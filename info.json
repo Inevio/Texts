@@ -1,0 +1,61 @@
+
+{
+
+    "name"    : "weeText",
+    "version" : "1.0",
+    "state"   : "beta",
+
+    "developer" : "wz",
+    "authKey"   : "wz",
+
+    "language" : {
+
+        "default" : "en-en",
+        "list"    : [ "en-en" ]
+
+    },
+
+    "common" : {
+
+        "css"    : ["style.css"],
+        "script" : ["script.js"]
+
+    },
+
+    "primary" : "main",
+
+    "window" : {
+
+        "main" : {
+
+            "description" : "",
+            
+            "template" : "main.html",
+
+            "maxizable" : false,
+            "resizable" : false,
+
+            "width"  : {
+
+                "default" : 540,
+                "min"     : 0,
+                "max"     : 0
+
+            },
+
+            "height" : {
+
+                "default" : 776,
+                "min"     : 0,
+                "max"     : 0
+
+            },
+
+            "css"    : [],
+            "script" : []
+
+        }
+
+    }
+
+}
