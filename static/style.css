@@ -194,10 +194,11 @@
 
 .wz-app-7 .weetext-paper-title-container{
 	
-	width: 100%;
+	width: 794px;
 	height: 50px;
 	position: absolute;
-	top: 0px;
+	top: 50px;
+	left: 11px;
 	background: #FFF;
 	border-radius: 7px 7px 0px 0px;
 	
@@ -232,10 +233,11 @@
 
 .wz-app-7 .weetext-paper-top-shadow{
 	
-	width: 100%;
+	width: 794px;
 	height: 10px;
 	position: absolute;
-	top: 49px;
+	top: 99px;
+	left: 11px;
 	background-image: -moz-linear-gradient(50% 0% -90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%); 
     background-image: -webkit-gradient(linear,50% 0%,50% 100%,color-stop(0, rgba(255,255,255,1)),color-stop(1, rgba(255,255,255,0)));
     background-image: -webkit-linear-gradient(-90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
