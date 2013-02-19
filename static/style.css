@@ -254,6 +254,10 @@
 	border-radius: 7px;
 	margin-bottom: 	5px;
 	border-bottom: 1px solid #D2D2D2;
+	padding: 2.5cm 3cm;
+	box-sizing: padding-box;
+	-moz-box-sizing: padding-box;
+	-webkit-box-sizing: padding-box;
 }	
 
 .wz-app-7 .weetext-paper:last-child{
@@ -311,4 +315,12 @@
 	height: 18px;
 	background: url('https://static.weezeel.com/app/7/footer-right.png') no-repeat;
 	
+}
+
+.wz-app-7 .button-bold{
+
+}
+
+.wz-app-7 .button-bold.active{
+	font-weight: bold;
 }
