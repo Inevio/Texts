@@ -255,9 +255,9 @@
 	margin-bottom: 	5px;
 	border-bottom: 1px solid #D2D2D2;
 	padding: 2.5cm 3cm;
-	box-sizing: padding-box;
-	-moz-box-sizing: padding-box;
-	-webkit-box-sizing: padding-box;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	text-align: left;
 	
 }	
