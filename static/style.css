@@ -258,6 +258,8 @@
 	box-sizing: padding-box;
 	-moz-box-sizing: padding-box;
 	-webkit-box-sizing: padding-box;
+	text-align: left;
+	
 }	
 
 .wz-app-7 .weetext-paper:last-child{
@@ -317,10 +319,12 @@
 	
 }
 
-.wz-app-7 .button-bold{
-
+/* Estilos para pruebas */
+.wz-app-7 .weetext-option{
+	float: left;
+	padding: 0px 5px;
 }
 
-.wz-app-7 .button-bold.active{
-	font-weight: bold;
+.wz-app-7 .weetext-option.active{
+	background: #0f0;
 }

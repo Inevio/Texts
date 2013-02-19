@@ -19,6 +19,80 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
+    var toggle = {
+
+        bold : {
+
+            css   : 'font-weight',
+            scope : 'inline',
+            check : function( input ){ return isBold( input ); },
+            off   : '400',
+            on    : '700'
+
+        },
+
+        italic : {
+
+            css   : 'font-style',
+            scope : 'inline',
+            check : function( input ){ return isItalic( input ); },
+            off   : 'normal',
+            on    : 'italic'
+
+        },
+
+        underline : {
+
+            css   : 'text-decoration',
+            scope : 'inline',
+            check : function( input ){ return isUnderline( input ); },
+            off   : 'none',
+            on    : 'underline'
+
+        },
+
+        'align-left' : {
+
+            css   : 'text-align',
+            scope : 'block',
+            check : function( item ){ return toggle[ 'align-left' ].on === commonAlign( item );},
+            off   : 'left',
+            on    : 'left'
+
+        },
+
+        'align-center' : {
+
+            css   : 'text-align',
+            scope : 'block',
+            check : function( item ){ return toggle[ 'align-center' ].on === commonAlign( item );},
+            off   : 'left',
+            on    : 'center'
+
+        },
+
+        'align-right' : {
+
+            css   : 'text-align',
+            scope : 'block',
+            check : function( item ){ return toggle[ 'align-right' ].on === commonAlign( item );},
+            off   : 'left',
+            on    : 'right'
+
+        },
+
+        'align-justify' : {
+            
+            css   : 'text-align',
+            scope : 'block',
+            check : function( item ){ return toggle[ 'align-justify' ].on === commonAlign( item );},
+            off   : 'left',
+            on    : 'justify'
+
+        }
+
+    };
+
     // Functions
     /*
      * (void) updateState((mixed) input)
@@ -32,11 +106,11 @@ wz.app.addScript( 7, 'common', function( win ){
         $( '.button-font-size span', menu ).text( Math.round( parseFloat( wz.tool.pixelsToPoints( commonSize( input ) ) ) ) );
         
         var align = commonAlign(input);
-        
+
         if(align === null){
             $('.button-align',menu).removeClass('active');
         }else{
-            $('.button-align-'+align,menu).addClass('active').siblings().removeClass('active');
+            $('.button-align-' + align, menu).addClass('active').siblings().removeClass('active');
         }
         
         if(isBold(input)){
@@ -356,7 +430,212 @@ wz.app.addScript( 7, 'common', function( win ){
         
     };
 
+    /*
+     * (void) surroundSelection((string) command, (string) value)
+     * Llega a la conclusión de que rango debe someterse al surround
+     */
+    var surroundSelection = function( command, value ){
+        
+        var tmpSelection = null;
+        var tmpRange     = null;
+        var monoNode     = null;
+        var parent       = null;
+        var length       = null;
+        var selection    = zone.selection();
+        var nodes        = getSelectedNodes(zone[0]);
+        
+        nodes.each(function(){
+            
+            tmpSelection = $(this).selection();
+            $(this).selection(tmpSelection.start, tmpSelection.end);
+            
+            tmpRange = new $.Range.current(this);
+            parent   = $(this.parentElement);
+            
+            if(parent.is('p')){
+                
+                object   = $('<span></span>').css(command, value);
+                tmpRange.range.surroundContents(object[0]);
+                
+                if(tmpSelection.width === 0){
+                    monoNode = object;
+                }else{
+                    cleanArround(object);
+                }
+                
+            }else if(parent.is('span')){
+                
+                length = parent.text().length;
+                
+                if(length === tmpSelection.width){
+                    
+                    parent.css(command,value);
+                    
+                }else{
+                    
+                    $(this).selection(tmpSelection.start, tmpSelection.end);
+                    
+                    if(tmpSelection.end === 0 || (tmpSelection.start !== 0 && tmpSelection.end !== length)){
+                        
+                        parent.selection(tmpSelection.end, length);
+                        
+                        tmpRange = new $.Range.current(this);
+                        object = $('<span></span>').attr('style',parent.attr('style'));
+                        tmpRange.range.surroundContents(object[0]);
+                        parent.after(object);
+                        
+                        cleanArround(object);
+                        
+                        if(tmpSelection.width === 0){
+                            
+                            object = $('<span></span>').attr('style',parent.attr('style')).css(command, value);
+                            parent.after(object);
+                            monoNode = object;
+                            
+                        }else{
+                            
+                            parent.selection(tmpSelection.start, tmpSelection.end);
+                            
+                            tmpRange = new $.Range.current(this);
+                            object = $('<span></span>').attr('style',parent.attr('style')).css(command, value);
+                            tmpRange.range.surroundContents(object[0]);
+                            parent.after(object);
+                            
+                            cleanArround(object);
+                            
+                        }
+                        
+                    }else if(tmpSelection.start === 0){
+                        
+                        tmpRange = new $.Range.current(this);
+                        object = $('<span></span>').attr('style',parent.attr('style')).css(command, value);
+                        tmpRange.range.surroundContents(object[0]);
+                        parent.before(object);
+                        
+                        cleanArround(object);
+                        
+                    }else if(tmpSelection.end === length){
+                        
+                        tmpRange = new $.Range.current(this);
+                        object = $('<span></span>').attr('style',parent.attr('style')).css(command, value);
+                        tmpRange.range.surroundContents(object[0]);
+                        parent.after(object);
+                        
+                        cleanArround(object);
+                        
+                    }else{
+                        throw Error('Wrong Cut Position');
+                    }
+                    
+                }
+                
+            }else{
+                throw Error('Wrong Parent Selected');
+            }
+            
+            if(monoNode === null){
+                
+                zone.selection(selection.start, selection.end);
+                updateState(getTagNode(getSelectedNodes(zone[0])));
+                
+            }else{
+                
+                cleanArround(monoNode);
+                
+                monoNode
+                    .text(' ')
+                    .selection(0,1);
+                    
+                updateState(getTagNode(getSelectedNodes(zone[0])));
+                
+                monoNode.text('');
+                
+            }
+            
+        });
+        
+    };
+
+    /*
+     * (void) cleanArround( (jQuery) node)
+     * Limpia los nodos de texto vacios aledanos y el mismo
+     */
+    var cleanArround = function( node ){
+        
+        node = $(node)[0];
+        
+        if(node.previousSibling.nodeName === '#text' && node.previousSibling.length === 0){
+            $(node.previousSibling).remove();
+        }
+        
+        if(node.nextSibling.nodeName === '#text' && node.nextSibling.length === 0){
+            $(node.nextSibling).remove();
+        }
+        
+        if(node.nodeName === '#text' && node.length === 0){
+            $(node).remove();
+        }
+        
+    };
+
+    /*
+     * (jQuery) getBigParents()
+     * Devuelve las padres "especiales" seleccionadas
+     */
+    var getBigParents = function( reference ){
+        return reference.closest('p');
+    }
+
     // Events
+    menu
+    .on('mousedown','.weetext-option',function(e){
+        // Evita la perdida de la seleccion
+        e.preventDefault();
+    })
+
+    .on('click','.button-toggle',function(e){
+        
+        e.preventDefault();
+        
+        var action = $(this).attr('data-action');
+        var tags   = null;
+        
+        if( typeof toggle[ action ] === 'undefined' ){
+            throw Error('Bad Id Input');
+        }
+        
+        if( toggle[ action ].scope === 'block' ){
+            
+            tags = getBigParents(getTagNode(getSelectedNodes(zone[0])));
+            
+            if( toggle[ action ].check(tags) ){
+                
+                tags.css(toggle[ action ].css, toggle[ action ].off);
+                updateState(tags);
+                
+            }else{
+                
+                tags.css(toggle[ action ].css, toggle[ action ].on);
+                updateState(tags);
+                
+            }
+            
+        }else if( toggle[ action ].scope === 'inline' ){
+            
+            tags = getTagNode(getSelectedNodes(zone[0]));
+            
+            if( toggle[ action ].check(tags) ){
+                surroundSelection(toggle[ action ].css, toggle[ action ].off);
+            }else{
+                surroundSelection(toggle[ action ].css, toggle[ action ].on);
+            }
+            
+        }else{
+            throw Error('Bad Toggle Input');
+        }
+        
+    });
+
     zone
     .on('mouseup',function(e){
         
