@@ -2,8 +2,9 @@
 wz.app.addScript( 7, 'common', function( win ){
     
     // Cache Elements
-    var zone = $( '.weetext-paper-zone', win );
-    var menu = $( '.stupid-container', win );
+    var zone  = $( '.weetext-paper-zone', win );
+    var menu  = $( '.stupid-container', win );
+    var title = $( '.weetext-paper-title span', win );
 
     // Local Info
     var list = {
@@ -92,6 +93,9 @@ wz.app.addScript( 7, 'common', function( win ){
         }
 
     };
+
+    // File Info
+    var openFileID = null;
 
     // Functions
     /*
@@ -584,16 +588,87 @@ wz.app.addScript( 7, 'common', function( win ){
      */
     var getBigParents = function( reference ){
         return reference.closest('p');
-    }
+    };
+
+    /*
+     * (void) renderInput( (string) data)
+     * Inserta el código indicado en las páginas
+     */
+    var renderInput = function( data ){
+        $( '.weetext-paper', zone ).first().html( data );
+    };
+
+    /*
+     * (void) windowTitle( (string) title)
+     * Inserta el código indicado en las páginas
+     */
+    var windowTitle = function( text ){
+        title.text( text );
+    };
 
     // Events
+    win
+    .on( 'app-param', function( e, params ){
+
+        // To Do -> Comprobar que params no va vacio
+
+        wz.structure( params[ 0 ], function( error, structure ){
+            
+            structure.read( function( error, data ){
+
+                if( data.split('\n')[ 0 ] !== '<!-- weedoc -->' ){
+                    alert( 'FILE FORMAT NOT RECOGNIZED' );
+                    return false;
+                }
+
+                openFileID = structure.id;
+                renderInput( data );
+                windowTitle( structure.name );
+
+            });
+
+        });
+
+    });
+
     menu
-    .on('mousedown','.weetext-option',function(e){
+    .on( 'mousedown', '.weetext-option', function( e ){
         // Evita la perdida de la seleccion
         e.preventDefault();
     })
 
-    .on('click','.button-toggle',function(e){
+    .on( 'click', '.weetext-options-save', function( e ){
+
+        // To Do -> Archivo nuevo
+
+        wz.structure( openFileID, function( error, structure ){
+
+            // To Do -> Error
+            if( error ){
+                alert( error );
+                return false;
+            }
+
+            structure.write( $( '.weetext-paper', zone ).first().html(), function( error ){
+
+                if( error ){
+                    alert( 'Error: ' + error );
+                }else{
+
+                    wz.banner()
+                        .title( 'weeText - ' + structure.name )
+                        .text( 'Archivo guardado' )
+                        .append();
+
+                }
+
+            });
+
+        });
+
+    })
+
+    .on( 'click', '.button-toggle', function( e ){
         
         e.preventDefault();
         
@@ -637,7 +712,7 @@ wz.app.addScript( 7, 'common', function( win ){
     });
 
     zone
-    .on('mouseup',function(e){
+    .on( 'mouseup', function( e ){
         
         normalizeSelection();
         updateState( getSelectedTags( this ) );
