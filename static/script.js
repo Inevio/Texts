@@ -606,6 +606,64 @@ wz.app.addScript( 7, 'common', function( win ){
         title.text( text );
     };
 
+    var extractText = function(){
+        return $.trim( $( '.weetext-paper', zone ).first().html() );
+    };
+
+    var saveFile = function(){
+
+        wz.structure( openFileID, function( error, structure ){
+
+            // To Do -> Error
+            if( error ){
+                alert( error );
+                return false;
+            }
+
+            structure.write( extractText(), function( error ){
+
+                if( error ){
+                    alert( 'Error: ' + error );
+                }else{
+
+                    wz.banner()
+                        .title( 'weeText - ' + structure.name )
+                        .text( 'Archivo guardado' )
+                        .append();
+
+                }
+
+            });
+
+        });
+
+    };
+
+    var createFile = function(){
+
+        var name = prompt( 'Nombre del nuevo documento' );
+
+        wz.createStructure( name, 'text/plain', 1, extractText(), function( error, structure ){
+
+            if( error ){
+
+                alert( error );
+                createFile();
+                return false;
+
+            }
+
+            windowTitle( structure.name );
+
+            wz.banner()
+                .title( 'weeText - ' + structure.name )
+                .text( 'Archivo guardado' )
+                .append();
+
+        });
+
+    };
+
     // Events
     win
     .on( 'app-param', function( e, params ){
@@ -639,32 +697,11 @@ wz.app.addScript( 7, 'common', function( win ){
 
     .on( 'click', '.weetext-options-save', function( e ){
 
-        // To Do -> Archivo nuevo
-
-        wz.structure( openFileID, function( error, structure ){
-
-            // To Do -> Error
-            if( error ){
-                alert( error );
-                return false;
-            }
-
-            structure.write( $( '.weetext-paper', zone ).first().html(), function( error ){
-
-                if( error ){
-                    alert( 'Error: ' + error );
-                }else{
-
-                    wz.banner()
-                        .title( 'weeText - ' + structure.name )
-                        .text( 'Archivo guardado' )
-                        .append();
-
-                }
-
-            });
-
-        });
+        if( openFileID ){
+            saveFile();
+        }else{
+            createFile();
+        }
 
     })
 
