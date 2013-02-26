@@ -94,9 +94,6 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
-    // File Info
-    var openFileID = null;
-
     // Functions
     /*
      * (void) updateState((mixed) input)
@@ -610,7 +607,7 @@ wz.app.addScript( 7, 'common', function( win ){
         return $.trim( $( '.weetext-paper', zone ).first().html() );
     };
 
-    var saveFile = function(){
+    var saveFile = function( callback ){
 
         wz.structure( openFileID, function( error, structure ){
 
@@ -620,16 +617,26 @@ wz.app.addScript( 7, 'common', function( win ){
                 return false;
             }
 
-            structure.write( extractText(), function( error ){
+            console.log('save');
+            var text = extractText();
+            console.log('text', text);
+
+            structure.write( text, function( error ){
 
                 if( error ){
                     alert( 'Error: ' + error );
                 }else{
 
+                    console.log('guardado',error);
+                    openFileText   = text;
+                    openFileLength = openFileText.length;
+
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
                         .text( 'Archivo guardado' )
                         .append();
+
+                    wz.tool.secureCallback( callback )();
 
                 }
 
@@ -639,11 +646,12 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
-    var createFile = function(){
+    var createFile = function( callback ){
 
         var name = prompt( 'Nombre del nuevo documento' );
+        var text = extractText();
 
-        wz.createStructure( name, 'text/plain', 1, extractText(), function( error, structure ){
+        wz.createStructure( name, 'text/plain', 'root', text, function( error, structure ){
 
             if( error ){
 
@@ -653,6 +661,10 @@ wz.app.addScript( 7, 'common', function( win ){
 
             }
 
+            openFileID     = structure.id;
+            openFileText   = text;
+            openFileLength = openFileText.length;
+
             windowTitle( structure.name );
 
             wz.banner()
@@ -660,9 +672,16 @@ wz.app.addScript( 7, 'common', function( win ){
                 .text( 'Archivo guardado' )
                 .append();
 
+            wz.tool.secureCallback( callback )();
+
         });
 
     };
+
+    // File Info
+    var openFileID     = null;
+    var openFileText   = extractText();
+    var openFileLength = openFileText.length;
 
     // Events
     win
@@ -679,13 +698,50 @@ wz.app.addScript( 7, 'common', function( win ){
                     return false;
                 }
 
-                openFileID = structure.id;
+                openFileID     = structure.id;
+                openFileText   = data;
+                openFileLength = openFileText.length;
+
                 renderInput( data );
                 windowTitle( structure.name );
 
             });
 
         });
+
+    })
+
+    .on( 'click', '.wz-win-close', function( e ){
+
+        e.stopPropagation();
+
+        var text = extractText();
+
+        if( text.length === openFileLength && text === openFileText ){
+            wz.app.closeWindow( win.data('win') );
+            return false;
+        }
+
+        if( confirm( '¿Desea guardar los cambios?' ) ){
+
+            if( openFileID ){
+
+                console.log(openFileID);
+                saveFile( function(){
+                    wz.app.closeWindow( win.data('win') );
+                });
+
+            }else{
+
+                createFile( function(){
+                    wz.app.closeWindow( win.data('win') );
+                });
+
+            }
+
+        }else{
+            wz.app.closeWindow( win.data('win') );
+        }
 
     });
 
@@ -755,6 +811,9 @@ wz.app.addScript( 7, 'common', function( win ){
         updateState( getSelectedTags( this ) );
         
     });
+
+
+
 
     // Insert pointer
     /*
