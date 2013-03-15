@@ -86,28 +86,56 @@
 	background-position: -230px 0;
 }
 
+.wz-app-7 .button-bold.active{
+	background-position: -230px -17px;
+}
+
 .wz-app-7 .button-italic{
 	background-position: -249px 0;
+}
+
+.wz-app-7 .button-italic.active{
+	background-position: -249px -17px;
 }
 
 .wz-app-7 .button-underline{
 	background-position: -266px 0;
 }
 
+.wz-app-7 .button-underline.active{
+	background-position: -266px -17px;
+}
+
 .wz-app-7 .button-align-left{
 	background-position: -69px 0;
+}
+
+.wz-app-7 .button-align-left.active{
+	background-position: -69px -17px;
 }
 
 .wz-app-7 .button-align-center{
 	background-position: -85px 0;
 }
 
+.wz-app-7 .button-align-center.active{
+	background-position: -85px -17px;
+}
+
 .wz-app-7 .button-align-right{
 	background-position: -100px 0;
 }
 
+.wz-app-7 .button-align-right.active{
+	background-position: -100px -17px;
+}
+
 .wz-app-7 .button-align-justify{
 	background-position: -116px 0;
+}
+
+.wz-app-7 .button-align-justify.active{
+	background-position: -116px -17px;
 }
 
 .wz-app-7 .weetext-options-font{
@@ -351,8 +379,4 @@
 /* Estilos para pruebas */
 .wz-app-7 .weetext-option{
 	float: left;
-}
-
-.wz-app-7 .weetext-option.active{
-	background: #0f0;
 }

@@ -812,35 +812,20 @@ wz.app.addScript( 7, 'common', function( win ){
         
     });
 
+    // Insert Pointer
+    var paraq = $( '.weetext-paper', zone ).first().find('p').first();
+    var ptext = paraq.text();
 
+    $( '.weetext-paper', zone ).first().focus();
+    
+    paraq
+        .text( ptext + ' ' )
+        .range()
+        .start( '+' + ( ptext.length ) )
+        .end( '+' + ( ptext.length ) )
+        .select();
 
-
-    // Insert pointer
-    /*
-    var firstPaper = $( '.weetext-paper', zone ).first();
-    var firstText  = firstPaper.text();
-
-    /*if( firstText.length ){
-
-        console.log( firstText.length );
-
-        firstPaper
-            .text( firstText + ' ' );
-
-            console.log( firstPaper.text(), firstPaper.text().length );
-        firstPaper
-            .selection( firstText.length - 1, firstText.length )
-            .text( firstText )
-            .focus();
-
-    }else{
-
-        firstPaper
-            .text(' ')
-            .selection(0,0) // To Do -> Probar con solo 0
-            .text('')
-            .focus();
-
-    }*/
+    normalizeSelection();
+    updateState( getSelectedTags( zone[ 0 ] ) );
 
 });
