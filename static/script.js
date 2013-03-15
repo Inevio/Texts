@@ -5,6 +5,7 @@ wz.app.addScript( 7, 'common', function( win ){
     var zone  = $( '.weetext-paper-zone', win );
     var menu  = $( '.stupid-container', win );
     var title = $( '.weetext-paper-title span', win );
+    var paper = $( '.weetext-paper', zone ).first();
 
     // Local Info
     var list = {
@@ -592,7 +593,44 @@ wz.app.addScript( 7, 'common', function( win ){
      * Inserta el código indicado en las páginas
      */
     var renderInput = function( data ){
-        $( '.weetext-paper', zone ).first().html( data );
+
+        var height    = paper.height();
+        var tmpHeight = height;
+        var newPaper  = paper.clone().empty();
+        var nowPaper  = paper.empty().html('<!-- weedoc -->');
+        var tmpPaper  = $();
+        var items     = [];
+
+        console.log('start');
+
+        $( data ).filter('p').each( function(){
+            items.push( this );
+        });
+
+        for( var i in items ){
+
+            nowPaper.append( items[ i ] );
+
+            tmpHeight -= $( items[ i ] ).outerHeight( true );
+
+            if( tmpHeight < 0 ){
+
+                tmpPaper  = newPaper.clone();
+
+                nowPaper.after( tmpPaper );
+
+                nowPaper  = tmpPaper;
+                tmpPaper  = $();
+                tmpHeight = height;
+
+                nowPaper.append( items[ i ] );
+
+                tmpHeight -= $( items[ i ] ).outerHeight( true );
+
+            }
+
+        }
+
     };
 
     /*
@@ -604,7 +642,7 @@ wz.app.addScript( 7, 'common', function( win ){
     };
 
     var extractText = function(){
-        return $.trim( $( '.weetext-paper', zone ).first().html() );
+        return $.trim( $( '.weetext-paper', zone ).html() );
     };
 
     var saveFile = function( callback ){
@@ -617,9 +655,7 @@ wz.app.addScript( 7, 'common', function( win ){
                 return false;
             }
 
-            console.log('save');
             var text = extractText();
-            console.log('text', text);
 
             structure.write( text, function( error ){
 
@@ -693,7 +729,9 @@ wz.app.addScript( 7, 'common', function( win ){
             
             structure.read( function( error, data ){
 
-                if( data.split('\n')[ 0 ] !== '<!-- weedoc -->' ){
+                var comment = $( data ).first()[ 0 ];
+
+                if( comment.nodeName !== '#comment' || comment.nodeValue !== ' weedoc ' ){
                     alert( 'FILE FORMAT NOT RECOGNIZED' );
                     return false;
                 }
