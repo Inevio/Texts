@@ -32,11 +32,11 @@
 
 .wz-app-7 .weetext-options-middle{
     
-    width: 549px;
+    width: 534px;
     height: 33px;
     float: left;
     padding-top: 17px;
-    padding-left: 15px;
+    padding-left: 30px;
     border-left: 1px solid #D0706F;
     border-right: 1px solid #8A313C;
     
@@ -53,185 +53,166 @@
     
 }
 
-.wz-app-7 .weetext-options-new{
+.wz-app-7 .weetext-button{
     
-    width: 20px;
-    height: 17px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat 0 0;
-    
-}
-
-.wz-app-7 .weetext-options-save{
-    
-    width: 16px;
-    height: 17px;
-    float: left;
-    margin-left: 20px;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -21px 0;
-    
-}
-
-.wz-app-7 .weetext-option{
-    
-    width: 17px;
-    height: 17px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -38px 0;
-    margin-right: 10px;
-    
-}
-
-.wz-app-7 .button-bold{
-    background-position: -230px 0;
-}
-
-.wz-app-7 .button-bold.active{
-    background-position: -230px -17px;
-}
-
-.wz-app-7 .button-italic{
-    background-position: -249px 0;
-}
-
-.wz-app-7 .button-italic.active{
-    background-position: -249px -17px;
-}
-
-.wz-app-7 .button-underline{
-    background-position: -266px 0;
-}
-
-.wz-app-7 .button-underline.active{
-    background-position: -266px -17px;
-}
-
-.wz-app-7 .button-align-left{
-    background-position: -69px 0;
-}
-
-.wz-app-7 .button-align-left.active{
-    background-position: -69px -17px;
-}
-
-.wz-app-7 .button-align-center{
-    background-position: -85px 0;
-}
-
-.wz-app-7 .button-align-center.active{
-    background-position: -85px -17px;
-}
-
-.wz-app-7 .button-align-right{
-    background-position: -100px 0;
-}
-
-.wz-app-7 .button-align-right.active{
-    background-position: -100px -17px;
-}
-
-.wz-app-7 .button-align-justify{
-    background-position: -116px 0;
-}
-
-.wz-app-7 .button-align-justify.active{
-    background-position: -116px -17px;
-}
-
-.wz-app-7 .weetext-options-font{
-    
-    width: 15px;
-    height: 17px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -54px 0;
-    
-}
-
-.wz-app-7 .weetext-options-align{
-    
-    width: 20px;
-    height: 17px;
+    height: 16px;
     float: left;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat;
     
 }
 
-.wz-app-7 .weetext-options-align.left{
+.wz-app-7 .weetext-options-new{
     
-    background-position: -70px 0;
-    
-}
-
-.wz-app-7 .weetext-options-align.center{
-    
-    background-position: -86px 0;
+    width: 20px;
     
 }
 
-.wz-app-7 .weetext-options-align.right{
+.wz-app-7 .weetext-options-save{
     
-    background-position: -101px 0;
-    
-}
-
-.wz-app-7 .weetext-options-align.justify{
-    
-    background-position: -116px 0;
+    width: 15px;
+    margin-left: 20px;
+    background-position: -20px 0;
     
 }
 
-.wz-app-7 .weetext-options-bullets{
+.wz-app-7 .button-typo{
+	float: left;
+	margin-top: 2px;
+	color: #641D26;
+	font-size: 13px;
+}
+
+.wz-app-7 .button-size{
+	float: left;
+	margin-top: 2px;
+	margin-left: 15px;
+	color: #641D26;
+	font-size: 13px;
+}
+
+.wz-app-7 .button-color{
+	width: 15px;
+	height: 15px;
+	float: left;
+	margin-top: 1px;
+	margin-left: 15px;
+	border-radius: 3px;
+	background: #009;
+}
+
+.wz-app-7 .button-bold{
+	width: 13px;
+	margin-left: 15px;
+    background-position: -182px 0;
+}
+
+.wz-app-7 .button-bold.active{
+    background-position: -182px -16px;
+}
+
+.wz-app-7 .button-italic{
+	width: 12px;
+	margin-left: 15px;
+    background-position: -195px 0;
+}
+
+.wz-app-7 .button-italic.active{
+    background-position: -195px -16px;
+}
+
+.wz-app-7 .button-underline{
+	width: 13px;
+	margin-left: 15px;
+    background-position: -207px 0;
+}
+
+.wz-app-7 .button-underline.active{
+    background-position: -207px -16px;
+}
+
+.wz-app-7 .button-align-left{
+	width: 14px;
+	margin-left: 15px;
+    background-position: -64px 0;
+}
+
+.wz-app-7 .button-align-left.active{
+    background-position: -64px -16px;
+}
+
+.wz-app-7 .button-align-center{
+	width: 14px;
+	margin-left: 15px;
+    background-position: -92px 0;
+}
+
+.wz-app-7 .button-align-center.active{
+    background-position: -92px -16px;
+}
+
+.wz-app-7 .button-align-right{
+	width: 14px;
+	margin-left: 15px;
+    background-position: -78px 0;
+}
+
+.wz-app-7 .button-align-right.active{
+    background-position: -78px -16px;
+}
+
+.wz-app-7 .button-align-justify{
+	width: 14px;
+	margin-left: 15px;
+    background-position: -50px 0;
+}
+
+.wz-app-7 .button-align-justify.active{
+    background-position: -50px -16px;
+}
+
+.wz-app-7 .button-bullets{
     
     width: 18px;
-    height: 17px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -131px 0;
+    margin-left: 15px;
+    background-position: -106px 0;
     
 }
 
 .wz-app-7 .wz-win-maximize{
     
-    width: 15px;
-    height: 17px;
+    width: 14px;
+    height: 16px;
     float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -152px 0;
+    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -124px 0;
     
 }
 
 .wz-app-7 .wz-win-close{
     
     width: 14px;
-    height: 17px;
+    height: 16px;
     float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -167px 0;
+    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -153px 0;
     
 }
 
 .wz-app-7 .wz-win-minimize{
     
-    width: 16px;
-    height: 17px;
+    width: 15px;
+    height: 16px;
     float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -207px 0;
-    
-}
-
-.wz-app-7 .weetext-options-ellipsis{
-    
-    width: 21px;
-    height: 17px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -181px 0;
+    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -138px 0;
     
 }
 
 .wz-app-7 .weetext-options-display{
     
     width: 7px;
-    height: 17px;
+    height: 5px;
     float: left;
     margin-left: 5px;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -222px 0;
+	margin-top: 7px;
+    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -220px 0;
     
 }
 
@@ -373,6 +354,122 @@
     width: 7px;
     height: 18px;
     background: url('https://static.weezeel.com/app/7/footer-right.png') no-repeat;
+    
+}
+
+.wz-app-7 .weetext-size{
+    width: 80px;
+    position: absolute;
+    top: 36px;
+    left: 255px;
+    list-style: none;
+    display: none;
+    z-index: 1;
+}
+
+.wz-app-7 .weetext-size.show{
+    display: block;
+}
+
+.wz-app-7 .weetext-size:before{
+    
+    position: relative;
+    top: 2px;
+    left: 33px;
+    float: left;
+    width: 16px;
+    height: 7px;
+    background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    content: '';
+    
+}
+
+.wz-app-7 .weetext-size li:first-child{
+    
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    box-shadow: inset 0px 1px 0px 0px #4D4D4D;
+    
+}
+
+.wz-app-7 .weetext-size li{
+    
+    overflow: hidden; 
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box; 
+    box-sizing: border-box;
+    padding: 10px 10px 0px 10px;
+    width: 100%;
+    height: 29px;
+    background: #404040;
+    color: #E0E0E0;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    line-height: 10px;
+    
+}
+
+.wz-app-7 .weetext-size li:last-child{
+    
+    height: 30px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    box-shadow: inset 0px -1px 0px 0px #4D4D4D;
+    
+}
+
+.wz-app-7 .weetext-size li:hover{
+    background: #535353;
+}
+
+.wz-app-7 .weetext-size i{
+    width: 10px;
+    height: 8px;
+    float: left;
+    display: block;
+    margin-top: 2px;
+}
+
+.wz-app-7 .weetext-size li.active i{
+    background: url('https://static.weezeel.com/app/7/tick.png') no-repeat;
+}
+
+.wz-app-7 .weetext-size span{
+    float: left;
+    margin-left: 8px;
+}
+
+.wz-app-7 .weetext-size li.active span{
+    color: #FF5951;
+}
+
+.wz-app-7 .weetext-color{
+    width: 150px;
+	height: 250px;
+	background: #404040;
+	border-radius: 6px;
+    position: absolute;
+    top: 43px;
+    left: 264px;
+    list-style: none;
+    display: none;
+    z-index: 1;
+}
+
+.wz-app-7 .weetext-color.show{
+    display: block;
+}
+
+.wz-app-7 .weetext-color:before{
+    
+    position: relative;
+    top: -5px;
+    left: 67px;
+    float: left;
+    width: 16px;
+    height: 7px;
+    background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    content: '';
     
 }
 

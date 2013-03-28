@@ -781,6 +781,34 @@ wz.app.addScript( 7, 'common', function( win ){
             wz.app.closeWindow( win.data('win') );
         }
 
+    })
+	
+	.on( 'wz-blur', function(){
+        $( '.weetext-size', win ).removeClass( 'show' );
+		$( '.weetext-color', win ).removeClass( 'show' );
+    })
+	
+	.on( 'mousedown', function(){
+        $( '.weetext-size', win ).removeClass( 'show' ); 
+		$( '.weetext-color', win ).removeClass( 'show' );
+    })
+	
+	.on( 'mousedown', '.button-size', function( e ){
+        
+        if( !$( '.weetext-size', win ).hasClass( 'show' ) ){
+            $( '.weetext-size', win ).addClass( 'show' );
+            e.stopPropagation();
+        }   
+        
+    })
+	
+	.on( 'mousedown', '.button-color', function( e ){
+        
+        if( !$( '.weetext-color', win ).hasClass( 'show' ) ){
+            $( '.weetext-color', win ).addClass( 'show' );
+            e.stopPropagation();
+        }   
+        
     });
 
     menu
