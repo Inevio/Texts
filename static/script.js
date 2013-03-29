@@ -786,16 +786,31 @@ wz.app.addScript( 7, 'common', function( win ){
 	.on( 'wz-blur', function(){
         $( '.weetext-size', win ).removeClass( 'show' );
 		$( '.weetext-color', win ).removeClass( 'show' );
+		$( '.weetext-typo', win ).removeClass( 'show' );
     })
 	
 	.on( 'mousedown', function(){
         $( '.weetext-size', win ).removeClass( 'show' ); 
 		$( '.weetext-color', win ).removeClass( 'show' );
+		$( '.weetext-typo', win ).removeClass( 'show' );
+    })
+	
+	.on( 'mousedown', '.button-typo', function( e ){
+        
+        if( !$( '.weetext-typo', win ).hasClass( 'show' ) ){
+			$( '.weetext-color', win ).removeClass( 'show' );
+			$( '.weetext-size', win ).removeClass( 'show' );
+            $( '.weetext-typo', win ).addClass( 'show' );
+            e.stopPropagation();
+        }   
+        
     })
 	
 	.on( 'mousedown', '.button-size', function( e ){
         
         if( !$( '.weetext-size', win ).hasClass( 'show' ) ){
+			$( '.weetext-color', win ).removeClass( 'show' );
+			$( '.weetext-typo', win ).removeClass( 'show' );
             $( '.weetext-size', win ).addClass( 'show' );
             e.stopPropagation();
         }   
@@ -805,10 +820,20 @@ wz.app.addScript( 7, 'common', function( win ){
 	.on( 'mousedown', '.button-color', function( e ){
         
         if( !$( '.weetext-color', win ).hasClass( 'show' ) ){
+			$( '.weetext-size', win ).removeClass( 'show' );
+			$( '.weetext-typo', win ).removeClass( 'show' ); 
             $( '.weetext-color', win ).addClass( 'show' );
             e.stopPropagation();
         }   
         
+    })
+	
+	.on( 'mousedown', '.table-container table', function( e ){    
+        $( '.weetext-color', win ).removeClass( 'show' );      
+    })
+	
+	.on( 'mousedown', '.weetext-color', function( e ){    
+        e.stopPropagation();      
     });
 
     menu
