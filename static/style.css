@@ -75,27 +75,34 @@
     
 }
 
-.wz-app-7 .button-typo{
-	float: left;
-	margin-top: 2px;
-	color: #641D26;
-	font-size: 13px;
+.wz-app-7 .weetext-button-drop{
+    float: left;
+    margin-top: 2px;
+    color: #641D26;
+    font-size: 13px;
+}
+
+.wz-app-7 .weetext-button-drop span{
+    float: left;
+}
+
+.wz-app-7 .button-typo span{
+    /* width: 110px; */
 }
 
 .wz-app-7 .button-size{
-	float: left;
-	margin-top: 2px;
-	margin-left: 15px;
-	color: #641D26;
-	font-size: 13px;
+    margin-left: 15px;
 }
 
 .wz-app-7 .button-color{
+    margin-top: 1px;
+    margin-left: 15px;
+}
+
+.wz-app-7 .button-color figure{
 	width: 15px;
 	height: 15px;
 	float: left;
-	margin-top: 1px;
-	margin-left: 15px;
 	border-radius: 3px;
 	background: #009;
 }

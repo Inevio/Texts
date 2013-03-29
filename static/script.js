@@ -7,15 +7,20 @@ wz.app.addScript( 7, 'common', function( win ){
     var title = $( '.weetext-paper-title span', win );
     var paper = $( '.weetext-paper', zone ).first();
 
+    var typoMenu  = $( '.weetext-typo', win ).removeClass( 'show' );
+    var sizeMenu  = $( '.weetext-size', win ).removeClass( 'show' ); 
+    var colorMenu = $( '.weetext-color', win ).removeClass( 'show' );
+    var dropMenu  = typoMenu.add( sizeMenu ).add( colorMenu );
+    
     // Local Info
     var list = {
 
         'font-weight' : {
 
-             lighter : '100',
-             normal  : '400',
-             bold    : '700',
-             bolder  : '800'
+            lighter : '100',
+            normal  : '400',
+            bold    : '700',
+            bolder  : '800'
 
         }
 
@@ -95,6 +100,33 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
+    var fontFamily = [
+
+        { name : 'Arial', value : 'Arial, sans-serif' },
+        { name : 'Times New Roman', value : '"Times New Roman", serif' },
+        { name : 'Effra', value : 'Effra, sans-serif' }
+
+    ];
+
+    var fontSize = [
+
+        { name : '6pt', value : '6pt' },
+        { name : '8pt', value : '8pt' },
+        { name : '9pt', value : '9pt' },
+        { name : '11pt', value : '10pt' },
+        { name : '12pt', value : '12pt' },
+        { name : '14pt', value : '14pt' },
+        { name : '18pt', value : '18pt' },
+        { name : '20pt', value : '20pt' },
+        { name : '24pt', value : '24pt' },
+        { name : '30pt', value : '30pt' },
+        { name : '36pt', value : '36pt' },
+        { name : '48pt', value : '48pt' },
+        { name : '60pt', value : '60pt' },
+        { name : '72pt', value : '72pt' }
+
+    ];
+
     // Functions
     /*
      * (void) updateState((mixed) input)
@@ -103,9 +135,12 @@ wz.app.addScript( 7, 'common', function( win ){
     var updateState = function(input){
         
         input = $(input);
+
+        var font = commonFont( input );
+        var size = Math.round( parseFloat( wz.tool.pixelsToPoints( commonSize( input ) ) ) );
         
-        $( '.button-font-type span', menu ).text( commonFont( input ) );
-        $( '.button-font-size span', menu ).text( Math.round( parseFloat( wz.tool.pixelsToPoints( commonSize( input ) ) ) ) );
+        $( '.button-typo span', menu ).text( ( font === null ) ? '(several fonts)' : font );
+        $( '.button-size span', menu ).text( isNaN( size ) ? '--' : size + 'pt' );
         
         var align = commonAlign(input);
 
@@ -335,9 +370,7 @@ wz.app.addScript( 7, 'common', function( win ){
         var tags = getSelectedTags( zone[ 0 ] ).filter('p');
         
         if( tags.size() === 1 && tags.text().length === 0 ){
-            
-            // To Do -> Nodo vacio
-            
+            selectEnd( tags );
         }else{
             
             var sel = zone.selection();
@@ -731,6 +764,52 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
+    var generateFontFamilyMenu = function(){
+
+        var prototype = typoMenu.children('.prototype');
+
+        for( var i in fontFamily ){
+
+            typoMenu.append(
+
+                prototype.clone()
+                    .removeClass('prototype')
+                    .data( 'font-family', fontFamily[ i ].value )
+                    .children('span')
+                        .text( fontFamily[ i ].name )
+                    .parent()
+
+            );
+
+        }
+
+        prototype.remove();
+
+    };
+
+    var generateFontSizeMenu = function(){
+
+        var prototype = sizeMenu.children('.prototype');
+
+        for( var i in fontSize ){
+
+            sizeMenu.append(
+
+                prototype.clone()
+                    .removeClass('prototype')
+                    .data( 'font-size', fontSize[ i ].value )
+                    .children('span')
+                        .text( fontSize[ i ].name )
+                    .parent()
+
+            );
+
+        }
+
+        prototype.remove();
+
+    };
+
     // File Info
     var openFileID     = null;
     var openFileText   = extractText();
@@ -799,62 +878,91 @@ wz.app.addScript( 7, 'common', function( win ){
         }
 
     })
-	
-	.on( 'wz-blur', function(){
+    
+    .on( 'wz-blur', function(){
         $( '.weetext-size', win ).removeClass( 'show' );
-		$( '.weetext-color', win ).removeClass( 'show' );
-		$( '.weetext-typo', win ).removeClass( 'show' );
+        $( '.weetext-color', win ).removeClass( 'show' );
+        $( '.weetext-typo', win ).removeClass( 'show' );
     })
-	
-	.on( 'mousedown', function(){
-        $( '.weetext-size', win ).removeClass( 'show' ); 
-		$( '.weetext-color', win ).removeClass( 'show' );
-		$( '.weetext-typo', win ).removeClass( 'show' );
-    })
-	
-	.on( 'mousedown', '.button-typo', function( e ){
-        
-        if( !$( '.weetext-typo', win ).hasClass( 'show' ) ){
-			$( '.weetext-color', win ).removeClass( 'show' );
-			$( '.weetext-size', win ).removeClass( 'show' );
-            $( '.weetext-typo', win ).addClass( 'show' );
-            e.stopPropagation();
-        }   
+    
+    .on( 'mousedown', function(){
+
+        if( $( this ).hasClass('weetext-drop-menu') ){
+            dropMenu.removeClass('show');
+        }
         
     })
-	
-	.on( 'mousedown', '.button-size', function( e ){
+    
+    .on( 'mousedown', '.button-typo', function( e ){
         
-        if( !$( '.weetext-size', win ).hasClass( 'show' ) ){
-			$( '.weetext-color', win ).removeClass( 'show' );
-			$( '.weetext-typo', win ).removeClass( 'show' );
-            $( '.weetext-size', win ).addClass( 'show' );
-            e.stopPropagation();
-        }   
+        e.stopPropagation();
+        
+        if( !typoMenu.hasClass('show') ){
+            
+            dropMenu.removeClass('show');
+            typoMenu.addClass('show');
+            win.addClass('weetext-drop-menu');
+
+        }else{
+            dropMenu.removeClass('show');
+        }
+
+    })
+    
+    .on( 'mousedown', '.button-size', function( e ){
+        
+        e.stopPropagation();
+        
+        if( !sizeMenu.hasClass('show') ){
+            
+            dropMenu.removeClass('show');
+            sizeMenu.addClass('show');
+            win.addClass('weetext-drop-menu');
+
+        }else{
+            dropMenu.removeClass('show');
+        }  
         
     })
-	
-	.on( 'mousedown', '.button-color', function( e ){
+    
+    .on( 'mousedown', '.button-color', function( e ){
         
-        if( !$( '.weetext-color', win ).hasClass( 'show' ) ){
-			$( '.weetext-size', win ).removeClass( 'show' );
-			$( '.weetext-typo', win ).removeClass( 'show' ); 
-            $( '.weetext-color', win ).addClass( 'show' );
-            e.stopPropagation();
-        }   
+        e.stopPropagation();
+        
+        if( !colorMenu.hasClass('show') ){
+            
+            dropMenu.removeClass('show');
+            colorMenu.addClass('show');
+            win.addClass('weetext-drop-menu');
+
+        }else{
+            dropMenu.removeClass('show');
+        }  
         
     })
-	
-	.on( 'mousedown', '.table-container table', function( e ){    
+    
+    /* Sin revisar */
+    .on( 'mousedown', '.table-container table', function( e ){    
         $( '.weetext-color', win ).removeClass( 'show' );      
     })
-	
-	.on( 'mousedown', '.weetext-color', function( e ){    
+    
+    .on( 'mousedown', '.weetext-color', function( e ){    
         e.stopPropagation();      
+    });
+    /* Fin sin revisar */
+
+    typoMenu
+    .on( 'mousedown', 'li', function(){
+        surroundSelection( 'font-family', $(this).data('font-family') );
+    });
+
+    sizeMenu
+    .on( 'mousedown', 'li', function(){
+        surroundSelection( 'font-size', $(this).data('font-size') );
     });
 
     menu
-    .on( 'mousedown', '.weetext-option', function( e ){
+    .on( 'mousedown', '.weetext-button, .weetext-button-drop', function( e ){
         // Evita la perdida de la seleccion
         e.preventDefault();
     })
@@ -919,6 +1027,10 @@ wz.app.addScript( 7, 'common', function( win ){
         updateState( getSelectedTags( this ) );
         
     });
+
+    // Create Menus
+    generateFontFamilyMenu();
+    generateFontSizeMenu();
 
     // Insert Pointer
     $( '.weetext-paper', zone ).first().focus();
