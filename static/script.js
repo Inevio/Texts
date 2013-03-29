@@ -714,6 +714,23 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
+    var selectEnd = function( node ){
+
+        var range = new $.Range( node );
+
+        if( !node.text().length ){
+
+            node.html('&nbsp;');//.addClass('empty-node');
+            range.collapse( true );
+
+        }else{
+            range.collapse( false );
+        }
+
+        range.select();
+
+    };
+
     // File Info
     var openFileID     = null;
     var openFileText   = extractText();
@@ -879,17 +896,11 @@ wz.app.addScript( 7, 'common', function( win ){
     });
 
     // Insert Pointer
-    var paraq = $( '.weetext-paper', zone ).first().find('p').first();
-    var ptext = paraq.text();
-
     $( '.weetext-paper', zone ).first().focus();
-    
-    paraq
-        .text( ptext + ' ' )
-        .range()
-        .start( '+' + ( ptext.length ) )
-        .end( '+' + ( ptext.length ) )
-        .select();
+
+    var paragraph = $( '.weetext-paper', zone ).first().find('p').last();
+
+    selectEnd( paragraph );
 
     normalizeSelection();
     updateState( getSelectedTags( zone[ 0 ] ) );
