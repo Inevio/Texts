@@ -146,6 +146,42 @@ wz.app.addScript( 7, 'common', function( win ){
         
         $( '.button-typo span', menu ).text( ( font === null ) ? '(several fonts)' : font );
         $( '.button-size span', menu ).text( isNaN( size ) ? '--' : size + 'pt' );
+
+        if( font !== null ){
+
+            typoMenu.children()
+                .removeClass('active')
+                .each( function(){
+
+                    if( $( 'span', this ).text() === font ){
+
+                        $(this).addClass('active');
+                        return false;
+
+                    }
+
+                });
+
+        }
+
+        if( !isNaN( size ) ){
+
+            size = size + 'pt';
+
+            sizeMenu.children()
+                .removeClass('active')
+                .each( function(){
+
+                    if( $( 'span', this ).text() === size ){
+
+                        $(this).addClass('active');
+                        return false;
+
+                    }
+
+                });
+                
+        }
         
         var align = commonAlign(input);
 
@@ -707,7 +743,7 @@ wz.app.addScript( 7, 'common', function( win ){
 
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
-                        .text( 'Archivo guardado' )
+                        .text( 'File saved' )
                         .append();
 
                     wz.tool.secureCallback( callback )();
@@ -722,7 +758,7 @@ wz.app.addScript( 7, 'common', function( win ){
 
     var createFile = function( callback ){
 
-        var name = prompt( 'Nombre del nuevo documento' );
+        var name = prompt( 'New file name' );
         var text = extractText();
 
         wz.createStructure( name, 'text/plain', 'root', text, function( error, structure ){
@@ -863,7 +899,7 @@ wz.app.addScript( 7, 'common', function( win ){
             return false;
         }
 
-        if( confirm( '¿Desea guardar los cambios?' ) ){
+        if( confirm( 'Do you want to save changes?' ) ){
 
             if( openFileID ){
 
