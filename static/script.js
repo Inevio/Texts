@@ -11,6 +11,11 @@ wz.app.addScript( 7, 'common', function( win ){
     var sizeMenu  = $( '.weetext-size', win ).removeClass( 'show' ); 
     var colorMenu = $( '.weetext-color', win ).removeClass( 'show' );
     var dropMenu  = typoMenu.add( sizeMenu ).add( colorMenu );
+
+    // Info
+    var openFileID     = null;
+    var openFileText   = null;
+    var openFileLength = null;
     
     // Local Info
     var list = {
@@ -810,10 +815,14 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
-    // File Info
-    var openFileID     = null;
-    var openFileText   = extractText();
-    var openFileLength = openFileText.length;
+    var saveStatus = function( id ){
+
+        // File Info
+        openFileID     = id;
+        openFileText   = extractText();
+        openFileLength = openFileText.length;
+
+    };
 
     // Events
     win
@@ -832,12 +841,10 @@ wz.app.addScript( 7, 'common', function( win ){
                     return false;
                 }
 
-                openFileID     = structure.id;
-                openFileText   = data;
-                openFileLength = openFileText.length;
-
                 renderInput( data );
                 windowTitle( structure.name );
+
+                saveStatus( structure.id );
 
             });
 
@@ -1041,5 +1048,8 @@ wz.app.addScript( 7, 'common', function( win ){
 
     normalizeSelection();
     updateState( getSelectedTags( zone[ 0 ] ) );
+
+    // Save status
+    saveStatus( null );
 
 });
