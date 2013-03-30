@@ -702,7 +702,7 @@ wz.app.addScript( 7, 'common', function( win ){
 
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
-                        .text( 'Archivo guardado' )
+                        .text( 'File saved' )
                         .append();
 
                     wz.tool.secureCallback( callback )();
@@ -717,7 +717,7 @@ wz.app.addScript( 7, 'common', function( win ){
 
     var createFile = function( callback ){
 
-        var name = prompt( 'Nombre del nuevo documento' );
+        var name = prompt( 'New file name' );
         var text = extractText();
 
         wz.createStructure( name, 'text/plain', 'root', text, function( error, structure ){
@@ -856,7 +856,7 @@ wz.app.addScript( 7, 'common', function( win ){
             return false;
         }
 
-        if( confirm( '¿Desea guardar los cambios?' ) ){
+        if( confirm( 'Do you want to save changes?' ) ){
 
             if( openFileID ){
 
