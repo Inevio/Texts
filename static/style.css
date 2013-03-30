@@ -87,11 +87,15 @@
 }
 
 .wz-app-7 .button-typo span{
-    /* width: 110px; */
+    width: 110px;
 }
 
 .wz-app-7 .button-size{
     margin-left: 15px;
+}
+
+.wz-app-7 .button-size span{
+    width: 30px;
 }
 
 .wz-app-7 .button-color{

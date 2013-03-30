@@ -146,6 +146,42 @@ wz.app.addScript( 7, 'common', function( win ){
         
         $( '.button-typo span', menu ).text( ( font === null ) ? '(several fonts)' : font );
         $( '.button-size span', menu ).text( isNaN( size ) ? '--' : size + 'pt' );
+
+        if( font !== null ){
+
+            typoMenu.children()
+                .removeClass('active')
+                .each( function(){
+
+                    if( $( 'span', this ).text() === font ){
+
+                        $(this).addClass('active');
+                        return false;
+
+                    }
+
+                });
+
+        }
+
+        if( !isNaN( size ) ){
+
+            size = size + 'pt';
+
+            sizeMenu.children()
+                .removeClass('active')
+                .each( function(){
+
+                    if( $( 'span', this ).text() === size ){
+
+                        $(this).addClass('active');
+                        return false;
+
+                    }
+
+                });
+                
+        }
         
         var align = commonAlign(input);
 
