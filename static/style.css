@@ -703,12 +703,12 @@
 }
 
 .wz-app-7 .weetext-map i{
-	width: 19px;
-	height: 20px;
+    top: -9px;
+    left: -9px;
+	width: 18px;
+	height: 18px;
 	background: url('https://staticbeta.weezeel.com/app/7/color.png') no-repeat -126px 0px;
 	position: absolute;
-	top: 35px;
-	left: 75px;
 }
 
 .wz-app-7 .weetext-rainbow{

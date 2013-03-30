@@ -931,7 +931,10 @@ wz.app.addScript( 7, 'common', function( win ){
     .on( 'mousedown', function(){
 
         if( $( this ).hasClass('weetext-drop-menu') ){
+
             dropMenu.removeClass('show');
+            $( this ).removeClass('weetext-drop-menu');
+
         }
         
     })
@@ -982,17 +985,7 @@ wz.app.addScript( 7, 'common', function( win ){
             dropMenu.removeClass('show');
         }  
         
-    })
-    
-    /* Sin revisar */
-    .on( 'mousedown', '.table-container table', function( e ){    
-        $( '.weetext-color', win ).removeClass( 'show' );      
-    })
-    
-    .on( 'mousedown', '.weetext-color', function( e ){    
-        e.stopPropagation();      
     });
-    /* Fin sin revisar */
 
     typoMenu
     .on( 'mousedown', 'li', function(){
@@ -1002,6 +995,20 @@ wz.app.addScript( 7, 'common', function( win ){
     sizeMenu
     .on( 'mousedown', 'li', function(){
         surroundSelection( 'font-size', $(this).data('font-size') );
+    });
+
+    colorMenu
+    .on( 'mousedown', '.weetext-color', function( e ){    
+        e.stopPropagation();      
+    })
+
+    .on( 'mousedown', '.table-container td', function( e ){
+
+        $( '.weetext-color', win ).removeClass( 'show' );   
+        win.removeClass('weetext-drop-menu');
+
+        surroundSelection( 'color', $( this ).css('background-color') );
+
     });
 
     menu
