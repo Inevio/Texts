@@ -7,9 +7,9 @@ wz.app.addScript( 7, 'common', function( win ){
     var title = $( '.weetext-paper-title span', win );
     var paper = $( '.weetext-paper', zone ).first();
 
-    var typoMenu  = $( '.weetext-typo', win ).removeClass( 'show' );
-    var sizeMenu  = $( '.weetext-size', win ).removeClass( 'show' ); 
-    var colorMenu = $( '.weetext-color', win ).removeClass( 'show' );
+    var typoMenu  = $( '.weetext-typo', win );
+    var sizeMenu  = $( '.weetext-size', win );
+    var colorMenu = $( '.weetext-color', win );
     var dropMenu  = typoMenu.add( sizeMenu ).add( colorMenu );
 
     // Info
@@ -409,12 +409,31 @@ wz.app.addScript( 7, 'common', function( win ){
     var normalizeSelection = function(){
         
         var tags = getSelectedTags( zone[ 0 ] ).filter('p');
+
+        console.log( tags );
         
-        if( tags.size() === 1 && tags.text().length === 0 ){
-            selectEnd( tags );
+        if( tags.size() === 1 ){
+
+            if( tags.text().length === 0 ){
+                selectEnd( tags );
+            }else{
+
+                var sel = tags.selection();
+
+                if( sel.start === 0 && sel.end === 0 ){
+                    tags.selection( sel.start, sel.end );
+                }else if( tags.text().length === sel.start && sel.start === sel.end ){
+                    selectEnd( tags );
+                }else{
+                    tags.selection( sel.start, sel.end );
+                }
+
+            }
+
         }else{
             
             var sel = zone.selection();
+            console.log( sel );
             zone.selection( sel.start, sel.end );
             
         }
@@ -860,6 +879,16 @@ wz.app.addScript( 7, 'common', function( win ){
 
     };
 
+    var positionMenu = function( reference, menu ){
+
+        var refOffset = reference.offset().left;
+        var refWidth  = reference.outerWidth();
+        var winOffset = win.offset().left;
+
+        menu.css( 'left', ( refOffset - winOffset ) + ( refWidth / 2 ) - ( menu.outerWidth() / 2 ) );
+
+    };
+
     // Events
     win
     .on( 'app-param', function( e, params ){
@@ -949,6 +978,8 @@ wz.app.addScript( 7, 'common', function( win ){
             typoMenu.addClass('show');
             win.addClass('weetext-drop-menu');
 
+            positionMenu( $( this ), typoMenu );
+
         }else{
             dropMenu.removeClass('show');
         }
@@ -965,13 +996,15 @@ wz.app.addScript( 7, 'common', function( win ){
             sizeMenu.addClass('show');
             win.addClass('weetext-drop-menu');
 
+            positionMenu( $( this ), sizeMenu );
+
         }else{
             dropMenu.removeClass('show');
         }  
         
     })
     
-    .on( 'mousedown', '.button-color', function( e ){
+    .on( 'mousedown', '.button-color .weetext-options-display', function( e ){
         
         e.stopPropagation();
         
@@ -981,10 +1014,16 @@ wz.app.addScript( 7, 'common', function( win ){
             colorMenu.addClass('show');
             win.addClass('weetext-drop-menu');
 
+            positionMenu( $( this ), colorMenu );
+
         }else{
             dropMenu.removeClass('show');
         }  
         
+    })
+
+    .on( 'click', '.button-color figure', function(){
+        surroundSelection( 'color', $( this ).css('background-color') );
     });
 
     typoMenu
@@ -1008,6 +1047,8 @@ wz.app.addScript( 7, 'common', function( win ){
         win.removeClass('weetext-drop-menu');
 
         surroundSelection( 'color', $( this ).css('background-color') );
+
+        $('.button-color figure', menu ).css( 'background-color', $( this ).css('background-color') );
 
     });
 

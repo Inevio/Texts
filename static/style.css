@@ -87,7 +87,7 @@
 }
 
 .wz-app-7 .button-typo span{
-    width: 110px;
+    /* width: 110px; */
 }
 
 .wz-app-7 .button-size{
@@ -542,7 +542,7 @@
 
 .wz-app-7 .weetext-color{
     width: 150px;
-	height: 339px;
+	height: 88px;
 	background: #404040;
 	border-radius: 6px;
     position: absolute;
