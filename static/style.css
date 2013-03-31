@@ -95,7 +95,7 @@
 }
 
 .wz-app-7 .button-size span{
-    width: 30px;
+    /* width: 30px; */
 }
 
 .wz-app-7 .button-color{
@@ -103,7 +103,7 @@
     margin-left: 15px;
 }
 
-.wz-app-7 .button-color figure{
+.wz-app-7 .button-color-indicator{
 	width: 15px;
 	height: 15px;
 	float: left;
@@ -218,11 +218,20 @@
 
 .wz-app-7 .weetext-options-display{
     
+    width: 9px;
+    height: 16px;
+    float: left;
+    margin-left: 4px;
+    
+}
+
+.wz-app-7 .weetext-options-display i{
+    
     width: 7px;
     height: 5px;
     float: left;
-    margin-left: 5px;
-	margin-top: 7px;
+    margin-left: 1px;
+    margin-top: 7px;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -220px 0;
     
 }

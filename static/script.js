@@ -1022,7 +1022,7 @@ wz.app.addScript( 7, 'common', function( win ){
         
     })
 
-    .on( 'click', '.button-color figure', function(){
+    .on( 'click', '.button-color-indicator', function(){
         surroundSelection( 'color', $( this ).css('background-color') );
     });
 
