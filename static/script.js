@@ -1048,7 +1048,7 @@ wz.app.addScript( 7, 'common', function( win ){
 
         surroundSelection( 'color', $( this ).css('background-color') );
 
-        $('.button-color figure', menu ).css( 'background-color', $( this ).css('background-color') );
+        $( '.button-color-indicator', menu ).css( 'background-color', $( this ).css('background-color') );
 
     });
 
