@@ -32,7 +32,7 @@
 
 .wz-app-7 .weetext-options-middle{
     
-    width: 534px;
+    width: 572px; /* 534px; */
     height: 33px;
     float: left;
     padding-top: 17px;
@@ -44,7 +44,7 @@
 
 .wz-app-7 .weetext-options-right{
     
-    width: 110px;
+    width: 72px; /* 110px; */
     height: 33px;
     float: left;
     padding-top: 17px;
@@ -212,6 +212,7 @@
     width: 15px;
     height: 16px;
     float: left;
+    margin-right: 23px;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -138px 0;
     
 }
