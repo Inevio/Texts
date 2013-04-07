@@ -408,9 +408,7 @@ wz.app.addScript( 7, 'common', function( win ){
      */
     var normalizeSelection = function(){
         
-        var tags = getSelectedTags( zone[ 0 ] ).filter('p');
-
-        console.log( tags );
+        var tags = getSelectedTags( zone[ 0 ] ).filter('p, li');
         
         if( tags.size() === 1 ){
 
@@ -433,7 +431,6 @@ wz.app.addScript( 7, 'common', function( win ){
         }else{
             
             var sel = zone.selection();
-            console.log( sel );
             zone.selection( sel.start, sel.end );
             
         }
@@ -547,7 +544,7 @@ wz.app.addScript( 7, 'common', function( win ){
             tmpRange = new $.Range.current(this);
             parent   = $(this.parentElement);
             
-            if(parent.is('p')){
+            if(parent.is('p, li')){
                 
                 object   = $('<span></span>').css(command, value);
                 tmpRange.range.surroundContents(object[0]);
@@ -678,7 +675,7 @@ wz.app.addScript( 7, 'common', function( win ){
      * Devuelve las padres "especiales" seleccionadas
      */
     var getBigParents = function( reference ){
-        return reference.closest('p');
+        return reference.closest('p, li');
     };
 
     /*
@@ -694,9 +691,7 @@ wz.app.addScript( 7, 'common', function( win ){
         var tmpPaper  = $();
         var items     = [];
 
-        console.log('start');
-
-        $( data ).filter('p').each( function(){
+        $( data ).filter('p, li').each( function(){
             items.push( this );
         });
 
@@ -756,14 +751,13 @@ wz.app.addScript( 7, 'common', function( win ){
                     alert( 'Error: ' + error );
                 }else{
 
-                    console.log('guardado',error);
                     openFileText   = text;
                     openFileLength = openFileText.length;
 
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
                         .text( 'File saved' )
-                        .append();
+                        .render();
 
                     wz.tool.secureCallback( callback )();
 
@@ -780,7 +774,7 @@ wz.app.addScript( 7, 'common', function( win ){
         var name = prompt( 'New file name' );
         var text = extractText();
 
-        wz.createStructure( name, 'text/plain', 'root', text, function( error, structure ){
+        wz.structure.create( name, 'text/plain', 'root', text, function( error, structure ){
 
             if( error ){
 
@@ -799,7 +793,7 @@ wz.app.addScript( 7, 'common', function( win ){
             wz.banner()
                 .title( 'weeText - ' + structure.name )
                 .text( 'Archivo guardado' )
-                .append();
+                .render();
 
             wz.tool.secureCallback( callback )();
 
@@ -932,7 +926,6 @@ wz.app.addScript( 7, 'common', function( win ){
 
             if( openFileID ){
 
-                console.log(openFileID);
                 saveFile( function(){
                     wz.app.closeWindow( win.data('win') );
                 });
@@ -1109,6 +1102,58 @@ wz.app.addScript( 7, 'common', function( win ){
             throw Error('Bad Toggle Input');
         }
         
+    })
+
+    .on( 'click', '.button-bullets', function( e ){
+
+        var tags       = getBigParents( getTagNode( getSelectedNodes( zone[ 0 ] ) ) );
+        var tmp        = null;
+        var newTags    = $();
+        var selection  = zone.selection();
+        var replaceStr = '<li></li>';
+        var css        = { 'margin-left' : '1.25cm' };
+
+        tmp = tags.filter('li');
+
+        if( tmp.size() ){
+
+            if( tmp.size() === tags.size() ){
+
+                replaceStr = '<p></p>';
+                css        = {};
+
+            }else{
+
+                newTags = tmp;
+                tags    = tags.not( tmp );
+
+            }
+
+        }
+
+        tags.each( function(){
+
+            tmp     = $( replaceStr ).html( $( this ).html() ).css( css );
+            newTags = newTags.add( tmp );
+
+            $( this ).replaceWith( tmp );
+
+        });
+
+        if( tags.size() === 1 ){
+            selectEnd( newTags );
+        }else{
+            zone.selection( selection.start, selection.end );
+        }
+
+        normalizeSelection();
+        updateState( getSelectedTags( zone[ 0 ] ) );
+
+        tags      = newTags;
+        newTags   = null;
+        tmp       = null;
+        selection = null;
+
     });
 
     zone
@@ -1126,7 +1171,7 @@ wz.app.addScript( 7, 'common', function( win ){
     // Insert Pointer
     $( '.weetext-paper', zone ).first().focus();
 
-    var paragraph = $( '.weetext-paper', zone ).first().find('p').last();
+    var paragraph = $( '.weetext-paper', zone ).first().find('p, li').last();
 
     selectEnd( paragraph );
 
