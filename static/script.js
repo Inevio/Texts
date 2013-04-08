@@ -183,12 +183,19 @@ wz.app.addScript( 7, 'common', function( win ){
                 
         }
         
-        var align = commonAlign(input);
+        var align = commonAlign( input );
+        var list  = commonParent( input );
 
         if(align === null){
             $('.button-align',menu).removeClass('active');
         }else{
             $('.button-align-' + align, menu).addClass('active').siblings().removeClass('active');
+        }
+
+        if( list === 'li' ){
+            $( '.button-bullets', menu ).addClass('active');
+        }else{
+            $( '.button-bullets', menu ).removeClass('active');
         }
         
         if(isBold(input)){
@@ -267,6 +274,21 @@ wz.app.addScript( 7, 'common', function( win ){
             return value;
         }
         
+    };
+
+    var commonParent = function(input){
+
+        var p  = input.closest('p');
+        var li = input.closest('li');
+
+        if( p.size() && li.size() === 0 ){
+            return 'p';
+        }else if( li.size() && p.size() === 0 ){
+            return 'li';
+        }else{
+            return null;
+        }
+         
     };
 
     /*

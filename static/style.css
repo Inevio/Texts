@@ -182,11 +182,13 @@
 }
 
 .wz-app-7 .button-bullets{
-    
     width: 18px;
     margin-left: 15px;
     background-position: -106px 0;
-    
+}
+
+.wz-app-7 .button-bullets.active{
+    background-position: -106px -16px;
 }
 
 .wz-app-7 .wz-win-maximize{
