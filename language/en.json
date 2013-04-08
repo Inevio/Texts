@@ -1,4 +1,9 @@
 
 {
 	
+	"severalFonts" : "(several fonts)",
+	"fileSaved" : "has been saved",
+	"newName" : "New file name",
+	"saveChanges" : "Do you want to save changes?"
+
 }

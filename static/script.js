@@ -1,5 +1,5 @@
 
-wz.app.addScript( 7, 'common', function( win ){
+wz.app.addScript( 7, 'common', function( win, app, lang, params ){
     
     // Cache Elements
     var zone  = $( '.weetext-paper-zone', win );
@@ -144,7 +144,7 @@ wz.app.addScript( 7, 'common', function( win ){
         var font = commonFont( input );
         var size = Math.round( parseFloat( wz.tool.pixelsToPoints( commonSize( input ) ) ) );
         
-        $( '.button-typo span', menu ).text( ( font === null ) ? '(several fonts)' : font );
+        $( '.button-typo span', menu ).text( ( font === null ) ? lang.severalFonts : font );
         $( '.button-size span', menu ).text( isNaN( size ) ? '--' : size + 'pt' );
 
         if( font !== null ){
@@ -778,7 +778,8 @@ wz.app.addScript( 7, 'common', function( win ){
 
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
-                        .text( 'File saved' )
+                        .text( structure.name + ' ' + lang.fileSaved )
+                        .image( 'https://staticbeta.weezeel.com/app/7/floppy.png' )
                         .render();
 
                     wz.tool.secureCallback( callback )();
@@ -793,7 +794,7 @@ wz.app.addScript( 7, 'common', function( win ){
 
     var createFile = function( callback ){
 
-        var name = prompt( 'New file name' );
+        var name = prompt( lang.newName );
         var text = extractText();
 
         wz.structure.create( name, 'text/plain', 'root', text, function( error, structure ){
@@ -814,7 +815,8 @@ wz.app.addScript( 7, 'common', function( win ){
 
             wz.banner()
                 .title( 'weeText - ' + structure.name )
-                .text( 'Archivo guardado' )
+                .text( structure.name + ' ' + lang.fileSaved )
+                .image( 'https://staticbeta.weezeel.com/app/7/floppy.png' )
                 .render();
 
             wz.tool.secureCallback( callback )();
@@ -944,7 +946,7 @@ wz.app.addScript( 7, 'common', function( win ){
             return false;
         }
 
-        if( confirm( 'Do you want to save changes?' ) ){
+        if( confirm( lang.saveChanges ) ){
 
             if( openFileID ){
 
