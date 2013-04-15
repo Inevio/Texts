@@ -795,6 +795,12 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
     var createFile = function( callback ){
 
         var name = prompt( lang.newName );
+
+        if( name === null ){
+            callback( 'USER ABORT' );
+            return false;
+        }
+
         var text = extractText();
 
         wz.structure.create( name, 'text/plain', 'root', text, function( error, structure ){
