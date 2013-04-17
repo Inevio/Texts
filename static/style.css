@@ -58,6 +58,7 @@
     height: 16px;
     float: left;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat;
+    background-size: 227px 33px;
     
 }
 
@@ -197,6 +198,7 @@
     height: 16px;
     float: left;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -124px 0;
+    background-size: 227px 33px;
     
 }
 
@@ -206,6 +208,7 @@
     height: 16px;
     float: left;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -153px 0;
+    background-size: 227px 33px;
     
 }
 
@@ -216,6 +219,7 @@
     float: left;
     margin-right: 23px;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -138px 0;
+    background-size: 227px 33px;
     
 }
 
@@ -236,6 +240,7 @@
     margin-left: 1px;
     margin-top: 7px;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -220px 0;
+    background-size: 227px 33px;
     
 }
 
@@ -282,6 +287,7 @@
     height: 11px;
     display: inline-block;
     background: url('https://static.weezeel.com/app/7/title-icon.png') no-repeat;
+    background-size: 9px 11px;
 }
 
 .wz-app-7 .weetext-paper-title span{    
@@ -300,7 +306,6 @@
     top: 99px;
     left: 11px;
     background-image: -moz-linear-gradient(50% 0% -90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%); 
-    background-image: -webkit-gradient(linear,50% 0%,50% 100%,color-stop(0, rgba(255,255,255,1)),color-stop(1, rgba(255,255,255,0)));
     background-image: -webkit-linear-gradient(-90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
     background-image: -o-linear-gradient(-90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
     background-image: linear-gradient(0deg,rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
@@ -337,7 +342,6 @@
     bottom: 21px;
     left: 11px;
     background-image: -moz-linear-gradient(50% 0% -90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%); 
-    background-image: -webkit-gradient(linear,50% 0%,50% 100%,color-stop(0, rgba(255,255,255,0)),color-stop(1, rgba(255,255,255,1)));
     background-image: -webkit-linear-gradient(-90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
     background-image: -o-linear-gradient(-90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
     background-image: linear-gradient(0deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
@@ -359,6 +363,7 @@
     width: 7px;
     height: 18px;
     background: url('https://static.weezeel.com/app/7/footer-left.png') no-repeat;
+    background-size: 7px 18px;
     
 }
 
@@ -368,6 +373,7 @@
     width: 780px;
     height: 18px;
     background: url('https://static.weezeel.com/app/7/footer-middle.png');
+    background-size: 1px 18px;
     
 }
 
@@ -377,6 +383,7 @@
     width: 7px;
     height: 18px;
     background: url('https://static.weezeel.com/app/7/footer-right.png') no-repeat;
+    background-size: 7px 18px;
     
 }
 
@@ -403,6 +410,7 @@
     width: 16px;
     height: 7px;
     background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    background-size: 15px 6px;
     content: '';
     
 }
@@ -455,6 +463,8 @@
 
 .wz-app-7 .weetext-typo li.active i{
     background: url('https://static.weezeel.com/app/7/tick.png') no-repeat;
+    background-size: 10px 8px;
+
 }
 
 .wz-app-7 .weetext-typo span{
@@ -489,6 +499,7 @@
     width: 16px;
     height: 7px;
     background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    background-size: 15px 6px;
     content: '';
     
 }
@@ -541,6 +552,7 @@
 
 .wz-app-7 .weetext-size li.active i{
     background: url('https://static.weezeel.com/app/7/tick.png') no-repeat;
+    background-size: 10px 8px;
 }
 
 .wz-app-7 .weetext-size span{
@@ -578,6 +590,7 @@
     width: 16px;
     height: 7px;
     background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    background-size: 15px 6px;
     content: '';
     
 }
@@ -712,6 +725,7 @@
 	width: 126px;
 	height: 160px;
 	background: url('https://static.weezeel.com/app/7/map.png') no-repeat;
+    background-size: 126px 160px;
 }
 
 .wz-app-7 .weetext-map i{
@@ -720,6 +734,7 @@
 	width: 18px;
 	height: 18px;
 	background: url('https://static.weezeel.com/app/7/color.png') no-repeat -126px 0px;
+    background-size: 157px 25px;
 	position: absolute;
 }
 
@@ -736,12 +751,14 @@
 	width: 126px;
 	height: 25px;
 	background: url('https://static.weezeel.com/app/7/color.png') no-repeat 0px 0px;
+    background-size: 157px 25px;
 }
 
 .wz-app-7 .weetext-rainbow i{
 	width: 13px;
 	height: 9px;
 	background: url('https://static.weezeel.com/app/7/color.png') no-repeat -144px 0px;
+    background-size: 157px 25px;
 	position: absolute;
 	top: -2px;
 	left: 80px;
