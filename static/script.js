@@ -779,7 +779,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
                         .text( structure.name + ' ' + lang.fileSaved )
-                        .image( 'https://staticbeta.weezeel.com/app/7/floppy.png' )
+                        .image( 'https://static.weezeel.com/app/7/floppy.png' )
                         .render();
 
                     wz.tool.secureCallback( callback )();
@@ -822,7 +822,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             wz.banner()
                 .title( 'weeText - ' + structure.name )
                 .text( structure.name + ' ' + lang.fileSaved )
-                .image( 'https://staticbeta.weezeel.com/app/7/floppy.png' )
+                .image( 'https://static.weezeel.com/app/7/floppy.png' )
                 .render();
 
             wz.tool.secureCallback( callback )();

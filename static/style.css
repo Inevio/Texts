@@ -711,7 +711,7 @@
 .wz-app-7 .weetext-map figure{
 	width: 126px;
 	height: 160px;
-	background: url('https://staticbeta.weezeel.com/app/7/map.png') no-repeat;
+	background: url('https://static.weezeel.com/app/7/map.png') no-repeat;
 }
 
 .wz-app-7 .weetext-map i{
@@ -719,7 +719,7 @@
     left: -9px;
 	width: 18px;
 	height: 18px;
-	background: url('https://staticbeta.weezeel.com/app/7/color.png') no-repeat -126px 0px;
+	background: url('https://static.weezeel.com/app/7/color.png') no-repeat -126px 0px;
 	position: absolute;
 }
 
@@ -735,13 +735,13 @@
 .wz-app-7 .weetext-rainbow figure{
 	width: 126px;
 	height: 25px;
-	background: url('https://staticbeta.weezeel.com/app/7/color.png') no-repeat 0px 0px;
+	background: url('https://static.weezeel.com/app/7/color.png') no-repeat 0px 0px;
 }
 
 .wz-app-7 .weetext-rainbow i{
 	width: 13px;
 	height: 9px;
-	background: url('https://staticbeta.weezeel.com/app/7/color.png') no-repeat -144px 0px;
+	background: url('https://static.weezeel.com/app/7/color.png') no-repeat -144px 0px;
 	position: absolute;
 	top: -2px;
 	left: 80px;
