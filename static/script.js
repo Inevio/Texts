@@ -913,13 +913,9 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
-    // Events
-    win
-    .on( 'app-param', function( e, params ){
-
-        // To Do -> Comprobar que params no va vacio
-
-        wz.structure( params[ 0 ], function( error, structure ){
+    var openFile = function( id ) {
+        
+        wz.structure( id, function( error, structure ){
             
             structure.read( function( error, data ){
 
@@ -935,9 +931,36 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
                 saveStatus( structure.id );
 
+                structure.sharedWith( function( e, owner, permissions, list ){
+                    
+                    for( var i in list ){
+                        requestCollaboration( list[ i ].id )
+                    }
+
+                });
+
             });
 
         });
+
+    };
+
+    var requestCollaboration = function( userId ) {
+        
+        wz.message()
+            .app( 7 )
+            .user( userId )
+            .message( { command : 'requestCollaboration' } )
+            .send();
+
+    };
+
+    // Events
+    win
+    .on( 'app-param', function( e, params ){
+
+        // To Do -> Comprobar que params no va vacio
+        openFile( params[ 0 ] );
 
     })
 
@@ -1047,6 +1070,10 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     .on( 'click', '.button-color-indicator', function(){
         surroundSelection( 'color', $( this ).css('background-color') );
+    })
+
+    .on( 'message', function( e, data ){
+        console.log( data );
     });
 
     typoMenu
