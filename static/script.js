@@ -12,6 +12,8 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
     var colorMenu = $( '.weetext-color', win );
     var dropMenu  = typoMenu.add( sizeMenu ).add( colorMenu );
 
+    var remoteCaretPrototype = $('<i class="weetext-remote-carret"></i>');
+
     // Info
     var openFileID     = null;
     var openFileText   = null;
@@ -913,7 +915,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
-    var openFile = function( id ) {
+    var openFile = function( id ){
         
         wz.structure( id, function( error, structure ){
             
@@ -931,13 +933,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
                 saveStatus( structure.id );
 
-                structure.sharedWith( function( e, owner, permissions, list ){
-                    
-                    for( var i in list ){
-                        requestCollaboration( list[ i ].id )
-                    }
-
-                });
+                requestCollaboration( structure )
 
             });
 
@@ -945,12 +941,44 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
-    var requestCollaboration = function( userId ) {
-        
+    var requestCollaboration = function( structure ){
+
+        var promises = [ $.Deferred(), $.Deferred() ];
+
+        structure.sharedWith( function( error, owner, permissions, list ){
+            promises[ 0 ].resolve( [ error, owner, permissions, list ] );
+        });
+
+        wz.user.connectedFriends( function( error, list ){
+            promises[ 1 ].resolve( [ error, list ] );
+        });
+
+        $.when.apply( promises )
+            .then( function( shared, connected ){
+
+                for( var i in list ){
+
+                    if( list[ i ].id !== wz.info.userId() ){
+                        requestCollaboration( list[ i ].id );
+                    }
+
+                }
+
+            });
+
+    };
+
+    var requestCollaborationToUser = function( userId ){
+
         wz.message()
             .app( 7 )
             .user( userId )
-            .message( { command : 'requestCollaboration' } )
+            .message( {
+
+                command  : 'requestCollaboration',
+                position : 0
+                
+            } )
             .send();
 
     };
@@ -1073,7 +1101,22 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
     })
 
     .on( 'message', function( e, data ){
-        console.log( data );
+
+        var mes = data.message;
+        var com = mes.command;
+
+        if( com === 'requestCollaboration' ){
+
+            if( _collaborationHost ){
+
+            }else{
+
+            }
+
+        }
+
+        remoteCaretPrototype.clone().appendTo( $( 'p', win ) );
+
     });
 
     typoMenu

@@ -764,6 +764,16 @@
 	left: 80px;
 }
 
+.wz-app-7 .weetext-remote-carret{
+    border: 1px solid #09f;
+    background: #f00;
+    border-top: 0px;
+    border-bottom: 0px;
+    height: 12pt;
+    margin-top: -1pt;
+    outline: 1px solid rgba( 255, 255, 255, 0.3 );
+}
+
 /* Estilos para pruebas */
 .wz-app-7 .weetext-option{
     float: left;
