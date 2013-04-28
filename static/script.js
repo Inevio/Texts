@@ -13,6 +13,9 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
     var dropMenu  = typoMenu.add( sizeMenu ).add( colorMenu );
 
     var remoteCaretPrototype = $('<i class="weetext-remote-carret"></i>');
+    var collaborationHost    = null;
+    var collaborationActive  = false;
+    var collaborationUsers   = [];
 
     // Info
     var openFileID     = null;
@@ -933,7 +936,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
                 saveStatus( structure.id );
 
-                requestCollaboration( structure )
+                requestCollaboration( structure );
 
             });
 
@@ -953,16 +956,35 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             promises[ 1 ].resolve( [ error, list ] );
         });
 
-        $.when.apply( promises )
+        $.when( promises[ 0 ], promises[ 1 ] )
             .then( function( shared, connected ){
 
-                for( var i in list ){
+                shared    = shared[ 3 ];
+                connected = connected[ 1 ];
 
-                    if( list[ i ].id !== wz.info.userId() ){
-                        requestCollaboration( list[ i ].id );
+                var sharedConnected = shared.filter( function( element ){
+
+                    for( var i in connected ){
+
+                        if( element.id === connected[ i ].id ){
+                            return true;
+                        }
+
+                    }
+
+                    return false;
+
+                });
+
+                for( var i in shared ){
+
+                    if( shared[ i ].id !== wz.info.userId() ){
+                        requestCollaborationToUser( shared[ i ].id );
                     }
 
                 }
+
+                collaborationUsers = shared;
 
             });
 
@@ -977,6 +999,44 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
                 command  : 'requestCollaboration',
                 position : 0
+                
+            } )
+            .send();
+
+    };
+
+    var collaborationAddLetter = function( childrenIndex, position, letter, text ){
+
+        var element = zone;
+
+        for( var i in childrenIndex ){
+            element = element.children().eq( childrenIndex[ i ] );
+        };
+
+        element.html( text );
+
+    };
+
+    var collaborationSendAddLetter = function( childrenIndex, position, letter, text ){
+
+        for( var i in collaborationUsers ){
+            collaborationSendAddLetterToUser( collaborationUsers[ i ].id, childrenIndex, position, letter, text );
+        }
+
+    };
+
+    var collaborationSendAddLetterToUser = function( userId, childrenIndex, position, letter, text ){
+
+        wz.message()
+            .app( 7 )
+            .user( userId )
+            .message( {
+
+                command       : 'addLetter',
+                childrenIndex : childrenIndex,
+                position      : position,
+                letter        : letter,
+                text          : text
                 
             } )
             .send();
@@ -1107,15 +1167,17 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         if( com === 'requestCollaboration' ){
 
-            if( _collaborationHost ){
-
+            if( collaborationHost === true ){
+                // To Do
             }else{
-
+                // To Do
             }
 
-        }
+            remoteCaretPrototype.clone().appendTo( $( 'p', win ) );
 
-        remoteCaretPrototype.clone().appendTo( $( 'p', win ) );
+        }else if( com === 'addLetter' ){
+            collaborationAddLetter( mes.childrenIndex, mes.position, mes.letter, mes.text );
+        }
 
     });
 
@@ -1262,6 +1324,27 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
         normalizeSelection();
         updateState( getSelectedTags( this ) );
         
+    })
+
+    .on( 'keyup', function( e ){
+
+        var allTags   = getSelectedTags( this );
+        var tag       = allTags.first();
+        var text      = tag.text();
+        var selection = tag.selection();
+        var selStart  = selection.start - 1;
+        var selEnd    = selection.end;
+        var parents   = tag.add( tag.parentsUntil( zone ) );
+        var letter    = text.slice( selStart, selEnd );
+
+        var childrenIndex = [];
+
+        parents.each( function(){
+            childrenIndex.push( $( this ).index() );
+        });
+
+        collaborationSendAddLetter( childrenIndex, selStart, letter, tag.html() );
+
     });
 
     // Create Menus
