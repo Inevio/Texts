@@ -1017,6 +1017,20 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
+    var collaborationAddLine = function( childrenIndex, text ){
+
+        var element = zone;
+
+        childrenIndex[ childrenIndex.length - 1 ] = childrenIndex[ childrenIndex.length - 1 ] - 1;
+
+        for( var i in childrenIndex ){
+            element = element.children().eq( childrenIndex[ i ] );
+        };
+
+        element.after( text );
+
+    };
+
     var collaborationSendAddLetter = function( childrenIndex, position, letter, text ){
 
         for( var i in collaborationUsers ){
@@ -1036,6 +1050,30 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
                 childrenIndex : childrenIndex,
                 position      : position,
                 letter        : letter,
+                text          : text
+                
+            } )
+            .send();
+
+    };
+
+    var collaborationSendAddLine = function( childrenIndex, text ){
+
+        for( var i in collaborationUsers ){
+            collaborationSendAddLineToUser( collaborationUsers[ i ].id, childrenIndex, text );
+        }
+
+    };
+
+    var collaborationSendAddLineToUser = function( userId, childrenIndex, text ){
+
+        wz.message()
+            .app( 7 )
+            .user( userId )
+            .message( {
+
+                command       : 'addLine',
+                childrenIndex : childrenIndex,
                 text          : text
                 
             } )
@@ -1177,6 +1215,8 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         }else if( com === 'addLetter' ){
             collaborationAddLetter( mes.childrenIndex, mes.position, mes.letter, mes.text );
+        }else if( com === 'addLine' ){
+            collaborationAddLine( mes.childrenIndex, mes.text );
         }
 
     });
@@ -1343,7 +1383,17 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             childrenIndex.push( $( this ).index() );
         });
 
-        collaborationSendAddLetter( childrenIndex, selStart, letter, tag.html() );
+        if( e.which === 13){
+
+            collaborationSendAddLine( childrenIndex, $('<div></div>').append( tag.clone() ).html() );
+
+            // To Do -> Eliminar esto cuando se implemente eliminaciones masivas
+            childrenIndex[ childrenIndex.length - 1 ] = childrenIndex[ childrenIndex.length - 1 ] - 1;
+            collaborationSendAddLetter( childrenIndex, selStart, letter, tag.prev().html() );
+
+        }else{
+            collaborationSendAddLetter( childrenIndex, selStart, letter, tag.html() );
+        }
 
     });
 
