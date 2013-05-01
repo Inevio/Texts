@@ -748,6 +748,19 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
+    var replaceParagraphType = function( tags, replaceStr, css ){
+        
+        tags.each( function(){
+
+            tmp     = $( replaceStr ).html( $( this ).html() ).css( css );
+            //newTags = newTags.add( tmp );
+
+            $( this ).replaceWith( tmp );
+
+        });
+
+    };
+
     /*
      * (void) windowTitle( (string) title)
      * Inserta el código indicado en las páginas
@@ -1031,6 +1044,18 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
+    var collaborationChangeParagraph = function( childrenIndex, type, css ){
+
+        var element = zone;
+
+        for( var i in childrenIndex ){
+            element = element.children().eq( childrenIndex[ i ] );
+        };
+
+        replaceParagraphType( element, type, css );
+
+    };
+
     var collaborationSendAddLetter = function( childrenIndex, position, letter, text ){
 
         for( var i in collaborationUsers ){
@@ -1080,6 +1105,46 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             .send();
 
     };
+
+    var collaborationSendChangeParagraph = function( childrenIndex, type, css ){
+
+        console.log( childrenIndex );
+
+        for( var i in collaborationUsers ){
+            collaborationSendChangeParagraphToUser( collaborationUsers[ i ].id, childrenIndex, type, css );
+        }
+
+    };
+
+    var collaborationSendChangeParagraphToUser = function( userId, childrenIndex, type, css ){
+
+        wz.message()
+            .app( 7 )
+            .user( userId )
+            .message( {
+
+                command       : 'changeParagraph',
+                childrenIndex : childrenIndex,
+                type          : type,
+                css           : css
+                
+            } )
+            .send();
+
+    };
+
+    var getChildrenIndex = function( element ){
+        
+        var parents       = element.add( element.parentsUntil( zone ) );
+        var childrenIndex = [];
+
+        parents.each( function(){
+            childrenIndex.push( $( this ).index() );
+        });
+
+        return childrenIndex;
+
+    }
 
     // Events
     win
@@ -1217,6 +1282,8 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             collaborationAddLetter( mes.childrenIndex, mes.position, mes.letter, mes.text );
         }else if( com === 'addLine' ){
             collaborationAddLine( mes.childrenIndex, mes.text );
+        }else if( com === 'changeParagraph' ){
+            collaborationChangeParagraph( mes.childrenIndex, mes.type, mes.css );
         }
 
     });
@@ -1342,6 +1409,10 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         });
 
+        newTags.each( function(){
+            collaborationSendChangeParagraph( getChildrenIndex( $( this ) ), replaceStr, css );
+        });
+
         if( tags.size() === 1 ){
             selectEnd( newTags );
         }else{
@@ -1368,20 +1439,14 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     .on( 'keyup', function( e ){
 
-        var allTags   = getSelectedTags( this );
-        var tag       = allTags.first();
-        var text      = tag.text();
-        var selection = tag.selection();
-        var selStart  = selection.start - 1;
-        var selEnd    = selection.end;
-        var parents   = tag.add( tag.parentsUntil( zone ) );
-        var letter    = text.slice( selStart, selEnd );
-
-        var childrenIndex = [];
-
-        parents.each( function(){
-            childrenIndex.push( $( this ).index() );
-        });
+        var allTags       = getSelectedTags( this );
+        var tag           = allTags.first();
+        var text          = tag.text();
+        var selection     = tag.selection();
+        var selStart      = selection.start - 1;
+        var selEnd        = selection.end;
+        var letter        = text.slice( selStart, selEnd );
+        var childrenIndex = getChildrenIndex( tag );
 
         if( e.which === 13){
 
