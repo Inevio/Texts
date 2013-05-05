@@ -672,6 +672,10 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             }
             
         });
+
+        getBigParents( getSelectedNodes( zone[ 0 ] ) ).each( function(){
+            collaborationSurroundedText(getChildrenIndex( $( this ) ), $( this ).html() );
+        });
         
     };
 
@@ -1056,6 +1060,18 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
+    var collaborationSurroundedText = function( childrenIndex, text ){
+
+        var element = zone;
+
+        for( var i in childrenIndex ){
+            element = element.children().eq( childrenIndex[ i ] );
+        };
+
+        element.html( text );
+
+    };
+
     var collaborationSendAddLetter = function( childrenIndex, position, letter, text ){
 
         for( var i in collaborationUsers ){
@@ -1108,8 +1124,6 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     var collaborationSendChangeParagraph = function( childrenIndex, type, css ){
 
-        console.log( childrenIndex );
-
         for( var i in collaborationUsers ){
             collaborationSendChangeParagraphToUser( collaborationUsers[ i ].id, childrenIndex, type, css );
         }
@@ -1132,6 +1146,32 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             .send();
 
     };
+
+    var collaborationSendSurroundedText = function( childrenIndex, text ){
+
+        for( var i in collaborationUsers ){
+            collaborationSendSurroundedTextToUser( collaborationUsers[ i ].id, childrenIndex, text );
+        }
+
+    };
+
+    var collaborationSendSurroundedTextToUser = function( userId, childrenIndex, text ){
+
+        wz.message()
+            .app( 7 )
+            .user( userId )
+            .message( {
+
+                command       : 'surroundedText',
+                childrenIndex : childrenIndex,
+                text          : text
+
+                
+            } )
+            .send();
+
+    };
+
 
     var getChildrenIndex = function( element ){
         
@@ -1284,6 +1324,8 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             collaborationAddLine( mes.childrenIndex, mes.text );
         }else if( com === 'changeParagraph' ){
             collaborationChangeParagraph( mes.childrenIndex, mes.type, mes.css );
+        }else if( com === 'surroundedText' ){
+            collaborationSurroundedText( mes.childrenIndex, mes.text );
         }
 
     });
