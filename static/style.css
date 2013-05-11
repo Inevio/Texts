@@ -248,7 +248,7 @@
     
     width: 21cm;
     height: 500px;
-    border-radius: 7px;
+    border-radius: 3px;
     background: #EAEAEA;
     margin: 0 auto;
     position: relative;
@@ -266,7 +266,7 @@
     top: 50px;
     left: 11px;
     background: #FFF;
-    border-radius: 7px 7px 0px 0px;
+    border-radius: 3px 3px 0px 0px;
     
 }
 
@@ -317,7 +317,7 @@
     width: 21cm;
     height: 29.5cm;
     background: #FFF;
-    border-radius: 7px;
+    border-radius: 3px;
     margin-bottom:  5px;
     border-bottom: 1px solid #D2D2D2;
     padding: 2.5cm 3cm;
@@ -417,8 +417,8 @@
 
 .wz-app-7 .weetext-typo li:first-child{
     
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
     box-shadow: inset 0px 1px 0px 0px #4D4D4D;
     
 }
@@ -443,8 +443,8 @@
 .wz-app-7 .weetext-typo li:last-child{
     
     height: 30px;
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
     box-shadow: inset 0px -1px 0px 0px #4D4D4D;
     
 }
@@ -506,8 +506,8 @@
 
 .wz-app-7 .weetext-size li:first-child{
     
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
     box-shadow: inset 0px 1px 0px 0px #4D4D4D;
     
 }
@@ -532,8 +532,8 @@
 .wz-app-7 .weetext-size li:last-child{
     
     height: 30px;
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
     box-shadow: inset 0px -1px 0px 0px #4D4D4D;
     
 }
@@ -568,7 +568,7 @@
     width: 150px;
 	height: 88px;
 	background: #404040;
-	border-radius: 6px;
+	border-radius: 3px;
     position: absolute;
     top: 43px;
     left: 264px;
