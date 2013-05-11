@@ -872,14 +872,14 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     var generateFontFamilyMenu = function(){
 
-        var prototype = typoMenu.children('.prototype');
+        var prototype = typoMenu.children('.wz-prototype');
 
         for( var i in fontFamily ){
 
             typoMenu.append(
 
                 prototype.clone()
-                    .removeClass('prototype')
+                    .removeClass('wz-prototype')
                     .data( 'font-family', fontFamily[ i ].value )
                     .children('span')
                         .text( fontFamily[ i ].name )
@@ -895,14 +895,14 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     var generateFontSizeMenu = function(){
 
-        var prototype = sizeMenu.children('.prototype');
+        var prototype = sizeMenu.children('.wz-prototype');
 
         for( var i in fontSize ){
 
             sizeMenu.append(
 
                 prototype.clone()
-                    .removeClass('prototype')
+                    .removeClass('wz-prototype')
                     .data( 'font-size', fontSize[ i ].value )
                     .children('span')
                         .text( fontSize[ i ].name )
