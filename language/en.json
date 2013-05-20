@@ -4,6 +4,7 @@
 	"severalFonts" : "(several fonts)",
 	"fileSaved" : "has been saved",
 	"newName" : "New file name",
-	"saveChanges" : "Do you want to save changes?"
+	"saveChanges" : "Do you want to save changes?",
+	"notWorking" : "I'm sorry but this functionality doesn't work right now"
 
 }

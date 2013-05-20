@@ -816,6 +816,8 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     var createFile = function( callback ){
 
+        callback = wz.tool.secureCallback( callback );
+
         var name = prompt( lang.newName );
 
         if( name === null ){
@@ -1369,6 +1371,12 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
         }else{
             createFile();
         }
+
+    })
+
+    .on( 'click', '.weetext-options-new', function(){
+
+        alert( lang.notWorking );
 
     })
 
