@@ -827,7 +827,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         var text = extractText();
 
-        wz.structure.create( name, 'text/plain', 'root', text, function( error, structure ){
+        wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
 
             if( error ){
 
