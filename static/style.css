@@ -12,6 +12,10 @@
     
 }
 
+.wz-win-option:hover{
+    border: 1px solid #FFF;
+}
+
 .wz-app-7 .stupid-container{
     
     width: 100%;
@@ -22,10 +26,9 @@
 .wz-app-7 .weetext-options-left{
     
     width: 90px;
-    height: 33px;
+    height: 38px;
     float: left;
-    padding-top: 17px;
-    padding-left: 22px;
+    padding: 12px 6px 0px 16px;
     border-right: 1px solid #8A313C;
     
 }
@@ -53,7 +56,7 @@
     
 }
 
-.wz-app-7 .weetext-button{
+.wz-app-7 .weetext-button i{
     
     height: 16px;
     float: left;
@@ -62,16 +65,19 @@
     
 }
 
-.wz-app-7 .weetext-options-new{
+.wz-app-7 .weetext-options-new i{
     
     width: 20px;
     
 }
 
 .wz-app-7 .weetext-options-save{
+    margin-left: 6px;
+}
+
+.wz-app-7 .weetext-options-save i{
     
     width: 15px;
-    margin-left: 20px;
     background-position: -20px 0;
     
 }
