@@ -13,7 +13,7 @@
 }
 
 .wz-win-option:hover{
-    border: 1px solid #FFF;
+    border: 1px solid #7B2F39;
 }
 
 .wz-app-7 .stupid-container{
@@ -36,10 +36,10 @@
 .wz-app-7 .weetext-options-middle{
     
     width: 572px; /* 534px; */
-    height: 33px;
+    height: 40px;
     float: left;
-    padding-top: 17px;
-    padding-left: 30px;
+    padding-top: 10px;
+    padding-left: 24px;
     border-left: 1px solid #D0706F;
     border-right: 1px solid #8A313C;
     
@@ -47,11 +47,9 @@
 
 .wz-app-7 .weetext-options-right{
     
-    width: 72px; /* 110px; */
-    height: 33px;
+    height: 30px;
     float: left;
-    padding-top: 17px;
-    padding-left: 24px;
+    padding: 11px 19px 9px;
     border-left: 1px solid #D0706F;
     
 }
@@ -97,17 +95,8 @@
     /* width: 110px; */
 }
 
-.wz-app-7 .button-size{
-    margin-left: 15px;
-}
-
 .wz-app-7 .button-size span{
     /* width: 30px; */
-}
-
-.wz-app-7 .button-color{
-    margin-top: 1px;
-    margin-left: 15px;
 }
 
 .wz-app-7 .button-color-indicator{
@@ -118,87 +107,89 @@
 	background: #009;
 }
 
-.wz-app-7 .button-bold{
+.wz-app-7 .button-bold i{
 	width: 13px;
-	margin-left: 15px;
     background-position: -182px 0;
 }
 
-.wz-app-7 .button-bold.active{
+.wz-app-7 .button-bold.active i{
     background-position: -182px -16px;
 }
 
-.wz-app-7 .button-italic{
+.wz-app-7 .button-italic i{
 	width: 12px;
-	margin-left: 15px;
     background-position: -195px 0;
 }
 
-.wz-app-7 .button-italic.active{
+.wz-app-7 .button-italic.active i{
     background-position: -195px -16px;
 }
 
-.wz-app-7 .button-underline{
+.wz-app-7 .button-underline i{
 	width: 13px;
-	margin-left: 15px;
     background-position: -207px 0;
 }
 
-.wz-app-7 .button-underline.active{
+.wz-app-7 .button-underline.active i{
     background-position: -207px -16px;
 }
 
-.wz-app-7 .button-align-left{
+.wz-app-7 .button-align-left i{
 	width: 14px;
-	margin-left: 15px;
     background-position: -64px 0;
 }
 
-.wz-app-7 .button-align-left.active{
+.wz-app-7 .button-align-left.active i{
     background-position: -64px -16px;
 }
 
-.wz-app-7 .button-align-center{
+.wz-app-7 .button-align-center i{
 	width: 14px;
-	margin-left: 15px;
     background-position: -92px 0;
 }
 
-.wz-app-7 .button-align-center.active{
+.wz-app-7 .button-align-center.active i{
     background-position: -92px -16px;
 }
 
-.wz-app-7 .button-align-right{
+.wz-app-7 .button-align-right i{
 	width: 14px;
-	margin-left: 15px;
     background-position: -78px 0;
 }
 
-.wz-app-7 .button-align-right.active{
+.wz-app-7 .button-align-right.active i{
     background-position: -78px -16px;
 }
 
-.wz-app-7 .button-align-justify{
+.wz-app-7 .button-align-justify i{
 	width: 14px;
-	margin-left: 15px;
     background-position: -50px 0;
 }
 
-.wz-app-7 .button-align-justify.active{
+.wz-app-7 .button-align-justify.active i{
     background-position: -50px -16px;
 }
 
-.wz-app-7 .button-bullets{
+.wz-app-7 .button-bullets i{
     width: 18px;
-    margin-left: 15px;
     background-position: -106px 0;
 }
 
-.wz-app-7 .button-bullets.active{
+.wz-app-7 .button-bullets.active i{
     background-position: -106px -16px;
 }
 
-.wz-app-7 .wz-win-maximize{
+.wz-app-7 .wz-win-minimize, .wz-app-7 .wz-win-maximize, .wz-app-7 .wz-win-close{
+    height: 16px;
+    width: 14px;
+    padding: 6px 7px 4px;
+}
+
+.wz-app-7 .wz-win-minimize:hover, .wz-app-7 .wz-win-maximize:hover, .wz-app-7 .wz-win-close:hover{
+    border: 1px solid #7B2F39;
+}
+
+.wz-app-7 .wz-win-maximize i{
     
     width: 14px;
     height: 16px;
@@ -208,7 +199,7 @@
     
 }
 
-.wz-app-7 .wz-win-close{
+.wz-app-7 .wz-win-close i{
     
     width: 14px;
     height: 16px;
@@ -218,12 +209,11 @@
     
 }
 
-.wz-app-7 .wz-win-minimize{
+.wz-app-7 .wz-win-minimize i{
     
     width: 15px;
     height: 16px;
     float: left;
-    margin-right: 23px;
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -138px 0;
     background-size: 227px 33px;
     
