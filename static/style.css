@@ -12,6 +12,16 @@
     
 }
 
+.wz-app-7 .wz-scroll-bar{
+    width: 5px;
+    background: transparent;
+}
+
+.wz-app-7 .wz-scroll-slider{
+    width: 5px;
+    background: #B84E52;
+}
+
 .wz-app-7 .wz-win-option:hover{
     border: 1px solid #7B2F39;
 }
