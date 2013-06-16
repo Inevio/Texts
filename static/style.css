@@ -1,5 +1,5 @@
 
-.wz-app-7{
+.wz-win{
     
     width: 21.6cm;
     height: 600px;
@@ -12,28 +12,28 @@
     
 }
 
-.wz-app-7 .wz-scroll-bar{
+.wz-scroll-bar{
     width: 5px;
     background: transparent;
 }
 
-.wz-app-7 .wz-scroll-slider{
+.wz-scroll-slider{
     width: 5px;
     background: #B84E52;
 }
 
-.wz-app-7 .wz-win-option:hover{
+.wz-win-option:hover{
     border: 1px solid #7B2F39;
 }
 
-.wz-app-7 .stupid-container{
+.stupid-container{
     
     width: 100%;
     height: 50px;
     
 }
 
-.wz-app-7 .weetext-options-left{
+.weetext-options-left{
     
     width: 90px;
     height: 38px;
@@ -43,7 +43,7 @@
     
 }
 
-.wz-app-7 .weetext-options-middle{
+.weetext-options-middle{
     
     width: 572px; /* 534px; */
     height: 40px;
@@ -55,7 +55,7 @@
     
 }
 
-.wz-app-7 .weetext-options-right{
+.weetext-options-right{
     
     height: 30px;
     float: left;
@@ -64,7 +64,7 @@
     
 }
 
-.wz-app-7 .weetext-button i{
+.weetext-button i{
     
     height: 16px;
     float: left;
@@ -73,43 +73,43 @@
     
 }
 
-.wz-app-7 .weetext-options-new i{
+.weetext-options-new i{
     
     width: 20px;
     
 }
 
-.wz-app-7 .weetext-options-save{
+.weetext-options-save{
     margin-left: 6px;
 }
 
-.wz-app-7 .weetext-options-save i{
+.weetext-options-save i{
     
     width: 15px;
     background-position: -20px 0;
     
 }
 
-.wz-app-7 .weetext-button-drop{
+.weetext-button-drop{
     float: left;
     margin-top: 2px;
     color: #641D26;
     font-size: 13px;
 }
 
-.wz-app-7 .weetext-button-drop span{
+.weetext-button-drop span{
     float: left;
 }
 
-.wz-app-7 .button-typo span{
+.button-typo span{
     /* width: 110px; */
 }
 
-.wz-app-7 .button-size span{
+.button-size span{
     /* width: 30px; */
 }
 
-.wz-app-7 .button-color-indicator{
+.button-color-indicator{
 	width: 15px;
 	height: 15px;
 	float: left;
@@ -117,89 +117,89 @@
 	background: #009;
 }
 
-.wz-app-7 .button-bold i{
+.button-bold i{
 	width: 13px;
     background-position: -182px 0;
 }
 
-.wz-app-7 .button-bold.active i{
+.button-bold.active i{
     background-position: -182px -16px;
 }
 
-.wz-app-7 .button-italic i{
+.button-italic i{
 	width: 12px;
     background-position: -195px 0;
 }
 
-.wz-app-7 .button-italic.active i{
+.button-italic.active i{
     background-position: -195px -16px;
 }
 
-.wz-app-7 .button-underline i{
+.button-underline i{
 	width: 13px;
     background-position: -207px 0;
 }
 
-.wz-app-7 .button-underline.active i{
+.button-underline.active i{
     background-position: -207px -16px;
 }
 
-.wz-app-7 .button-align-left i{
+.button-align-left i{
 	width: 14px;
     background-position: -64px 0;
 }
 
-.wz-app-7 .button-align-left.active i{
+.button-align-left.active i{
     background-position: -64px -16px;
 }
 
-.wz-app-7 .button-align-center i{
+.button-align-center i{
 	width: 14px;
     background-position: -92px 0;
 }
 
-.wz-app-7 .button-align-center.active i{
+.button-align-center.active i{
     background-position: -92px -16px;
 }
 
-.wz-app-7 .button-align-right i{
+.button-align-right i{
 	width: 14px;
     background-position: -78px 0;
 }
 
-.wz-app-7 .button-align-right.active i{
+.button-align-right.active i{
     background-position: -78px -16px;
 }
 
-.wz-app-7 .button-align-justify i{
+.button-align-justify i{
 	width: 14px;
     background-position: -50px 0;
 }
 
-.wz-app-7 .button-align-justify.active i{
+.button-align-justify.active i{
     background-position: -50px -16px;
 }
 
-.wz-app-7 .button-bullets i{
+.button-bullets i{
     width: 18px;
     background-position: -106px 0;
 }
 
-.wz-app-7 .button-bullets.active i{
+.button-bullets.active i{
     background-position: -106px -16px;
 }
 
-.wz-app-7 .wz-win-minimize, .wz-app-7 .wz-win-maximize, .wz-app-7 .wz-win-close{
+.wz-win-minimize, .wz-win-maximize, .wz-win-close{
     height: 16px;
     width: 14px;
     padding: 6px 7px 4px;
 }
 
-.wz-app-7 .wz-win-minimize:hover, .wz-app-7 .wz-win-maximize:hover, .wz-app-7 .wz-win-close:hover{
+.wz-win-minimize:hover, .wz-win-maximize:hover, .wz-win-close:hover{
     border: 1px solid #7B2F39;
 }
 
-.wz-app-7 .wz-win-maximize i{
+.wz-win-maximize i{
     
     width: 14px;
     height: 16px;
@@ -209,7 +209,7 @@
     
 }
 
-.wz-app-7 .wz-win-close i{
+.wz-win-close i{
     
     width: 14px;
     height: 16px;
@@ -219,7 +219,7 @@
     
 }
 
-.wz-app-7 .wz-win-minimize i{
+.wz-win-minimize i{
     
     width: 15px;
     height: 16px;
@@ -229,7 +229,7 @@
     
 }
 
-.wz-app-7 .weetext-options-display{
+.weetext-options-display{
     
     width: 9px;
     height: 16px;
@@ -238,7 +238,7 @@
     
 }
 
-.wz-app-7 .weetext-options-display i{
+.weetext-options-display i{
     
     width: 7px;
     height: 5px;
@@ -250,7 +250,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-zone{
+.weetext-paper-zone{
     
     width: 21cm;
     height: 500px;
@@ -264,7 +264,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-title-container{
+.weetext-paper-title-container{
     
     width: 794px;
     height: 50px;
@@ -276,7 +276,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-title{
+.weetext-paper-title{
     
     width: 750px;
     height: 28px;
@@ -287,7 +287,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-title figure{
+.weetext-paper-title figure{
     
     width: 9px;
     height: 11px;
@@ -296,7 +296,7 @@
     background-size: 9px 11px;
 }
 
-.wz-app-7 .weetext-paper-title span{    
+.weetext-paper-title span{    
 
     font-size: 15px;
     color: #545454;
@@ -304,7 +304,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-top-shadow{
+.weetext-paper-top-shadow{
     
     width: 794px;
     height: 10px;
@@ -318,7 +318,7 @@
     
 }
 
-.wz-app-7 .weetext-paper{
+.weetext-paper{
     
     width: 21cm;
     height: 29.5cm;
@@ -334,13 +334,13 @@
     
 }   
 
-.wz-app-7 .weetext-paper:last-child{
+.weetext-paper:last-child{
     
     margin-bottom:  0px;
 
 }
 
-.wz-app-7 .weetext-paper-bottom-shadow{
+.weetext-paper-bottom-shadow{
     
     width: 794px;
     height: 10px;
@@ -354,7 +354,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-footer{
+.weetext-paper-footer{
     
     height: 18px;
     position: absolute;
@@ -363,7 +363,7 @@
 
 }
 
-.wz-app-7 .weetext-paper-footer-left{
+.weetext-paper-footer-left{
     
     float: left;
     width: 7px;
@@ -373,7 +373,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-footer-middle{
+.weetext-paper-footer-middle{
     
     float: left;
     width: 780px;
@@ -383,7 +383,7 @@
     
 }
 
-.wz-app-7 .weetext-paper-footer-right{
+.weetext-paper-footer-right{
     
     float: left;
     width: 7px;
@@ -393,7 +393,7 @@
     
 }
 
-.wz-app-7 .weetext-typo{
+.weetext-typo{
     width: 165px;
     position: absolute;
     top: 36px;
@@ -403,11 +403,11 @@
     z-index: 1;
 }
 
-.wz-app-7 .weetext-typo.show{
+.weetext-typo.show{
     display: block;
 }
 
-.wz-app-7 .weetext-typo:before{
+.weetext-typo:before{
     
     position: relative;
     top: 2px;
@@ -421,7 +421,7 @@
     
 }
 
-.wz-app-7 .weetext-typo li:first-child{
+.weetext-typo li:first-child{
     
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
@@ -429,7 +429,7 @@
     
 }
 
-.wz-app-7 .weetext-typo li{
+.weetext-typo li{
     
     overflow: hidden; 
     -webkit-box-sizing: border-box;
@@ -446,7 +446,7 @@
     
 }
 
-.wz-app-7 .weetext-typo li:last-child{
+.weetext-typo li:last-child{
     
     height: 30px;
     border-bottom-right-radius: 3px;
@@ -455,11 +455,11 @@
     
 }
 
-.wz-app-7 .weetext-typo li:hover{
+.weetext-typo li:hover{
     background: #535353;
 }
 
-.wz-app-7 .weetext-typo i{
+.weetext-typo i{
     width: 10px;
     height: 8px;
     float: left;
@@ -467,22 +467,22 @@
     margin-top: 2px;
 }
 
-.wz-app-7 .weetext-typo li.active i{
+.weetext-typo li.active i{
     background: url('https://static.weezeel.com/app/7/tick.png') no-repeat;
     background-size: 10px 8px;
 
 }
 
-.wz-app-7 .weetext-typo span{
+.weetext-typo span{
     float: left;
     margin-left: 8px;
 }
 
-.wz-app-7 .weetext-typo li.active span{
+.weetext-typo li.active span{
     color: #FF5951;
 }
 
-.wz-app-7 .weetext-size{
+.weetext-size{
     width: 80px;
     position: absolute;
     top: 36px;
@@ -492,11 +492,11 @@
     z-index: 1;
 }
 
-.wz-app-7 .weetext-size.show{
+.weetext-size.show{
     display: block;
 }
 
-.wz-app-7 .weetext-size:before{
+.weetext-size:before{
     
     position: relative;
     top: 2px;
@@ -510,7 +510,7 @@
     
 }
 
-.wz-app-7 .weetext-size li:first-child{
+.weetext-size li:first-child{
     
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
@@ -518,7 +518,7 @@
     
 }
 
-.wz-app-7 .weetext-size li{
+.weetext-size li{
     
     overflow: hidden; 
     -webkit-box-sizing: border-box;
@@ -535,7 +535,7 @@
     
 }
 
-.wz-app-7 .weetext-size li:last-child{
+.weetext-size li:last-child{
     
     height: 30px;
     border-bottom-right-radius: 3px;
@@ -544,11 +544,11 @@
     
 }
 
-.wz-app-7 .weetext-size li:hover{
+.weetext-size li:hover{
     background: #535353;
 }
 
-.wz-app-7 .weetext-size i{
+.weetext-size i{
     width: 10px;
     height: 8px;
     float: left;
@@ -556,21 +556,21 @@
     margin-top: 2px;
 }
 
-.wz-app-7 .weetext-size li.active i{
+.weetext-size li.active i{
     background: url('https://static.weezeel.com/app/7/tick.png') no-repeat;
     background-size: 10px 8px;
 }
 
-.wz-app-7 .weetext-size span{
+.weetext-size span{
     float: left;
     margin-left: 8px;
 }
 
-.wz-app-7 .weetext-size li.active span{
+.weetext-size li.active span{
     color: #FF5951;
 }
 
-.wz-app-7 .weetext-color{
+.weetext-color{
     width: 150px;
 	height: 88px;
 	background: #404040;
@@ -583,11 +583,11 @@
     z-index: 1;
 }
 
-.wz-app-7 .weetext-color.show{
+.weetext-color.show{
     display: block;
 }
 
-.wz-app-7 .weetext-color:before{
+.weetext-color:before{
     
     position: relative;
     top: -5px;
@@ -601,7 +601,7 @@
     
 }
 
-.wz-app-7 .table-container{
+.table-container{
 	border-radius: 2px;
 	float: left;
 	margin: 4px 12px 12px 12px;
@@ -610,84 +610,84 @@
 	border-bottom: 1px solid #535353;
 }
 
-.wz-app-7 td{
+td{
 	width: 21px;
 	height: 21px;
 }
 
-.wz-app-7 tr:nth-child(1) td:nth-child(1){
+tr:nth-child(1) td:nth-child(1){
 	background: #2D035B;
 }
 
-.wz-app-7 tr:nth-child(1) td:nth-child(2){
+tr:nth-child(1) td:nth-child(2){
 	background: #6B5389;
 }
 
-.wz-app-7 tr:nth-child(1) td:nth-child(3){
+tr:nth-child(1) td:nth-child(3){
 	background: #BD1749;
 }
 
-.wz-app-7 tr:nth-child(1) td:nth-child(4){
+tr:nth-child(1) td:nth-child(4){
 	background: #E43D60;
 }
 
-.wz-app-7 tr:nth-child(1) td:nth-child(5){
+tr:nth-child(1) td:nth-child(5){
 	background: #F8A79B;
 }
 
-.wz-app-7 tr:nth-child(1) td:nth-child(6){
+tr:nth-child(1) td:nth-child(6){
 	background: #F5920B;
 }
 
-.wz-app-7 tr:nth-child(2) td:nth-child(1){
+tr:nth-child(2) td:nth-child(1){
 	background: #15ABD9;
 }
 
-.wz-app-7 tr:nth-child(2) td:nth-child(2){
+tr:nth-child(2) td:nth-child(2){
 	background: #0877A8;
 }
 
-.wz-app-7 tr:nth-child(2) td:nth-child(3){
+tr:nth-child(2) td:nth-child(3){
 	background: #0F6A4E;
 }
 
-.wz-app-7 tr:nth-child(2) td:nth-child(4){
+tr:nth-child(2) td:nth-child(4){
 	background: #47B769;
 }
 
-.wz-app-7 tr:nth-child(2) td:nth-child(5){
+tr:nth-child(2) td:nth-child(5){
 	background: #A4CE3F;
 }
 
-.wz-app-7 tr:nth-child(2) td:nth-child(6){
+tr:nth-child(2) td:nth-child(6){
 	background: #FFD000;
 }
 
-.wz-app-7 tr:nth-child(3) td:nth-child(1){
+tr:nth-child(3) td:nth-child(1){
 	background: #000000;
 }
 
-.wz-app-7 tr:nth-child(3) td:nth-child(2){
+tr:nth-child(3) td:nth-child(2){
 	background: #363636;
 }
 
-.wz-app-7 tr:nth-child(3) td:nth-child(3){
+tr:nth-child(3) td:nth-child(3){
 	background: #636363;
 }
 
-.wz-app-7 tr:nth-child(3) td:nth-child(4){
+tr:nth-child(3) td:nth-child(4){
 	background: #B7B7B7;
 }
 
-.wz-app-7 tr:nth-child(3) td:nth-child(5){
+tr:nth-child(3) td:nth-child(5){
 	background: #D7D7D7;
 }
 
-.wz-app-7 tr:nth-child(3) td:nth-child(6){
+tr:nth-child(3) td:nth-child(6){
 	background: #FFFFFF;
 }
 
-.wz-app-7 .weetext-hex{
+.weetext-hex{
 	width: 126px;
 	height: 21px;
 	background: #171717;
@@ -701,14 +701,14 @@
 	text-align: center;
 }
 
-.wz-app-7 .weetext-hex span{
+.weetext-hex span{
 	color: #04397B;
 	font-size: 14px;
 	display: inline-block;
 	margin-right: 4px;
 }
 
-.wz-app-7 .weetext-hex input{
+.weetext-hex input{
 	max-width: 50px;
 	background: none;
 	color: #D3D3D3;
@@ -716,7 +716,7 @@
 	display: inline-block;
 }
 
-.wz-app-7 .weetext-map{
+.weetext-map{
 	background: #f00;
 	float: left;
 	margin: 0px 12px 12px 12px;
@@ -727,14 +727,14 @@
 	position: relative;
 }
 
-.wz-app-7 .weetext-map figure{
+.weetext-map figure{
 	width: 126px;
 	height: 160px;
 	background: url('https://static.weezeel.com/app/7/map.png') no-repeat;
     background-size: 126px 160px;
 }
 
-.wz-app-7 .weetext-map i{
+.weetext-map i{
     top: -9px;
     left: -9px;
 	width: 18px;
@@ -744,7 +744,7 @@
 	position: absolute;
 }
 
-.wz-app-7 .weetext-rainbow{
+.weetext-rainbow{
 	float: left;
 	margin: 0px 12px 12px 12px;
 	border-radius: 2px;
@@ -753,14 +753,14 @@
 	position: relative;
 }
 
-.wz-app-7 .weetext-rainbow figure{
+.weetext-rainbow figure{
 	width: 126px;
 	height: 25px;
 	background: url('https://static.weezeel.com/app/7/color.png') no-repeat 0px 0px;
     background-size: 157px 25px;
 }
 
-.wz-app-7 .weetext-rainbow i{
+.weetext-rainbow i{
 	width: 13px;
 	height: 9px;
 	background: url('https://static.weezeel.com/app/7/color.png') no-repeat -144px 0px;
@@ -770,7 +770,7 @@
 	left: 80px;
 }
 
-.wz-app-7 .weetext-remote-carret{
+.weetext-remote-carret{
     border: 1px solid #09f;
     background: #f00;
     border-top: 0px;
@@ -781,6 +781,6 @@
 }
 
 /* Estilos para pruebas */
-.wz-app-7 .weetext-option{
+.weetext-option{
     float: left;
 }
