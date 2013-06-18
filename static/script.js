@@ -561,7 +561,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
         var parent       = null;
         var length       = null;
         var selection    = zone.selection();
-        var nodes        = getSelectedNodes(zone[0]);
+        var nodes        = getSelectedNodes( zone[ 0 ] );
         
         nodes.each(function(){
             
@@ -672,9 +672,9 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             }
             
         });
-
+    
         getBigParents( getSelectedNodes( zone[ 0 ] ) ).each( function(){
-            collaborationSurroundedText(getChildrenIndex( $( this ) ), $( this ).html() );
+            collaborationSendSurroundedText(getChildrenIndex( $( this ) ), $( this ).html() );
         });
         
     };
@@ -1174,7 +1174,6 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     };
 
-
     var getChildrenIndex = function( element ){
         
         var parents       = element.add( element.parentsUntil( zone ) );
@@ -1186,7 +1185,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         return childrenIndex;
 
-    }
+    };
 
     // Events
     win
