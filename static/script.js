@@ -72,7 +72,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-left' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-left' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'left'
 
@@ -82,7 +82,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-center' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-center' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'center'
 
@@ -92,7 +92,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-right' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-right' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'right'
 
@@ -102,7 +102,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-justify' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-justify' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'justify'
 
@@ -137,6 +137,158 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     ];
 
+    // Modules
+    var fn = {
+
+        common : {
+
+            align : function( input ){
+                
+                /*
+                 *
+                 * Alineación común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un string con la alineación común
+                 * - Un objeto null si no hay alineación común
+                 *
+                 */
+
+                var first = input.first();
+                var value = input.css('text-align');
+                
+                input = input.not(first);
+
+                input.each( function(){
+                    
+                    if( $( this ).css('text-align') !== value ){
+                        value = false;
+                        return false;
+                    }
+                    
+                });
+                
+                if( value ){
+                    return value;
+                }else{
+                    return null;
+                }
+            
+            },
+
+            font : function( input ){
+
+                /*
+                 *
+                 * Tipo de letra común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un string con la familia común
+                 * - Un objeto null si no hay familia común
+                 *
+                 */
+                
+                var first = input.first();
+                var value = input.css('font-family');
+                
+                input = input.not(first);
+
+                input.each( function(){
+                    
+                    if( $( this ).css('font-family') !== value ){
+                        value = false;
+                        return false;
+                    }
+                    
+                });
+                
+                if( value ){
+                    return $.trim( value.split( ',', 1 )[ 0 ] ).replace( /"|'*/mg, '' );
+                }else{
+                    return null;
+                }
+                
+            },
+
+            parent : function( input ){
+
+                /*
+                 *
+                 * Padre común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un string con el padre común
+                 * - Un objeto null si no hay padre común
+                 *
+                 */
+
+                var p  = input.closest('p');
+                var li = input.closest('li');
+
+                if( p.size() && li.size() === 0 ){
+                    return 'p';
+                }else if( li.size() && p.size() === 0 ){
+                    return 'li';
+                }else{
+                    return null;
+                }
+             
+            },
+
+            size : function( input ){
+
+                /*
+                 *
+                 * Tamaño común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un entero con el tamaño común
+                 * - Un objeto null si no hay tamaño común
+                 *
+                 */
+
+                var first = input.first();
+                var value = parseInt( first.css('font-size'), 10 );
+                
+                input = input.not( first );
+
+                input.each( function(){
+                    
+                    if( parseInt( $( this ).css('font-size'), 10 ) !== value ){
+                        value = false;
+                        return false;
+                    }
+                    
+                });
+                
+                if( value ){
+                    return value;
+                }else{
+                    return null;
+                }
+
+            }
+
+        }
+
+    };
+
     // Functions
     /*
      * (void) updateState((mixed) input)
@@ -146,8 +298,8 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
         
         input = $(input);
 
-        var font = commonFont( input );
-        var size = Math.round( parseFloat( wz.tool.pixelsToPoints( commonSize( input ) ) ) );
+        var font = fn.common.font( input );
+        var size = Math.round( parseFloat( wz.tool.pixelsToPoints( fn.common.size( input ) ) ) );
         
         $( '.button-typo span', menu ).text( ( font === null ) ? lang.severalFonts : font );
         $( '.button-size span', menu ).text( isNaN( size ) ? '--' : size + 'pt' );
@@ -188,8 +340,8 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
                 
         }
         
-        var align = commonAlign( input );
-        var list  = commonParent( input );
+        var align = fn.common.align( input );
+        var list  = fn.common.parent( input );
 
         if(align === null){
             $('.button-align',menu).removeClass('active');
@@ -221,79 +373,6 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             $('.button-underline',menu).removeClass('active');
         }
         
-    };
-
-    /*
-     * (mixed) commonFont((jQuery) input)
-     * Determina si un conjunto de elementos tienen la misma familia de fuente.
-     */
-    var commonFont = function( input ){
-        
-        var first = input.first();
-        var value = input.css('font-family');
-        
-        input = input.not(first);
-        input.each(function(){
-            
-            if($(this).css('font-family') !== value){
-                
-                value = false;
-                return false;
-                
-            }
-            
-        });
-        
-        if(value === false){
-            return null;
-        }else{
-            return $.trim(value.split(',',1)[0]).replace(/"|'*/mg,'');
-        }
-        
-    };
-
-    /*
-     * (mixed) commonAlign((jQuery) input)
-     * Determina si un conjunto de elementos tienen la misma alineación.
-     */
-    var commonAlign = function( input ){
-        
-        var first = input.first();
-        var value = input.css('text-align');
-        
-        input = input.not(first);
-        input.each(function(){
-            
-            if($(this).css('text-align') !== value){
-                
-                value = false;
-                return false;
-                
-            }
-            
-        });
-        
-        if(value === false){
-            return null;
-        }else{
-            return value;
-        }
-        
-    };
-
-    var commonParent = function(input){
-
-        var p  = input.closest('p');
-        var li = input.closest('li');
-
-        if( p.size() && li.size() === 0 ){
-            return 'p';
-        }else if( li.size() && p.size() === 0 ){
-            return 'li';
-        }else{
-            return null;
-        }
-         
     };
 
     /*
@@ -399,36 +478,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
         }
         
     };
-
-    /*
-     * (mixed) commonSize((jQuery) input)
-     * Determina si un conjunto de elementos tienen el mismo tamaño de fuente.
-     */
-    var commonSize = function( input ){
-        
-        var first = input.first();
-        var value = parseInt( input.css('font-size'), 10 );
-        
-        input = input.not( first );
-        input.each( function(){
-            
-            if( parseInt( $(this).css('font-size'), 10 ) !== value){
-                
-                value = false;
-                return false;
-                
-            }
-            
-        });
-        
-        if( value === false ){
-            return null;
-        }else{
-            return value;
-        }
-        
-    };
-
+    
     /*
      * (void) normalizeSelection()
      * Normaliza los tags seleccionados, muy útil cuando los rangos son simples
