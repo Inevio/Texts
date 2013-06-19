@@ -1209,7 +1209,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         confirm( lang.saveChanges, function( answer ){
 
-            if( answer ) ){
+            if( answer ){
 
                 if( openFileID ){
 
