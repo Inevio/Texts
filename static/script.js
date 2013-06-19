@@ -783,7 +783,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
             // To Do -> Error
             if( error ){
-                alert( error );
+                alert( error, null, win.data().win );
                 return false;
             }
 
@@ -792,7 +792,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             structure.write( text, function( error ){
 
                 if( error ){
-                    alert( 'Error: ' + error );
+                    alert( 'Error: ' + error, null, win.data().win );
                 }else{
 
                     openFileText   = text;
@@ -831,7 +831,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
             if( error ){
 
-                alert( error );
+                alert( error, null, win.data().win );
                 createFile();
                 return false;
 
@@ -946,7 +946,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
                 var comment = $( data ).first()[ 0 ];
 
                 if( comment.nodeName !== '#comment' || comment.nodeValue !== ' weedoc ' ){
-                    alert( 'FILE FORMAT NOT RECOGNIZED' );
+                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
                     return false;
                 }
 
@@ -1207,25 +1207,29 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             return false;
         }
 
-        if( confirm( lang.saveChanges ) ){
+        confirm( lang.saveChanges, function( answer ){
 
-            if( openFileID ){
+            if( answer ) ){
 
-                saveFile( function(){
-                    wz.app.closeWindow( win.data('win') );
-                });
+                if( openFileID ){
+
+                    saveFile( function(){
+                        wz.app.closeWindow( win.data('win') );
+                    });
+
+                }else{
+
+                    createFile( function(){
+                        wz.app.closeWindow( win.data('win') );
+                    });
+
+                }
 
             }else{
-
-                createFile( function(){
-                    wz.app.closeWindow( win.data('win') );
-                });
-
+                wz.app.closeWindow( win.data('win') );
             }
 
-        }else{
-            wz.app.closeWindow( win.data('win') );
-        }
+        }, win.data().win );
 
     })
     
@@ -1375,7 +1379,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     .on( 'click', '.weetext-options-new', function(){
 
-        alert( lang.notWorking );
+        alert( lang.notWorking, null, win.data().win );
 
     })
 
