@@ -818,40 +818,44 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         callback = wz.tool.secureCallback( callback );
 
-        var name = prompt( lang.newName );
+        prompt( lang.newName, function( name ){
 
-        if( name === null ){
-            callback( 'USER ABORT' );
-            return false;
-        }
-
-        var text = extractText();
-
-        wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
-
-            if( error ){
-
-                alert( error, null, win.data().win );
-                createFile();
+            if( name === false ){
+                callback( 'USER ABORT' );
                 return false;
-
             }
 
-            openFileID     = structure.id;
-            openFileText   = text;
-            openFileLength = openFileText.length;
+            var text = extractText();
 
-            windowTitle( structure.name );
+            wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
 
-            wz.banner()
-                .title( 'weeText - ' + structure.name )
-                .text( structure.name + ' ' + lang.fileSaved )
-                .image( 'https://static.weezeel.com/app/7/floppy.png' )
-                .render();
+                if( error ){
 
-            wz.tool.secureCallback( callback )();
+                    alert( error, function(){
+                        createFile();
+                    }, win.data().win );
+                    
+                    return false;
 
-        });
+                }
+
+                openFileID     = structure.id;
+                openFileText   = text;
+                openFileLength = openFileText.length;
+
+                windowTitle( structure.name );
+
+                wz.banner()
+                    .title( 'weeText - ' + structure.name )
+                    .text( structure.name + ' ' + lang.fileSaved )
+                    .image( 'https://static.weezeel.com/app/7/floppy.png' )
+                    .render();
+
+                wz.tool.secureCallback( callback )();
+
+            });
+
+        }, win.data().win );
 
     };
 
