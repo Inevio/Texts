@@ -1,5 +1,3 @@
-
-wz.app.addScript( 7, 'common', function( win, app, lang, params ){
     
     // Cache Elements
     var zone  = $( '.weetext-paper-zone', win );
@@ -1535,5 +1533,3 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     // Save status
     saveStatus( null );
-
-});
