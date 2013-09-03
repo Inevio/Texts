@@ -56,6 +56,18 @@
 
         }
 
+    },
+
+    "permissions" : {
+
+        "structure" : {
+
+            "create" : true,
+            "modify" : true,
+            "read"   : true
+            
+        }
+        
     }
 
 }

@@ -1,5 +1,3 @@
-
-wz.app.addScript( 7, 'common', function( win, app, lang, params ){
     
     // Cache Elements
     var zone  = $( '.weetext-paper-zone', win );
@@ -833,7 +831,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
             // To Do -> Error
             if( error ){
-                alert( error );
+                alert( error, null, win.data().win );
                 return false;
             }
 
@@ -842,7 +840,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             structure.write( text, function( error ){
 
                 if( error ){
-                    alert( 'Error: ' + error );
+                    alert( 'Error: ' + error, null, win.data().win );
                 }else{
 
                     openFileText   = text;
@@ -851,7 +849,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
                         .text( structure.name + ' ' + lang.fileSaved )
-                        .image( 'https://static.weezeel.com/app/7/floppy.png' )
+                        .icon( 'https://static.weezeel.com/app/7/floppy.png' )
                         .render();
 
                     wz.tool.secureCallback( callback )();
@@ -868,40 +866,44 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
         callback = wz.tool.secureCallback( callback );
 
-        var name = prompt( lang.newName );
+        prompt( lang.newName, function( name ){
 
-        if( name === null ){
-            callback( 'USER ABORT' );
-            return false;
-        }
-
-        var text = extractText();
-
-        wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
-
-            if( error ){
-
-                alert( error );
-                createFile();
+            if( name === false ){
+                callback( 'USER ABORT' );
                 return false;
-
             }
 
-            openFileID     = structure.id;
-            openFileText   = text;
-            openFileLength = openFileText.length;
+            var text = extractText();
 
-            windowTitle( structure.name );
+            wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
 
-            wz.banner()
-                .title( 'weeText - ' + structure.name )
-                .text( structure.name + ' ' + lang.fileSaved )
-                .image( 'https://static.weezeel.com/app/7/floppy.png' )
-                .render();
+                if( error ){
 
-            wz.tool.secureCallback( callback )();
+                    alert( error, function(){
+                        createFile();
+                    }, win.data().win );
+                    
+                    return false;
 
-        });
+                }
+
+                openFileID     = structure.id;
+                openFileText   = text;
+                openFileLength = openFileText.length;
+
+                windowTitle( structure.name );
+
+                wz.banner()
+                    .title( 'weeText - ' + structure.name )
+                    .text( structure.name + ' ' + lang.fileSaved )
+                    .icon( 'https://static.weezeel.com/app/7/floppy.png' )
+                    .render();
+
+                wz.tool.secureCallback( callback )();
+
+            });
+
+        }, win.data().win );
 
     };
 
@@ -996,7 +998,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
                 var comment = $( data ).first()[ 0 ];
 
                 if( comment.nodeName !== '#comment' || comment.nodeValue !== ' weedoc ' ){
-                    alert( 'FILE FORMAT NOT RECOGNIZED' );
+                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
                     return false;
                 }
 
@@ -1257,25 +1259,29 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
             return false;
         }
 
-        if( confirm( lang.saveChanges ) ){
+        confirm( lang.saveChanges, function( answer ){
 
-            if( openFileID ){
+            if( answer ){
 
-                saveFile( function(){
-                    wz.app.closeWindow( win.data('win') );
-                });
+                if( openFileID ){
+
+                    saveFile( function(){
+                        wz.app.closeWindow( win.data('win') );
+                    });
+
+                }else{
+
+                    createFile( function(){
+                        wz.app.closeWindow( win.data('win') );
+                    });
+
+                }
 
             }else{
-
-                createFile( function(){
-                    wz.app.closeWindow( win.data('win') );
-                });
-
+                wz.app.closeWindow( win.data('win') );
             }
 
-        }else{
-            wz.app.closeWindow( win.data('win') );
-        }
+        }, win.data().win );
 
     })
     
@@ -1425,7 +1431,7 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     .on( 'click', '.weetext-options-new', function(){
 
-        alert( lang.notWorking );
+        alert( lang.notWorking, null, win.data().win );
 
     })
 
@@ -1577,5 +1583,3 @@ wz.app.addScript( 7, 'common', function( win, app, lang, params ){
 
     // Save status
     saveStatus( null );
-
-});

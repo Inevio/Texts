@@ -189,17 +189,17 @@
     background-position: -106px -16px;
 }
 
-.wz-win-minimize, .wz-win-maximize, .wz-win-close{
+/*.wz-win-minimize, .wz-win-maximize, .wz-win-close{
     height: 16px;
     width: 14px;
     padding: 6px 7px 4px;
-}
+}*/
 
-.wz-win-minimize:hover, .wz-win-maximize:hover, .wz-win-close:hover{
+/*.wz-win-minimize:hover, .wz-win-maximize:hover, .wz-win-close:hover{
     border: 1px solid #7B2F39;
-}
+}*/
 
-.wz-win-maximize i{
+/*.wz-win-maximize i{
     
     width: 14px;
     height: 16px;
@@ -227,7 +227,7 @@
     background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -138px 0;
     background-size: 227px 33px;
     
-}
+}*/
 
 .weetext-options-display{
     
