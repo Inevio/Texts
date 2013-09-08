@@ -283,6 +283,23 @@
 
             }
 
+        },
+
+        parse : {
+
+            txt : function( text ){
+
+                var parent   = $('div');
+                var paragraf = text.split( /(\r\n|\n\r|\r|\n)/g );
+                
+                for( var i = 0; i < paragraf.length; i++ ) {
+                    parent.append( $('<p></p>').text( paragraf[ i ] ) );
+                }
+
+                return parent.html();
+
+            }
+
         }
 
     };
@@ -992,12 +1009,25 @@
     var openFile = function( id ){
         
         wz.structure( id, function( error, structure ){
+
+            console.log( structure );
             
             structure.read( function( error, data ){
 
-                var comment = $( data ).first()[ 0 ];
+                // To Do -> Error
 
-                if( comment.nodeName !== '#comment' || comment.nodeValue !== ' weedoc ' ){
+                if( structure.mime === 'text/plain' ){
+                    data = fn.parse.txt( data );
+                }else if( structure.mime === 'text/html' ){
+
+                    var comment = $( data ).first()[ 0 ];
+
+                    if( comment.nodeName !== '#comment' || comment.nodeValue !== ' weedoc ' ){
+                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                        return false;
+                    }
+
+                }else{
                     alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
                     return false;
                 }
@@ -1007,7 +1037,7 @@
 
                 saveStatus( structure.id );
 
-                requestCollaboration( structure );
+                //requestCollaboration( structure );
 
             });
 
