@@ -298,6 +298,16 @@
 
                 return parent.html();
 
+            },
+
+            weeDoc : function( data ){
+
+                data = $( data );
+                // To Do -> Comprobación de metas
+                // To Do -> Personalización de página
+
+                return data.filter('#content').html();
+
             }
 
         }
@@ -1007,40 +1017,49 @@
     };
 
     var openFile = function( id ){
-        
+
         wz.structure( id, function( error, structure ){
 
-            console.log( structure );
-            
-            structure.read( function( error, data ){
+            if( structure.mime === 'text/plain' ){
 
-                // To Do -> Error
-
-                if( structure.mime === 'text/plain' ){
+                structure.read( function( error, data ){
+                    
+                    // To Do -> Error
                     data = fn.parse.txt( data );
-                }else if( structure.mime === 'text/html' ){
 
-                    var comment = $( data ).first()[ 0 ];
+                    renderInput( data );
+                    windowTitle( structure.name );
+                    saveStatus( structure.id );
 
-                    if( comment.nodeName !== '#comment' || comment.nodeValue !== ' weedoc ' ){
-                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
-                        return false;
-                    }
+                    //requestCollaboration( structure );
 
-                }else{
-                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
-                    return false;
-                }
+                });
 
-                renderInput( data );
-                windowTitle( structure.name );
+            }else if(
+                
+                structure.mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' &&
+                structure.formats.html
 
-                saveStatus( structure.id );
+            ){
+                
+                structure.formats.html.read( function( error, data ){
 
-                //requestCollaboration( structure );
 
-            });
+                    // To Do -> Error
+                    data = fn.parse.weeDoc( data );
 
+                    renderInput( data );
+                    windowTitle( structure.name );
+                    saveStatus( structure.id );
+
+                    //requestCollaboration( structure );
+
+                });
+
+            }else{
+                alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+            }
+        
         });
 
     };
