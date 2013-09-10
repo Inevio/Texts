@@ -1,4 +1,7 @@
     
+    // App = This
+    var app = this;
+
     // Cache Elements
     var zone  = $( '.weetext-paper-zone', win );
     var menu  = $( '.stupid-container', win );
@@ -338,6 +341,32 @@
                 return { content : data.filter('#content').html(), page : css };
 
             }
+
+        },
+
+        save : function(){
+
+            var content = '';
+
+            zone.find('.weetext-paper').each( function(){
+                content += $( this ).html();
+            });
+
+            var page  = zone.find('.weetext-paper').first().attr('style').split(/;\s*/g);
+            var style = {};
+            var tmp   = null;
+
+            for( var i in page ){
+
+                tmp = page[ i ].split(/\s*:\s*/ );
+
+                style[ tmp[ 0 ] ] = tmp[ 1 ];
+
+            }
+
+            // To Do -> Save file
+
+            console.log( app.createWeeDoc( {}, content, style ) );
 
         }
 
