@@ -296,7 +296,7 @@
                     parent.append( $('<p></p>').text( paragraf[ i ] ) );
                 }
 
-                return parent.html();
+                return { content : parent.html() };
 
             },
 
@@ -306,7 +306,36 @@
                 // To Do -> Comprobación de metas
                 // To Do -> Personalización de página
 
-                return data.filter('#content').html();
+                var page  = data.filter('#page').children().first().attr('style').split(/;\s*/g);
+                var style = {};
+                var css   = {};
+                var tmp   = null;
+
+                for( var i in page ){
+
+                    tmp = page[ i ].split(/\s*:\s*/ );
+
+                    style[ tmp[ 0 ] ] = tmp[ 1 ];
+
+                }
+
+                if( style[ 'margin-top' ] ){
+                    css[ 'padding-top' ] = style[ 'margin-top' ];
+                }
+
+                if( style[ 'margin-left' ] ){
+                    css[ 'padding-left' ] = style[ 'margin-left' ];
+                }
+
+                if( style[ 'margin-bottom' ] ){
+                    css[ 'padding-bottom' ] = style[ 'margin-bottom' ];
+                }
+
+                if( style[ 'margin-right' ] ){
+                    css[ 'padding-right' ] = style[ 'margin-right' ];
+                }
+
+                return { content : data.filter('#content').html(), page : css };
 
             }
 
@@ -788,7 +817,9 @@
      * (void) renderInput( (string) data)
      * Inserta el código indicado en las páginas
      */
-    var renderInput = function( data ){
+    var renderInput = function( data, pageConfig ){
+
+        paper.css( pageConfig );
 
         var height    = paper.height();
         var tmpHeight = height;
@@ -1027,7 +1058,7 @@
                     // To Do -> Error
                     data = fn.parse.txt( data );
 
-                    renderInput( data );
+                    renderInput( data.content, data.page );
                     windowTitle( structure.name );
                     saveStatus( structure.id );
 
@@ -1037,18 +1068,20 @@
 
             }else if(
                 
-                structure.mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' &&
-                structure.formats.html
+                (
+                    structure.mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                    structure.mime === 'application/msword' ||
+                    structure.mime === 'text/rtf'
+                ) && structure.formats.html
 
             ){
                 
-                structure.formats.html.read( function( error, data ){
-
+                structure.formats.html.read( function( error, data ){                    
 
                     // To Do -> Error
                     data = fn.parse.weeDoc( data );
 
-                    renderInput( data );
+                    renderInput( data.content, data.page );
                     windowTitle( structure.name );
                     saveStatus( structure.id );
 
@@ -1434,6 +1467,10 @@
             collaborationSurroundedText( mes.childrenIndex, mes.text );
         }
 
+    })
+
+    .on( 'mousedown', 'menu', function( e ){
+        e.preventDefault();
     });
 
     typoMenu
