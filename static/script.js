@@ -306,8 +306,13 @@
             weeDoc : function( data ){
 
                 data = $( data );
+                
                 // To Do -> Comprobación de metas
                 // To Do -> Personalización de página
+
+                if( !data.filter('meta[name="application-name"][content="weeDoc"]').length ){
+                    throw 'FILE IS NOT A WEEDOC';
+                }
 
                 var page  = data.filter('#page').children().first().attr('style').split(/;\s*/g);
                 var style = {};
@@ -352,21 +357,30 @@
                 content += $( this ).html();
             });
 
-            var page  = zone.find('.weetext-paper').first().attr('style').split(/;\s*/g);
+            var page  = zone.find('.weetext-paper').first().attr('style');
             var style = {};
-            var tmp   = null;
 
-            for( var i in page ){
+            if( page ){
 
-                tmp = page[ i ].split(/\s*:\s*/ );
+                page = page.split(/;\s*/g);
 
-                style[ tmp[ 0 ] ] = tmp[ 1 ];
+                var tmp = null;
+
+                for( var i in page ){
+
+                    tmp = page[ i ].split(/\s*:\s*/ );
+
+                    style[ tmp[ 0 ] ] = tmp[ 1 ];
+
+                }
+
+            }else{
 
             }
 
             // To Do -> Save file
 
-            console.log( app.createWeeDoc( {}, content, style ) );
+            return app.createWeeDoc( {}, content, style );
 
         }
 
@@ -853,7 +867,7 @@
         var height    = paper.height();
         var tmpHeight = height;
         var newPaper  = paper.clone().empty();
-        var nowPaper  = paper.empty().html('<!-- weedoc -->');
+        var nowPaper  = paper.empty();
         var tmpPaper  = $();
         var items     = [];
 
@@ -914,7 +928,7 @@
 
     var saveFile = function( callback ){
 
-        wz.structure( openFileID, function( error, structure ){
+        wz.structure( openFileID.id, function( error, structure ){
 
             // To Do -> Error
             if( error ){
@@ -960,21 +974,21 @@
                 return false;
             }
 
-            var text = extractText();
+            var text = fn.save();
 
             wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
 
                 if( error ){
 
                     alert( error, function(){
-                        createFile();
+                        createFile( callback );
                     }, win.data().win );
                     
                     return false;
 
                 }
 
-                openFileID     = structure.id;
+                openFileID     = structure;
                 openFileText   = text;
                 openFileLength = openFileText.length;
 
@@ -1057,10 +1071,10 @@
 
     };
 
-    var saveStatus = function( id ){
+    var saveStatus = function( structure ){
 
         // File Info
-        openFileID     = id;
+        openFileID     = structure;
         openFileText   = extractText();
         openFileLength = openFileText.length;
 
@@ -1089,7 +1103,7 @@
 
                     renderInput( data.content, data.page );
                     windowTitle( structure.name );
-                    saveStatus( structure.id );
+                    saveStatus( structure );
 
                     //requestCollaboration( structure );
 
@@ -1108,11 +1122,36 @@
                 structure.formats.html.read( function( error, data ){                    
 
                     // To Do -> Error
-                    data = fn.parse.weeDoc( data );
+                    try{
+                        data = fn.parse.weeDoc( data );
+                    }catch( e ){
+                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                        return false;
+                    }
 
                     renderInput( data.content, data.page );
                     windowTitle( structure.name );
-                    saveStatus( structure.id );
+                    saveStatus( structure );
+
+                    //requestCollaboration( structure );
+
+                });
+
+            }else if( structure.mime === 'text/html' ){
+
+                structure.read( function( error, data ){                    
+
+                    // To Do -> Error
+                    try{
+                        data = fn.parse.weeDoc( data );
+                    }catch( e ){
+                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                        return false;
+                    }
+
+                    renderInput( data.content, data.page );
+                    windowTitle( structure.name );
+                    saveStatus( structure );
 
                     //requestCollaboration( structure );
 
@@ -1536,7 +1575,7 @@
 
     .on( 'click', '.weetext-options-save', function( e ){
 
-        if( openFileID ){
+        if( openFileID.mime === 'text/html' ){
             saveFile();
         }else{
             createFile();
