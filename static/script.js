@@ -1017,6 +1017,20 @@
 
     };
 
+    var selectStart = function( node ){
+
+        var range = new $.Range( node );
+
+        if( !node.text().length ){
+            node.html('&nbsp;');//.addClass('empty-node');
+        }
+            
+        range.collapse( true );
+        
+        range.select();
+
+    };
+
     var selectEnd = function( node ){
 
         var range = new $.Range( node );
@@ -1114,6 +1128,8 @@
                     windowTitle( structure.name );
                     saveStatus( structure );
 
+                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
+
                     //requestCollaboration( structure );
 
                 });
@@ -1142,6 +1158,7 @@
                     renderInput( data.content, data.page );
                     windowTitle( structure.name );
                     saveStatus( structure );
+                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
 
                     //requestCollaboration( structure );
 
@@ -1162,6 +1179,8 @@
                     renderInput( data.content, data.page );
                     windowTitle( structure.name );
                     saveStatus( structure );
+
+                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
 
                     //requestCollaboration( structure );
 
@@ -1740,7 +1759,7 @@
 
     var paragraph = $( '.weetext-paper', zone ).first().find('p, li').last();
 
-    selectEnd( paragraph );
+    selectStart( paragraph );
 
     normalizeSelection();
     updateState( getSelectedTags( zone[ 0 ] ) );
