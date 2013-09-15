@@ -1,7 +1,7 @@
 
 .wz-win{
     
-    width: 21.6cm;
+    width: 21.3cm;
     height: 600px;
 
     background-image:-moz-linear-gradient(14% 0% -90deg,rgb(217,109,103) 0%,rgb(184,78,82) 39px,rgb(140,38,55) 90px,rgb(140,38,55) 100%); 
@@ -57,9 +57,9 @@
 
 .weetext-options-right{
     
-    height: 30px;
+    height: 22px;
     float: left;
-    padding: 11px 19px 9px;
+    padding: 15px 19px 13px;
     border-left: 1px solid #D0706F;
     
 }
@@ -189,45 +189,33 @@
     background-position: -106px -16px;
 }
 
-/*.wz-win-minimize, .wz-win-maximize, .wz-win-close{
-    height: 16px;
-    width: 14px;
-    padding: 6px 7px 4px;
-}*/
+.wz-win-minimize, .wz-win-maximize, .wz-win-close{
+    padding: 6px 6px 5px;
+}
 
-/*.wz-win-minimize:hover, .wz-win-maximize:hover, .wz-win-close:hover{
+.wz-win-minimize i, .wz-win-maximize i, .wz-win-close i{
+    width: 10px;
+    height: 9px;
+    display: block;
+    background: url('https://staticbeta.weezeel.com/app/7/nav.png') no-repeat;
+    background-size: 30px 9px;
+}
+
+.wz-win-minimize:hover, .wz-win-maximize:hover, .wz-win-close:hover{
     border: 1px solid #7B2F39;
-}*/
+}
 
-/*.wz-win-maximize i{
-    
-    width: 14px;
-    height: 16px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -124px 0;
-    background-size: 227px 33px;
-    
+.wz-win-maximize i{
+    background-position: -10px 0;
 }
 
 .wz-win-close i{
-    
-    width: 14px;
-    height: 16px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -153px 0;
-    background-size: 227px 33px;
-    
+    background-position: -20px 0;
 }
 
 .wz-win-minimize i{
-    
-    width: 15px;
-    height: 16px;
-    float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -138px 0;
-    background-size: 227px 33px;
-    
-}*/
+    background-position: 0 0;
+}
 
 .weetext-options-display{
     
@@ -266,11 +254,11 @@
 
 .weetext-paper-title-container{
     
-    width: 794px;
+    width: 793px;
     height: 50px;
     position: absolute;
     top: 50px;
-    left: 11px;
+    left: 6px;
     background: #FFF;
     border-radius: 3px 3px 0px 0px;
     
@@ -306,11 +294,11 @@
 
 .weetext-paper-top-shadow{
     
-    width: 794px;
+    width: 793px;
     height: 10px;
     position: absolute;
     top: 99px;
-    left: 11px;
+    left: 6px;
     background-image: -moz-linear-gradient(50% 0% -90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%); 
     background-image: -webkit-linear-gradient(-90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
     background-image: -o-linear-gradient(-90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
@@ -342,11 +330,11 @@
 
 .weetext-paper-bottom-shadow{
     
-    width: 794px;
+    width: 793px;
     height: 10px;
     position: absolute;
     bottom: 21px;
-    left: 11px;
+    left: 6px;
     background-image: -moz-linear-gradient(50% 0% -90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%); 
     background-image: -webkit-linear-gradient(-90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
     background-image: -o-linear-gradient(-90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
@@ -356,40 +344,40 @@
 
 .weetext-paper-footer{
     
-    height: 18px;
+    height: 7px;
     position: absolute;
-    bottom: 3px;
-    left: 11px;
+    bottom: 9px;
+    left: 6px;
 
 }
 
 .weetext-paper-footer-left{
     
     float: left;
-    width: 7px;
-    height: 18px;
-    background: url('https://static.weezeel.com/app/7/footer-left.png') no-repeat;
-    background-size: 7px 18px;
+    width: 3px;
+    height: 7px;
+    background: url('https://staticbeta.weezeel.com/app/7/border.png') no-repeat;
+    background-size: 6px 7px;
     
 }
 
 .weetext-paper-footer-middle{
     
     float: left;
-    width: 780px;
-    height: 18px;
-    background: url('https://static.weezeel.com/app/7/footer-middle.png');
-    background-size: 1px 18px;
+    width: 787px;
+    height: 7px;
+    background: url('https://staticbeta.weezeel.com/app/7/middle.png') repeat-x;
+    background-size: 1px 7px;
     
 }
 
 .weetext-paper-footer-right{
     
     float: left;
-    width: 7px;
-    height: 18px;
-    background: url('https://static.weezeel.com/app/7/footer-right.png') no-repeat;
-    background-size: 7px 18px;
+    width: 3px;
+    height: 7px;
+    background: url('https://staticbeta.weezeel.com/app/7/border.png') no-repeat -3px 0;
+    background-size: 6px 7px;
     
 }
 
