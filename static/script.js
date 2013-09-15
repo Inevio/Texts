@@ -1122,6 +1122,7 @@
                 
                 (
                     structure.mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                    structure.mime === 'application/vnd.oasis.opendocument.text' ||
                     structure.mime === 'application/msword' ||
                     structure.mime === 'text/rtf'
                 ) && structure.formats.html
