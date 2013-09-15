@@ -288,6 +288,19 @@
 
         },
 
+        compare : function( firstText, secondText, full ){
+
+            if( full ){
+                return firstText === secondText;
+            }
+
+            firstText  = $( '<div></div>' ).append( $( firstText ).filter( '#content, #page' ) ).html();
+            secondText = $( '<div></div>' ).append( $( secondText ).filter( '#content, #page' ) ).html();
+
+            return firstText === secondText;
+
+        },
+
         parse : {
 
             txt : function( text ){
@@ -922,10 +935,6 @@
         title.text( text );
     };
 
-    var extractText = function(){
-        return $.trim( $( '.weetext-paper', zone ).html() );
-    };
-
     var saveFile = function( callback ){
 
         wz.structure( openFileID.id, function( error, structure ){
@@ -936,7 +945,7 @@
                 return false;
             }
 
-            var text = extractText();
+            var text = fn.save();
 
             structure.write( text, function( error ){
 
@@ -1075,7 +1084,7 @@
 
         // File Info
         openFileID     = structure;
-        openFileText   = extractText();
+        openFileText   = fn.save();
         openFileLength = openFileText.length;
 
     };
@@ -1402,9 +1411,9 @@
 
         e.stopPropagation();
 
-        var text = extractText();
+        var text = fn.save();
 
-        if( text.length === openFileLength && text === openFileText ){
+        if( text.length === openFileLength && fn.compare( text, openFileText ) ){
             wz.app.closeWindow( win.data('win') );
             return false;
         }
@@ -1413,7 +1422,7 @@
 
             if( answer ){
 
-                if( openFileID ){
+                if( openFileID.mime === 'text/html' ){
 
                     saveFile( function(){
                         wz.app.closeWindow( win.data('win') );
@@ -1736,4 +1745,4 @@
     updateState( getSelectedTags( zone[ 0 ] ) );
 
     // Save status
-    saveStatus( null );
+    //saveStatus( null );
