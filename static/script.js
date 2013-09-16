@@ -1442,7 +1442,7 @@
 
             if( answer ){
 
-                if( openFileID.mime === 'text/html' ){
+                if( openFileID && openFileID.mime === 'text/html' ){
 
                     saveFile( function(){
                         wz.app.closeWindow( win.data('win') );
@@ -1604,7 +1604,7 @@
 
     .on( 'click', '.weetext-options-save', function( e ){
 
-        if( openFileID.mime === 'text/html' ){
+        if( openFileID && openFileID.mime === 'text/html' ){
             saveFile();
         }else{
             createFile();
