@@ -1,10 +1,10 @@
 
 {
-	
-	"severalFonts" : "(diversas fuentes)",
-	"fileSaved" : "ha sido guardado",
-	"newName" : "Nuevo nombre del archivo",
-	"saveChanges" : "¿Quieres guardar los cambios?",
-	"notWorking" : "Lo siento pero esta funcionalidad todavía no está implementada"
+    
+    "severalFonts" : "(diversas fuentes)",
+    "fileSaved" : "ha sido guardado",
+    "newName" : "Nuevo nombre del archivo",
+    "saveChanges" : "¿Quieres guardar los cambios?",
+    "notWorking" : "Lo siento pero esta funcionalidad todavía no está implementada"
 
 }

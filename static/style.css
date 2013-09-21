@@ -110,15 +110,15 @@
 }
 
 .button-color-indicator{
-	width: 15px;
-	height: 15px;
-	float: left;
-	border-radius: 3px;
-	background: #009;
+    width: 15px;
+    height: 15px;
+    float: left;
+    border-radius: 3px;
+    background: #009;
 }
 
 .button-bold i{
-	width: 13px;
+    width: 13px;
     background-position: -182px 0;
 }
 
@@ -127,7 +127,7 @@
 }
 
 .button-italic i{
-	width: 12px;
+    width: 12px;
     background-position: -195px 0;
 }
 
@@ -136,7 +136,7 @@
 }
 
 .button-underline i{
-	width: 13px;
+    width: 13px;
     background-position: -207px 0;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .button-align-left i{
-	width: 14px;
+    width: 14px;
     background-position: -64px 0;
 }
 
@@ -154,7 +154,7 @@
 }
 
 .button-align-center i{
-	width: 14px;
+    width: 14px;
     background-position: -92px 0;
 }
 
@@ -163,7 +163,7 @@
 }
 
 .button-align-right i{
-	width: 14px;
+    width: 14px;
     background-position: -78px 0;
 }
 
@@ -172,7 +172,7 @@
 }
 
 .button-align-justify i{
-	width: 14px;
+    width: 14px;
     background-position: -50px 0;
 }
 
@@ -572,9 +572,9 @@
 
 .weetext-color{
     width: 150px;
-	height: 88px;
-	background: #404040;
-	border-radius: 3px;
+    height: 88px;
+    background: #404040;
+    border-radius: 3px;
     position: absolute;
     top: 43px;
     left: 264px;
@@ -602,172 +602,172 @@
 }
 
 .table-container{
-	border-radius: 2px;
-	float: left;
-	margin: 4px 12px 12px 12px;
-	overflow: hidden;
-	border-top: 1px solid #050505;
-	border-bottom: 1px solid #535353;
+    border-radius: 2px;
+    float: left;
+    margin: 4px 12px 12px 12px;
+    overflow: hidden;
+    border-top: 1px solid #050505;
+    border-bottom: 1px solid #535353;
 }
 
 td{
-	width: 21px;
-	height: 21px;
+    width: 21px;
+    height: 21px;
 }
 
 tr:nth-child(1) td:nth-child(1){
-	background: #2D035B;
+    background: #2D035B;
 }
 
 tr:nth-child(1) td:nth-child(2){
-	background: #6B5389;
+    background: #6B5389;
 }
 
 tr:nth-child(1) td:nth-child(3){
-	background: #BD1749;
+    background: #BD1749;
 }
 
 tr:nth-child(1) td:nth-child(4){
-	background: #E43D60;
+    background: #E43D60;
 }
 
 tr:nth-child(1) td:nth-child(5){
-	background: #F8A79B;
+    background: #F8A79B;
 }
 
 tr:nth-child(1) td:nth-child(6){
-	background: #F5920B;
+    background: #F5920B;
 }
 
 tr:nth-child(2) td:nth-child(1){
-	background: #15ABD9;
+    background: #15ABD9;
 }
 
 tr:nth-child(2) td:nth-child(2){
-	background: #0877A8;
+    background: #0877A8;
 }
 
 tr:nth-child(2) td:nth-child(3){
-	background: #0F6A4E;
+    background: #0F6A4E;
 }
 
 tr:nth-child(2) td:nth-child(4){
-	background: #47B769;
+    background: #47B769;
 }
 
 tr:nth-child(2) td:nth-child(5){
-	background: #A4CE3F;
+    background: #A4CE3F;
 }
 
 tr:nth-child(2) td:nth-child(6){
-	background: #FFD000;
+    background: #FFD000;
 }
 
 tr:nth-child(3) td:nth-child(1){
-	background: #000000;
+    background: #000000;
 }
 
 tr:nth-child(3) td:nth-child(2){
-	background: #363636;
+    background: #363636;
 }
 
 tr:nth-child(3) td:nth-child(3){
-	background: #636363;
+    background: #636363;
 }
 
 tr:nth-child(3) td:nth-child(4){
-	background: #B7B7B7;
+    background: #B7B7B7;
 }
 
 tr:nth-child(3) td:nth-child(5){
-	background: #D7D7D7;
+    background: #D7D7D7;
 }
 
 tr:nth-child(3) td:nth-child(6){
-	background: #FFFFFF;
+    background: #FFFFFF;
 }
 
 .weetext-hex{
-	width: 126px;
-	height: 21px;
-	background: #171717;
-	float: left;
-	padding-top: 3px;
-	margin: 0px 12px 12px 12px;
-	border-radius: 2px;
-	overflow: hidden;
-	border-top: 1px solid #050505;
-	border-bottom: 1px solid #535353;
-	text-align: center;
+    width: 126px;
+    height: 21px;
+    background: #171717;
+    float: left;
+    padding-top: 3px;
+    margin: 0px 12px 12px 12px;
+    border-radius: 2px;
+    overflow: hidden;
+    border-top: 1px solid #050505;
+    border-bottom: 1px solid #535353;
+    text-align: center;
 }
 
 .weetext-hex span{
-	color: #04397B;
-	font-size: 14px;
-	display: inline-block;
-	margin-right: 4px;
+    color: #04397B;
+    font-size: 14px;
+    display: inline-block;
+    margin-right: 4px;
 }
 
 .weetext-hex input{
-	max-width: 50px;
-	background: none;
-	color: #D3D3D3;
-	font-size: 14px;
-	display: inline-block;
+    max-width: 50px;
+    background: none;
+    color: #D3D3D3;
+    font-size: 14px;
+    display: inline-block;
 }
 
 .weetext-map{
-	background: #f00;
-	float: left;
-	margin: 0px 12px 12px 12px;
-	border-radius: 2px;
-	overflow: hidden;
-	border-top: 1px solid #050505;
-	border-bottom: 1px solid #535353;
-	position: relative;
+    background: #f00;
+    float: left;
+    margin: 0px 12px 12px 12px;
+    border-radius: 2px;
+    overflow: hidden;
+    border-top: 1px solid #050505;
+    border-bottom: 1px solid #535353;
+    position: relative;
 }
 
 .weetext-map figure{
-	width: 126px;
-	height: 160px;
-	background: url('https://static.weezeel.com/app/7/map.png') no-repeat;
+    width: 126px;
+    height: 160px;
+    background: url('https://static.weezeel.com/app/7/map.png') no-repeat;
     background-size: 126px 160px;
 }
 
 .weetext-map i{
     top: -9px;
     left: -9px;
-	width: 18px;
-	height: 18px;
-	background: url('https://static.weezeel.com/app/7/color.png') no-repeat -126px 0px;
+    width: 18px;
+    height: 18px;
+    background: url('https://static.weezeel.com/app/7/color.png') no-repeat -126px 0px;
     background-size: 157px 25px;
-	position: absolute;
+    position: absolute;
 }
 
 .weetext-rainbow{
-	float: left;
-	margin: 0px 12px 12px 12px;
-	border-radius: 2px;
-	border-top: 1px solid #050505;
-	border-bottom: 1px solid #535353;
-	position: relative;
+    float: left;
+    margin: 0px 12px 12px 12px;
+    border-radius: 2px;
+    border-top: 1px solid #050505;
+    border-bottom: 1px solid #535353;
+    position: relative;
 }
 
 .weetext-rainbow figure{
-	width: 126px;
-	height: 25px;
-	background: url('https://static.weezeel.com/app/7/color.png') no-repeat 0px 0px;
+    width: 126px;
+    height: 25px;
+    background: url('https://static.weezeel.com/app/7/color.png') no-repeat 0px 0px;
     background-size: 157px 25px;
 }
 
 .weetext-rainbow i{
-	width: 13px;
-	height: 9px;
-	background: url('https://static.weezeel.com/app/7/color.png') no-repeat -144px 0px;
+    width: 13px;
+    height: 9px;
+    background: url('https://static.weezeel.com/app/7/color.png') no-repeat -144px 0px;
     background-size: 157px 25px;
-	position: absolute;
-	top: -2px;
-	left: 80px;
+    position: absolute;
+    top: -2px;
+    left: 80px;
 }
 
 .weetext-remote-carret{
