@@ -1,4 +1,7 @@
     
+    // App = This
+    var app = this;
+
     // Cache Elements
     var zone  = $( '.weetext-paper-zone', win );
     var menu  = $( '.stupid-container', win );
@@ -70,7 +73,7 @@
 
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-left' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-left' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'left'
 
@@ -80,7 +83,7 @@
 
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-center' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-center' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'center'
 
@@ -90,7 +93,7 @@
 
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-right' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-right' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'right'
 
@@ -100,7 +103,7 @@
             
             css   : 'text-align',
             scope : 'block',
-            check : function( item ){ return toggle[ 'align-justify' ].on === commonAlign( item );},
+            check : function( item ){ return toggle[ 'align-justify' ].on === fn.common.align( item );},
             off   : 'left',
             on    : 'justify'
 
@@ -135,6 +138,267 @@
 
     ];
 
+    // Modules
+    var fn = {
+
+        common : {
+
+            align : function( input ){
+                
+                /*
+                 *
+                 * Alineación común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un string con la alineación común
+                 * - Un objeto null si no hay alineación común
+                 *
+                 */
+
+                var first = input.first();
+                var value = input.css('text-align');
+                
+                input = input.not(first);
+
+                input.each( function(){
+                    
+                    if( $( this ).css('text-align') !== value ){
+                        value = false;
+                        return false;
+                    }
+                    
+                });
+                
+                if( value ){
+                    return value;
+                }else{
+                    return null;
+                }
+            
+            },
+
+            font : function( input ){
+
+                /*
+                 *
+                 * Tipo de letra común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un string con la familia común
+                 * - Un objeto null si no hay familia común
+                 *
+                 */
+                
+                var first = input.first();
+                var value = input.css('font-family');
+                
+                input = input.not(first);
+
+                input.each( function(){
+                    
+                    if( $( this ).css('font-family') !== value ){
+                        value = false;
+                        return false;
+                    }
+                    
+                });
+                
+                if( value ){
+                    return $.trim( value.split( ',', 1 )[ 0 ] ).replace( /"|'*/mg, '' );
+                }else{
+                    return null;
+                }
+                
+            },
+
+            parent : function( input ){
+
+                /*
+                 *
+                 * Padre común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un string con el padre común
+                 * - Un objeto null si no hay padre común
+                 *
+                 */
+
+                var p  = input.closest('p');
+                var li = input.closest('li');
+
+                if( p.size() && li.size() === 0 ){
+                    return 'p';
+                }else if( li.size() && p.size() === 0 ){
+                    return 'li';
+                }else{
+                    return null;
+                }
+             
+            },
+
+            size : function( input ){
+
+                /*
+                 *
+                 * Tamaño común entre todos los nodos que se pasan como parámetro
+                 * 
+                 * Entrada
+                 * - Objeto jQuery
+                 *
+                 * Salida
+                 * Dos posibles valores
+                 * - Un entero con el tamaño común
+                 * - Un objeto null si no hay tamaño común
+                 *
+                 */
+
+                var first = input.first();
+                var value = parseInt( first.css('font-size'), 10 );
+                
+                input = input.not( first );
+
+                input.each( function(){
+                    
+                    if( parseInt( $( this ).css('font-size'), 10 ) !== value ){
+                        value = false;
+                        return false;
+                    }
+                    
+                });
+                
+                if( value ){
+                    return value;
+                }else{
+                    return null;
+                }
+
+            }
+
+        },
+
+        compare : function( firstText, secondText, full ){
+
+            if( full ){
+                return firstText === secondText;
+            }
+
+            firstText  = $( '<div></div>' ).append( $( firstText ).filter( '#content, #page' ) ).html();
+            secondText = $( '<div></div>' ).append( $( secondText ).filter( '#content, #page' ) ).html();
+
+            return firstText === secondText;
+
+        },
+
+        parse : {
+
+            txt : function( text ){
+
+                var parent   = $('div');
+                var paragraf = text.split( /(\r\n|\n\r|\r|\n)/g );
+                
+                for( var i = 0; i < paragraf.length; i++ ) {
+                    parent.append( $('<p></p>').text( paragraf[ i ] ) );
+                }
+
+                return { content : parent.html() };
+
+            },
+
+            weeDoc : function( data ){
+
+                data = $( data );
+                
+                // To Do -> Comprobación de metas
+                // To Do -> Personalización de página
+
+                if( !data.filter('meta[name="application-name"][content="weeDoc"]').length ){
+                    throw 'FILE IS NOT A WEEDOC';
+                }
+
+                var page  = data.filter('#page').children().first().attr('style').split(/;\s*/g);
+                var style = {};
+                var css   = {};
+                var tmp   = null;
+
+                for( var i in page ){
+
+                    tmp = page[ i ].split(/\s*:\s*/ );
+
+                    style[ tmp[ 0 ] ] = tmp[ 1 ];
+
+                }
+
+                if( style[ 'margin-top' ] ){
+                    css[ 'padding-top' ] = style[ 'margin-top' ];
+                }
+
+                if( style[ 'margin-left' ] ){
+                    css[ 'padding-left' ] = style[ 'margin-left' ];
+                }
+
+                if( style[ 'margin-bottom' ] ){
+                    css[ 'padding-bottom' ] = style[ 'margin-bottom' ];
+                }
+
+                if( style[ 'margin-right' ] ){
+                    css[ 'padding-right' ] = style[ 'margin-right' ];
+                }
+
+                return { content : data.filter('#content').html(), page : css };
+
+            }
+
+        },
+
+        save : function(){
+
+            var content = '';
+
+            zone.find('.weetext-paper').each( function(){
+                content += $( this ).html();
+            });
+
+            var page  = zone.find('.weetext-paper').first().attr('style');
+            var style = {};
+
+            if( page ){
+
+                page = page.split(/;\s*/g);
+
+                var tmp = null;
+
+                for( var i in page ){
+
+                    tmp = page[ i ].split(/\s*:\s*/ );
+
+                    style[ tmp[ 0 ] ] = tmp[ 1 ];
+
+                }
+
+            }else{
+
+            }
+
+            // To Do -> Save file
+
+            return app.createWeeDoc( {}, content, style );
+
+        }
+
+    };
+
     // Functions
     /*
      * (void) updateState((mixed) input)
@@ -144,8 +408,8 @@
         
         input = $(input);
 
-        var font = commonFont( input );
-        var size = Math.round( parseFloat( wz.tool.pixelsToPoints( commonSize( input ) ) ) );
+        var font = fn.common.font( input );
+        var size = Math.round( parseFloat( wz.tool.pixelsToPoints( fn.common.size( input ) ) ) );
         
         $( '.button-typo span', menu ).text( ( font === null ) ? lang.severalFonts : font );
         $( '.button-size span', menu ).text( isNaN( size ) ? '--' : size + 'pt' );
@@ -186,8 +450,8 @@
                 
         }
         
-        var align = commonAlign( input );
-        var list  = commonParent( input );
+        var align = fn.common.align( input );
+        var list  = fn.common.parent( input );
 
         if(align === null){
             $('.button-align',menu).removeClass('active');
@@ -219,79 +483,6 @@
             $('.button-underline',menu).removeClass('active');
         }
         
-    };
-
-    /*
-     * (mixed) commonFont((jQuery) input)
-     * Determina si un conjunto de elementos tienen la misma familia de fuente.
-     */
-    var commonFont = function( input ){
-        
-        var first = input.first();
-        var value = input.css('font-family');
-        
-        input = input.not(first);
-        input.each(function(){
-            
-            if($(this).css('font-family') !== value){
-                
-                value = false;
-                return false;
-                
-            }
-            
-        });
-        
-        if(value === false){
-            return null;
-        }else{
-            return $.trim(value.split(',',1)[0]).replace(/"|'*/mg,'');
-        }
-        
-    };
-
-    /*
-     * (mixed) commonAlign((jQuery) input)
-     * Determina si un conjunto de elementos tienen la misma alineación.
-     */
-    var commonAlign = function( input ){
-        
-        var first = input.first();
-        var value = input.css('text-align');
-        
-        input = input.not(first);
-        input.each(function(){
-            
-            if($(this).css('text-align') !== value){
-                
-                value = false;
-                return false;
-                
-            }
-            
-        });
-        
-        if(value === false){
-            return null;
-        }else{
-            return value;
-        }
-        
-    };
-
-    var commonParent = function(input){
-
-        var p  = input.closest('p');
-        var li = input.closest('li');
-
-        if( p.size() && li.size() === 0 ){
-            return 'p';
-        }else if( li.size() && p.size() === 0 ){
-            return 'li';
-        }else{
-            return null;
-        }
-         
     };
 
     /*
@@ -397,36 +588,7 @@
         }
         
     };
-
-    /*
-     * (mixed) commonSize((jQuery) input)
-     * Determina si un conjunto de elementos tienen el mismo tamaño de fuente.
-     */
-    var commonSize = function( input ){
-        
-        var first = input.first();
-        var value = parseInt( input.css('font-size'), 10 );
-        
-        input = input.not( first );
-        input.each( function(){
-            
-            if( parseInt( $(this).css('font-size'), 10 ) !== value){
-                
-                value = false;
-                return false;
-                
-            }
-            
-        });
-        
-        if( value === false ){
-            return null;
-        }else{
-            return value;
-        }
-        
-    };
-
+    
     /*
      * (void) normalizeSelection()
      * Normaliza los tags seleccionados, muy útil cuando los rangos son simples
@@ -711,12 +873,14 @@
      * (void) renderInput( (string) data)
      * Inserta el código indicado en las páginas
      */
-    var renderInput = function( data ){
+    var renderInput = function( data, pageConfig ){
+
+        paper.css( pageConfig );
 
         var height    = paper.height();
         var tmpHeight = height;
         var newPaper  = paper.clone().empty();
-        var nowPaper  = paper.empty().html('<!-- weedoc -->');
+        var nowPaper  = paper.empty();
         var tmpPaper  = $();
         var items     = [];
 
@@ -771,13 +935,9 @@
         title.text( text );
     };
 
-    var extractText = function(){
-        return $.trim( $( '.weetext-paper', zone ).html() );
-    };
-
     var saveFile = function( callback ){
 
-        wz.structure( openFileID, function( error, structure ){
+        wz.structure( openFileID.id, function( error, structure ){
 
             // To Do -> Error
             if( error ){
@@ -785,7 +945,7 @@
                 return false;
             }
 
-            var text = extractText();
+            var text = fn.save();
 
             structure.write( text, function( error ){
 
@@ -823,21 +983,21 @@
                 return false;
             }
 
-            var text = extractText();
+            var text = fn.save();
 
             wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
 
                 if( error ){
 
                     alert( error, function(){
-                        createFile();
+                        createFile( callback );
                     }, win.data().win );
                     
                     return false;
 
                 }
 
-                openFileID     = structure.id;
+                openFileID     = structure;
                 openFileText   = text;
                 openFileLength = openFileText.length;
 
@@ -854,6 +1014,20 @@
             });
 
         }, win.data().win );
+
+    };
+
+    var selectStart = function( node ){
+
+        var range = new $.Range( node );
+
+        if( !node.text().length ){
+            node.html('&nbsp;');//.addClass('empty-node');
+        }
+            
+        range.collapse( true );
+        
+        range.select();
 
     };
 
@@ -920,11 +1094,11 @@
 
     };
 
-    var saveStatus = function( id ){
+    var saveStatus = function( structure ){
 
         // File Info
-        openFileID     = id;
-        openFileText   = extractText();
+        openFileID     = structure;
+        openFileText   = fn.save();
         openFileLength = openFileText.length;
 
     };
@@ -940,27 +1114,82 @@
     };
 
     var openFile = function( id ){
-        
+
         wz.structure( id, function( error, structure ){
-            
-            structure.read( function( error, data ){
 
-                var comment = $( data ).first()[ 0 ];
+            if( structure.mime === 'text/plain' ){
 
-                if( comment.nodeName !== '#comment' || comment.nodeValue !== ' weedoc ' ){
-                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
-                    return false;
-                }
+                structure.read( function( error, data ){
+                    
+                    // To Do -> Error
+                    data = fn.parse.txt( data );
 
-                renderInput( data );
-                windowTitle( structure.name );
+                    renderInput( data.content, data.page );
+                    windowTitle( structure.name );
+                    saveStatus( structure );
 
-                saveStatus( structure.id );
+                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
 
-                requestCollaboration( structure );
+                    //requestCollaboration( structure );
 
-            });
+                });
 
+            }else if(
+                
+                (
+                    structure.mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                    structure.mime === 'application/vnd.oasis.opendocument.text' ||
+                    structure.mime === 'application/msword' ||
+                    structure.mime === 'text/rtf'
+                ) && structure.formats.html
+
+            ){
+                
+                structure.formats.html.read( function( error, data ){                    
+
+                    // To Do -> Error
+                    try{
+                        data = fn.parse.weeDoc( data );
+                    }catch( e ){
+                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                        return false;
+                    }
+
+                    renderInput( data.content, data.page );
+                    windowTitle( structure.name );
+                    saveStatus( structure );
+                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
+
+                    //requestCollaboration( structure );
+
+                });
+
+            }else if( structure.mime === 'text/html' ){
+
+                structure.read( function( error, data ){                    
+
+                    // To Do -> Error
+                    try{
+                        data = fn.parse.weeDoc( data );
+                    }catch( e ){
+                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                        return false;
+                    }
+
+                    renderInput( data.content, data.page );
+                    windowTitle( structure.name );
+                    saveStatus( structure );
+
+                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
+
+                    //requestCollaboration( structure );
+
+                });
+
+            }else{
+                alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+            }
+        
         });
 
     };
@@ -1202,9 +1431,9 @@
 
         e.stopPropagation();
 
-        var text = extractText();
+        var text = fn.save();
 
-        if( text.length === openFileLength && text === openFileText ){
+        if( text.length === openFileLength && fn.compare( text, openFileText ) ){
             wz.app.closeWindow( win.data('win') );
             return false;
         }
@@ -1213,7 +1442,7 @@
 
             if( answer ){
 
-                if( openFileID ){
+                if( openFileID && openFileID.mime === 'text/html' ){
 
                     saveFile( function(){
                         wz.app.closeWindow( win.data('win') );
@@ -1335,6 +1564,10 @@
             collaborationSurroundedText( mes.childrenIndex, mes.text );
         }
 
+    })
+
+    .on( 'mousedown', 'menu', function( e ){
+        e.preventDefault();
     });
 
     typoMenu
@@ -1371,7 +1604,7 @@
 
     .on( 'click', '.weetext-options-save', function( e ){
 
-        if( openFileID ){
+        if( openFileID && openFileID.mime === 'text/html' ){
             saveFile();
         }else{
             createFile();
@@ -1526,10 +1759,10 @@
 
     var paragraph = $( '.weetext-paper', zone ).first().find('p, li').last();
 
-    selectEnd( paragraph );
+    selectStart( paragraph );
 
     normalizeSelection();
     updateState( getSelectedTags( zone[ 0 ] ) );
 
     // Save status
-    saveStatus( null );
+    //saveStatus( null );
