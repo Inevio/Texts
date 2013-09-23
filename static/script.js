@@ -1124,6 +1124,8 @@
                     // To Do -> Error
                     data = fn.parse.txt( data );
 
+                    data.page = {};
+
                     renderInput( data.content, data.page );
                     windowTitle( structure.name );
                     saveStatus( structure );
