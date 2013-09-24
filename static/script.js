@@ -305,11 +305,18 @@
 
             txt : function( text ){
 
-                var parent   = $('div');
-                var paragraf = text.split( /(\r\n|\n\r|\r|\n)/g );
-                
+                var parent   = $('<div></div>');
+                var paragraf = text.split( /\r?\n/ );
+
                 for( var i = 0; i < paragraf.length; i++ ) {
-                    parent.append( $('<p></p>').text( paragraf[ i ] ) );
+
+                    if( paragraf[ i ] ){
+                        parent.append( $('<p></p>').text( paragraf[ i ] ) );
+                    }else{
+                        parent.append( $('<p></p>').html( '&nbsp;' ) );
+                    }
+                    
+
                 }
 
                 return { content : parent.html() };
