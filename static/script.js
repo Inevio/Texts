@@ -1769,5 +1769,10 @@
     normalizeSelection();
     updateState( getSelectedTags( zone[ 0 ] ) );
 
+    // Default state
+    var openFileID     = null;
+    var openFileText   = fn.save();
+    var openFileLength = openFileText.length;
+
     // Save status
-    //saveStatus( null );
+    //saveStatus( null ); // To Do -> Ver que es esto
