@@ -990,7 +990,12 @@
                 return false;
             }
 
-            var text = fn.save();
+            var text    = fn.save();
+            var tmpName = name.split('.');
+
+            if( tmpName[ tmpName.length - 1 ] !== 'html' ){
+                name = name + '.html';
+            }
 
             wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
 
@@ -1773,5 +1778,10 @@
     normalizeSelection();
     updateState( getSelectedTags( zone[ 0 ] ) );
 
+    // Default state
+    var openFileID     = null;
+    var openFileText   = fn.save();
+    var openFileLength = openFileText.length;
+
     // Save status
-    //saveStatus( null );
+    //saveStatus( null ); // To Do -> Ver que es esto
