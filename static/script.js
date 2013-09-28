@@ -983,7 +983,12 @@
                 return false;
             }
 
-            var text = fn.save();
+            var text    = fn.save();
+            var tmpName = name.split('.');
+
+            if( tmpName[ tmpName.length - 1 ] !== 'html' ){
+                name = name + '.html';
+            }
 
             wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
 
