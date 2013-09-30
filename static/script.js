@@ -1762,6 +1762,27 @@
             collaborationSendAddLetter( childrenIndex, selStart, letter, tag.html() );
         }
 
+        var page    = allTags.closest('.weetext-paper');
+        var current = allTags.closest('p, li');
+        var rows    = current.prevAll('p, li').add( current );
+        var top     = 0;
+
+        rows.each( function(){
+            top += $(this).outerHeight( true );
+        });
+
+        if( top > page.height() ){
+
+            if( !page.next('.weetext-paper').length ){
+                page.after( paper.clone().empty() );
+            }
+
+            current.appendTo( page.next('.weetext-paper') );
+
+            normalizeSelection();
+
+        }
+
     });
 
     // Create Menus
