@@ -1767,19 +1767,34 @@
         var rows    = current.prevAll('p, li').add( current );
         var top     = 0;
 
-        rows.each( function(){
-            top += $(this).outerHeight( true );
-        });
+        if( current.length && e.which !== 8 ){
 
-        if( top > page.height() ){
+            rows.each( function(){
+                top += $(this).outerHeight( true );
+            });
 
-            if( !page.next('.weetext-paper').length ){
-                page.after( paper.clone().empty() );
+            if( top > page.height() ){
+
+                if( !page.next('.weetext-paper').length ){
+                    page.after( paper.clone().empty() );
+                }
+
+                current.appendTo( page.next('.weetext-paper') );
+
+                selectEnd( current );
+
             }
 
-            current.appendTo( page.next('.weetext-paper') );
+        }else{
 
-            normalizeSelection();
+            var prev = page.prev('.weetext-paper');
+
+            if( prev.length ){
+
+                page.remove();
+                selectEnd( prev.children('p, li').last() );
+
+            }
 
         }
 
