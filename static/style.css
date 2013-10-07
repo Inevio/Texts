@@ -197,7 +197,7 @@
     width: 10px;
     height: 9px;
     display: block;
-    background: url('https://staticbeta.weezeel.com/app/7/nav.png') no-repeat;
+    background: url('https://static.weezeel.com/app/7/nav.png') no-repeat;
     background-size: 30px 9px;
 }
 
@@ -356,7 +356,7 @@
     float: left;
     width: 3px;
     height: 7px;
-    background: url('https://staticbeta.weezeel.com/app/7/border.png') no-repeat;
+    background: url('https://static.weezeel.com/app/7/border.png') no-repeat;
     background-size: 6px 7px;
     
 }
@@ -366,7 +366,7 @@
     float: left;
     width: 787px;
     height: 7px;
-    background: url('https://staticbeta.weezeel.com/app/7/middle.png') repeat-x;
+    background: url('https://static.weezeel.com/app/7/middle.png') repeat-x;
     background-size: 1px 7px;
     
 }
@@ -376,7 +376,7 @@
     float: left;
     width: 3px;
     height: 7px;
-    background: url('https://staticbeta.weezeel.com/app/7/border.png') no-repeat -3px 0;
+    background: url('https://static.weezeel.com/app/7/border.png') no-repeat -3px 0;
     background-size: 6px 7px;
     
 }
