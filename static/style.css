@@ -68,7 +68,7 @@
     
     height: 16px;
     float: left;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat;
+    background: url('@static/sprite.png') no-repeat;
     background-size: 227px 33px;
     
 }
@@ -197,7 +197,7 @@
     width: 10px;
     height: 9px;
     display: block;
-    background: url('https://static.weezeel.com/app/7/nav.png') no-repeat;
+    background: url('@static/nav.png') no-repeat;
     background-size: 30px 9px;
 }
 
@@ -233,7 +233,7 @@
     float: left;
     margin-left: 1px;
     margin-top: 7px;
-    background: url('https://static.weezeel.com/app/7/sprite.png') no-repeat -220px 0;
+    background: url('@static/sprite.png') no-repeat -220px 0;
     background-size: 227px 33px;
     
 }
@@ -280,7 +280,7 @@
     width: 9px;
     height: 11px;
     display: inline-block;
-    background: url('https://static.weezeel.com/app/7/title-icon.png') no-repeat;
+    background: url('@static/title-icon.png') no-repeat;
     background-size: 9px 11px;
 }
 
@@ -356,7 +356,7 @@
     float: left;
     width: 3px;
     height: 7px;
-    background: url('https://static.weezeel.com/app/7/border.png') no-repeat;
+    background: url('@static/border.png') no-repeat;
     background-size: 6px 7px;
     
 }
@@ -366,7 +366,7 @@
     float: left;
     width: 787px;
     height: 7px;
-    background: url('https://static.weezeel.com/app/7/middle.png') repeat-x;
+    background: url('@static/middle.png') repeat-x;
     background-size: 1px 7px;
     
 }
@@ -376,7 +376,7 @@
     float: left;
     width: 3px;
     height: 7px;
-    background: url('https://static.weezeel.com/app/7/border.png') no-repeat -3px 0;
+    background: url('@static/border.png') no-repeat -3px 0;
     background-size: 6px 7px;
     
 }
@@ -403,7 +403,7 @@
     float: left;
     width: 16px;
     height: 7px;
-    background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    background: url('@static/sort.png') no-repeat;
     background-size: 15px 6px;
     content: '';
     
@@ -456,7 +456,7 @@
 }
 
 .weetext-typo li.active i{
-    background: url('https://static.weezeel.com/app/7/tick.png') no-repeat;
+    background: url('@static/tick.png') no-repeat;
     background-size: 10px 8px;
 
 }
@@ -492,7 +492,7 @@
     float: left;
     width: 16px;
     height: 7px;
-    background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    background: url('@static/sort.png') no-repeat;
     background-size: 15px 6px;
     content: '';
     
@@ -545,7 +545,7 @@
 }
 
 .weetext-size li.active i{
-    background: url('https://static.weezeel.com/app/7/tick.png') no-repeat;
+    background: url('@static/tick.png') no-repeat;
     background-size: 10px 8px;
 }
 
@@ -583,7 +583,7 @@
     float: left;
     width: 16px;
     height: 7px;
-    background: url('https://static.weezeel.com/app/7/sort.png') no-repeat;
+    background: url('@static/sort.png') no-repeat;
     background-size: 15px 6px;
     content: '';
     
@@ -718,7 +718,7 @@ tr:nth-child(3) td:nth-child(6){
 .weetext-map figure{
     width: 126px;
     height: 160px;
-    background: url('https://static.weezeel.com/app/7/map.png') no-repeat;
+    background: url('@static/map.png') no-repeat;
     background-size: 126px 160px;
 }
 
@@ -727,7 +727,7 @@ tr:nth-child(3) td:nth-child(6){
     left: -9px;
     width: 18px;
     height: 18px;
-    background: url('https://static.weezeel.com/app/7/color.png') no-repeat -126px 0px;
+    background: url('@static/color.png') no-repeat -126px 0px;
     background-size: 157px 25px;
     position: absolute;
 }
@@ -744,14 +744,14 @@ tr:nth-child(3) td:nth-child(6){
 .weetext-rainbow figure{
     width: 126px;
     height: 25px;
-    background: url('https://static.weezeel.com/app/7/color.png') no-repeat 0px 0px;
+    background: url('@static/color.png') no-repeat 0px 0px;
     background-size: 157px 25px;
 }
 
 .weetext-rainbow i{
     width: 13px;
     height: 9px;
-    background: url('https://static.weezeel.com/app/7/color.png') no-repeat -144px 0px;
+    background: url('@static/color.png') no-repeat -144px 0px;
     background-size: 157px 25px;
     position: absolute;
     top: -2px;
