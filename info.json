@@ -3,10 +3,8 @@
 
     "name"    : "weeText",
     "version" : "1.0",
-    "state"   : "beta",
-
-    "developer" : "wz",
-    "authKey"   : "wz",
+    "stage"   : "beta",
+    "api"     : "a100d2",
 
     "language" : {
 
@@ -15,50 +13,57 @@
 
     },
 
-    "common" : {
+    "device" : {
 
-        "css"    : ["style.css"],
-        "script" : ["createWeeDoc.js","script.js"]
+        "desktop" : {
 
-    },
+            "primary" : "main",
+            "service" : [],
+            "common"  : {
 
-    "primary" : "main",
-
-    "window" : {
-
-        "main" : {
-
-            "description" : "",
-            
-            "template" : "main.html",
-
-            "maxizable" : false,
-            "resizable" : false,
-
-            "width"  : {
-
-                "default" : 0,
-                "min"     : 0,
-                "max"     : 0
+                "css"    : [],
+                "script" : [],
+                "start"  : []
 
             },
 
-            "height" : {
+            "view" : {
 
-                "default" : 0,
-                "min"     : 0,
-                "max"     : 0
+                "main" : {
+                    
+                    "template" : "main.html",
 
-            },
+                    "maxizable" : false,
+                    "resizable" : false,
 
-            "css"    : [],
-            "script" : []
+                    "width"  : {
+
+                        "default" : 0,
+                        "min"     : 0,
+                        "max"     : 0
+
+                    },
+
+                    "height" : {
+
+                        "default" : 0,
+                        "min"     : 0,
+                        "max"     : 0
+
+                    },
+
+                    "css"    : ["style.css"],
+                    "script" : ["createWeeDoc.js","script.js"]
+
+                }
+
+            }
 
         }
 
     },
 
-    "permissions" : {
+    "permission" : {
 
         "structure" : {
 

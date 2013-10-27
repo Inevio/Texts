@@ -1,8 +1,10 @@
     
-    // App = This
-    var app = this;
+// App = This
+// To Do -> Real var app    var app = this;
+var app = {};
 
     // Cache Elements
+    var win   = $( this );
     var zone  = $( '.weetext-paper-zone', win );
     var menu  = $( '.stupid-container', win );
     var title = $( '.weetext-paper-title span', win );
