@@ -1127,87 +1127,83 @@ var app = {};
 
     };
 
-    var openFile = function( id ){
+    var openFile = function( structure ){
 
-        wz.structure( id, function( error, structure ){
+        if( structure.mime === 'text/plain' ){
 
-            if( structure.mime === 'text/plain' ){
-
-                structure.read( function( error, data ){
-                    
-                    // To Do -> Error
-                    data = fn.parse.txt( data );
-
-                    data.page = {};
-
-                    renderInput( data.content, data.page );
-                    windowTitle( structure.name );
-                    saveStatus( structure );
-
-                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
-
-                    //requestCollaboration( structure );
-
-                });
-
-            }else if(
+            structure.read( function( error, data ){
                 
-                (
-                    structure.mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                    structure.mime === 'application/vnd.oasis.opendocument.text' ||
-                    structure.mime === 'application/msword' ||
-                    structure.mime === 'text/rtf'
-                ) && structure.formats.html
+                // To Do -> Error
+                data = fn.parse.txt( data );
 
-            ){
-                
-                structure.formats.html.read( function( error, data ){                    
+                data.page = {};
 
-                    // To Do -> Error
-                    try{
-                        data = fn.parse.weeDoc( data );
-                    }catch( e ){
-                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
-                        return false;
-                    }
+                renderInput( data.content, data.page );
+                windowTitle( structure.name );
+                saveStatus( structure );
 
-                    renderInput( data.content, data.page );
-                    windowTitle( structure.name );
-                    saveStatus( structure );
-                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
+                selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
 
-                    //requestCollaboration( structure );
+                //requestCollaboration( structure );
 
-                });
+            });
 
-            }else if( structure.mime === 'text/html' ){
+        }else if(
+            
+            (
+                structure.mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                structure.mime === 'application/vnd.oasis.opendocument.text' ||
+                structure.mime === 'application/msword' ||
+                structure.mime === 'text/rtf'
+            ) && structure.formats.html
 
-                structure.read( function( error, data ){                    
+        ){
+            
+            structure.formats.html.read( function( error, data ){                    
 
-                    // To Do -> Error
-                    try{
-                        data = fn.parse.weeDoc( data );
-                    }catch( e ){
-                        alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
-                        return false;
-                    }
+                // To Do -> Error
+                try{
+                    data = fn.parse.weeDoc( data );
+                }catch( e ){
+                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                    return false;
+                }
 
-                    renderInput( data.content, data.page );
-                    windowTitle( structure.name );
-                    saveStatus( structure );
+                renderInput( data.content, data.page );
+                windowTitle( structure.name );
+                saveStatus( structure );
+                selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
 
-                    selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
+                //requestCollaboration( structure );
 
-                    //requestCollaboration( structure );
+            });
 
-                });
+        }else if( structure.mime === 'text/html' ){
 
-            }else{
-                alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
-            }
-        
-        });
+            structure.read( function( error, data ){                    
 
+                // To Do -> Error
+                try{
+                    data = fn.parse.weeDoc( data );
+                }catch( e ){
+                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                    return false;
+                }
+
+                renderInput( data.content, data.page );
+                windowTitle( structure.name );
+                saveStatus( structure );
+
+                selectStart( $( '.weetext-paper', zone ).first().find('p, li').first() );
+
+                //requestCollaboration( structure );
+
+            });
+
+        }else{
+            alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+        }
+    
     };
 
     var requestCollaboration = function( structure ){
@@ -1439,7 +1435,9 @@ var app = {};
     .on( 'app-param', function( e, params ){
 
         // To Do -> Comprobar que params no va vacio
-        openFile( params[ 0 ] );
+        if( params && params.command === 'openFile' ){
+            openFile( params.data );
+        }
 
     })
 
