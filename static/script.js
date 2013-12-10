@@ -1,7 +1,3 @@
-    
-// App = This
-// To Do -> Real var app    var app = this;
-var app = {};
 
     // Cache Elements
     var win   = $( this );
@@ -402,7 +398,7 @@ var app = {};
 
             // To Do -> Save file
 
-            return app.createWeeDoc( {}, content, style );
+            return wz.app.storage('createWeeDoc')( {}, content, style );
 
         }
 

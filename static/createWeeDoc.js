@@ -4,7 +4,7 @@
     var moduleVersion = 0;
 
 // Export Module
-    this.createWeeDoc = function( config, content, page ){
+    wz.app.storage( 'createWeeDoc', function( config, content, page ){
 
         var result = '<!DOCTYPE html>';
 
@@ -56,4 +56,4 @@
 
         return result;
 
-    };
+    } );
