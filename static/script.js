@@ -1236,7 +1236,7 @@
 
                 for( var i in shared ){
 
-                    if( shared[ i ].id !== wz.info.userId() ){
+                    if( shared[ i ].id !== wz.info.user().id ){
                         requestCollaborationToUser( shared[ i ].id );
                     }
 
