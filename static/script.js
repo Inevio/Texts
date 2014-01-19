@@ -1474,7 +1474,7 @@
 
     })
     
-    .on( 'wz-blur', function(){
+    .on( 'ui-view-blur', function(){
         $( '.weetext-size', win ).removeClass( 'show' );
         $( '.weetext-color', win ).removeClass( 'show' );
         $( '.weetext-typo', win ).removeClass( 'show' );
