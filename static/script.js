@@ -942,7 +942,7 @@
 
     var saveFile = function( callback ){
 
-        wz.structure( openFileID.id, function( error, structure ){
+        wz.fs( openFileID.id, function( error, structure ){
 
             // To Do -> Error
             if( error ){
@@ -995,7 +995,7 @@
                 name = name + '.html';
             }
 
-            wz.structure.create( name, 'text/html', 'root', text, function( error, structure ){
+            wz.fs.create( name, 'text/html', 'root', text, function( error, structure ){
 
                 if( error ){
 

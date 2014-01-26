@@ -65,7 +65,7 @@
 
     "permission" : {
 
-        "structure" : {
+        "fs" : {
 
             "create" : true,
             "modify" : true,
