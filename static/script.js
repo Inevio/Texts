@@ -1444,7 +1444,7 @@
         var text = fn.save();
 
         if( text.length === openFileLength && fn.compare( text, openFileText ) ){
-            wz.app.removeView( win.data('win') );
+            wz.view.remove();
             return false;
         }
 
@@ -1455,22 +1455,22 @@
                 if( openFileID && openFileID.mime === 'text/html' ){
 
                     saveFile( function(){
-                        wz.app.removeView( win.data('win') );
+                        wz.view.remove();
                     });
 
                 }else{
 
                     createFile( function(){
-                        wz.app.removeView( win.data('win') );
+                        wz.view.remove();
                     });
 
                 }
 
             }else{
-                wz.app.removeView( win.data('win') );
+                wz.view.remove();
             }
 
-        }, win.data().win );
+        });
 
     })
     
