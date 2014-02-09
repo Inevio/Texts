@@ -1,5 +1,5 @@
 
-.wz-win{
+.wz-view{
     
     width: 21.3cm;
     height: 600px;
@@ -22,7 +22,7 @@
     background: #B84E52;
 }
 
-.wz-win-option:hover{
+.wz-view-option:hover{
     border: 1px solid #7B2F39;
 }
 
@@ -189,11 +189,11 @@
     background-position: -106px -16px;
 }
 
-.wz-win-minimize, .wz-win-maximize, .wz-win-close{
+.wz-view-minimize, .wz-view-maximize, .wz-view-close{
     padding: 6px 6px 5px;
 }
 
-.wz-win-minimize i, .wz-win-maximize i, .wz-win-close i{
+.wz-view-minimize i, .wz-view-maximize i, .wz-view-close i{
     width: 10px;
     height: 9px;
     display: block;
@@ -201,19 +201,19 @@
     background-size: 30px 9px;
 }
 
-.wz-win-minimize:hover, .wz-win-maximize:hover, .wz-win-close:hover{
+.wz-view-minimize:hover, .wz-view-maximize:hover, .wz-view-close:hover{
     border: 1px solid #7B2F39;
 }
 
-.wz-win-maximize i{
+.wz-view-maximize i{
     background-position: -10px 0;
 }
 
-.wz-win-close i{
+.wz-view-close i{
     background-position: -20px 0;
 }
 
-.wz-win-minimize i{
+.wz-view-minimize i{
     background-position: 0 0;
 }
 
