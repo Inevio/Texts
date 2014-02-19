@@ -946,7 +946,7 @@
 
             // To Do -> Error
             if( error ){
-                alert( error, null, win.data().win );
+                alert( error );
                 return false;
             }
 
@@ -955,7 +955,7 @@
             structure.write( text, function( error ){
 
                 if( error ){
-                    alert( 'Error: ' + error, null, win.data().win );
+                    alert( 'Error: ' + error );
                 }else{
 
                     openFileText   = text;
@@ -1161,7 +1161,7 @@
                 try{
                     data = fn.parse.weeDoc( data );
                 }catch( e ){
-                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                    alert( 'FILE FORMAT NOT RECOGNIZED' );
                     return false;
                 }
 
@@ -1182,7 +1182,7 @@
                 try{
                     data = fn.parse.weeDoc( data );
                 }catch( e ){
-                    alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+                    alert( 'FILE FORMAT NOT RECOGNIZED' );
                     return false;
                 }
 
@@ -1197,7 +1197,7 @@
             });
 
         }else{
-            alert( 'FILE FORMAT NOT RECOGNIZED', null, win.data().win );
+            alert( 'FILE FORMAT NOT RECOGNIZED' );
         }
     
     };
@@ -1623,9 +1623,7 @@
     })
 
     .on( 'click', '.weetext-options-new', function(){
-
-        alert( lang.notWorking, null, win.data().win );
-
+        alert( lang.notWorking );
     })
 
     .on( 'click', '.button-toggle', function( e ){
