@@ -1,198 +1,93 @@
 
-<section class="stupid-container">
+<section class="wz-ui-header wz-dragger wz-fit-x">
 
-    <section class="weetext-options-left wz-dragger">
-    
-        <figure class="wz-view-option weetext-button weetext-options-new">
-            <i></i>
-        </figure>
-        <figure class="wz-view-option weetext-button weetext-options-save">
-            <i></i>
-            <figure class="weetext-options-display">
-                <i></i>
-            </figure>
-        </figure>
-        
-    </section>
-    
-    <section class="weetext-options-middle wz-dragger">
-        
-        <figure class="wz-view-option weetext-button-drop button-typo" data-action="typo">
+    <span class="option-save">Save</span>
 
-            <span></span>
+	<section class="wz-view-menu-group right wz-dragger">
 
-            <figure class="weetext-options-display">
-                <i></i>
-            </figure>
-
-        </figure>
-        
-        <figure class="wz-view-option weetext-button-drop button-size" data-action="size">
-
-            <span></span>
-
-            <figure class="weetext-options-display">
-                <i></i>
-            </figure>
-
-        </figure>
-        
-
-        <figure class="wz-view-option weetext-button-drop button-color" data-action="color">
-
-            <figure class="button-color-indicator"></figure>
-
-            <figure class="weetext-options-display">
-                <i></i>
-            </figure>
-
-        </figure>
-        
-        <figure class="wz-view-option weetext-button button-bold button-toggle" data-action="bold">
-            <i></i>
-        </figure>
-        <figure class="wz-view-option weetext-button button-italic button-toggle" data-action="italic">
-            <i></i>
-        </figure>
-        <figure class="wz-view-option weetext-button button-underline button-toggle" data-action="underline">
-            <i></i>
-        </figure>
-
-        <figure class="wz-view-option weetext-button button-align-left button-toggle" data-action="align-left">
-            <i></i>
-        </figure>
-        <figure class="wz-view-option weetext-button button-align-center button-toggle" data-action="align-center">
-            <i></i>
-        </figure>
-        <figure class="wz-view-option weetext-button button-align-right button-toggle" data-action="align-right">
-            <i></i>
-        </figure>
-        <figure class="wz-view-option weetext-button button-align-justify button-toggle" data-action="align-justify">
-            <i></i>
-        </figure>
-        
-        <figure class="wz-view-option weetext-button button-bullets" data-action="bullets">
-            <i></i>
-        </figure>
-        
-    </section>
-    
-    <section class="weetext-options-right wz-dragger">
-    
         <figure class="wz-view-minimize">
             <i></i>
         </figure>
-        <!-- <figure class="wz-view-maximize"></figure> -->
+        <figure class="wz-view-maximize">
+            <i></i>
+        </figure>
         <figure class="wz-view-close">
             <i></i>
         </figure>
-        
+
     </section>
 
 </section>
 
-<section class="weetext-paper-zone wz-scroll">
-    
-    <section class="weetext-paper" contenteditable="true">
-        <p></p>
+<section class="toolbar wz-fit-x">
+
+    <nav class="toolbar-menus">
+        <ul>
+            <li class="active">General</li>
+            <li>Insert</li>
+            <li>Layout</li>
+            <li>Formulas</li>
+            <li>Data</li>
+            <li>Review</li>
+            <li>View</li>
+        </ul>
+    </nav>
+
+    <section class="tools-line wz-fit-x">
+
+        <article>
+
+            <figure class="tool tool-fontfamily" data-tool="fontfamily">Arial</figure>
+            <figure class="tool tool-fontsize" data-tool="fontsize">11</figure>
+
+            <i class="tool-separator"></i>
+
+            <figure class="tool tool-button tool-button-bold" data-tool="bold">
+                <i></i>
+            </figure>
+
+            <figure class="tool tool-button tool-button-italic" data-tool="italic">
+                <i></i>
+            </figure>
+
+            <figure class="tool tool-button tool-button-underline" data-tool="underline">
+                <i></i>
+            </figure>
+
+            <i class="tool-separator"></i>
+
+            <figure class="tool tool-button tool-button-left" data-tool="left">
+                <i></i>
+            </figure>
+
+            <figure class="tool tool-button tool-button-center" data-tool="center">
+                <i></i>
+            </figure>
+
+            <figure class="tool tool-button tool-button-right" data-tool="right">
+                <i></i>
+            </figure>
+
+        </article>
+
     </section>
 
-    <!--<section class="weetext-paper"></section>
-    <section class="weetext-paper"></section>-->
-        
 </section>
 
-<section class="weetext-paper-title-container">
-    
-     <section class="weetext-paper-title">
-         <figure></figure>
-         <span></span>
-     </section>
-    
+<!-- Editor area -->
+<canvas class="sheet wz-fit"></canvas>
+
+<section class="scroll-vertical wz-fit-y wz-drag-limit">
+    <article class="scroll-vertical-seeker wz-draggable wz-dragger-y"></article>
 </section>
 
-<section class="weetext-paper-top-shadow"></section>
+<!-- wz-fit no parece suficientemente inteligente como para tener los elementos de dentro directamente fuera -->
+<section class="scroll-horizontal-wrapper wz-fit-x">
 
-<section class="weetext-paper-bottom-shadow"></section>
+    <section class="scroll-horizontal wz-fit-x wz-drag-limit">
+        <article class="scroll-horizontal-seeker wz-draggable wz-dragger-x"></article>
+    </section>
 
-<section class="weetext-paper-footer">
-    <i class="weetext-paper-footer-left"></i>
-    <i class="weetext-paper-footer-middle"></i>
-    <i class="weetext-paper-footer-right"></i>
+    <section class="scroll-gap"></section>
+
 </section>
-
-<menu class="weetext-typo">
-
-    <li class="wz-prototype">
-        <i></i>
-        <span></span>
-    </li>
-
-</menu>
-
-<menu class="weetext-size">
-
-    <li class="wz-prototype">
-        <i></i>
-        <span></span>
-    </li>
-    
-</menu>
-
-<menu class="weetext-color">
-    
-    <div class="table-container">
-        <table>
-        
-            <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            </tr>
-            
-            <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            </tr>
-            
-            <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            </tr>
-        
-        </table>
-    </div>
-    
-    <!--
-    <article class="weetext-hex">
-        <span>#</span>
-        <input value="04397b" maxlength="6" />
-    </article>
-    
-    <article class="weetext-map">
-        <figure class="wz-drag-limit wz-dragger-magnet">
-            <i class="wz-draggable wz-dragger"></i>
-        </figure>  
-    </article>
-    
-    <article class="weetext-rainbow">
-        <figure class="wz-drag-limit wz-dragger-x-magnet">
-            <i class="wz-draggable wz-dragger-x"></i>
-        </figure>
-    </article>
-    -->
-    
-</menu>
-
-
