@@ -254,6 +254,14 @@ var handleChar = function( newChar ){
 
 var handleEnter = function(){
 
+    // To Do -> Comprobar que entra en la página
+    // To Do -> Intro a mitad de línea
+    // To Do -> Herencia de estilos
+
+    var paragraph = currentPage.paragraphList.push( createParagraph( currentPage ) ) - 1;
+
+    setCursor( currentPageId, paragraph, 0, 0 );
+
 };
 
 var newLine = function(){
