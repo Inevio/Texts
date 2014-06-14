@@ -2,13 +2,13 @@
 .wz-ui-header{
     box-shadow: none;
     position: static;
-    width: 800px;
+    width: 900px;
     float: left;
 }
 
 .toolbar{
     height: 67px;
-    width: 800px;
+    width: 900px;
     float: left;
 }
 
@@ -41,7 +41,7 @@
 .tools-line{
     height: 25px;
     padding: 5px 7px;
-    width: 786px;
+    width: 886px;
     float: left;
     background: #f5f5f5;
     border-bottom: 1px solid #cacaca;
@@ -139,59 +139,38 @@
     background-position: -56px 0;
 }
 
-.sheet{
-    width: 785px;
-    height: 449px;
-    float: left;
-    cursor: cell;
-}
-
-.scroll-vertical{
-    background: #f1f1f1;
-    padding: 1px;
-    width: 12px;
-    border-left: 1px solid #d9d9d9;
-    height: 447px;
-    float: left;
-}
-
-.scroll-vertical-seeker{
-    width: 10px;
-    height: 52px;
-    background-color: #bcbcbc;
-    border: solid 1px #a8a8a8;
-}
-
-.scroll-horizontal-wrapper{
-    width:800px;
-    height:15px;
-    float:left;
-    background:#f00;
-}
-
-.scroll-horizontal{
-    background: #f1f1f1;
-    width: 783px;
-    height: 12px;
-    border-top: 1px solid #d9d9d9;
-    padding: 1px;
+.editor{
+    width: 900px;
+    height: 493px;
     float: left;
     position: relative;
-    z-index: 3;
 }
 
-.scroll-horizontal-seeker{
-    width: 52px;
-    height: 10px;
-    background-color: #bcbcbc;
-    border: solid 1px #a8a8a8;
+.pages{
+    width: 900px;
+    height: 492px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #ebebeb;
 }
 
-.scroll-gap{
-    border-top: 1px solid #d9d9d9;
-    border-left: 1px solid #d9d9d9;
-    background: #f1f1f1;
-    width: 14px;
-    height: 14px;
-    float: left;
+.selections{
+    width: 900px;
+    height: 492px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.input{
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.test-zone{
+    position: absolute;
+    top: 15px;
+    left: 0;
 }
