@@ -116,7 +116,11 @@ var createParagraph = function( page ){
     paragraph.width = page.width;
 
     // Creamos la línea inicial
-    paragraph.lineList.push( createLine( paragraph ) );
+    var line = createLine( paragraph );
+
+    paragraph.lineList.push( line );
+
+    paragraph.height += line.height;
 
     return paragraph;
 
@@ -322,14 +326,16 @@ var setCursor = function( page, paragraph, line, letter  ){
         currentPage = pageList[ page ];
     }
 
-    if( currentParagraphId !== paragraph ){
+    if( currentPageId !== page || currentParagraphId !== paragraph ){
         currentParagraph = currentPage.paragraphList[ paragraph ];
     }
     
-    if( currentLineId !== line ){
+    if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line ){
+
         currentLine = currentParagraph.lineList[ line ];
         // To Do -> Actualizamos el alto de línea
         currentLineHeight = parseInt( testZone.css('line-height'), 10 );
+
     }
 
     // Calculamos la posición vertical si es necesario
@@ -347,15 +353,21 @@ var setCursor = function( page, paragraph, line, letter  ){
 
         // Tamaño de cada página
         for( var i = 0; i < page; i++ ){
-            positionAbsoluteY += page.height;
+            positionAbsoluteY += pageList[ i ].height;
             // To Do -> Gaps entre páginas
         }
 
         // Tamaño de cada párrafo
-        // To Do
+        for( var i = 0; i < paragraph; i++ ){
+            positionAbsoluteY += currentPage.paragraphList[ i ].height;
+            // To Do -> Gaps entre páginas
+        }
 
         // Tamaño de cada línea
-        // To Do
+        for( var i = 0; i < line; i++ ){
+            positionAbsoluteY += currentPage.lineList[ i ].height;
+            // To Do -> Gaps entre páginas
+        }
 
         // Márgen superior
         positionAbsoluteY += currentPage.marginTop;
