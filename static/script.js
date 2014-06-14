@@ -204,12 +204,51 @@ var drawPages = function(){
 
 var handleBackspace = function(){
 
-    if( !currentLine.string.length ){
-        // To Do
-        return;
-    }
+    // Principio de linea
+    if( currentCharId === 0 ){
 
-    if( currentLine.string.length === currentCharId ){
+        // Principio del documento, lo comprobamos antes porque es un caso especial
+        if( !currentPageId && !currentParagraphId && !currentLineId && !currentCharId ){
+            return;
+        }
+
+        var line      = 0;
+        var paragraph = 0;
+        var page      = 0;
+        var charId    = 0;
+
+        // Principio de párrafo
+        if( currentLineId === 0 ){
+
+            // Principio de página
+            if( currentParagraphId === 0){
+
+                page      = currentPageId - 1;
+                paragraph = pageList[ page ].paragraphList.length - 1;
+                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+
+            }else{
+
+                page      = currentPageId;
+                paragraph = currentParagraphId - 1;
+                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+
+            }
+
+        }else{
+
+            page      = currentPageId;
+            paragraph = currentParagraphId;
+            line      = currentLineId - 1;
+            charId    = currentParagraph[ line ].string.length;
+
+        }
+
+        setCursor( page, paragraph, line, charId );
+
+    }else if( currentLine.string.length === currentCharId ){
 
         var prev = currentLine.charList[ currentLine.charList.length - 2 ] || 0;
         var next = currentLine.charList[ currentLine.charList.length - 1 ];
@@ -398,6 +437,11 @@ var setCursor = function( page, paragraph, line, letter  ){
 
         // Márgen superior
         positionAbsoluteX += currentPage.marginLeft;
+
+        // Posicion dentro de la linea
+        if( letter > 0 ){
+            positionAbsoluteX += currentLine.charList[ letter - 1 ];
+        }
 
     }
     
