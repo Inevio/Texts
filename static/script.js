@@ -212,9 +212,38 @@ var handleArrowLeft = function(){
             return;
         }
 
-        console.log('No implementado');
-        return;
+        var line, paragraph, page, charId;
 
+        // Principio de párrafo
+        if( currentLineId === 0 ){
+
+            // Principio de página
+            if( currentParagraphId === 0){
+
+                page      = currentPageId - 1;
+                paragraph = pageList[ page ].paragraphList.length - 1;
+                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+
+            }else{
+
+                page      = currentPageId;
+                paragraph = currentParagraphId - 1;
+                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+
+            }
+
+        }else{
+
+            page      = currentPageId;
+            paragraph = currentParagraphId;
+            line      = currentLineId - 1;
+            charId    = currentParagraph[ line ].string.length;
+
+        }
+
+        setCursor( page, paragraph, line, charId );
 
     }else{
 
@@ -235,8 +264,45 @@ var handleArrowLeft = function(){
 var handleArrowRight = function(){
 
     if( currentCharId === currentLine.string.length ){
-        console.log('No implementado');
-        return;
+
+        var line, paragraph, page, charId;
+
+        // Final de párrafo
+        if( currentLineId === currentParagraph.lineList.length - 1 ){
+
+            // Final de página
+            if( currentParagraphId === currentPage.paragraphList.length -1 ){
+
+                // Final de documento
+                if( currentPageId === pageList.length - 1 ){
+                    return;
+                }
+
+                page      = currentPageId + 1;
+                paragraph = 0;
+                line      = 0;
+                charId    = 0;
+
+            }else{
+
+                page      = currentPageId;
+                paragraph = currentParagraphId + 1;
+                line      = 0;
+                charId    = 0;
+
+            }
+
+        }else{
+
+            page      = currentPageId;
+            paragraph = currentParagraphId;
+            line      = currentLineId + 1;
+            charId    = 0;
+
+        }
+
+        setCursor( page, paragraph, line, charId );
+
     }else{
 
         var prev = currentLine.charList[ currentCharId - 1 ] || 0;
@@ -262,10 +328,7 @@ var handleBackspace = function(){
             return;
         }
 
-        var line      = 0;
-        var paragraph = 0;
-        var page      = 0;
-        var charId    = 0;
+        var line, paragraph, page, charId;
 
         // Principio de párrafo
         if( currentLineId === 0 ){
@@ -318,14 +381,16 @@ var handleBackspace = function(){
 
 var handleChar = function( newChar ){
 
+    var prev, next;
+
     if( currentLine.string.length === currentCharId ){
 
         currentLine.string += newChar;
         currentLine.charList.push( ctx.measureText( currentLine.string ).width );
         currentCharId++;
 
-        var prev = currentLine.charList[ currentCharId - 2 ] || 0;
-        var next = currentLine.charList[ currentCharId - 1 ];
+        prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        next = currentLine.charList[ currentCharId - 1 ];
 
         positionAbsoluteX += next - prev;
 
@@ -341,8 +406,8 @@ var handleChar = function( newChar ){
             currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
         }
 
-        var prev = currentLine.charList[ currentCharId - 2 ] || 0;
-        var next = currentLine.charList[ currentCharId - 1 ];
+        prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        next = currentLine.charList[ currentCharId - 1 ];
 
         positionAbsoluteX += next - prev;
 
