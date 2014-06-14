@@ -1,5 +1,6 @@
 
 // Constantes
+var DEBUG = false;
 var PAGE_A4 = {
 
     width  : 794, // 21 cm
@@ -42,6 +43,7 @@ var usersEditing  = {};
 var blinkEnabled = false;
 var blinkTime    = 0;
 var blinkStatus  = 0;
+var blinkCurrent = false;
 
 // Current variables
 var currentPage        = null;
@@ -120,11 +122,27 @@ var createParagraph = function( page ){
 
 };
 
+var debugTime = function( name ){
+
+    if( DEBUG ){
+        debugTime( name );
+    }
+    
+};
+
+var debugTimeEnd = function( name ){
+    
+    if( DEBUG ){
+        debugTimeEnd( name );
+    }
+    
+};
+
 var drawPages = function(){
 
     checkCanvasPagesSize();
 
-    console.time('draw');
+    debugTime('draw');
 
     // Draw the page
     ctx.beginPath();
@@ -148,7 +166,7 @@ var drawPages = function(){
 
     );
 
-    console.timeEnd('draw');
+    debugTimeEnd('draw');
 
 };
 
@@ -173,8 +191,9 @@ var handleBackspace = function(){
         // To Do -> No está al final de la línea
     }
 
-    blinkTime   = Date.now();
-    blinkStatus = 0;
+    blinkTime    = Date.now();
+    blinkStatus  = 0;
+    blinkCurrent = false;
 
 };
 
@@ -195,8 +214,9 @@ var handleChar = function( newChar ){
         // To Do -> No está al final de la línea
     }
 
-    blinkTime   = Date.now();
-    blinkStatus = 0;
+    blinkTime    = Date.now();
+    blinkStatus  = 0;
+    blinkCurrent = false;
 
 };
 
@@ -362,12 +382,30 @@ var updateBlink = function(){
         
     }
 
-    checkCanvasSelectSize();
+    var newCurrent = blinkStatus < 600;
 
-    if( blinkStatus < 600 ){
+    if( !blinkCurrent && newCurrent ){
+
+        debugTime('cursor on');
+
+        blinkCurrent = newCurrent;
+
+        checkCanvasSelectSize();
 
         ctxSel.rect( positionAbsoluteX + 0.5, positionAbsoluteY + 0.5, 0, currentLineHeight );
         ctxSel.stroke();
+
+        debugTimeEnd('cursor on');
+
+    }else if( blinkCurrent && !newCurrent ){
+
+        debugTime('cursor off');
+
+        blinkCurrent = newCurrent;
+
+        checkCanvasSelectSize();
+
+        debugTimeEnd('cursor off');
 
     }
 
