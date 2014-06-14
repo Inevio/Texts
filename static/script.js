@@ -202,6 +202,56 @@ var drawPages = function(){
 
 };
 
+var handleArrowLeft = function(){
+
+    // Principio de linea
+    if( currentCharId === 0 ){
+
+        // Principio del documento, lo comprobamos antes porque es un caso especial
+        if( !currentPageId && !currentParagraphId && !currentLineId && !currentCharId ){
+            return;
+        }
+
+        console.log('No implementado');
+        return;
+
+
+    }else{
+
+        var prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        var next = currentLine.charList[ currentCharId - 1 ];
+
+        console.log( prev, next );
+
+        positionAbsoluteX += ( prev - next );
+        currentCharId--;
+
+    }
+
+    resetBlink();
+
+};
+
+var handleArrowRight = function(){
+
+    if( currentCharId === currentLine.string.length ){
+        console.log('No implementado');
+        return;
+    }else{
+
+        var prev = currentLine.charList[ currentCharId - 1 ] || 0;
+        var next = currentLine.charList[ currentCharId ];
+
+        positionAbsoluteX += next - prev;
+
+        currentCharId++;
+
+    }
+
+    resetBlink();
+
+};
+
 var handleBackspace = function(){
 
     // Principio de linea
@@ -262,9 +312,7 @@ var handleBackspace = function(){
         // To Do -> No está al final de la línea
     }
 
-    blinkTime    = Date.now();
-    blinkStatus  = 0;
-    blinkCurrent = false;
+    resetBlink();
 
 };
 
@@ -285,9 +333,7 @@ var handleChar = function( newChar ){
         // To Do -> No está al final de la línea
     }
 
-    blinkTime    = Date.now();
-    blinkStatus  = 0;
-    blinkCurrent = false;
+    resetBlink();
 
 };
 
@@ -300,6 +346,7 @@ var handleEnter = function(){
     var paragraph = currentPage.paragraphList.push( createParagraph( currentPage ) ) - 1;
 
     setCursor( currentPageId, paragraph, 0, 0 );
+    resetBlink();
 
 };
 
@@ -344,6 +391,14 @@ var newParagraph = function(){
         height        : 0
 
     };
+
+};
+
+var resetBlink = function(){
+
+    blinkTime    = Date.now();
+    blinkStatus  = 0;
+    blinkCurrent = false;
 
 };
 
@@ -515,6 +570,12 @@ input.on( 'keydown', function(e){
         handleBackspace();
     }else if( e.which === 13 ){
         handleEnter();
+    }else if( e.which === 37 ){
+        handleArrowLeft();
+    }else if( e.which === 39 ){
+        handleArrowRight();
+    }else{
+        console.log( e.which );
     }
 
     drawPages();
