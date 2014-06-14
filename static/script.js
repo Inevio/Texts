@@ -144,27 +144,55 @@ var drawPages = function(){
 
     debugTime('draw');
 
+    // To Do -> Soportar varias páginas
+
     // Draw the page
+    var page = pageList[ 0 ];
+
     ctx.beginPath();
-    ctx.rect( 20.5, 20.5, pageList[ 0 ].width, pageList[ 0 ].height );
+    ctx.rect( 20.5, 20.5, page.width, page.height );
     ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.lineWidth = 1;
     ctx.strokeStyle = '#cacaca';
     ctx.stroke();
 
-    ctx.fillStyle = '#000';
-    ctx.font      = '12pt Helvetica';
+    // Draw the lines
+    var paragraph = null;
+    var line      = null;
+    //var pHeritage = 0;
+    //var lHeritage = 0;
+    var heritage  = 0;
 
-    // To Do -> Gaps
-    // To Do -> Altura de línea
-    ctx.fillText(
+    for( var i = 0; i < page.paragraphList.length; i++ ){
 
-        currentLine.string,
-        pageList[ 0 ].marginLeft + 20,
-        pageList[ 0 ].marginTop + 20 + currentLineHeight
+        paragraph = page.paragraphList[ i ];
 
-    );
+        for( var j = 0; j < paragraph.lineList.length; j++ ){
+
+            // To Do -> Gaps
+            // To Do -> Altura de línea
+            line = paragraph.lineList[ j ];
+
+            ctx.fillStyle = '#000';
+            ctx.font      = '12pt Helvetica';
+
+            ctx.fillText(
+
+                line.string,
+                page.marginLeft + 20,
+                page.marginTop + 20 + line.height + heritage
+
+            );
+
+            heritage += line.height;
+            //lHeritage += line.height;
+
+        }
+
+        //pHeritage += paragraph.height;
+
+    }
 
     debugTimeEnd('draw');
 
@@ -261,7 +289,8 @@ var newParagraph = function(){
         interline     : null,
         justification : null,
         lineList      : [],
-        width         : 0
+        width         : 0,
+        height        : 0
 
     };
 
