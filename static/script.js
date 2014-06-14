@@ -324,13 +324,29 @@ var handleChar = function( newChar ){
         currentLine.charList.push( ctx.measureText( currentLine.string ).width );
         currentCharId++;
 
-        var prev = currentLine.charList[ currentLine.charList.length - 2 ] || 0;
-        var next = currentLine.charList[ currentLine.charList.length - 1 ];
+        var prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        var next = currentLine.charList[ currentCharId - 1 ];
 
         positionAbsoluteX += next - prev;
 
     }else{
-        // To Do -> No está al final de la línea
+        
+        currentLine.string = currentLine.string.slice( 0, currentCharId ) + newChar + currentLine.string.slice( currentCharId );
+
+        currentLine.charList = currentLine.charList.slice( 0, currentCharId );
+
+        currentCharId++;
+
+        for( var i = currentCharId; i < currentLine.string.length; i++ ){
+            currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
+        }
+
+        var prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        var next = currentLine.charList[ currentCharId - 1 ];
+
+        positionAbsoluteX += next - prev;
+
+
     }
 
     resetBlink();
