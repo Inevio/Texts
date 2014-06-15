@@ -667,5 +667,90 @@ input.on( 'keydown', function(e){
 
 });
 
+selections.on( 'mousedown', function(e){
+
+    var offset = selections.offset();
+    var posX   = e.pageX - offset.left;
+    var posY   = e.pageY - offset.top;
+
+    // Buscamos la posición vertical
+    var height = 0;
+
+    // Tenemos en cuenta el gap
+    height += 20;
+
+    // Buscamos la página
+    for( var page = 0; page < pageList.length; page++ ){
+
+        if( pageList[ page ].height + height < posY ){
+            height += pageList[ page ].height;
+        }else{
+            break;
+        }
+
+    }
+
+    var pageId = page;
+
+    page = pageList[ page ];
+
+    // Tenemos en cuenta el margen superior
+    height += page.marginTop;
+
+    // Buscamos el párrafo
+    for( var paragraph = 0; paragraph < page.paragraphList.length; paragraph++ ){
+
+        if( page.paragraphList[ paragraph ].height + height < posY ){
+            height += page.paragraphList[ paragraph ].height;
+        }else{
+            break;
+        }
+
+    }
+
+    var paragraphId = paragraph;
+
+    paragraph = page.paragraphList[ paragraph ];
+
+    // Buscamos la línea
+    for( var line = 0; line < paragraph.lineList.length; line++ ){
+        
+        if( paragraph.lineList[ line ].height + height < posY ){
+            height += paragraph.lineList[ line ].height;
+        }else{
+            break;
+        }
+
+    }
+
+    var lineId = line;
+
+    line = paragraph.lineList[ line ];
+
+    // Buscamos la posición horizontal
+    var width = 0;
+
+    // Tenemos en cuenta el gap
+    width += 20;
+
+    // Tenemos en cuenta el margen izquierdo
+    width += page.marginLeft;
+
+    // Buscamos el caracter
+    for( var i = 0; i < line.string.length; i++ ){
+
+        if( line.charList[ i ] + width >= posX ){
+            width += line.charList[ i ];
+            break;
+        }
+
+    }
+
+    // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
+    setCursor( pageId, paragraphId, lineId, i );
+    resetBlink();
+
+});
+
 // Start
 start();
