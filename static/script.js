@@ -250,8 +250,6 @@ var handleArrowLeft = function(){
         var prev = currentLine.charList[ currentCharId - 2 ] || 0;
         var next = currentLine.charList[ currentCharId - 1 ];
 
-        console.log( prev, next );
-
         positionAbsoluteX += ( prev - next );
         currentCharId--;
 
@@ -377,8 +375,11 @@ var handleBackspace = function(){
     // En medio de la linea
     }else{
 
-        currentLine.string = currentLine.string.slice( 0, currentCharId - 1 ) + currentLine.string.slice( currentCharId );
+        prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        next = currentLine.charList[ currentCharId - 1 ];
 
+        positionAbsoluteX   += ( prev - next );
+        currentLine.string   = currentLine.string.slice( 0, currentCharId - 1 ) + currentLine.string.slice( currentCharId );
         currentLine.charList = currentLine.charList.slice( 0, currentCharId - 1 );
 
         for( var i = currentCharId; i <= currentLine.string.length; i++ ){
@@ -386,11 +387,6 @@ var handleBackspace = function(){
         }
 
         currentCharId--;
-
-        prev = currentLine.charList[ currentCharId - 2 ] || 0;
-        next = currentLine.charList[ currentCharId - 1 ];
-
-        positionAbsoluteX += ( prev - next );
 
     }
 
@@ -417,8 +413,7 @@ var handleChar = function( newChar ){
     // Cualquier otra posición
     }else{
         
-        currentLine.string = currentLine.string.slice( 0, currentCharId ) + newChar + currentLine.string.slice( currentCharId );
-
+        currentLine.string   = currentLine.string.slice( 0, currentCharId ) + newChar + currentLine.string.slice( currentCharId );
         currentLine.charList = currentLine.charList.slice( 0, currentCharId );
 
         currentCharId++;
