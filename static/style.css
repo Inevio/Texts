@@ -163,6 +163,10 @@
     left: 0;
 }
 
+.selections.text{
+    cursor: text;
+}
+
 .input{
     position: absolute;
     top: 0;

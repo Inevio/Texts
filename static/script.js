@@ -45,6 +45,11 @@ var blinkTime    = 0;
 var blinkStatus  = 0;
 var blinkCurrent = false;
 
+// Selection variables
+var selectionEnabled = false;
+var selectionStart   = null;
+var selectedEnabled  = false;
+
 // Current variables
 var currentPage        = null;
 var currentPageId      = null;
@@ -606,11 +611,111 @@ var setCursor = function( page, paragraph, line, letter  ){
     currentLineId      = line;
     currentCharId      = letter;
 
+    // To Do -> Pueden darse demasiadas llamadas, dentro tiene un requestAnimation
     updateBlink();
     
 };
 
+var setRange = function( start, end ){
+
+    // To Do -> Podemos pasarle las coordenadas para evitar cálculos
+    // To Do -> Si no se le pueden pasar las coordenadas podemos utilizar los bucles para las dos alturas
+
+    var startHash = start.pageId + '-' + start.paragraphId  + '-' + start.lineId  + '-' + start.charId;
+    var endHash   = end.pageId + '-' + end.paragraphId  + '-' + end.lineId  + '-' + end.charId;
+
+    // Si son iguales no es un rango
+    if( startHash === endHash ){
+        selectedEnabled = false;
+        return;
+    }
+
+    selectedEnabled = true;
+
+    // Ordenamos los imputs
+    if( startHash > endHash ){
+
+        var tmp = start;
+
+        start = end;
+        end   = tmp;
+        tmp   = null;
+
+    }
+
+    // Calculamos la altura de inicio
+    var startHeight = 0;
+
+    // Gap inicial
+    startHeight += 20;
+
+    // Calculamos la posición vertical de la página de inicio
+    for( var i = 0; i < start.pageId; i++ ){
+
+        // Gap
+        startHeight += 20;
+        startHeight += pageList[ i ].height;
+
+    }
+
+    // Tenemos en cuenta el margen superior
+    startHeight += start.page.marginTop;
+
+    // Calculamos la posición vertical del párrafo de inicio
+    for( var i = 0; i < start.paragraphId; i++ ){
+        startHeight += start.page.paragraphList[ i ].height;
+    }
+
+    // Calculamos la posición vertical de la linea de inicio
+    for( var i = 0; i < start.lineId; i++ ){
+        startHeight += start.paragraph.lineList[ i ].height;
+    }
+
+    // Calculamos el ancho de inicio
+    var startWidth = 0;
+
+    // Gap inicial
+    startWidth += 20;
+
+    // Margen izquierdo
+    startWidth += start.page.marginLeft;
+
+    // Posición del caracter
+    startWidth += start.line.charList[ start.charId - 1 ] || 0;
+
+    // Procedimiento de coloreado
+    // Si principio y fin están en la misma fila
+    if(
+        start.pageId === end.pageId &&
+        start.paragraphId === end.paragraphId &&
+        start.lineId === end.lineId
+    ){
+
+        checkCanvasSelectSize();
+
+        ctxSel.rect(
+
+            startWidth,
+            startHeight,
+            end.line.charList[ end.charId - 1 ] - ( start.line.charList[ start.charId - 1 ] || 0 ),
+            start.line.height
+
+        );
+
+        ctxSel.globalAlpha = 0.3;
+        ctxSel.fillStyle = '#7EBE30';
+        ctxSel.fill();
+        ctxSel.globalAlpha = 1;
+
+    }
+    
+};
+
 var updateBlink = function(){
+
+    if( selectedEnabled ){
+        return;
+    }
 
     if( !blinkEnabled ){
 
@@ -683,7 +788,13 @@ input.on( 'keydown', function(e){
 
 });
 
-selections.on( 'mousedown', function(e){
+selections
+.on( 'mousedown', function(e){
+
+    selectionEnabled = true;
+    selectedEnabled  = false;
+
+    e.preventDefault();
 
     var offset = selections.offset();
     var posX   = e.pageX - offset.left;
@@ -762,10 +873,129 @@ selections.on( 'mousedown', function(e){
 
     }
 
+    selectionStart = {
+
+        pageId      : pageId,
+        page        : page,
+        paragraphId : paragraphId,
+        paragraph   : paragraph,
+        lineId      : lineId,
+        line        : line,
+        charId      : i
+
+    };
+
     // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
     setCursor( pageId, paragraphId, lineId, i );
     resetBlink();
 
+})
+
+.on( 'mousemove', function(e){
+
+    if( !selectionEnabled ){
+        return;
+    }
+
+    var offset = selections.offset();
+    var posX   = e.pageX - offset.left;
+    var posY   = e.pageY - offset.top;
+
+    // Buscamos la posición vertical
+    var height = 0;
+
+    // Tenemos en cuenta el gap
+    height += 20;
+
+    // Buscamos la página
+    for( var page = 0; page < pageList.length; page++ ){
+
+        if( pageList[ page ].height + height < posY ){
+            height += pageList[ page ].height;
+        }else{
+            break;
+        }
+
+    }
+
+    var pageId = page;
+
+    page = pageList[ page ];
+
+    // Tenemos en cuenta el margen superior
+    height += page.marginTop;
+
+    // Buscamos el párrafo
+    for( var paragraph = 0; paragraph < page.paragraphList.length; paragraph++ ){
+
+        if( page.paragraphList[ paragraph ].height + height < posY ){
+            height += page.paragraphList[ paragraph ].height;
+        }else{
+            break;
+        }
+
+    }
+
+    var paragraphId = paragraph;
+
+    paragraph = page.paragraphList[ paragraph ];
+
+    // Buscamos la línea
+    for( var line = 0; line < paragraph.lineList.length; line++ ){
+        
+        if( paragraph.lineList[ line ].height + height < posY ){
+            height += paragraph.lineList[ line ].height;
+        }else{
+            break;
+        }
+
+    }
+
+    var lineId = line;
+
+    line = paragraph.lineList[ line ];
+
+    // Buscamos la posición horizontal
+    var width = 0;
+
+    // Tenemos en cuenta el gap
+    width += 20;
+
+    // Tenemos en cuenta el margen izquierdo
+    width += page.marginLeft;
+
+    // Buscamos el caracter
+    for( var i = 0; i < line.string.length; i++ ){
+
+        if( line.charList[ i ] - ( ( line.charList[ i ] - ( line.charList[ i - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+            width += line.charList[ i ];
+            break;
+        }
+
+    }
+
+    setRange(
+
+        selectionStart,
+
+        {
+
+            pageId      : pageId,
+            page        : page,
+            paragraphId : paragraphId,
+            paragraph   : paragraph,
+            lineId      : lineId,
+            line        : line,
+            charId      : i
+
+        }
+
+    );
+
+})
+
+.on( 'mouseup', function(e){
+    selectionEnabled = false;
 });
 
 // Start
