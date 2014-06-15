@@ -320,6 +320,8 @@ var handleArrowRight = function(){
 
 var handleBackspace = function(){
 
+    var prev, next;
+
     // Principio de linea
     if( currentCharId === 0 ){
 
@@ -361,18 +363,35 @@ var handleBackspace = function(){
 
         setCursor( page, paragraph, line, charId );
 
+    // Final de la linea
     }else if( currentLine.string.length === currentCharId ){
 
-        var prev = currentLine.charList[ currentLine.charList.length - 2 ] || 0;
-        var next = currentLine.charList[ currentLine.charList.length - 1 ];
+        prev = currentLine.charList[ currentLine.charList.length - 2 ] || 0;
+        next = currentLine.charList[ currentLine.charList.length - 1 ];
 
         positionAbsoluteX += ( prev - next );
         currentLine.string = currentLine.string.slice( 0, -1 );
         currentLine.charList.pop();
         currentCharId--;
 
+    // En medio de la linea
     }else{
-        // To Do -> No está al final de la línea
+
+        currentLine.string = currentLine.string.slice( 0, currentCharId - 1 ) + currentLine.string.slice( currentCharId );
+
+        currentLine.charList = currentLine.charList.slice( 0, currentCharId - 1 );
+
+        for( var i = currentCharId; i <= currentLine.string.length; i++ ){
+            currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
+        }
+
+        currentCharId--;
+
+        prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        next = currentLine.charList[ currentCharId - 1 ];
+
+        positionAbsoluteX += ( prev - next );
+
     }
 
     resetBlink();
@@ -383,6 +402,7 @@ var handleChar = function( newChar ){
 
     var prev, next;
 
+    // Final de linea
     if( currentLine.string.length === currentCharId ){
 
         currentLine.string += newChar;
@@ -394,6 +414,7 @@ var handleChar = function( newChar ){
 
         positionAbsoluteX += next - prev;
 
+    // Cualquier otra posición
     }else{
         
         currentLine.string = currentLine.string.slice( 0, currentCharId ) + newChar + currentLine.string.slice( currentCharId );
