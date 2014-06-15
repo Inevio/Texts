@@ -739,7 +739,7 @@ selections.on( 'mousedown', function(e){
     // Buscamos el caracter
     for( var i = 0; i < line.string.length; i++ ){
 
-        if( line.charList[ i ] + width >= posX ){
+        if( line.charList[ i ] - ( ( line.charList[ i ] - ( line.charList[ i - 1 ] || 0 ) ) / 2 ) + width >= posX ){
             width += line.charList[ i ];
             break;
         }
