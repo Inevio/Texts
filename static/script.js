@@ -411,7 +411,6 @@ var handleChar = function( newChar ){
 
         positionAbsoluteX += next - prev;
 
-
     }
 
     resetBlink();
@@ -424,7 +423,12 @@ var handleEnter = function(){
     // To Do -> Intro a mitad de línea
     // To Do -> Herencia de estilos
 
-    var paragraph = currentPage.paragraphList.push( createParagraph( currentPage ) ) - 1;
+    var paragraph = createParagraph( currentPage );
+    var endList   = currentPage.paragraphList.slice( currentParagraphId + 1 );
+
+    currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 );
+    paragraph                 = currentPage.paragraphList.push( paragraph ) - 1;
+    currentPage.paragraphList = currentPage.paragraphList.concat( endList );
 
     setCursor( currentPageId, paragraph, 0, 0 );
     resetBlink();
