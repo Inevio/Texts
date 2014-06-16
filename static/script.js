@@ -3,7 +3,7 @@
 var DEBUG = false;
 var PAGE_A4 = {
 
-    width  : 794, // 21 cm
+    width  : 300,//794, // 21 cm
     height : 1122 // 29.7 cm
 
 };
@@ -118,7 +118,7 @@ var createParagraph = function( page ){
 
     // To Do -> Alto de linea dinamico
     // To Do -> Ancho de linea dinamico
-    paragraph.width = page.width;
+    paragraph.width = page.width - page.marginLeft - page.marginRight;
 
     // Creamos la línea inicial
     var line = createLine( paragraph );
@@ -401,19 +401,39 @@ var handleBackspace = function(){
 
 var handleChar = function( newChar ){
 
-    var prev, next;
+    var prev, next, realocation;
 
     // Final de linea
     if( currentLine.string.length === currentCharId ){
 
         currentLine.string += newChar;
-        currentLine.charList.push( ctx.measureText( currentLine.string ).width );
-        currentCharId++;
+        realocation         = realocateLine( currentLineId );
 
-        prev = currentLine.charList[ currentCharId - 2 ] || 0;
-        next = currentLine.charList[ currentCharId - 1 ];
+        if( realocation ){
 
-        positionAbsoluteX += next - prev;
+            currentLineId++;
+
+            currentLine   = currentParagraph.lineList[ currentLineId ];
+            currentCharId = realocation;
+
+            positionAbsoluteY += currentLine.height;
+
+            // Reiniciamos la posición horizontal
+            positionAbsoluteX  = 20; // Gap
+            positionAbsoluteX += currentPage.marginLeft;
+            positionAbsoluteX += currentLine.charList[ currentCharId - 1 ];
+
+        }else{
+
+            currentLine.charList.push( ctx.measureText( currentLine.string ).width );
+            currentCharId++;
+
+            prev = currentLine.charList[ currentCharId - 2 ] || 0;
+            next = currentLine.charList[ currentCharId - 1 ];
+
+            positionAbsoluteX += next - prev;
+
+        }
 
     // Cualquier otra posición
     }else{
@@ -497,6 +517,74 @@ var newParagraph = function(){
         height        : 0
 
     };
+
+};
+
+var realocateLine = function( id, propagated ){
+
+    var line    = currentParagraph.lineList[ id ];
+    var counter = 0;
+
+    if( ctx.measureText( line.string ).width <= line.width ){
+
+        if( propagated ){
+
+            line.charList = [];
+
+            for( var i = 1; i <= line.string.length; i++ ){
+                line.charList.push( ctx.measureText( line.string.slice( 0, i ) ).width );
+            }
+
+        }
+
+        return counter;
+    }
+
+    // Generamos el listado de palabras
+    var words   = line.string.split(' ');
+    var newLine = null;
+
+    if( line.string.slice( -1 ) === ' ' ){
+        words = words.slice( 0, -1 );
+    }
+
+    // Comprobamos palabra por palabra si entra
+    for( var i = words.length - 1; i > 0; i-- ){
+
+        if( !currentParagraph.lineList[ id + 1 ] ){
+
+            newLine                  = createLine( currentParagraph );
+            currentParagraph.height += newLine.height;
+
+            // To Do -> Esto no es correcto, hay que hacerlo con splits y concats por si se está haciendo en medio de un párrafo
+            currentParagraph.lineList.push( newLine );
+
+        }
+
+        counter += words[ i ].length;
+
+        currentParagraph.lineList[ id + 1 ].string = words[ i ] + currentParagraph.lineList[ id + 1 ].string;
+
+        if( ctx.measureText( words.slice( 0, i ).join(' ') ).width <= line.width ){
+
+            line.string = words.slice( 0, i ).join(' ');
+
+            // To Do -> Se puede optimizar, el primer realocateLine (el que no está propagado) puede heredar parte de las medidas ya calculadas previamente
+            line.charList = [];
+
+            for( var i = 0; i < line.string.length; i++ ){
+                line.charList.push( ctx.measureText( line.string.slice( 0, i ) ).width );
+            }
+
+            break;
+
+        }
+
+    }
+
+    realocateLine( id + 1, true );
+
+    return counter;
 
 };
 
