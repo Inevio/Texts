@@ -632,7 +632,7 @@ var setRange = function( start, end ){
 
     // Si son iguales no es un rango
     if( startHash === endHash ){
-        selectedEnabled = false;
+        resetBlink();
         return;
     }
 
@@ -798,8 +798,6 @@ selections
 .on( 'mousedown', function(e){
 
     selectionEnabled = true;
-    selectedEnabled  = false;
-
     e.preventDefault();
 
     var offset = selections.offset();
@@ -893,7 +891,6 @@ selections
 
     // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
     setCursor( pageId, paragraphId, lineId, i );
-    resetBlink();
 
 })
 
