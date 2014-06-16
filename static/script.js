@@ -48,7 +48,7 @@ var blinkCurrent = false;
 // Selection variables
 var selectionEnabled = false;
 var selectionStart   = null;
-var selectedEnabled  = false;
+var selectedEnabled  = true;
 
 // Current variables
 var currentPage        = null;
@@ -134,7 +134,7 @@ var createParagraph = function( page ){
 var debugTime = function( name ){
 
     if( DEBUG ){
-        debugTime( name );
+        console.time( name );
     }
     
 };
@@ -142,7 +142,7 @@ var debugTime = function( name ){
 var debugTimeEnd = function( name ){
     
     if( DEBUG ){
-        debugTimeEnd( name );
+        console.timeEnd( name );
     }
     
 };
@@ -506,6 +506,13 @@ var resetBlink = function(){
     blinkStatus  = 0;
     blinkCurrent = false;
 
+    if( selectedEnabled ){
+
+        selectedEnabled = false;
+        updateBlink();
+
+    }
+
 };
 
 var start = function(){
@@ -611,8 +618,7 @@ var setCursor = function( page, paragraph, line, letter  ){
     currentLineId      = line;
     currentCharId      = letter;
 
-    // To Do -> Pueden darse demasiadas llamadas, dentro tiene un requestAnimation
-    updateBlink();
+    resetBlink();
     
 };
 
