@@ -477,7 +477,6 @@ var handleChar = function( newChar ){
             setCursor( currentPageId, currentParagraphId, currentLineId, currentCharId );
             */
 
-            // To Do -> Esto podría ser una optimización en vez de usar el setCursor anterior. Sin embargo lo vamos a usar por ahora para usar casos generales
             positionAbsoluteY += currentLine.height;
 
             // Reiniciamos la posición horizontal
@@ -500,21 +499,49 @@ var handleChar = function( newChar ){
     // Cualquier otra posición
     }else{
 
-        // To Do -> Realocation
-        
-        currentLine.string   = currentLine.string.slice( 0, currentCharId ) + newChar + currentLine.string.slice( currentCharId );
-        currentLine.charList = currentLine.charList.slice( 0, currentCharId );
+        var corrector;
 
-        currentCharId++;
+        currentLine.string = currentLine.string.slice( 0, currentCharId ) + newChar + currentLine.string.slice( currentCharId );
+        //corrector          = trimRight( currentLine.string ).length - currentLine.string.length;
+        realocation        = realocateLine( currentLineId );
 
-        for( var i = currentCharId; i < currentLine.string.length; i++ ){
-            currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
+        if( realocation ){
+
+            // Fix realocation value
+            //realocation += corrector;
+
+            currentLineId++;
+
+            currentLine   = currentParagraph.lineList[ currentLineId ];
+            currentCharId = realocation;
+
+            /*
+            setCursor( currentPageId, currentParagraphId, currentLineId, currentCharId );
+            */
+
+            positionAbsoluteY += currentLine.height;
+
+            // Reiniciamos la posición horizontal
+            positionAbsoluteX  = 20; // Gap
+            positionAbsoluteX += currentPage.marginLeft;
+            positionAbsoluteX += currentLine.charList[ currentCharId - 1 ];
+
+        }else{
+
+            currentLine.charList = currentLine.charList.slice( 0, currentCharId );
+
+            currentCharId++;
+
+            for( var i = currentCharId; i < currentLine.string.length; i++ ){
+                currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
+            }
+
+            prev = currentLine.charList[ currentCharId - 2 ] || 0;
+            next = currentLine.charList[ currentCharId - 1 ];
+
+            positionAbsoluteX += next - prev;
+
         }
-
-        prev = currentLine.charList[ currentCharId - 2 ] || 0;
-        next = currentLine.charList[ currentCharId - 1 ];
-
-        positionAbsoluteX += next - prev;
 
     }
 
@@ -660,8 +687,8 @@ var realocateLineInverse = function( id, modifiedChar ){
     ){
 
         // Generamos el listado de palabras
-        var words = line.string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
-        var tmp   = currentParagraph.lineList[ id - 1 ].string + ' ' + words[ 0 ];
+        var words   = line.string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
+        var tmp     = currentParagraph.lineList[ id - 1 ].string + ' ' + words[ 0 ].replace( ' ', '' );
         var newLine = currentParagraph.lineList[ id - 1 ];
 
         if( newLine.width >= ctx.measureText( trimRight( tmp ) ).width ){
