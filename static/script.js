@@ -323,7 +323,7 @@ var handleArrowRight = function(){
 
 var handleBackspace = function(){
 
-    var prev, next;
+    var prev, next, i;
 
     // Al principio de la línea
     if( /*currentLineId !== 0 &&*/ currentCharId === 0 ){
@@ -380,11 +380,12 @@ var handleBackspace = function(){
     // En medio de una linea no primera
     }else if( currentLineId !== 0 ){
 
-        currentCharId--;
+        prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        next = currentLine.charList[ currentCharId - 1 ];
 
-        currentLine.string = currentLine.string.slice( 0, currentCharId ) + currentLine.string.slice( currentCharId + 1 );
-        realocation        = realocateLineInverse( currentLineId, currentCharId );
-
+        currentLine.string = currentLine.string.slice( 0, currentCharId - 1 ) + currentLine.string.slice( currentCharId );
+        realocation        = realocateLineInverse( currentLineId, currentCharId - 1 );
+        
         if( realocation ){
 
             currentLineId--;
@@ -404,35 +405,18 @@ var handleBackspace = function(){
             positionAbsoluteX += currentPage.marginLeft;
             positionAbsoluteX += currentLine.charList[ currentCharId - 1 ];
 
+        }else{
+
+            positionAbsoluteX   += ( prev - next );
+            currentLine.charList = currentLine.charList.slice( 0, currentCharId - 1 );
+
+            for( i = currentCharId; i <= currentLine.string.length; i++ ){
+                currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
+            }
+
+            currentCharId--;
+
         }
-
-        /*else{
-
-            currentLine.charList.push( ctx.measureText( currentLine.string ).width );
-            currentCharId++;
-
-            prev = currentLine.charList[ currentCharId - 2 ] || 0;
-            next = currentLine.charList[ currentCharId - 1 ];
-
-            positionAbsoluteX += next - prev;
-
-        }
-
-        prev = currentLine.charList[ currentCharId - 2 ] || 0;
-        next = currentLine.charList[ currentCharId - 1 ];
-
-        positionAbsoluteX   += ( prev - next );
-        currentLine.string   = currentLine.string.slice( 0, currentCharId - 1 ) + currentLine.string.slice( currentCharId );
-        currentLine.charList = currentLine.charList.slice( 0, currentCharId - 1 );
-
-        for( var i = currentCharId; i <= currentLine.string.length; i++ ){
-            currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
-        }
-
-        currentCharId--;
-
-        realocateLineInverse( currentLineId, currentCharId );
-        */
 
     // En medio de la primera linea, caso generalista
     }else{
@@ -444,7 +428,7 @@ var handleBackspace = function(){
         currentLine.string   = currentLine.string.slice( 0, currentCharId - 1 ) + currentLine.string.slice( currentCharId );
         currentLine.charList = currentLine.charList.slice( 0, currentCharId - 1 );
 
-        for( var i = currentCharId; i <= currentLine.string.length; i++ ){
+        for( i = currentCharId; i <= currentLine.string.length; i++ ){
             currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
         }
 
