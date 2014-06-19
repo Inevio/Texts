@@ -948,8 +948,8 @@ var updateBlink = function(){
 
         checkCanvasSelectSize();
 
-        ctxSel.rect( positionAbsoluteX + 0.5, positionAbsoluteY + 0.5, 0, currentLineHeight );
-        ctxSel.stroke();
+        ctxSel.rect( positionAbsoluteX, positionAbsoluteY, 1, currentLineHeight );
+        ctxSel.fill();
 
         debugTimeEnd('cursor on');
 
