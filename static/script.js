@@ -325,7 +325,7 @@ var handleBackspace = function(){
 
     var prev, next;
 
-    // Principio de la primera linea
+    // Al principio de la línea
     if( /*currentLineId !== 0 &&*/ currentCharId === 0 ){
 
         // Principio del documento, lo comprobamos antes porque es un caso especial
@@ -380,7 +380,59 @@ var handleBackspace = function(){
     // En medio de una linea no primera
     }else if( currentLineId !== 0 ){
 
+        currentCharId--;
+
+        currentLine.string = currentLine.string.slice( 0, currentCharId ) + currentLine.string.slice( currentCharId + 1 );
+        realocation        = realocateLineInverse( currentLineId, currentCharId );
+
+        if( realocation ){
+
+            currentLineId--;
+
+            currentLine   = currentParagraph.lineList[ currentLineId ];
+            currentCharId = realocation;
+
+            /*
+            setCursor( currentPageId, currentParagraphId, currentLineId, currentCharId );
+            */
+
+            // To Do -> Esto podría ser una optimización en vez de usar el setCursor anterior. Sin embargo lo vamos a usar por ahora para usar casos generales
+            positionAbsoluteY -= currentLine.height;
+
+            // Reiniciamos la posición horizontal
+            positionAbsoluteX  = 20; // Gap
+            positionAbsoluteX += currentPage.marginLeft;
+            positionAbsoluteX += currentLine.charList[ currentCharId - 1 ];
+
+        }
+
+        /*else{
+
+            currentLine.charList.push( ctx.measureText( currentLine.string ).width );
+            currentCharId++;
+
+            prev = currentLine.charList[ currentCharId - 2 ] || 0;
+            next = currentLine.charList[ currentCharId - 1 ];
+
+            positionAbsoluteX += next - prev;
+
+        }
+
+        prev = currentLine.charList[ currentCharId - 2 ] || 0;
+        next = currentLine.charList[ currentCharId - 1 ];
+
+        positionAbsoluteX   += ( prev - next );
+        currentLine.string   = currentLine.string.slice( 0, currentCharId - 1 ) + currentLine.string.slice( currentCharId );
+        currentLine.charList = currentLine.charList.slice( 0, currentCharId - 1 );
+
+        for( var i = currentCharId; i <= currentLine.string.length; i++ ){
+            currentLine.charList.push( ctx.measureText( currentLine.string.slice( 0, i ) ).width );
+        }
+
+        currentCharId--;
+
         realocateLineInverse( currentLineId, currentCharId );
+        */
 
     // En medio de la primera linea, caso generalista
     }else{
@@ -447,6 +499,8 @@ var handleChar = function( newChar ){
 
     // Cualquier otra posición
     }else{
+
+        // To Do -> Realocation
         
         currentLine.string   = currentLine.string.slice( 0, currentCharId ) + newChar + currentLine.string.slice( currentCharId );
         currentLine.charList = currentLine.charList.slice( 0, currentCharId );
@@ -560,17 +614,16 @@ var realocateLine = function( id, propagated ){
 
         if( !currentParagraph.lineList[ id + 1 ] ){
 
-            console.log('creamos párrafo');
-
             newLine                   = createLine( currentParagraph );
             currentParagraph.height  += newLine.height;
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, id + 1 ).concat( newLine ).concat( currentParagraph.lineList.slice( id + 1 ) );
+            newLine.string            = words[ i ];
 
+        }else{
+            currentParagraph.lineList[ id + 1 ].string = words[ i ] + ' ' + currentParagraph.lineList[ id + 1 ].string;
         }
 
         counter += words[ i ].length;
-
-        currentParagraph.lineList[ id + 1 ].string = words[ i ] + ' ' + currentParagraph.lineList[ id + 1 ].string;
 
         // No debemos tener en cuenta los espacios del final de la línea
         if( ctx.measureText( trimRight( words.slice( 0, i ).join('') ) ).width <= line.width ){
@@ -598,29 +651,46 @@ var realocateLine = function( id, propagated ){
 
 var realocateLineInverse = function( id, modifiedChar ){
 
+    var line = currentParagraph.lineList[ id ];
+
     // Si se ha modificado algún caracter de la primera palabra, comprobar si entra en la fila anterior
-    if( currentLine.string.indexOf(' ') > modifiedChar || currentLine.string.indexOf(' ') === -1 ){
+    if(
+        line.string.indexOf(' ') >= modifiedChar || // Usamos >= porque ahora el espacio puede estar ocupando la posición eliminada
+        line.string.indexOf(' ') === -1 // Caso especial, solo hay una palabra
+    ){
 
-        var tmp = currentLine.string.split(' ')[ 0 ];
+        // Generamos el listado de palabras
+        var words = line.string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
+        var tmp   = currentParagraph.lineList[ id - 1 ].string + ' ' + words[ 0 ];
+        var newLine = currentParagraph.lineList[ id - 1 ];
 
-        tmp = currentParagraph.lineList[ currentLineId - 1 ].string + tmp;
+        if( newLine.width >= ctx.measureText( trimRight( tmp ) ).width ){
 
-        if( currentParagraph.lineList[ currentLineId - 1 ].width >= ctx.measureText( tmp ).width ){
+            newLine.string = tmp;
+            line.string    = words.slice( 1 ).join('');
+            line.charList  = [];
 
-            currentParagraph.lineList[ currentLineId - 1 ].string = tmp;
-            currentLine.string = currentLine.string.split(' ').slice( 1 );
+            for( var i = 1; i <= line.string.length; i++ ){
+                line.charList.push( ctx.measureText( line.string.slice( 0, i ) ).width );
+            }
+
+            for( var i = newLine.charList.length + 1; i <= newLine.string.length; i++ ){
+                newLine.charList.push( ctx.measureText( newLine.string.slice( 0, i ) ).width );
+            }
+
+            return trimRight( newLine.string ).length;
 
         }
 
     }
 
-    return;
+    return 0;
 
 };
 
 var resetBlink = function(){
 
-    blinkTime    = Date.now();
+    blinkTime    = Date.now().
     blinkStatus  = 0;
     blinkCurrent = false;
 
