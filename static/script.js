@@ -1089,8 +1089,8 @@ var updateBlink = function(){
         blinkCurrent = newCurrent;
 
         checkCanvasSelectSize();
-
-        ctxSel.rect( positionAbsoluteX, positionAbsoluteY, 1, currentLineHeight );
+        
+        ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY, 10 ), 1, currentLineHeight );
         ctxSel.fill();
 
         debugTimeEnd('cursor on');
