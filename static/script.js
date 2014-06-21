@@ -59,9 +59,11 @@ var currentParagraph   = null;
 var currentParagraphId = null;
 var currentLine        = null;
 var currentLineId      = null;
-var currentLineHeight  = null;
+var currentNode        = null;
+var currentNodeId      = null;
 var currentCharId      = null;
 var currentStyle       = '12pt Helvetica';
+var currentLineHeight  = null;
 var positionAbsoluteX  = null;
 var positionAbsoluteY  = null;
 
@@ -85,11 +87,23 @@ var createLine = function( paragraph ){
 
     // To Do -> Asignar la altura dinámicamente
     line.height = parseInt( testZone.css('line-height'), 10 );
+    line.width  = paragraph.width;
 
-    // To Do -> Herencia de ancho
-    line.width = paragraph.width;
+    // Creamos el nodo inicial
+    line.nodeList.push( createNode() );
 
     return line;
+
+};
+
+var createNode = function(){
+
+    var node = newNode();
+
+    // To Do -> Asignar la altura dinámicamente
+    node.height = parseInt( testZone.css('line-height'), 10 );
+
+    return node;
 
 };
 
@@ -171,8 +185,7 @@ var drawPages = function(){
     // Draw the lines
     var paragraph = null;
     var line      = null;
-    //var pHeritage = 0;
-    //var lHeritage = 0;
+    var node      = null;
     var heritage  = 0;
 
     for( var i = 0; i < page.paragraphList.length; i++ ){
@@ -185,23 +198,32 @@ var drawPages = function(){
             // To Do -> Altura de línea
             line = paragraph.lineList[ j ];
 
-            ctx.fillStyle = '#000';
-            ctx.font      = '12pt Helvetica';
+            if( line.totalChars ){
 
-            ctx.fillText(
+                for( var k = 0; k < line.nodeList.length; k++ ){
 
-                line.string,
-                page.marginLeft + 20,
-                page.marginTop + 20 + line.height + heritage
+                    node = line.nodeList[ k ];
 
-            );
+                    ctx.fillStyle = '#000';
+                    ctx.font      = '12pt Helvetica';
+
+                    ctx.fillText(
+
+                        node.string,
+                        page.marginLeft + 20,
+                        page.marginTop + 20 + line.height + heritage
+
+                    );
+
+                    console.log(node.string,page.marginLeft + 20,page.marginTop + 20 + line.height + heritage);
+
+                }
+
+            }
 
             heritage += line.height;
-            //lHeritage += line.height;
 
         }
-
-        //pHeritage += paragraph.height;
 
     }
 
@@ -551,14 +573,19 @@ var handleBackspace = function(){
 
 var handleChar = function( newChar ){
 
-    verticalKeysEnabled = false;
+    verticalKeysEnabled  = false;
 
     var prev, next, realocation;
 
     // Final de linea
-    if( currentLine.string.length === currentCharId ){
+    if(
+        currentLine.nodeList.length - 1 === currentNodeId &&
+        currentNode.string.length === currentCharId
+    ){
 
-        currentLine.string += newChar;
+        currentLine.totalChars++;
+
+        currentNode.string += newChar;
         realocation         = realocateLine( currentLineId );
 
         if( realocation ){
@@ -675,7 +702,7 @@ var handleEnter = function(){
         currentParagraph.height -= movedLines[ i ].height;
     }
 
-    setCursor( currentPageId, paragraphId, 0, 0 );
+    setCursor( currentPageId, paragraphId, 0, 0, 0 );
     realocateLineInverse( 0, 0 );
     resetBlink();
 
@@ -685,11 +712,24 @@ var newLine = function(){
 
     return {
 
-        charList   : [],
+        nodeList   : [],
         height     : null,
         width      : null,
-        string     : '',
-        styleStops : []
+        totalChars : 0
+
+    };
+
+};
+
+var newNode = function(){
+
+    return {
+
+        string   : '',
+        height   : null,
+        width    : null,
+        charList : [],
+        style    : {}
 
     };
 
@@ -883,18 +923,19 @@ var start = function(){
     
     input.focus();
     createPage( PAGE_A4, MARGIN_NORMAL );
-    setCursor( 0, 0, 0, 0 );
+    setCursor( 0, 0, 0, 0, 0 );
     drawPages();
 
 };
 
-var setCursor = function( page, paragraph, line, letter  ){
+var setCursor = function( page, paragraph, line, node, letter ){
 
     // Ignoramos si el cursor se vuelve a poner en el mismo sitio
     if(
         currentPageId === page &&
         currentParagraphId === paragraph &&
         currentLineId === line &&
+        currentNodeId === node &&
         currentCharId === letter
     ){
         return;
@@ -908,13 +949,16 @@ var setCursor = function( page, paragraph, line, letter  ){
     if( currentPageId !== page || currentParagraphId !== paragraph ){
         currentParagraph = currentPage.paragraphList[ paragraph ];
     }
-    
+
     if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line ){
 
-        currentLine = currentParagraph.lineList[ line ];
-        // To Do -> Actualizamos el alto de línea
-        currentLineHeight = parseInt( testZone.css('line-height'), 10 );
+        currentLine       = currentParagraph.lineList[ line ];
+        currentLineHeight = currentLine.height;
 
+    }
+
+    if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line || currentNodeId !== node ){
+        currentNode = currentLine.nodeList[ node ];
     }
 
     // Calculamos la posición vertical si es necesario
@@ -958,6 +1002,7 @@ var setCursor = function( page, paragraph, line, letter  ){
         currentPageId !== page ||
         currentParagraphId !== paragraph||
         currentLineId !== line ||
+        currentNodeId !== node ||
         currentCharId !== letter
     ){
 
@@ -971,6 +1016,7 @@ var setCursor = function( page, paragraph, line, letter  ){
         positionAbsoluteX += currentPage.marginLeft;
 
         // Posicion dentro de la linea
+        // To Do -> Sistema de nodos
         if( letter > 0 ){
             positionAbsoluteX += currentLine.charList[ letter - 1 ];
         }
