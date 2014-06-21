@@ -441,7 +441,7 @@ var handleArrowUp = function(){
     newCharList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].charList;
 
     for( var i = 0; i < newCharList.length; i++ ){
-            
+
         if( newCharList[ i ] > verticalKeysPosition ){
             charId = i - 1;
             break;
@@ -635,17 +635,48 @@ var handleEnter = function(){
     verticalKeysEnabled = false;
 
     // To Do -> Comprobar que entra en la página
-    // To Do -> Intro a mitad de línea
     // To Do -> Herencia de estilos
 
+    var paragraphId, i;
     var paragraph = createParagraph( currentPage );
     var endList   = currentPage.paragraphList.slice( currentParagraphId + 1 );
 
+    // Insertamos el párrafo en su posición
     currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 );
-    paragraph                 = currentPage.paragraphList.push( paragraph ) - 1;
+    paragraphId               = currentPage.paragraphList.push( paragraph ) - 1;
     currentPage.paragraphList = currentPage.paragraphList.concat( endList );
 
-    setCursor( currentPageId, paragraph, 0, 0 );
+    // Obtenemos las líneas a mover y el texto
+    var movedLines = currentParagraph.lineList.slice( currentLineId + 1 );
+    var firstLine  = paragraph.lineList[ 0 ];
+
+    firstLine.string   = currentLine.string.slice( currentCharId );
+    paragraph.lineList = paragraph.lineList.concat( movedLines );
+
+    // Actualizamos las alturas del nuevo párrafo
+    for( i = 0; i < movedLines.length; i++ ){
+        paragraph.height += movedLines[ i ].height;
+    }
+
+    // Actualizamos el tamaño de la primera línea
+    firstLine.charList = [];
+
+    for( i = 1; i <= firstLine.string.length; i++ ){
+        firstLine.charList.push( ctx.measureText( firstLine.string.slice( 0, i ) ).width );
+    }
+
+    // Eliminamos las líneas que ya no se van a usar y el texto residual
+    currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId + 1 );
+    currentLine.string        = currentLine.string.slice( 0, currentCharId );
+    currentLine.charList      = currentLine.charList.slice( 0, currentCharId );
+
+    // Actualizamos las alturas del párrafo de origen
+    for( i = 0; i < movedLines.length; i++ ){
+        currentParagraph.height -= movedLines[ i ].height;
+    }
+
+    setCursor( currentPageId, paragraphId, 0, 0 );
+    realocateLineInverse( 0, 0 );
     resetBlink();
 
 };
@@ -776,6 +807,8 @@ var realocateLineInverse = function( id, modifiedChar ){
 
     }
 
+    console.log( currentParagraph );
+
     // Si se ha modificado algún caracter de la primera palabra, comprobar si entra en la fila anterior
     if(
         line.string.indexOf(' ') >= modifiedChar || // Usamos >= porque ahora el espacio puede estar ocupando la posición eliminada
@@ -803,7 +836,6 @@ var realocateLineInverse = function( id, modifiedChar ){
 
             }else{
 
-                console.log( currentParagraph.lineList );
                 currentParagraph.lineList = currentParagraph.lineList.filter( function( value, index ){
 
                     if( id !== index ){
@@ -815,8 +847,6 @@ var realocateLineInverse = function( id, modifiedChar ){
                     return false;
 
                 });
-
-                console.log( currentParagraph.lineList );
 
             }
 
@@ -1089,7 +1119,7 @@ var updateBlink = function(){
         blinkCurrent = newCurrent;
 
         checkCanvasSelectSize();
-        
+
         ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY, 10 ), 1, currentLineHeight );
         ctxSel.fill();
 
