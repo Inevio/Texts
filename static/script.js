@@ -46,9 +46,11 @@ var blinkStatus  = 0;
 var blinkCurrent = false;
 
 // Selection variables
-var selectionEnabled = false;
-var selectionStart   = null;
-var selectedEnabled  = true;
+var selectionEnabled     = false;
+var selectionStart       = null;
+var selectedEnabled      = true;
+var verticalKeysEnabled  = false;
+var verticalKeysPosition = 0;
 
 // Current variables
 var currentPage        = null;
@@ -207,7 +209,74 @@ var drawPages = function(){
 
 };
 
+var handleArrowDown = function(){
+
+    var pageId, paragraphId, lineId, charId, newCharList;
+
+    // Comprobamos si es la última línea del párrafo
+    if( currentLineId === currentParagraph.lineList.length - 1 ){
+
+        // Comprobamos si es el último párrafo de la página
+        if( currentParagraphId === currentPage.paragraphList.length - 1 ){
+
+            // Comprobamos si es la última página del documento
+            if( currentPageId === pageList.length - 1 ){
+                return;
+            }else{
+
+                pageId      = currentPageId + 1;
+                paragraphId = 0;
+                lineId      = 0;
+
+            }
+
+        }else{
+
+            pageId      = currentPageId;
+            paragraphId = currentParagraphId + 1;
+            lineId      = 0;
+
+        }
+
+    }else{
+
+        pageId      = currentPageId;
+        paragraphId = currentParagraphId;
+        lineId      = currentLineId + 1;
+
+    }
+
+    // Si no estaba activado el modo de teclas verticales lo activamos
+    if( !verticalKeysEnabled ){
+        
+        verticalKeysEnabled  = true;
+        verticalKeysPosition = currentLine.charList[ currentCharId ];
+
+    }
+
+    // Buscamos el nuevo caracter
+    newCharList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].charList;
+
+    for( var i = 0; i < newCharList.length; i++ ){
+
+        if( newCharList[ i ] > verticalKeysPosition ){
+            charId = i - 1;
+            break;
+        }else if( i === newCharList.length - 1 ){
+            charId = i + 1;
+            break;
+        }
+
+    }
+
+    setCursor( pageId, paragraphId, lineId, charId );
+    resetBlink();
+    
+};
+
 var handleArrowLeft = function(){
+
+    verticalKeysEnabled = false;
 
     // Principio de linea
     if( currentCharId === 0 ){
@@ -266,6 +335,8 @@ var handleArrowLeft = function(){
 
 var handleArrowRight = function(){
 
+    verticalKeysEnabled = false;
+
     if( currentCharId === currentLine.string.length ){
 
         var line, paragraph, page, charId;
@@ -321,7 +392,74 @@ var handleArrowRight = function(){
 
 };
 
+var handleArrowUp = function(){
+
+    var pageId, paragraphId, lineId, charId, newCharList;
+
+    // Comprobamos si es la primera línea del párrafo
+    if( currentLineId === 0 ){
+
+        // Comprobamos si es el primer párrafo de la página
+        if( currentParagraphId === 0 ){
+
+            // Comprobamos si es el primer página del documento
+            if( currentPageId === 0 ){
+                return;
+            }else{
+
+                pageId      = currentPageId - 1;
+                paragraphId = pageList[ pageId ].paragraphList.length - 1;
+                lineId      = pageList[ pageId ].paragraphList[ paragraphId ].lineList.length - 1;
+
+            }
+
+        }else{
+
+            pageId      = currentPageId;
+            paragraphId = currentParagraphId - 1;
+            lineId      = currentPage.paragraphList[ paragraphId ].lineList.length - 1;
+
+        }
+
+    }else{
+
+        pageId      = currentPageId;
+        paragraphId = currentParagraphId;
+        lineId      = currentLineId - 1;
+
+    }
+
+    // Si no estaba activado el modo de teclas verticales lo activamos
+    if( !verticalKeysEnabled ){
+        
+        verticalKeysEnabled  = true;
+        verticalKeysPosition = currentLine.charList[ currentCharId ];
+
+    }
+
+    // Buscamos el nuevo caracter
+    newCharList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].charList;
+
+    for( var i = 0; i < newCharList.length; i++ ){
+            
+        if( newCharList[ i ] > verticalKeysPosition ){
+            charId = i - 1;
+            break;
+        }else if( i === newCharList.length - 1 ){
+            charId = i + 1;
+            break;
+        }
+
+    }
+
+    setCursor( pageId, paragraphId, lineId, charId );
+    resetBlink();
+
+};
+
 var handleBackspace = function(){
+
+    verticalKeysEnabled = false;
 
     var prev, next, i;
 
@@ -413,6 +551,8 @@ var handleBackspace = function(){
 
 var handleChar = function( newChar ){
 
+    verticalKeysEnabled = false;
+
     var prev, next, realocation;
 
     // Final de linea
@@ -491,6 +631,8 @@ var handleChar = function( newChar ){
 };
 
 var handleEnter = function(){
+
+    verticalKeysEnabled = false;
 
     // To Do -> Comprobar que entra en la página
     // To Do -> Intro a mitad de línea
@@ -980,8 +1122,12 @@ input.on( 'keydown', function(e){
         handleEnter();
     }else if( e.which === 37 ){
         handleArrowLeft();
+    }else if( e.which === 38 ){
+        handleArrowUp();
     }else if( e.which === 39 ){
         handleArrowRight();
+    }else if( e.which === 40 ){
+        handleArrowDown();
     }else{
         console.log( e.which );
     }
@@ -992,6 +1138,8 @@ input.on( 'keydown', function(e){
 
 selections
 .on( 'mousedown', function(e){
+
+    verticalKeysEnabled = false;
 
     selectionEnabled = true;
     e.preventDefault();
