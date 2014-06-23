@@ -1,4 +1,3 @@
-
 /*global $:true console:true*/
 
 'use strict';
@@ -63,9 +62,10 @@ var currentParagraph   = null;
 var currentParagraphId = null;
 var currentLine        = null;
 var currentLineId      = null;
+var currentLineCharId  = null;
 var currentNode        = null;
 var currentNodeId      = null;
-var currentCharId      = null;
+var currentNodeCharId  = null;
 var currentStyle       = '12pt Helvetica';
 var currentLineHeight  = null;
 var positionAbsoluteX  = null;
@@ -301,7 +301,7 @@ var handleArrowDown = function(){
     if( !verticalKeysEnabled ){
         
         verticalKeysEnabled  = true;
-        verticalKeysPosition = currentLine.charList[ currentCharId ];
+        verticalKeysPosition = currentLine.charList[ currentLineCharId ];
 
     }
 
@@ -330,10 +330,10 @@ var handleArrowLeft = function(){
     verticalKeysEnabled = false;
 
     // Principio de linea
-    if( currentCharId === 0 ){
+    if( currentLineCharId === 0 ){
 
         // Principio del documento, lo comprobamos antes porque es un caso especial
-        if( !currentPageId && !currentParagraphId && !currentLineId && !currentCharId ){
+        if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
             return;
         }
 
@@ -372,11 +372,11 @@ var handleArrowLeft = function(){
 
     }else{
 
-        var prev = currentNode.charList[ currentCharId - 2 ] || 0;
-        var next = currentNode.charList[ currentCharId - 1 ];
+        var prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
+        var next = currentNode.charList[ currentLineCharId - 1 ];
 
         positionAbsoluteX += prev - next;
-        currentCharId--;
+        currentLineCharId--;
 
     }
 
@@ -388,7 +388,7 @@ var handleArrowRight = function(){
 
     verticalKeysEnabled = false;
 
-    if( currentCharId === currentLine.totalChars ){
+    if( currentLineCharId === currentLine.totalChars ){
 
         var line, paragraph, page, charId;
 
@@ -430,12 +430,12 @@ var handleArrowRight = function(){
 
     }else{
 
-        var prev = currentNode.charList[ currentCharId - 1 ] || 0;
-        var next = currentNode.charList[ currentCharId ];
+        var prev = currentNode.charList[ currentLineCharId - 1 ] || 0;
+        var next = currentNode.charList[ currentLineCharId ];
 
         positionAbsoluteX += next - prev;
 
-        currentCharId++;
+        currentLineCharId++;
 
     }
 
@@ -484,7 +484,7 @@ var handleArrowUp = function(){
     if( !verticalKeysEnabled ){
         
         verticalKeysEnabled  = true;
-        verticalKeysPosition = currentLine.charList[ currentCharId ];
+        verticalKeysPosition = currentLine.charList[ currentLineCharId ];
 
     }
 
@@ -515,10 +515,10 @@ var handleBackspace = function(){
     var prev, next, i, realocation;
 
     // Al principio de la línea
-    if( /*currentLineId !== 0 &&*/ currentCharId === 0 ){
+    if( /*currentLineId !== 0 &&*/ currentLineCharId === 0 ){
 
         // Principio del documento, lo comprobamos antes porque es un caso especial
-        if( !currentPageId && !currentParagraphId && !currentLineId && !currentCharId ){
+        if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
             return;
         }
 
@@ -557,36 +557,36 @@ var handleBackspace = function(){
 
     }else{
 
-        prev = currentNode.charList[ currentCharId - 2 ] || 0;
-        next = currentNode.charList[ currentCharId - 1 ];
+        prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
+        next = currentNode.charList[ currentLineCharId - 1 ];
 
-        currentNode.string = currentNode.string.slice( 0, currentCharId - 1 ) + currentNode.string.slice( currentCharId );
-        // To Do -> realocation        = realocateLineInverse( currentLineId, currentCharId - 1 );
+        currentNode.string = currentNode.string.slice( 0, currentLineCharId - 1 ) + currentNode.string.slice( currentLineCharId );
+        // To Do -> realocation        = realocateLineInverse( currentLineId, currentLineCharId - 1 );
 
         if( realocation ){
 
             currentLineId--;
 
             currentLine   = currentParagraph.lineList[ currentLineId ];
-            currentCharId = realocation;
+            currentLineCharId = realocation;
 
             positionAbsoluteY -= currentLine.height;
 
             // Reiniciamos la posición horizontal
             positionAbsoluteX  = 20; // Gap
             positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += currentLine.charList[ currentCharId - 1 ];
+            positionAbsoluteX += currentLine.charList[ currentLineCharId - 1 ];
 
         }else{
 
             positionAbsoluteX    += prev - next;
-            currentNode.charList  = currentNode.charList.slice( 0, currentCharId - 1 );
+            currentNode.charList  = currentNode.charList.slice( 0, currentLineCharId - 1 );
 
-            for( i = currentCharId; i <= currentNode.string.length; i++ ){
+            for( i = currentLineCharId; i <= currentNode.string.length; i++ ){
                 currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
             }
 
-            currentCharId--;
+            currentLineCharId--;
 
         }
 
@@ -605,7 +605,7 @@ var handleChar = function( newChar ){
     // Final de linea -> Final del último nodo de la línea
     if(
         currentLine.nodeList.length - 1 === currentNodeId &&
-        currentNode.string.length === currentCharId
+        currentNode.string.length === currentLineCharId
     ){
 
         currentLine.totalChars++;
@@ -624,21 +624,21 @@ var handleChar = function( newChar ){
 
             currentLine   = currentParagraph.lineList[ currentLineId ];
             currentNode   = currentLine.nodeList[ currentNodeId ];
-            currentCharId = realocation;
+            currentLineCharId = realocation;
 
             positionAbsoluteY += currentLine.height;
 
             // Reiniciamos la posición horizontal
             positionAbsoluteX  = 20; // Gap
             positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += currentNode.charList[ currentCharId - 1 ]; // To Do -> No siempre es el 0 y no se está cambiando
+            positionAbsoluteX += currentNode.charList[ currentLineCharId - 1 ]; // To Do -> No siempre es el 0 y no se está cambiando
 
         }else{
 
-            currentCharId++;
+            currentLineCharId++;
 
-            prev = currentNode.charList[ currentCharId - 2 ] || 0;
-            next = currentNode.charList[ currentCharId - 1 ];
+            prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
+            next = currentNode.charList[ currentLineCharId - 1 ];
 
             positionAbsoluteX += next - prev;
 
@@ -650,10 +650,10 @@ var handleChar = function( newChar ){
 
         currentLine.totalChars++;
 
-        currentNode.string   = currentNode.string.slice( 0, currentCharId ) + newChar + currentNode.string.slice( currentCharId );
-        currentNode.charList = currentNode.charList.slice( 0, currentCharId );
+        currentNode.string   = currentNode.string.slice( 0, currentLineCharId ) + newChar + currentNode.string.slice( currentLineCharId );
+        currentNode.charList = currentNode.charList.slice( 0, currentLineCharId );
 
-        for( var i = currentCharId + 1; i <= currentNode.string.length; i++ ){
+        for( var i = currentLineCharId + 1; i <= currentNode.string.length; i++ ){
             currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
         }
 
@@ -666,21 +666,21 @@ var handleChar = function( newChar ){
 
             currentLine   = currentParagraph.lineList[ currentLineId ];
             currentNode   = currentLine.nodeList[ currentNodeId ];
-            currentCharId = realocation;
+            currentLineCharId = realocation;
 
             positionAbsoluteY += currentLine.height;
 
             // Reiniciamos la posición horizontal
             positionAbsoluteX  = 20; // Gap
             positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += currentNode.charList[ currentCharId - 1 ]; // To Do -> No siempre es el 0 y no se está cambiando
+            positionAbsoluteX += currentNode.charList[ currentLineCharId - 1 ]; // To Do -> No siempre es el 0 y no se está cambiando
 
         }else{
 
-            currentCharId++;
+            currentLineCharId++;
 
-            var prev = currentNode.charList[ currentCharId - 2 ] || 0;
-            var next = currentNode.charList[ currentCharId - 1 ];
+            var prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
+            var next = currentNode.charList[ currentLineCharId - 1 ];
 
             positionAbsoluteX += next - prev;
 
@@ -713,8 +713,8 @@ var handleEnter = function(){
     var firstLine  = paragraph.lineList[ 0 ];
 
     // To Do -> Herencia de nodos
-    firstLine.nodeList[ 0 ].string = currentLine.nodeList[ 0 ].string.slice( currentCharId );
-    //firstLine.string   = currentLine.string.slice( currentCharId );
+    firstLine.nodeList[ 0 ].string = currentLine.nodeList[ 0 ].string.slice( currentLineCharId );
+    //firstLine.string   = currentLine.string.slice( currentLineCharId );
     paragraph.lineList = paragraph.lineList.concat( movedLines );
 
     // Actualizamos las alturas del nuevo párrafo
@@ -733,8 +733,8 @@ var handleEnter = function(){
     // Eliminamos las líneas que ya no se van a usar y el texto residual
     // To Do -> Herencia de nodos
     currentParagraph.lineList          = currentParagraph.lineList.slice( 0, currentLineId + 1 );
-    currentLine.nodeList[ 0 ].string   = currentLine.nodeList[ 0 ].string.slice( 0, currentCharId );
-    currentLine.nodeList[ 0 ].charList = currentLine.nodeList[ 0 ].charList.slice( 0, currentCharId );
+    currentLine.nodeList[ 0 ].string   = currentLine.nodeList[ 0 ].string.slice( 0, currentLineCharId );
+    currentLine.nodeList[ 0 ].charList = currentLine.nodeList[ 0 ].charList.slice( 0, currentLineCharId );
 
     // Actualizamos las alturas del párrafo de origen
     for( i = 0; i < movedLines.length; i++ ){
@@ -1002,7 +1002,7 @@ var setCursor = function( page, paragraph, line, node, letter ){
         currentParagraphId === paragraph &&
         currentLineId === line &&
         currentNodeId === node &&
-        currentCharId === letter
+        currentLineCharId === letter
     ){
         return;
     }
@@ -1071,7 +1071,7 @@ var setCursor = function( page, paragraph, line, node, letter ){
         currentParagraphId !== paragraph||
         currentLineId !== line ||
         currentNodeId !== node ||
-        currentCharId !== letter
+        currentLineCharId !== letter
     ){
 
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
@@ -1095,7 +1095,7 @@ var setCursor = function( page, paragraph, line, node, letter ){
     currentParagraphId = paragraph;
     currentLineId      = line;
     currentNodeId      = node;
-    currentCharId      = letter;
+    currentLineCharId  = letter;
 
     resetBlink();
     
@@ -1357,12 +1357,45 @@ selections
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
 
-    // Buscamos el caracter
-    for( var i = 0; i < line.string.length; i++ ){
+    // Buscamos el nodo y el charId
+    var node, nodeId, charId;
 
-        if( line.charList[ i ] - ( ( line.charList[ i ] - ( line.charList[ i - 1 ] || 0 ) ) / 2 ) + width >= posX ){
-            width += line.charList[ i ];
-            break;
+    // Principio del primer nodo
+    if( width >= posX ){
+        
+        nodeId = 0;
+        node   = line.nodeList[ nodeId ];
+        charId = 0;
+
+    }else{
+
+        for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
+
+            if(  width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
+
+                node = line.nodeList[ nodeId ];
+
+                for( charId = 0; charId < node.string.length; charId++ ){
+
+                    if( node.charList[ charId ] - ( ( node.charList[ charId ] - ( node.charList[ charId - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                        break;
+                    }
+
+                }
+
+            }
+
+            width += line.nodeList[ nodeId ].width;
+            
+        }
+
+        // Si no hay nodo es porque está al final de la línea
+        if( !node ){
+
+            nodeId = line.nodeList.length - 1;
+            node   = line.nodeList[ nodeId ];
+            charId = line.totalChars;
+
         }
 
     }
@@ -1375,12 +1408,14 @@ selections
         paragraph   : paragraph,
         lineId      : lineId,
         line        : line,
-        charId      : i
+        nodeId      : nodeId,
+        node        : node,
+        charId      : charId
 
     };
 
     // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
-    setCursor( pageId, paragraphId, lineId, i );
+    setCursor( pageId, paragraphId, lineId, nodeId, charId );
 
 })
 
