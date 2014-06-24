@@ -1084,9 +1084,12 @@ var setCursor = function( page, paragraph, line, node, letter ){
         positionAbsoluteX += currentPage.marginLeft;
 
         // Posicion dentro de la linea
-        // To Do -> Sistema de nodos
+        for( i = 0; i < node; i++ ){
+            positionAbsoluteX += currentLine.nodeList[ i ].width;
+        }
+
         if( letter > 0 ){
-            positionAbsoluteX += currentLine.charList[ letter - 1 ];
+            positionAbsoluteX += currentNode.charList[ letter - 1 ];
         }
 
     }
@@ -1369,6 +1372,8 @@ selections
 
     }else{
 
+        var stop = false;
+
         for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
 
             if(  width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
@@ -1378,9 +1383,14 @@ selections
                 for( charId = 0; charId < node.string.length; charId++ ){
 
                     if( node.charList[ charId ] - ( ( node.charList[ charId ] - ( node.charList[ charId - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                        stop = true;
                         break;
                     }
 
+                }
+
+                if( stop ){
+                    break;
                 }
 
             }
