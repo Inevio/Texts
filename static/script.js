@@ -329,54 +329,76 @@ var handleArrowLeft = function(){
 
     verticalKeysEnabled = false;
 
-    // Principio de linea
-    if( currentLineCharId === 0 ){
+    // Principio del nodo
+    if( currentNodeCharId === 0 ){
 
-        // Principio del documento, lo comprobamos antes porque es un caso especial
-        if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
-            return;
-        }
+        var page, paragraph, line, lineChar, node, nodeChar;
 
-        var line, paragraph, page, charId;
+        // Principio de linea
+        if( currentLineCharId === 0 ){
 
-        // Principio de párrafo
-        if( currentLineId === 0 ){
+            // Principio del documento, lo comprobamos antes porque es un caso especial
+            if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
+                return;
+            }
 
-            // Principio de página
-            if( currentParagraphId === 0){
+            // Principio de párrafo
+            if( currentLineId === 0 ){
 
-                page      = currentPageId - 1;
-                paragraph = pageList[ page ].paragraphList.length - 1;
-                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+                // Principio de página
+                if( currentParagraphId === 0){
+
+                    page      = currentPageId - 1;
+                    paragraph = pageList[ page ].paragraphList.length - 1;
+                    line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                    charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+
+                }else{
+
+                    page      = currentPageId;
+                    paragraph = currentParagraphId - 1;
+                    line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                    charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+
+                }
 
             }else{
 
                 page      = currentPageId;
-                paragraph = currentParagraphId - 1;
-                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+                paragraph = currentParagraphId;
+                line      = currentLineId - 1;
+                lineChar  = currentParagraph.lineList[ line ].totalChars;
+                node      = currentParagraph.lineList[ line ].nodeList.length - 1;
+                nodeChar  = currentParagraph.lineList[ line ].nodeList[ node ].string.length;
 
             }
 
         }else{
 
+            // To Do -> Este caso se puede optimizar y no meter en un setCursor
             page      = currentPageId;
             paragraph = currentParagraphId;
-            line      = currentLineId - 1;
-            charId    = currentParagraph.lineList[ line ].string.length;
+            line      = currentLineId;
+            lineChar  = currentLineCharId - 1;
+            node      = currentNodeId - 1;
+            nodeChar  = currentLine.nodeList[ node ].string.length;
 
         }
 
-        setCursor( page, paragraph, line, charId );
+        console.log( page, paragraph, line, node, nodeChar );
+
+        setCursor( page, paragraph, line, node, nodeChar );
 
     }else{
+
+        console.log('otra via', currentLineCharId, currentNodeCharId );
 
         var prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
         var next = currentNode.charList[ currentLineCharId - 1 ];
 
         positionAbsoluteX += prev - next;
         currentLineCharId--;
+        currentNodeCharId--;
 
     }
 
@@ -597,6 +619,7 @@ var handleBackspace = function(){
 };
 
 // Nodos Ready
+// Nodos Char Ready
 var handleChar = function( newChar ){
 
     verticalKeysEnabled = false;
@@ -660,27 +683,29 @@ var handleChar = function( newChar ){
         currentNode.width = currentNode.charList[ currentNode.charList.length - 1 ];
         var realocation   = realocateLine( currentLineId );
 
-        if( realocation ){
+        if( realocation.lineChar ){
 
             currentLineId++;
 
-            currentLine   = currentParagraph.lineList[ currentLineId ];
-            currentNode   = currentLine.nodeList[ currentNodeId ];
-            currentLineCharId = realocation;
+            currentLine       = currentParagraph.lineList[ currentLineId ];
+            currentNode       = currentLine.nodeList[ currentNodeId ];
+            currentLineCharId = realocation.lineChar;
+            currentNodeCharId = realocation.nodeChar;
 
             positionAbsoluteY += currentLine.height;
 
             // Reiniciamos la posición horizontal
             positionAbsoluteX  = 20; // Gap
             positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += currentNode.charList[ currentLineCharId - 1 ]; // To Do -> No siempre es el 0 y no se está cambiando
+            positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
         }else{
 
             currentLineCharId++;
+            currentNodeCharId++;
 
-            var prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
-            var next = currentNode.charList[ currentLineCharId - 1 ];
+            var prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
+            var next = currentNode.charList[ currentNodeCharId - 1 ];
 
             positionAbsoluteX += next - prev;
 
@@ -811,7 +836,7 @@ var newParagraph = function(){
 var realocateLine = function( id, propagated ){
 
     var line    = currentParagraph.lineList[ id ];
-    var counter = 0;
+    var counter = { lineChar : 0, nodeChar : 0 };
     var i;
 
     if( getNodesWidth( line ) <= line.width ){
@@ -873,7 +898,8 @@ var realocateLine = function( id, propagated ){
                 newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
                 newLine.nodeList    = [ newNode ];
                 newLine.totalChars  = newNode.string.length;
-                counter            += newNode.string.length; // To Do -> Y si se estaba escribiendo en medio de la palabra?
+                counter.lineChar   += newNode.string.length; // To Do -> Y si se estaba escribiendo en medio de la palabra?
+                counter.nodeChar   += newNode.string.length; // To Do -> Y si se estaba escribiendo en medio de la palabra?
                 stop                = true;
 
                 break;
@@ -985,16 +1011,17 @@ var resetBlink = function(){
 };
 
 // Nodos Ready
+// Nodos Char Ready
 var start = function(){
 
     input.focus();
     createPage( PAGE_A4, MARGIN_NORMAL );
-    setCursor( 0, 0, 0, 0, 0 );
+    setCursor( 0, 0, 0, 0, 0, 0 );
     drawPages();
 
 };
 
-var setCursor = function( page, paragraph, line, node, letter ){
+var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
 
     // Ignoramos si el cursor se vuelve a poner en el mismo sitio
     if(
@@ -1002,7 +1029,7 @@ var setCursor = function( page, paragraph, line, node, letter ){
         currentParagraphId === paragraph &&
         currentLineId === line &&
         currentNodeId === node &&
-        currentLineCharId === letter
+        currentLineCharId === lineChar
     ){
         return;
     }
@@ -1071,7 +1098,7 @@ var setCursor = function( page, paragraph, line, node, letter ){
         currentParagraphId !== paragraph||
         currentLineId !== line ||
         currentNodeId !== node ||
-        currentLineCharId !== letter
+        currentLineCharId !== lineChar
     ){
 
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
@@ -1085,11 +1112,12 @@ var setCursor = function( page, paragraph, line, node, letter ){
 
         // Posicion dentro de la linea
         for( i = 0; i < node; i++ ){
+            console.log( currentLine, i, node );
             positionAbsoluteX += currentLine.nodeList[ i ].width;
         }
 
-        if( letter > 0 ){
-            positionAbsoluteX += currentNode.charList[ letter - 1 ];
+        if( nodeChar > 0 ){
+            positionAbsoluteX += currentNode.charList[ nodeChar - 1 ];
         }
 
     }
@@ -1097,8 +1125,9 @@ var setCursor = function( page, paragraph, line, node, letter ){
     currentPageId      = page;
     currentParagraphId = paragraph;
     currentLineId      = line;
+    currentLineCharId  = lineChar;
     currentNodeId      = node;
-    currentLineCharId  = letter;
+    currentNodeCharId  = nodeChar;
 
     resetBlink();
     
@@ -1286,6 +1315,7 @@ input
 });
 
 selections
+// Nodos Ready
 .on( 'mousedown', function(e){
 
     verticalKeysEnabled = false;
@@ -1360,19 +1390,21 @@ selections
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
 
-    // Buscamos el nodo y el charId
-    var node, nodeId, charId;
+    // Buscamos el nodo y el nodeChar
+    var lineChar, node, nodeId, nodeChar;
 
     // Principio del primer nodo
     if( width >= posX ){
         
-        nodeId = 0;
-        node   = line.nodeList[ nodeId ];
-        charId = 0;
+        nodeId   = 0;
+        node     = line.nodeList[ nodeId ];
+        nodeChar = 0;
+        lineChar = 0;
 
     }else{
 
         var stop = false;
+        lineChar = 0;
 
         for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
 
@@ -1380,12 +1412,15 @@ selections
 
                 node = line.nodeList[ nodeId ];
 
-                for( charId = 0; charId < node.string.length; charId++ ){
+                for( nodeChar = 0; nodeChar < node.string.length; ){
 
-                    if( node.charList[ charId ] - ( ( node.charList[ charId ] - ( node.charList[ charId - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                    if( node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
                         stop = true;
                         break;
                     }
+
+                    lineChar++;
+                    nodeChar++;
 
                 }
 
@@ -1395,16 +1430,18 @@ selections
 
             }
 
-            width += line.nodeList[ nodeId ].width;
+            width    += line.nodeList[ nodeId ].width;
+            lineChar += line.nodeList[ nodeId ].string.length;
             
         }
 
         // Si no hay nodo es porque está al final de la línea
         if( !node ){
 
-            nodeId = line.nodeList.length - 1;
-            node   = line.nodeList[ nodeId ];
-            charId = line.totalChars;
+            lineChar = line.totalChars;
+            nodeId   = line.nodeList.length - 1;
+            node     = line.nodeList[ nodeId ];
+            nodeChar = node.string.length;
 
         }
 
@@ -1418,14 +1455,15 @@ selections
         paragraph   : paragraph,
         lineId      : lineId,
         line        : line,
+        lineChar    : lineChar,
         nodeId      : nodeId,
         node        : node,
-        charId      : charId
+        nodeChar    : nodeChar
 
     };
 
     // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
-    setCursor( pageId, paragraphId, lineId, nodeId, charId );
+    setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
 
 })
 
