@@ -387,7 +387,7 @@ var handleArrowLeft = function(){
 
         console.log( page, paragraph, line, node, nodeChar );
 
-        setCursor( page, paragraph, line, node, nodeChar );
+        setCursor( page, paragraph, line, lineChar, node, nodeChar );
 
     }else{
 
@@ -915,6 +915,12 @@ var realocateLine = function( id, propagated ){
         }
 
     }
+
+    for( i = line.nodeList.length - 1, j = 0; i >= 0; i-- ){
+        j += line.nodeList[ i ].string.length;
+    }
+
+    line.totalChars = j;
 
     realocateLine( id + 1, true );
 
