@@ -385,13 +385,9 @@ var handleArrowLeft = function(){
 
         }
 
-        console.log( page, paragraph, line, node, nodeChar );
-
         setCursor( page, paragraph, line, lineChar, node, nodeChar );
 
     }else{
-
-        console.log('otra via', currentLineCharId, currentNodeCharId );
 
         var prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
         var next = currentNode.charList[ currentLineCharId - 1 ];
@@ -410,45 +406,66 @@ var handleArrowRight = function(){
 
     verticalKeysEnabled = false;
 
-    if( currentLineCharId === currentLine.totalChars ){
+    // Final del nodo
+    if( currentNodeCharId === currentNode.string.length ){
 
-        var line, paragraph, page, charId;
+        var page, paragraph, line, lineChar, node, nodeChar;
 
-        // Final de párrafo
-        if( currentLineId === currentParagraph.lineList.length - 1 ){
+        // Final de linea
+        if( currentLineCharId === currentLine.totalChars ){
 
-            // Final de página
-            if( currentParagraphId === currentPage.paragraphList.length -1 ){
+            // Final de párrafo
+            if( currentLineId === currentParagraph.lineList.length - 1 ){
 
-                // Final de documento
-                if( currentPageId === pageList.length - 1 ){
-                    return;
+                // Final de página
+                if( currentParagraphId === currentPage.paragraphList.length -1 ){
+
+                    // Final de documento
+                    if( currentPageId === pageList.length - 1 ){
+                        return;
+                    }
+
+                    page      = currentPageId + 1;
+                    paragraph = 0;
+                    line      = 0;
+                    lineChar  = 0;
+                    node      = 0;
+                    nodeChar  = 0;
+
+                }else{
+
+                    page      = currentPageId;
+                    paragraph = currentParagraphId + 1;
+                    line      = 0;
+                    lineChar  = 0;
+                    node      = 0;
+                    nodeChar  = 0;
+
                 }
-
-                page      = currentPageId + 1;
-                paragraph = 0;
-                line      = 0;
-                charId    = 0;
 
             }else{
 
                 page      = currentPageId;
-                paragraph = currentParagraphId + 1;
-                line      = 0;
-                charId    = 0;
+                paragraph = currentParagraphId;
+                line      = currentLineId + 1;
+                lineChar  = 0;
+                node      = 0;
+                nodeChar  = 0;
 
             }
 
         }else{
-
+            
             page      = currentPageId;
             paragraph = currentParagraphId;
-            line      = currentLineId + 1;
-            charId    = 0;
+            line      = currentLineId;
+            lineChar  = lineChar + 1;
+            node      = currentNodeId + 1;
+            nodeChar  = 0;
 
         }
 
-        setCursor( page, paragraph, line, charId );
+        setCursor( page, paragraph, line, lineChar, node, nodeChar );
 
     }else{
 
@@ -458,6 +475,7 @@ var handleArrowRight = function(){
         positionAbsoluteX += next - prev;
 
         currentLineCharId++;
+        currentNodeCharId++;
 
     }
 
@@ -1118,7 +1136,6 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
 
         // Posicion dentro de la linea
         for( i = 0; i < node; i++ ){
-            console.log( currentLine, i, node );
             positionAbsoluteX += currentLine.nodeList[ i ].width;
         }
 
