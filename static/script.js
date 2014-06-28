@@ -325,6 +325,8 @@ var handleArrowDown = function(){
     
 };
 
+// Nodos Ready
+// Nodos Char Ready
 var handleArrowLeft = function(){
 
     verticalKeysEnabled = false;
@@ -351,14 +353,18 @@ var handleArrowLeft = function(){
                     page      = currentPageId - 1;
                     paragraph = pageList[ page ].paragraphList.length - 1;
                     line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                    charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+                    lineChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].totalChars;
+                    node      = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1
+                    nodeChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList[ node ].string.length;
 
                 }else{
 
                     page      = currentPageId;
                     paragraph = currentParagraphId - 1;
-                    line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                    charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+                    line      = currentPage.paragraphList[ paragraph ].lineList.length - 1;
+                    lineChar  = currentPage.paragraphList[ paragraph ].lineList[ line ].totalChars;
+                    node      = currentPage.paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1;
+                    nodeChar  = currentPage.paragraphList[ paragraph ].lineList[ line ].nodeList[ node ].string.length;
 
                 }
 
@@ -402,6 +408,8 @@ var handleArrowLeft = function(){
 
 };
 
+// Nodos Ready
+// Nodos Char Ready
 var handleArrowRight = function(){
 
     verticalKeysEnabled = false;
@@ -455,7 +463,7 @@ var handleArrowRight = function(){
             }
 
         }else{
-            
+
             page      = currentPageId;
             paragraph = currentParagraphId;
             line      = currentLineId;
