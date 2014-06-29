@@ -436,8 +436,8 @@ var handleArrowLeft = function(){
 
     }else{
 
-        var prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
-        var next = currentNode.charList[ currentLineCharId - 1 ];
+        var prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
+        var next = currentNode.charList[ currentNodeCharId - 1 ];
 
         positionAbsoluteX += prev - next;
         currentLineCharId--;
@@ -518,8 +518,8 @@ var handleArrowRight = function(){
 
     }else{
 
-        var prev = currentNode.charList[ currentLineCharId - 1 ] || 0;
-        var next = currentNode.charList[ currentLineCharId ];
+        var prev = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        var next = currentNode.charList[ currentNodeCharId ];
 
         positionAbsoluteX += next - prev;
 
@@ -691,10 +691,10 @@ var handleBackspace = function(){
 
     }else{
 
-        prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
-        next = currentNode.charList[ currentLineCharId - 1 ];
+        prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
+        next = currentNode.charList[ currentNodeCharId - 1 ];
 
-        currentNode.string = currentNode.string.slice( 0, currentLineCharId - 1 ) + currentNode.string.slice( currentLineCharId );
+        currentNode.string = currentNode.string.slice( 0, currentNodeCharId - 1 ) + currentNode.string.slice( currentNodeCharId );
         // To Do -> realocation        = realocateLineInverse( currentLineId, currentLineCharId - 1 );
 
         if( realocation ){
@@ -714,9 +714,9 @@ var handleBackspace = function(){
         }else{
 
             positionAbsoluteX    += prev - next;
-            currentNode.charList  = currentNode.charList.slice( 0, currentLineCharId - 1 );
+            currentNode.charList  = currentNode.charList.slice( 0, currentNodeCharId - 1 );
 
-            for( i = currentLineCharId; i <= currentNode.string.length; i++ ){
+            for( i = currentNodeCharId; i <= currentNode.string.length; i++ ){
                 currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
             }
 
@@ -786,10 +786,10 @@ var handleChar = function( newChar ){
 
         currentLine.totalChars++;
 
-        currentNode.string   = currentNode.string.slice( 0, currentLineCharId ) + newChar + currentNode.string.slice( currentLineCharId );
-        currentNode.charList = currentNode.charList.slice( 0, currentLineCharId );
+        currentNode.string   = currentNode.string.slice( 0, currentNodeCharId ) + newChar + currentNode.string.slice( currentNodeCharId );
+        currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
 
-        for( var i = currentLineCharId + 1; i <= currentNode.string.length; i++ ){
+        for( var i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
             currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
         }
 
@@ -851,7 +851,7 @@ var handleEnter = function(){
     var firstLine  = paragraph.lineList[ 0 ];
 
     // To Do -> Herencia de nodos
-    firstLine.nodeList[ 0 ].string = currentLine.nodeList[ 0 ].string.slice( currentLineCharId );
+    firstLine.nodeList[ 0 ].string = currentLine.nodeList[ 0 ].string.slice( currentNodeCharId );
     //firstLine.string   = currentLine.string.slice( currentLineCharId );
     paragraph.lineList = paragraph.lineList.concat( movedLines );
 
@@ -871,8 +871,8 @@ var handleEnter = function(){
     // Eliminamos las líneas que ya no se van a usar y el texto residual
     // To Do -> Herencia de nodos
     currentParagraph.lineList          = currentParagraph.lineList.slice( 0, currentLineId + 1 );
-    currentLine.nodeList[ 0 ].string   = currentLine.nodeList[ 0 ].string.slice( 0, currentLineCharId );
-    currentLine.nodeList[ 0 ].charList = currentLine.nodeList[ 0 ].charList.slice( 0, currentLineCharId );
+    currentLine.nodeList[ 0 ].string   = currentLine.nodeList[ 0 ].string.slice( 0, currentNodeCharId );
+    currentLine.nodeList[ 0 ].charList = currentLine.nodeList[ 0 ].charList.slice( 0, currentNodeCharId );
 
     // Actualizamos las alturas del párrafo de origen
     for( i = 0; i < movedLines.length; i++ ){
