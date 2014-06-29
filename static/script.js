@@ -1,4 +1,6 @@
-/*global $:true console:true*/
+/*global $:true */
+/*global console:true*/
+/*global requestAnimationFrame:true*/
 
 'use strict';
 
@@ -262,7 +264,7 @@ var getNodesWidth = function( line, offset ){
 
 var handleArrowDown = function(){
 
-    var pageId, paragraphId, lineId, charId, newCharList;
+    var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
 
     // Comprobamos si es la última línea del párrafo
     if( currentLineId === currentParagraph.lineList.length - 1 ){
@@ -301,28 +303,49 @@ var handleArrowDown = function(){
     if( !verticalKeysEnabled ){
         
         verticalKeysEnabled  = true;
-        verticalKeysPosition = currentLine.charList[ currentLineCharId ];
+        verticalKeysPosition = currentNode.charList[ currentNodeCharId ];
 
-    }
-
-    // Buscamos el nuevo caracter
-    newCharList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].charList;
-
-    for( var i = 0; i < newCharList.length; i++ ){
-
-        if( newCharList[ i ] > verticalKeysPosition ){
-            charId = i - 1;
-            break;
-        }else if( i === newCharList.length - 1 ){
-            charId = i + 1;
-            break;
+        for( var k = 0; k < currentNodeId; k++ ){
+            verticalKeysPosition += currentLine.nodeList[ k ].width;
         }
 
     }
 
-    setCursor( pageId, paragraphId, lineId, charId );
+    // Buscamos el nuevo caracter
+    nodeList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].nodeList;
+    lineChar = 0;
+
+    for( var i = 0; i < nodeList.length; i++ ){
+
+        if( nodeList[ i ].width < verticalKeysPosition ){
+            lineChar += nodeList[ i ].string.length;
+            continue;
+        }
+
+        nodeId   = i;
+        charList = nodeList[ i ].charList;
+
+        for( var j = 0; j < charList.length; j++ ){
+
+            if( charList[ j ] > verticalKeysPosition ){
+                nodeChar = j - 1;
+                break;
+            }else if( j === charList.length - 1 ){
+                nodeChar = j + 1;
+                break;
+            }
+
+        }
+
+        lineChar += nodeChar;
+
+        break;
+
+    }
+
+    setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
     resetBlink();
-    
+
 };
 
 // Nodos Ready
@@ -354,7 +377,7 @@ var handleArrowLeft = function(){
                     paragraph = pageList[ page ].paragraphList.length - 1;
                     line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
                     lineChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].totalChars;
-                    node      = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1
+                    node      = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1;
                     nodeChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList[ node ].string.length;
 
                 }else{
@@ -493,7 +516,7 @@ var handleArrowRight = function(){
 
 var handleArrowUp = function(){
 
-    var pageId, paragraphId, lineId, charId, newCharList;
+    var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
 
     // Comprobamos si es la primera línea del párrafo
     if( currentLineId === 0 ){
@@ -532,26 +555,47 @@ var handleArrowUp = function(){
     if( !verticalKeysEnabled ){
         
         verticalKeysEnabled  = true;
-        verticalKeysPosition = currentLine.charList[ currentLineCharId ];
+        verticalKeysPosition = currentNode.charList[ currentNodeCharId ];
 
-    }
-
-    // Buscamos el nuevo caracter
-    newCharList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].charList;
-
-    for( var i = 0; i < newCharList.length; i++ ){
-
-        if( newCharList[ i ] > verticalKeysPosition ){
-            charId = i - 1;
-            break;
-        }else if( i === newCharList.length - 1 ){
-            charId = i + 1;
-            break;
+        for( var k = 0; k < currentNodeId; k++ ){
+            verticalKeysPosition += currentLine.nodeList[ k ].width;
         }
 
     }
 
-    setCursor( pageId, paragraphId, lineId, charId );
+    // Buscamos el nuevo caracter
+    nodeList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].nodeList;
+    lineChar = 0;
+
+    for( var i = 0; i < nodeList.length; i++ ){
+
+        if( nodeList[ i ].width < verticalKeysPosition ){
+            lineChar += nodeList[ i ].string.length;
+            continue;
+        }
+
+        nodeId   = i;
+        charList = nodeList[ i ].charList;
+
+        for( var j = 0; j < charList.length; j++ ){
+
+            if( charList[ j ] > verticalKeysPosition ){
+                nodeChar = j - 1;
+                break;
+            }else if( j === charList.length - 1 ){
+                nodeChar = j + 1;
+                break;
+            }
+
+        }
+
+        lineChar += nodeChar;
+
+        break;
+
+    }
+
+    setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
     resetBlink();
 
 };
@@ -562,33 +606,51 @@ var handleBackspace = function(){
 
     var prev, next, i, realocation;
 
-    // Al principio de la línea
-    if( /*currentLineId !== 0 &&*/ currentLineCharId === 0 ){
+    // Al principio del nodo
+    if( currentNodeCharId === 0 ){
 
-        // Principio del documento, lo comprobamos antes porque es un caso especial
-        if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
-            return;
-        }
+        // Al principio de la línea
+        if( /*currentLineId !== 0 &&*/ currentLineCharId === 0 ){
 
-        var line, paragraph, page, charId;
+            // Principio del documento, lo comprobamos antes porque es un caso especial
+            if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
+                return;
+            }
 
-        // Principio de párrafo
-        if( currentLineId === 0 ){
+            var page, paragraph, line, lineChar, node, nodeChar;
 
-            // Principio de página
-            if( currentParagraphId === 0){
+            // Principio de párrafo
+            if( currentLineId === 0 ){
 
-                page      = currentPageId - 1;
-                paragraph = pageList[ page ].paragraphList.length - 1;
-                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+                // Principio de página
+                if( currentParagraphId === 0){
+
+                    page      = currentPageId - 1;
+                    paragraph = pageList[ page ].paragraphList.length - 1;
+                    line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                    lineChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].totalChars;
+                    node      = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1;
+                    nodeChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList[ node ].string.length;
+
+                }else{
+
+                    page      = currentPageId;
+                    paragraph = currentParagraphId - 1;
+                    line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
+                    lineChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].totalChars;
+                    node      = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1;
+                    nodeChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList[ node ].string.length;
+
+                }
 
             }else{
 
                 page      = currentPageId;
-                paragraph = currentParagraphId - 1;
-                line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                charId    = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].string.length;
+                paragraph = currentParagraphId;
+                line      = currentLineId - 1;
+                lineChar  = currentParagraph.lineList[ line ].totalChars;
+                node      = currentParagraph.lineList[ line ].nodeList.length - 1;
+                nodeChar  = currentParagraph.lineList[ line ].nodeList[ node ].string.length;
 
             }
 
@@ -596,12 +658,14 @@ var handleBackspace = function(){
 
             page      = currentPageId;
             paragraph = currentParagraphId;
-            line      = currentLineId - 1;
-            charId    = currentParagraph.lineList[ line ].string.length;
+            line      = currentLineId;
+            lineChar  = currentLineCharId - 1;
+            node      = currentNodeId - 1;
+            nodeChar  = currentLine.nodeList[ node ].string.length;
 
         }
 
-        setCursor( page, paragraph, line, charId );
+        setCursor( page, paragraph, line, lineChar, node, nodeChar );
 
     }else{
 
@@ -635,6 +699,7 @@ var handleBackspace = function(){
             }
 
             currentLineCharId--;
+            currentNodeCharId--;
 
         }
 
@@ -792,7 +857,7 @@ var handleEnter = function(){
         currentParagraph.height -= movedLines[ i ].height;
     }
 
-    setCursor( currentPageId, paragraphId, 0, 0, 0 );
+    setCursor( currentPageId, paragraphId, 0, 0, 0, 0 );
     realocateLineInverse( 0, 0 );
     resetBlink();
 
