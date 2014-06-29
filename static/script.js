@@ -234,7 +234,8 @@ var drawPages = function(){
                     node = line.nodeList[ k ];
 
                     ctx.fillStyle = '#000';
-                    ctx.font      = '12pt Helvetica';
+
+                    setStyle( node.style );
 
                     ctx.fillText(
 
@@ -716,6 +717,8 @@ var handleBackspace = function(){
             positionAbsoluteX    += prev - next;
             currentNode.charList  = currentNode.charList.slice( 0, currentNodeCharId - 1 );
 
+            setStyle( currentNode.style );
+
             for( i = currentNodeCharId; i <= currentNode.string.length; i++ ){
                 currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
             }
@@ -788,6 +791,8 @@ var handleChar = function( newChar ){
 
         currentNode.string   = currentNode.string.slice( 0, currentNodeCharId ) + newChar + currentNode.string.slice( currentNodeCharId );
         currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
+
+        setStyle( currentNode.style );
 
         for( var i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
             currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
@@ -863,6 +868,8 @@ var handleEnter = function(){
     // Actualizamos el tamaño de la primera línea
     // To Do -> Herencia de nodos
     firstLine.nodeList[ 0 ].charList = [];
+
+    setStyle( firstLine.nodeList[ 0 ].style );
 
     for( i = 1; i <= firstLine.nodeList[ 0 ].string.length; i++ ){
         firstLine.nodeList[ 0 ].charList.push( ctx.measureText( firstLine.nodeList[ 0 ].string.slice( 0, i ) ).width );
@@ -986,6 +993,8 @@ var realocateLine = function( id, propagated ){
 
     // Comprobamos nodo por nodo que entra por el final (desde el último hasta el primero)
     for( i = line.nodeList.length - 1; i >= 0; i-- ){
+
+        setStyle( line.nodeList[ i ].style );
         
         words = line.nodeList[ i ].string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
 
@@ -1396,11 +1405,15 @@ var setRangeStyle = function( key, value ){
         currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
         currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
 
+        setStyle( newNode.style );
+
         for( i = 1; i <= newNode.string.length; i++ ){
             newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
         }
 
         newNode.width = newNode.charList[ i - 2 ] || 0;
+
+        setStyle( endNode.style );
 
         for( i = 1; i <= endNode.string.length; i++ ){
             endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
@@ -1413,6 +1426,20 @@ var setRangeStyle = function( key, value ){
         drawPages();
 
     }
+
+};
+
+var setStyle = function( style ){
+
+    var font = '';
+
+    if( style['font-weight'] ){
+        font += style['font-weight'];
+    }
+
+    font += ' ' + currentStyle;
+
+    ctx.font = font;
 
 };
 
@@ -1803,6 +1830,8 @@ selections
 
 toolsLine
 .on( 'click', '.tool-button', function(){
+
+    input.focus();
 
     var value = $(this).attr('data-tool');
 
