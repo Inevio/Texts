@@ -609,6 +609,8 @@ var handleBackspace = function(){
     // Al principio del nodo
     if( currentNodeCharId === 0 ){
 
+        var page, paragraph, line, lineChar, node, nodeChar;
+
         // Al principio de la línea
         if( /*currentLineId !== 0 &&*/ currentLineCharId === 0 ){
 
@@ -616,8 +618,6 @@ var handleBackspace = function(){
             if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
                 return;
             }
-
-            var page, paragraph, line, lineChar, node, nodeChar;
 
             // Principio de párrafo
             if( currentLineId === 0 ){
