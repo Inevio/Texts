@@ -72,8 +72,18 @@ var currentStyle       = '12pt Helvetica';
 var currentLineHeight  = null;
 var positionAbsoluteX  = null;
 var positionAbsoluteY  = null;
+var currentRangeStart  = null;
+var currentRangeEnd    = null;
+
+var refrescos = 0;
+
+setInterval( function(){
+    //console.log( refrescos );
+    refrescos = 0;
+}, 1000 );
 
 // Nodos Ready
+// Nodos Char Ready
 var checkCanvasPagesSize = function(){
     
     canvasPages.width  = pages.width();
@@ -82,6 +92,7 @@ var checkCanvasPagesSize = function(){
 };
 
 // Nodos Ready
+// Nodos Char Ready
 var checkCanvasSelectSize = function(){
 
     canvasSelect.width  = selections.width();
@@ -160,6 +171,7 @@ var createParagraph = function( page ){
 };
 
 // Nodos Ready
+// Nodos Char Ready
 var debugTime = function( name ){
 
     if( DEBUG ){
@@ -169,6 +181,7 @@ var debugTime = function( name ){
 };
 
 // Nodos Ready
+// Nodos Char Ready
 var debugTimeEnd = function( name ){
     
     if( DEBUG ){
@@ -201,8 +214,8 @@ var drawPages = function(){
     var paragraph = null;
     var line      = null;
     var node      = null;
-    var heritage  = 0;
-
+    var wHeritage = 0;
+    var hHeritage = 0;
     for( var i = 0; i < page.paragraphList.length; i++ ){
 
         paragraph = page.paragraphList[ i ];
@@ -211,7 +224,8 @@ var drawPages = function(){
 
             // To Do -> Gaps
             // To Do -> Altura de línea
-            line = paragraph.lineList[ j ];
+            line      = paragraph.lineList[ j ];
+            wHeritage = 0;
 
             // To Do -> if( line.totalChars ){
 
@@ -225,16 +239,18 @@ var drawPages = function(){
                     ctx.fillText(
 
                         node.string,
-                        page.marginLeft + 20,
-                        page.marginTop + 20 + line.height + heritage
+                        page.marginLeft + 20 + wHeritage,
+                        page.marginTop + 20 + line.height + hHeritage
 
                     );
+
+                    wHeritage += node.width;
 
                 }
 
             //}
 
-            heritage += line.height;
+            hHeritage += line.height;
 
         }
 
@@ -262,6 +278,8 @@ var getNodesWidth = function( line, offset ){
 
 };
 
+// Nodos Ready
+// Nodos Char Ready
 var handleArrowDown = function(){
 
     var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
@@ -514,6 +532,8 @@ var handleArrowRight = function(){
 
 };
 
+// Nodos Ready
+// Nodos Char Ready
 var handleArrowUp = function(){
 
     var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
@@ -600,6 +620,8 @@ var handleArrowUp = function(){
 
 };
 
+// Nodos Ready
+// Nodos Char Ready
 var handleBackspace = function(){
 
     verticalKeysEnabled = false;
@@ -1233,9 +1255,10 @@ var setRange = function( start, end ){
 
     // To Do -> Podemos pasarle las coordenadas para evitar cálculos
     // To Do -> Si no se le pueden pasar las coordenadas podemos utilizar los bucles para las dos alturas
+    // To Do -> Cachear los hashes para evitar redibujados si son iguales a los que ya hay
 
-    var startHash = start.pageId + '-' + start.paragraphId  + '-' + start.lineId  + '-' + start.charId;
-    var endHash   = end.pageId + '-' + end.paragraphId  + '-' + end.lineId  + '-' + end.charId;
+    var startHash = start.pageId + '-' + start.paragraphId  + '-' + start.lineId  + '-' + start.lineChar;
+    var endHash   = end.pageId + '-' + end.paragraphId  + '-' + end.lineId  + '-' + end.lineChar;
 
     // Si son iguales no es un rango
     if( startHash === endHash ){
@@ -1243,7 +1266,9 @@ var setRange = function( start, end ){
         return;
     }
 
-    selectedEnabled = true;
+    selectedEnabled   = true;
+    currentRangeStart = start;
+    currentRangeEnd   = end;
 
     // Ordenamos los imputs
     if( startHash > endHash ){
@@ -1295,7 +1320,11 @@ var setRange = function( start, end ){
     startWidth += start.page.marginLeft;
 
     // Posición del caracter
-    startWidth += start.line.charList[ start.charId - 1 ] || 0;
+    for( i = 0; i < start.nodeId; i++ ){
+        startWidth += start.line.nodeList[ i ].width;
+    }
+
+    startWidth += start.node.charList[ start.nodeChar - 1 ] || 0;
 
     // Procedimiento de coloreado
     // Si principio y fin están en la misma fila
@@ -1305,13 +1334,30 @@ var setRange = function( start, end ){
         start.lineId === end.lineId
     ){
 
+        var width = 0;
+
+        if( start.nodeId === end.nodeId ){
+            width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+        }else{
+
+            // To Do -> Múltiples nodos
+            /*
+            for( i = start.nodeId; i < end.nodeId; i++ ){
+                width += start.line.nodeList[ i ].width;
+            }
+
+            width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+            */
+
+        }
+
         checkCanvasSelectSize();
 
         ctxSel.rect(
 
             startWidth,
             startHeight,
-            end.line.charList[ end.charId - 1 ] - ( start.line.charList[ start.charId - 1 ] || 0 ),
+            width,
             start.line.height
 
         );
@@ -1322,7 +1368,52 @@ var setRange = function( start, end ){
         ctxSel.globalAlpha = 1;
 
     }
+
+    // To Do -> Múltiples líneas
     
+};
+
+var setRangeStyle = function( key, value ){
+
+    // To Do -> Varias lineas
+    var i, newNode, endNode;
+
+    // Mismo nodo
+    if(
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId &&
+        currentRangeStart.nodeId === currentRangeEnd.nodeId
+    ){
+
+        newNode                         = createNode( currentLine );
+        endNode                         = createNode( currentLine );
+        newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+        newNode.style[ key ]            = value;
+        endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+        endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
+        currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
+        currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
+        currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
+
+        for( i = 1; i <= newNode.string.length; i++ ){
+            newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+        }
+
+        newNode.width = newNode.charList[ i - 2 ] || 0;
+
+        for( i = 1; i <= endNode.string.length; i++ ){
+            endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
+        }
+
+        endNode.width = endNode.charList[ i - 2 ] || 0;
+
+        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
+
+        drawPages();
+
+    }
+
 };
 
 // Nodos Ready
@@ -1336,6 +1427,8 @@ var updateBlink = function(){
     if( selectedEnabled ){
         return;
     }
+
+    refrescos++;
 
     if( !blinkEnabled ){
 
@@ -1392,10 +1485,13 @@ input
 
     if( e.key && e.key.length === 1 ){
         handleChar( e.key );
+        drawPages();
     }else if( e.which === 8 ){
         handleBackspace();
+        drawPages();
     }else if( e.which === 13 ){
         handleEnter();
+        drawPages();
     }else if( e.which === 37 ){
         handleArrowLeft();
     }else if( e.which === 38 ){
@@ -1406,12 +1502,11 @@ input
         handleArrowDown();
     }
 
-    drawPages();
-
 });
 
 selections
 // Nodos Ready
+// Nodos Char Ready
 .on( 'mousedown', function(e){
 
     verticalKeysEnabled = false;
@@ -1419,6 +1514,7 @@ selections
     selectionEnabled = true;
     e.preventDefault();
 
+    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar;
     var offset = selections.offset();
     var posX   = e.pageX - offset.left;
     var posY   = e.pageY - offset.top;
@@ -1430,52 +1526,46 @@ selections
     height += 20;
 
     // Buscamos la página
-    for( var page = 0; page < pageList.length; page++ ){
+    for( pageId = 0; pageId < pageList.length; pageId++ ){
 
-        if( pageList[ page ].height + height < posY ){
-            height += pageList[ page ].height;
+        if( pageList[ pageId ].height + height < posY ){
+            height += pageList[ pageId ].height;
         }else{
             break;
         }
 
     }
 
-    var pageId = page;
-
-    page = pageList[ page ];
+    page = pageList[ pageId ];
 
     // Tenemos en cuenta el margen superior
     height += page.marginTop;
 
     // Buscamos el párrafo
-    for( var paragraph = 0; paragraph < page.paragraphList.length; paragraph++ ){
+    for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
 
-        if( page.paragraphList[ paragraph ].height + height < posY ){
-            height += page.paragraphList[ paragraph ].height;
+        if( page.paragraphList[ paragraphId ].height + height < posY ){
+            height += page.paragraphList[ paragraphId ].height;
         }else{
             break;
         }
 
     }
 
-    var paragraphId = paragraph;
-
-    paragraph = page.paragraphList[ paragraph ];
+    paragraph = page.paragraphList[ paragraphId ];
 
     // Buscamos la línea
-    for( var line = 0; line < paragraph.lineList.length; line++ ){
+    for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
         
-        if( paragraph.lineList[ line ].height + height < posY ){
-            height += paragraph.lineList[ line ].height;
+        if( paragraph.lineList[ lineId ].height + height < posY ){
+            height += paragraph.lineList[ lineId ].height;
         }else{
             break;
         }
 
     }
 
-    var lineId = line;
-
-    line = paragraph.lineList[ line ];
+    line = paragraph.lineList[ lineId ];
 
     // Buscamos la posición horizontal
     var width = 0;
@@ -1487,8 +1577,6 @@ selections
     width += page.marginLeft;
 
     // Buscamos el nodo y el nodeChar
-    var lineChar, node, nodeId, nodeChar;
-
     // Principio del primer nodo
     if( width >= posX ){
         
@@ -1569,6 +1657,7 @@ selections
         return;
     }
 
+    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar;
     var offset = selections.offset();
     var posX   = e.pageX - offset.left;
     var posY   = e.pageY - offset.top;
@@ -1580,52 +1669,46 @@ selections
     height += 20;
 
     // Buscamos la página
-    for( var page = 0; page < pageList.length; page++ ){
+    for( pageId = 0; pageId < pageList.length; pageId++ ){
 
-        if( pageList[ page ].height + height < posY ){
-            height += pageList[ page ].height;
+        if( pageList[ pageId ].height + height < posY ){
+            height += pageList[ pageId ].height;
         }else{
             break;
         }
 
     }
 
-    var pageId = page;
-
-    page = pageList[ page ];
+    page = pageList[ pageId ];
 
     // Tenemos en cuenta el margen superior
     height += page.marginTop;
 
     // Buscamos el párrafo
-    for( var paragraph = 0; paragraph < page.paragraphList.length; paragraph++ ){
+    for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
 
-        if( page.paragraphList[ paragraph ].height + height < posY ){
-            height += page.paragraphList[ paragraph ].height;
+        if( page.paragraphList[ paragraphId ].height + height < posY ){
+            height += page.paragraphList[ paragraphId ].height;
         }else{
             break;
         }
 
     }
 
-    var paragraphId = paragraph;
-
-    paragraph = page.paragraphList[ paragraph ];
+    paragraph = page.paragraphList[ paragraphId ];
 
     // Buscamos la línea
-    for( var line = 0; line < paragraph.lineList.length; line++ ){
+    for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
         
-        if( paragraph.lineList[ line ].height + height < posY ){
-            height += paragraph.lineList[ line ].height;
+        if( paragraph.lineList[ lineId ].height + height < posY ){
+            height += paragraph.lineList[ lineId ].height;
         }else{
             break;
         }
 
     }
 
-    var lineId = line;
-
-    line = paragraph.lineList[ line ];
+    line = paragraph.lineList[ lineId ];
 
     // Buscamos la posición horizontal
     var width = 0;
@@ -1636,12 +1719,57 @@ selections
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
 
-    // Buscamos el caracter
-    for( var i = 0; i < line.string.length; i++ ){
+    // Buscamos el nodo y el nodeChar
+    // Principio del primer nodo
+    if( width >= posX ){
+        
+        nodeId   = 0;
+        node     = line.nodeList[ nodeId ];
+        nodeChar = 0;
+        lineChar = 0;
 
-        if( line.charList[ i ] - ( ( line.charList[ i ] - ( line.charList[ i - 1 ] || 0 ) ) / 2 ) + width >= posX ){
-            width += line.charList[ i ];
-            break;
+    }else{
+
+        var stop = false;
+        lineChar = 0;
+
+        for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
+
+            if(  width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
+
+                node = line.nodeList[ nodeId ];
+
+                for( nodeChar = 0; nodeChar < node.string.length; ){
+
+                    if( node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                        stop = true;
+                        break;
+                    }
+
+                    lineChar++;
+                    nodeChar++;
+
+                }
+
+                if( stop ){
+                    break;
+                }
+
+            }
+
+            width    += line.nodeList[ nodeId ].width;
+            lineChar += line.nodeList[ nodeId ].string.length;
+            
+        }
+
+        // Si no hay nodo es porque está al final de la línea
+        if( !node ){
+
+            lineChar = line.totalChars;
+            nodeId   = line.nodeList.length - 1;
+            node     = line.nodeList[ nodeId ];
+            nodeChar = node.string.length;
+
         }
 
     }
@@ -1658,7 +1786,10 @@ selections
             paragraph   : paragraph,
             lineId      : lineId,
             line        : line,
-            charId      : i
+            lineChar    : lineChar,
+            nodeId      : nodeId,
+            node        : node,
+            nodeChar    : nodeChar
 
         }
 
@@ -1668,6 +1799,17 @@ selections
 
 .on( 'mouseup', function(e){
     selectionEnabled = false;
+});
+
+toolsLine
+.on( 'click', '.tool-button', function(){
+
+    var value = $(this).attr('data-tool');
+
+    if( value === 'bold' ){
+        setRangeStyle( 'font-weight', value );
+    }
+
 });
 
 // Start
