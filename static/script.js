@@ -1471,7 +1471,13 @@ var setRangeStyle = function( key, value ){
         currentRangeStart.nodeId === currentRangeEnd.nodeId
     ){
 
-        if( currentRangeStart.nodeChar === 0 ){
+        // Si es todo el nodo
+        if( currentRangeStart.nodeChar === 0 && currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
+            
+            console.log('to do');
+
+        // Si comienza por el principio del nodo
+        }else if( currentRangeStart.nodeChar === 0 ){
 
             newNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
@@ -1497,8 +1503,12 @@ var setRangeStyle = function( key, value ){
             currentRangeStart.line.nodeList = [ newNode ].concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
             currentNode                     = currentRangeStart.line.nodeList[ currentNodeId ];
 
+        // Si termina por el final del nodo
         }else if( currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
+            
             console.log('to do');
+
+        // El resto de casos
         }else{
 
             newNode                         = createNode( currentLine );
@@ -1531,9 +1541,74 @@ var setRangeStyle = function( key, value ){
 
         }
 
-        drawPages();
+    // Varios nodos, misma linea
+    }else if(
+
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId
+
+    ){
+
+        // Tratamiento del primer nodo
+        // Comprobamos si es una selección completa del nodo
+        if( currentRangeStart.nodeChar === 0 && currentRangeStart.nodeChar === currentRangeStart.node.string.length ){
+
+            newNode = currentRangeStart.node;
+
+            newNode.style[ key ] = value;
+            newNode.charList     = [];
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= endNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+        // Es parcial
+        }else{
+            console.log('to do');
+        }
+
+        // Nodos intermedios
+        for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+
+            newNode = currentRangeStart.line.nodeList[ i ];
+
+            newNode.style[ key ] = value;
+            newNode.charList     = [];
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+            
+        }
+
+        // Tratamiento del último nodo
+        // Comprobamos si es una selección completa del nodo
+        if( currentRangeEnd.nodeChar === 0 && currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
+
+            newNode = currentRangeEnd.node;
+
+            newNode.style[ key ] = value;
+            newNode.charList     = [];
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+        // Es parcial
+        }else{
+            console.log('to do');
+        }
 
     }
+
+    drawPages();
 
 };
 
@@ -1541,8 +1616,12 @@ var setStyle = function( style ){
 
     var font = '';
 
+    if( style['font-style'] ){
+        font += style['font-style'];
+    }
+
     if( style['font-weight'] ){
-        font += style['font-weight'];
+        font += ( font.length ? ' ' : '' ) + style['font-weight'];
     }
 
     font += ' ' + currentStyle;
@@ -1948,6 +2027,8 @@ toolsLine
 
     if( value === 'bold' ){
         setRangeStyle( 'font-weight', value );
+    }else if( value === 'italic' ){
+        setRangeStyle( 'font-style', value );
     }
 
 });
