@@ -1426,15 +1426,14 @@ var setRange = function( start, end ){
             width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
         }else{
 
-            // To Do -> Múltiples nodos
-            /*
-            for( i = start.nodeId; i < end.nodeId; i++ ){
+            width += start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+            
+            for( i = start.nodeId + 1; i < end.nodeId; i++ ){
                 width += start.line.nodeList[ i ].width;
             }
 
-            width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
-            */
-
+            width += end.node.charList[ end.nodeChar - 1 ] || 0;
+            
         }
 
         checkCanvasSelectSize();
@@ -1869,7 +1868,7 @@ selections
         var stop = false;
         lineChar = 0;
 
-        for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
+        for( nodeId = selectionStart.nodeId; nodeId < line.nodeList.length; nodeId++ ){
 
             if(  width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
 
@@ -1878,7 +1877,6 @@ selections
                 for( nodeChar = 0; nodeChar < node.string.length; ){
 
                     if( node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
-                        stop = true;
                         break;
                     }
 
@@ -1887,14 +1885,14 @@ selections
 
                 }
 
-                if( stop ){
-                    break;
-                }
-
+                stop = true;
+                break;
+                
+            }else{
+                lineChar += line.nodeList[ nodeId ].string.length;
             }
 
-            width    += line.nodeList[ nodeId ].width;
-            //lineChar += line.nodeList[ nodeId ].string.length;
+            width += line.nodeList[ nodeId ].width;
             
         }
 
