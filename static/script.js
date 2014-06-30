@@ -1894,8 +1894,12 @@ selections
             }
 
             width    += line.nodeList[ nodeId ].width;
-            lineChar += line.nodeList[ nodeId ].string.length;
+            //lineChar += line.nodeList[ nodeId ].string.length;
             
+        }
+
+        if( !stop ){
+            nodeId--;
         }
 
         // Si no hay nodo es porque está al final de la línea
