@@ -379,10 +379,10 @@ var handleArrowLeft = function(){
         var page, paragraph, line, lineChar, node, nodeChar;
 
         // Principio de linea
-        if( currentLineCharId === 0 ){
+        if( currentLineCharId === 0 || ( currentNodeId > 0 && currentNodeCharId === 1 ) ){
 
             // Principio del documento, lo comprobamos antes porque es un caso especial
-            if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
+            if( !currentPageId && !currentParagraphId && !currentLineId ){
                 return;
             }
 
@@ -1430,8 +1430,9 @@ var setRangeStyle = function( key, value ){
 
             currentRangeStart.node.width    = currentRangeStart.node.charList[ i - 2 ] || 0;
             currentRangeStart.line.nodeList = [ newNode ].concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
+            currentNode                     = currentRangeStart.line.nodeList[ currentNodeId ];
 
-        }else if( currentRangeEnd.nodeChar === currentRangeEnd.string.length ){
+        }else if( currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
             console.log('to do');
         }else{
 
@@ -1461,10 +1462,9 @@ var setRangeStyle = function( key, value ){
 
             endNode.width                   = endNode.charList[ i - 2 ] || 0;
             currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
+            currentNode                     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
 
         }
-
-        //console.log( currentRangeStart, currentRangeEnd );
 
         drawPages();
 
