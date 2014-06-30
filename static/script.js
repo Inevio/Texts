@@ -261,6 +261,72 @@ var drawPages = function(){
 
 };
 
+var getCommonStyles = function( start, end ){
+
+    // Comprobamos si es el mismo nodo, es una optimización
+    if(
+
+        start.pageId === end.pageId &&
+        start.paragraphId === end.paragraphId &&
+        start.lineId === end.lineId &&
+        start.nodeId === end.nodeId
+    ){
+        return start.node.style;
+    }
+
+    var style         = $.extend( {}, start.node.style );
+    var styleCounter = Object.keys( style ).length;
+
+    // Recorremos todos los elementos seleccionados
+    var page, paragraph, line, node;
+
+    // Las páginas
+    for( var pageId = start.pageId; pageId <= end.pageId; pageId++ ){
+
+        page = pageList[ pageId ];
+
+        // Los párrafos
+        for( var paragraphId = start.paragraphId; paragraphId <= end.paragraphId; paragraphId++ ){
+
+            paragraph = page.paragraphList[ paragraphId ];
+
+            // Las líneas
+            for( var lineId = start.lineId; lineId <= end.lineId; lineId++ ){
+
+                line = paragraph.lineList[ lineId ];
+
+                // Los nodos
+                for( var nodeId = start.nodeId; nodeId <= end.nodeId; nodeId++ ){
+
+                    node = line.nodeList[ nodeId ];
+
+                    for( var i in style ){
+
+                        if( style[ i ] !== node.style[ i ] ){
+
+                            delete style[ i ];
+                            styleCounter--;
+
+                            if( !styleCounter ){
+                                return {};
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return style;
+
+};
+
 // Nodos Ready
 var getNodesWidth = function( line, offset ){
 
