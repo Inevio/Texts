@@ -509,9 +509,9 @@ var handleArrowRight = function(){
             page      = currentPageId;
             paragraph = currentParagraphId;
             line      = currentLineId;
-            lineChar  = lineChar + 1;
+            lineChar  = currentLineCharId + 1;
             node      = currentNodeId + 1;
-            nodeChar  = 0;
+            nodeChar  = 1;
 
         }
 
@@ -806,7 +806,8 @@ var handleChar = function( newChar ){
             currentLineId++;
 
             currentLine       = currentParagraph.lineList[ currentLineId ];
-            currentNode       = currentLine.nodeList[ currentNodeId ];
+            currentNodeId     = 0;
+            currentNode       = currentLine.nodeList[ 0 ];
             currentLineCharId = realocation.lineChar;
             currentNodeCharId = realocation.nodeChar;
 
@@ -1180,6 +1181,16 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
 
     }
 
+    /*
+    if( node > 0 && nodeChar === 0 ){
+        nodeChar = 1;
+    }
+    
+    // Comprobamos que si debemos movernos a otro nodo
+    console.log( currentLine, node, nodeChar );
+    */
+
+    // Actualizamos el nodo si es necesario
     if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line || currentNodeId !== node ){
         currentNode = currentLine.nodeList[ node ];
     }
@@ -1395,33 +1406,65 @@ var setRangeStyle = function( key, value ){
         currentRangeStart.nodeId === currentRangeEnd.nodeId
     ){
 
-        newNode                         = createNode( currentLine );
-        endNode                         = createNode( currentLine );
-        newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
-        newNode.style[ key ]            = value;
-        endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
-        endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
-        currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
-        currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
-        currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
+        if( currentRangeStart.nodeChar === 0 ){
 
-        setStyle( newNode.style );
+            newNode                         = createNode( currentLine );
+            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+            newNode.style[ key ]            = value;
+            currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
+            currentRangeStart.node.charList = [];
 
-        for( i = 1; i <= newNode.string.length; i++ ){
-            newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
+
+            setStyle( currentRangeStart.node.style );
+
+            for( i = 1; i <= currentRangeStart.node.string.length; i++ ){
+                currentRangeStart.node.charList.push( ctx.measureText( currentRangeStart.node.string.slice( 0, i ) ).width );
+            }
+
+            currentRangeStart.node.width    = currentRangeStart.node.charList[ i - 2 ] || 0;
+            currentRangeStart.line.nodeList = [ newNode ].concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
+
+        }else if( currentRangeEnd.nodeChar === currentRangeEnd.string.length ){
+            console.log('to do');
+        }else{
+
+            newNode                         = createNode( currentLine );
+            endNode                         = createNode( currentLine );
+            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+            newNode.style[ key ]            = value;
+            endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+            endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
+            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
+            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
+            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
+
+            setStyle( endNode.style );
+
+            for( i = 1; i <= endNode.string.length; i++ ){
+                endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
+            }
+
+            endNode.width                   = endNode.charList[ i - 2 ] || 0;
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
+
         }
 
-        newNode.width = newNode.charList[ i - 2 ] || 0;
-
-        setStyle( endNode.style );
-
-        for( i = 1; i <= endNode.string.length; i++ ){
-            endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
-        }
-
-        endNode.width = endNode.charList[ i - 2 ] || 0;
-
-        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
+        //console.log( currentRangeStart, currentRangeEnd );
 
         drawPages();
 
