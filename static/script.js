@@ -440,12 +440,12 @@ var handleArrowLeft = function(){
     verticalKeysEnabled = false;
 
     // Principio del nodo
-    if( currentNodeCharId === 0 ){
+    if( currentNodeCharId === 0 || ( currentNodeId > 0 && currentNodeCharId === 1 ) ){
 
         var page, paragraph, line, lineChar, node, nodeChar;
 
         // Principio de linea
-        if( currentLineCharId === 0 || ( currentNodeId > 0 && currentNodeCharId === 1 ) ){
+        if( currentLineCharId === 0 ){
 
             // Principio del documento, lo comprobamos antes porque es un caso especial
             if( !currentPageId && !currentParagraphId && !currentLineId ){
@@ -1583,7 +1583,7 @@ var setRangeStyle = function( key, value ){
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
             }
-            
+
         }
 
         // Tratamiento del último nodo
