@@ -441,6 +441,14 @@ var handleArrowLeft = function(){
 
     verticalKeysEnabled = false;
 
+    if( currentRangeStart ){
+        
+        setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+        resetBlink();
+        return;
+
+    }
+
     // Principio del nodo
     if( currentNodeCharId === 0 || ( currentNodeId > 0 && currentNodeCharId === 1 ) ){
 
@@ -525,7 +533,11 @@ var handleArrowRight = function(){
     verticalKeysEnabled = false;
 
     if( currentRangeEnd ){
+        
         setCursor( currentRangeEnd.pageId, currentRangeEnd.paragraphId, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+        resetBlink();
+        return;
+
     }
 
     // Final del nodo
