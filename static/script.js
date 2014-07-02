@@ -1604,13 +1604,36 @@ var setRangeStyle = function( key, value ){
 
             setStyle( newNode.style );
 
-            for( i = 1; i <= endNode.string.length; i++ ){
+            for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
             }
 
+            newNode.width = newNode.charList[ i - 2 ] || 0;
+
         // Es parcial
         }else{
-            console.log('to do');
+            
+            newNode                         = createNode( currentRangeStart.line );
+            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
+            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
+            newNode.style[ key ]            = value;
+            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
+            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
+            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ];
+            currentRangeStart.nodeId        = currentRangeStart.nodeId + 1;
+            currentRangeStart.nodeChar      = 0;
+            currentRangeEnd.nodeId          = currentRangeEnd.nodeId + 1;
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
+
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
+
         }
 
         // Nodos intermedios
@@ -1626,6 +1649,8 @@ var setRangeStyle = function( key, value ){
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
             }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
 
         }
 
@@ -1643,6 +1668,8 @@ var setRangeStyle = function( key, value ){
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
             }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
 
         // Es parcial
         }else{
