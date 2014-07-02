@@ -1256,6 +1256,14 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
     console.log( currentLine, node, nodeChar );
     */
 
+    // Comprobamos que estamos en la posición del nodo correcta
+    if( node > 0 && nodeChar === 0 ){
+        
+        node     = node - 1;
+        nodeChar = currentLine.nodeList[ node ].string.length;
+
+    }
+
     // Actualizamos el nodo si es necesario
     if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line || currentNodeId !== node ){
         currentNode = currentLine.nodeList[ node ];
@@ -1801,19 +1809,17 @@ selections
 
     }else{
 
-        var stop = false;
         lineChar = 0;
 
         for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
 
-            if(  width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
+            if( width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
 
                 node = line.nodeList[ nodeId ];
 
                 for( nodeChar = 0; nodeChar < node.string.length; ){
 
                     if( node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
-                        stop = true;
                         break;
                     }
 
@@ -1821,11 +1827,9 @@ selections
                     nodeChar++;
 
                 }
-
-                if( stop ){
-                    break;
-                }
-
+                
+                break;
+                
             }
 
             width    += line.nodeList[ nodeId ].width;
