@@ -1673,7 +1673,32 @@ var setRangeStyle = function( key, value ){
 
         // Es parcial
         }else{
-            console.log('to do');
+            
+            newNode                       = createNode( currentRangeEnd.line );
+            newNode.string                = currentRangeEnd.node.string.slice( 0, currentRangeEnd.nodeChar );
+            newNode.style                 = $.extend( {}, currentRangeEnd.node.style );
+            newNode.style[ key ]          = value;
+            currentRangeEnd.node.string   = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+            currentRangeEnd.node.charList = [];
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
+
+            setStyle( currentRangeEnd.node.style );
+
+            for( i = 1; i <= currentRangeEnd.node.string.length; i++ ){
+                currentRangeEnd.node.charList.push( ctx.measureText( currentRangeEnd.node.string.slice( 0, i ) ).width );
+            }
+
+            currentRangeEnd.node.width = currentRangeEnd.node.charList[ i - 2 ] || 0;
+
+            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( 0, currentRangeEnd.nodeId ).concat( newNode ).concat( currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId ) );
+            
         }
 
     }
