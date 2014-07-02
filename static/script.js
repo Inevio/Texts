@@ -174,6 +174,24 @@ var createParagraph = function( page ){
 
 // Nodos Ready
 // Nodos Char Ready
+var compareHashes = function( first, second ){
+
+    for( var i = 0; i < first.length; i++ ){
+
+        if( first[ i ] > second[ i ] ){
+            return -1;
+        }else if( second[ i ] > first[ i ] ){
+            return 1;
+        }
+
+    }
+
+    return 0;
+
+};
+
+// Nodos Ready
+// Nodos Char Ready
 var debugTime = function( name ){
 
     if( DEBUG ){
@@ -1373,17 +1391,17 @@ var setRange = function( start, end ){
     // To Do -> Podemos pasarle las coordenadas para evitar cálculos
     // To Do -> Si no se le pueden pasar las coordenadas podemos utilizar los bucles para las dos alturas
 
-    var startHash = start.pageId + '-' + start.paragraphId  + '-' + start.lineId  + '-' + start.lineChar;
-    var endHash   = end.pageId + '-' + end.paragraphId  + '-' + end.lineId  + '-' + end.lineChar;
+    var startHash = [ start.pageId, start.paragraphId, start.lineId, start.lineChar ];
+    var endHash   = [ end.pageId, end.paragraphId, end.lineId, end.lineChar ];
 
     // Si son iguales no es un rango
-    if( startHash === endHash ){
+    if( compareHashes( startHash, endHash ) === 0 ){
         resetBlink();
         return;
     }
 
     // Ordenamos los imputs
-    if( startHash > endHash ){
+    if( compareHashes( startHash, endHash ) === -1 ){
 
         var tmp;
 
@@ -1397,8 +1415,13 @@ var setRange = function( start, end ){
 
     }
 
-    if( currentRangeStartHash === startHash && currentRangeEndHash === endHash ){
-        console.log('mismo hash');
+    if(
+        currentRangeStartHash &&
+        currentRangeEndHash &&
+        compareHashes( currentRangeStartHash, startHash ) === 0 &&
+        compareHashes( currentRangeEndHash, endHash ) === 0
+    ){
+        //console.log('mismo hash');
         return;
     }
 
@@ -1497,7 +1520,7 @@ var setRange = function( start, end ){
 
     // To Do -> Múltiples líneas
 
-    selectionStart = start;
+    //selectionStart = start;
     
 };
 
@@ -1698,7 +1721,7 @@ var setRangeStyle = function( key, value ){
             currentRangeEnd.node.width = currentRangeEnd.node.charList[ i - 2 ] || 0;
 
             currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( 0, currentRangeEnd.nodeId ).concat( newNode ).concat( currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId ) );
-            
+
         }
 
     }
