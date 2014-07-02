@@ -58,22 +58,24 @@ var verticalKeysEnabled  = false;
 var verticalKeysPosition = 0;
 
 // Current variables
-var currentPage        = null;
-var currentPageId      = null;
-var currentParagraph   = null;
-var currentParagraphId = null;
-var currentLine        = null;
-var currentLineId      = null;
-var currentLineCharId  = null;
-var currentNode        = null;
-var currentNodeId      = null;
-var currentNodeCharId  = null;
-var currentStyle       = '12pt Helvetica';
-var currentLineHeight  = null;
-var positionAbsoluteX  = null;
-var positionAbsoluteY  = null;
-var currentRangeStart  = null;
-var currentRangeEnd    = null;
+var currentPage           = null;
+var currentPageId         = null;
+var currentParagraph      = null;
+var currentParagraphId    = null;
+var currentLine           = null;
+var currentLineId         = null;
+var currentLineCharId     = null;
+var currentNode           = null;
+var currentNodeId         = null;
+var currentNodeCharId     = null;
+var currentStyle          = '12pt Helvetica';
+var currentLineHeight     = null;
+var positionAbsoluteX     = null;
+var positionAbsoluteY     = null;
+var currentRangeStart     = null;
+var currentRangeEnd       = null;
+var currentRangeStartHash = null;
+var currentRangeEndHash   = null;
 
 var refrescos = 0;
 
@@ -521,6 +523,10 @@ var handleArrowLeft = function(){
 var handleArrowRight = function(){
 
     verticalKeysEnabled = false;
+
+    if( currentRangeEnd ){
+        setCursor( currentRangeEnd.pageId, currentRangeEnd.paragraphId, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+    }
 
     // Final del nodo
     if( currentNodeCharId === currentNode.string.length ){
@@ -1218,6 +1224,11 @@ var start = function(){
 
 var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
 
+    currentRangeStart     = null;
+    currentRangeEnd       = null;
+    currentRangeStartHash = null;
+    currentRangeEndHash   = null;
+
     // Ignoramos si el cursor se vuelve a poner en el mismo sitio
     if(
         currentPageId === page &&
@@ -1349,7 +1360,6 @@ var setRange = function( start, end ){
 
     // To Do -> Podemos pasarle las coordenadas para evitar cálculos
     // To Do -> Si no se le pueden pasar las coordenadas podemos utilizar los bucles para las dos alturas
-    // To Do -> Cachear los hashes para evitar redibujados si son iguales a los que ya hay
 
     var startHash = start.pageId + '-' + start.paragraphId  + '-' + start.lineId  + '-' + start.lineChar;
     var endHash   = end.pageId + '-' + end.paragraphId  + '-' + end.lineId  + '-' + end.lineChar;
@@ -1360,20 +1370,31 @@ var setRange = function( start, end ){
         return;
     }
 
-    selectedEnabled   = true;
-    currentRangeStart = start;
-    currentRangeEnd   = end;
-
     // Ordenamos los imputs
     if( startHash > endHash ){
 
-        var tmp = start;
+        var tmp;
 
-        start = end;
-        end   = tmp;
-        tmp   = null;
+        tmp       = start;
+        start     = end;
+        end       = tmp;
+        tmp       = startHash;
+        startHash = endHash;
+        endHash   = tmp;
+        tmp       = null;
 
     }
+
+    if( currentRangeStartHash === startHash && currentRangeEndHash === endHash ){
+        console.log('mismo hash');
+        return;
+    }
+
+    selectedEnabled       = true;
+    currentRangeStart     = start;
+    currentRangeEnd       = end;
+    currentRangeStartHash = startHash;
+    currentRangeEndHash   = endHash;
 
     // Calculamos la altura de inicio
     var startHeight = 0;
@@ -1463,6 +1484,8 @@ var setRange = function( start, end ){
     }
 
     // To Do -> Múltiples líneas
+
+    selectionStart = start;
     
 };
 
@@ -1849,6 +1872,10 @@ selections
 
     }
 
+    // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
+    setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
+    resetBlink();
+
     selectionStart = {
 
         pageId      : pageId,
@@ -1863,9 +1890,6 @@ selections
         nodeChar    : nodeChar
 
     };
-
-    // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
-    setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
 
 })
 
@@ -2018,7 +2042,7 @@ selections
 
 })
 
-.on( 'mouseup', function(e){
+.on( 'mouseup', function(){
     selectionEnabled = false;
 });
 
