@@ -2060,17 +2060,9 @@ selections
     }else{
 
         lineChar = 0;
-
-        // Tenemos en cuenta los nodos ignorados
-        for( nodeId = 0; nodeId < selectionStart.nodeId; nodeId++ ){
-
-            width    += line.nodeList[ nodeId ].width;
-            lineChar += line.nodeList[ nodeId ].string.length;
-
-        }
-
+        
         // Buscamos nodo a nodo
-        for( nodeId = selectionStart.nodeId; nodeId < line.nodeList.length; ){
+        for( nodeId = 0; nodeId < line.nodeList.length; ){
 
             // El caracter está en el nodo
             if( width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
