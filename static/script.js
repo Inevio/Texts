@@ -1590,13 +1590,13 @@ var setRange = function( start, end ){
             pageLoop  = pageList[ j ];
 
             // Recorremos los párrafos
-            for( k = paragraphLoopId; !finalPage || ( finalPage && k <= end.paragraphId ); k++ ){
+            for( k = paragraphLoopId; ( !finalPage && k < pageLoop.paragraphList.length ) || ( finalPage && k <= end.paragraphId ); k++ ){
 
                 finalParagraph = finalPage && k === end.paragraphId;
                 paragraphLoop  = pageLoop.paragraphList[ k ];
 
                 // Recorremos las líneas
-                for( m = lineLoopId; !finalParagraph || ( finalParagraph && m < end.lineId ); m++ ){
+                for( m = lineLoopId; ( !finalParagraph && m < paragraphLoop.lineList.length ) || ( finalParagraph && m < end.lineId ); m++ ){
 
                     lineLoop = paragraphLoop.lineList[ m ];
                     width    = 0;
@@ -1630,7 +1630,7 @@ var setRange = function( start, end ){
             paragraphLoopId = 0;
 
         }
-        
+
         // Coloreamos la línea del final de forma parcial
         width = 0;
 
