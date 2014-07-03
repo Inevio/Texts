@@ -1400,7 +1400,7 @@ var setRange = function( start, end ){
         return;
     }
 
-    // Ordenamos los imputs
+    // Ordenamos los inputs
     if( compareHashes( startHash, endHash ) === -1 ){
 
         var tmp;
@@ -2059,42 +2059,47 @@ selections
 
     }else{
 
-        var stop = false;
         lineChar = 0;
 
-        for( nodeId = selectionStart.nodeId; nodeId < line.nodeList.length; nodeId++ ){
+        // Tenemos en cuenta los nodos ignorados
+        for( nodeId = 0; nodeId < selectionStart.nodeId; nodeId++ ){
 
-            if(  width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
+            width    += line.nodeList[ nodeId ].width;
+            lineChar += line.nodeList[ nodeId ].string.length;
+
+        }
+
+        // Buscamos nodo a nodo
+        for( nodeId = selectionStart.nodeId; nodeId < line.nodeList.length; ){
+
+            // El caracter está en el nodo
+            if( width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
 
                 node = line.nodeList[ nodeId ];
 
                 for( nodeChar = 0; nodeChar < node.string.length; ){
-
-                    if( node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                    
+                    if(
+                        node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX
+                    ){
                         break;
                     }
 
-                    lineChar++;
                     nodeChar++;
+                    lineChar++;
 
                 }
 
-                stop = true;
                 break;
-                
-            }else{
-                lineChar += line.nodeList[ nodeId ].string.length;
+
             }
 
-            width += line.nodeList[ nodeId ].width;
-            
+            lineChar += line.nodeList[ nodeId ].string.length;
+            width    += line.nodeList[ nodeId ].width;
+            nodeId   += 1;
+
         }
 
-        if( !stop ){
-            nodeId--;
-        }
-
-        // Si no hay nodo es porque está al final de la línea
         if( !node ){
 
             lineChar = line.totalChars;
