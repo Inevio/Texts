@@ -1547,8 +1547,90 @@ var setRange = function( start, end ){
         startHeight += start.line.height;
 
         // Coloreamos las lineas intermedias de forma completa
-        // To Do
+        // Obtenemos los principios de los bucles
+        var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoop, lineLoopId, nodeLoopId, finalPage, finalParagraph, j, k, m, n;
 
+        nodeLoopId = start.nodeId + 1;
+
+        if( !start.line.nodeList[ nodeLoopId ] ){
+
+            lineLoopId = start.lineId + 1;
+            nodeLoopId = 0;
+
+            if( !start.paragraph.lineList[ lineLoopId ] ){
+
+                paragraphLoopId = start.paragraphId + 1;
+                lineLoopId      = 0;
+
+                if( !start.page.paragraphList[ paragraphLoopId ] ){
+                    pageLoopId = start.pageId + 1;
+                }else{
+                    pageLoopId = start.pageId;
+                }
+
+            }else{
+
+                paragraphLoopId = start.paragraphId;
+                pageLoopId      = start.pageId;
+
+            }
+
+        }else{
+
+            lineLoopId      = start.lineId;
+            paragraphLoopId = start.paragraphId;
+            pageLoopId      = start.pageId;
+
+        }
+
+        // Recorremos las páginas
+        for( j = pageLoopId; j <= end.pageId; j++ ){
+
+            finalPage = j === end.pageId;
+            pageLoop  = pageList[ j ];
+
+            // Recorremos los párrafos
+            for( k = paragraphLoopId; !finalPage || ( finalPage && k <= end.paragraphId ); k++ ){
+
+                finalParagraph = finalPage && k === end.paragraphId;
+                paragraphLoop  = pageLoop.paragraphList[ k ];
+
+                // Recorremos las líneas
+                for( m = lineLoopId; !finalParagraph || ( finalParagraph && m < end.lineId ); m++ ){
+
+                    lineLoop = paragraphLoop.lineList[ m ];
+                    width    = 0;
+
+                    // Obtenemos el tamaño de rectangulo a colorear
+                    for( n = 0; n < lineLoop.nodeList.length; n++ ){
+                        width += lineLoop.nodeList[ n ].width;
+                    }
+
+                    // Coloreamos la línea
+                    ctxSel.beginPath();
+                    ctxSel.rect(
+
+                        20 + end.page.marginLeft,
+                        startHeight,
+                        width,
+                        end.line.height
+
+                    );
+
+                    ctxSel.fill();
+                    
+                    startHeight += lineLoop.height;
+
+                }
+
+                lineLoopId = 0;
+
+            }
+
+            paragraphLoopId = 0;
+
+        }
+        
         // Coloreamos la línea del final de forma parcial
         width = 0;
 
