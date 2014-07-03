@@ -1313,7 +1313,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
     // Calculamos la posición vertical si es necesario
     if(
         currentPageId !== page ||
-        currentParagraphId !== paragraph||
+        currentParagraphId !== paragraph ||
         currentLineId !== line
     ){
 
@@ -1421,7 +1421,6 @@ var setRange = function( start, end ){
         compareHashes( currentRangeStartHash, startHash ) === 0 &&
         compareHashes( currentRangeEndHash, endHash ) === 0
     ){
-        //console.log('mismo hash');
         return;
     }
 
@@ -1477,15 +1476,21 @@ var setRange = function( start, end ){
     startWidth += start.node.charList[ start.nodeChar - 1 ] || 0;
 
     // Procedimiento de coloreado
-    // Si principio y fin están en la misma fila
+    var width = 0;
+
+    // Si principio y fin están en la misma linea
     if(
         start.pageId === end.pageId &&
         start.paragraphId === end.paragraphId &&
         start.lineId === end.lineId
     ){
 
-        var width = 0;
+        checkCanvasSelectSize();
 
+        ctxSel.globalAlpha = 0.3;
+        ctxSel.fillStyle = '#7EBE30';
+
+        // Si el nodo inicial es el mismo que el final
         if( start.nodeId === end.nodeId ){
             width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
         }else{
@@ -1500,8 +1505,6 @@ var setRange = function( start, end ){
             
         }
 
-        checkCanvasSelectSize();
-
         ctxSel.rect(
 
             startWidth,
@@ -1511,17 +1514,67 @@ var setRange = function( start, end ){
 
         );
 
+        ctxSel.fill();
+
+        ctxSel.globalAlpha = 1;
+
+    }else{
+
+        checkCanvasSelectSize();
+
         ctxSel.globalAlpha = 0.3;
         ctxSel.fillStyle = '#7EBE30';
+
+        // Coloreamos la linea del principio de forma parcial
+        width = start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+            
+        for( i = start.nodeId + 1; i < end.nodeId; i++ ){
+            width += start.line.nodeList[ i ].width;
+        }
+
+        ctxSel.beginPath();
+        ctxSel.rect(
+
+            startWidth,
+            startHeight,
+            width,
+            start.line.height
+
+        );
+
         ctxSel.fill();
+
+        startHeight += start.line.height;
+
+        // Coloreamos las lineas intermedias de forma completa
+        // To Do
+
+        // Coloreamos la línea del final de forma parcial
+        width = 0;
+
+        for( i = 0 + 1; i < end.nodeId; i++ ){
+            width += end.line.nodeList[ i ].width;
+        }
+
+        // To Do -> Que debe pasar si es se coge el fallback 0?
+        width += end.node.charList[ end.nodeChar - 1 ] || 0;
+
+        ctxSel.beginPath();
+        ctxSel.rect(
+
+            20 + end.page.marginLeft,
+            startHeight,
+            width,
+            end.line.height
+
+        );
+
+        ctxSel.fill();
+
         ctxSel.globalAlpha = 1;
 
     }
 
-    // To Do -> Múltiples líneas
-
-    //selectionStart = start;
-    
 };
 
 var setRangeStyle = function( key, value ){
