@@ -1190,7 +1190,7 @@ var realocateLine = function( id, propagated ){
             if( getNodesWidth( line, i ) + ctx.measureText( trimRight( words.slice( 0, j ).join('') ) ).width <= line.width ){
                 
                 // Clonamos el nodo y modificamos padre e hijo
-                newNode = $.extend( {}, line.nodeList[ i ] );
+                newNode = createNode( line );
 
                 line.nodeList[ i ].string   = words.slice( 0, j ).join('');
                 line.nodeList[ i ].charList = line.nodeList[ i ].charList.slice( 0, line.nodeList[ i ].string.length );
@@ -1204,6 +1204,7 @@ var realocateLine = function( id, propagated ){
                 }
 
                 newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
+                newNode.style       = $.extend( {}, line.nodeList[ i ].style );
                 newLine.nodeList    = [ newNode ];
                 newLine.totalChars  = newNode.string.length;
                 counter.lineChar   += newNode.string.length; // To Do -> Y si se estaba escribiendo en medio de la palabra?
