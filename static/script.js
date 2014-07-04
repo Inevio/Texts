@@ -998,6 +998,86 @@ var handleEnter = function(){
 
 };
 
+var mapRangeLines = function( includeLimits, start, end, callback ){
+
+    var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoopId, nodeLoopId, finalPage, finalParagraph, fakeEndLineId, j, k, m;
+
+    // To Do
+    /*
+    if( includeLimits ){
+
+        fakeEndLineId = end.lineId + 1;
+        nodeLoopId = start.nodeId;
+
+    }else{
+
+        fakeEndLineId = end.lineId;
+        nodeLoopId    = start.nodeId + 1;
+
+    }
+    */
+
+    fakeEndLineId = end.lineId;
+    nodeLoopId    = start.nodeId + 1;
+
+    if( /*!includeLimits ||*/ !start.line.nodeList[ nodeLoopId ] ){
+
+        lineLoopId = start.lineId + 1;
+        nodeLoopId = 0;
+
+        if( !start.paragraph.lineList[ lineLoopId ] ){
+
+            paragraphLoopId = start.paragraphId + 1;
+            lineLoopId      = 0;
+
+            if( !start.page.paragraphList[ paragraphLoopId ] ){
+                pageLoopId = start.pageId + 1;
+            }else{
+                pageLoopId = start.pageId;
+            }
+
+        }else{
+
+            paragraphLoopId = start.paragraphId;
+            pageLoopId      = start.pageId;
+
+        }
+
+    }else{
+
+        lineLoopId      = start.lineId;
+        paragraphLoopId = start.paragraphId;
+        pageLoopId      = start.pageId;
+
+    }
+
+    // Recorremos las páginas
+    for( j = pageLoopId; j <= end.pageId; j++ ){
+
+        finalPage = j === end.pageId;
+        pageLoop  = pageList[ j ];
+
+        // Recorremos los párrafos
+        for( k = paragraphLoopId; ( !finalPage && k < pageLoop.paragraphList.length ) || ( finalPage && k <= end.paragraphId ); k++ ){
+
+            finalParagraph = finalPage && k === end.paragraphId;
+            paragraphLoop  = pageLoop.paragraphList[ k ];
+
+            // Recorremos las líneas
+            for( m = lineLoopId; ( !finalParagraph && m < paragraphLoop.lineList.length ) || ( finalParagraph && m < fakeEndLineId ); m++ ){
+                callback( j, pageLoop, k, paragraphLoop, m, paragraphLoop.lineList[ m ] );
+            }
+
+            lineLoopId = 0;
+
+        }
+
+        paragraphLoopId = 0;
+
+    }
+
+};
+
 // Nodos Ready
 var newLine = function(){
 
@@ -1557,89 +1637,31 @@ var setRange = function( start, end ){
         startHeight += start.line.height;
 
         // Coloreamos las lineas intermedias de forma completa
-        // Obtenemos los principios de los bucles
-        var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoop, lineLoopId, nodeLoopId, finalPage, finalParagraph, j, k, m, n;
+        mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
-        nodeLoopId = start.nodeId + 1;
+            width = 0;
 
-        if( !start.line.nodeList[ nodeLoopId ] ){
-
-            lineLoopId = start.lineId + 1;
-            nodeLoopId = 0;
-
-            if( !start.paragraph.lineList[ lineLoopId ] ){
-
-                paragraphLoopId = start.paragraphId + 1;
-                lineLoopId      = 0;
-
-                if( !start.page.paragraphList[ paragraphLoopId ] ){
-                    pageLoopId = start.pageId + 1;
-                }else{
-                    pageLoopId = start.pageId;
-                }
-
-            }else{
-
-                paragraphLoopId = start.paragraphId;
-                pageLoopId      = start.pageId;
-
+            // Obtenemos el tamaño de rectangulo a colorear
+            for( var n = 0; n < line.nodeList.length; n++ ){
+                width += line.nodeList[ n ].width;
             }
 
-        }else{
+            // Coloreamos la línea
+            ctxSel.beginPath();
+            ctxSel.rect(
 
-            lineLoopId      = start.lineId;
-            paragraphLoopId = start.paragraphId;
-            pageLoopId      = start.pageId;
+                20 + end.page.marginLeft,
+                startHeight,
+                width,
+                end.line.height
 
-        }
+            );
 
-        // Recorremos las páginas
-        for( j = pageLoopId; j <= end.pageId; j++ ){
+            ctxSel.fill();
+            
+            startHeight += line.height;
 
-            finalPage = j === end.pageId;
-            pageLoop  = pageList[ j ];
-
-            // Recorremos los párrafos
-            for( k = paragraphLoopId; ( !finalPage && k < pageLoop.paragraphList.length ) || ( finalPage && k <= end.paragraphId ); k++ ){
-
-                finalParagraph = finalPage && k === end.paragraphId;
-                paragraphLoop  = pageLoop.paragraphList[ k ];
-
-                // Recorremos las líneas
-                for( m = lineLoopId; ( !finalParagraph && m < paragraphLoop.lineList.length ) || ( finalParagraph && m < end.lineId ); m++ ){
-
-                    lineLoop = paragraphLoop.lineList[ m ];
-                    width    = 0;
-
-                    // Obtenemos el tamaño de rectangulo a colorear
-                    for( n = 0; n < lineLoop.nodeList.length; n++ ){
-                        width += lineLoop.nodeList[ n ].width;
-                    }
-
-                    // Coloreamos la línea
-                    ctxSel.beginPath();
-                    ctxSel.rect(
-
-                        20 + end.page.marginLeft,
-                        startHeight,
-                        width,
-                        end.line.height
-
-                    );
-
-                    ctxSel.fill();
-                    
-                    startHeight += lineLoop.height;
-
-                }
-
-                lineLoopId = 0;
-
-            }
-
-            paragraphLoopId = 0;
-
-        }
+        });
 
         // Coloreamos la línea del final de forma parcial
         width = 0;
@@ -1869,6 +1891,9 @@ var setRangeStyle = function( key, value ){
 
         }
 
+    // Varias líneas
+    }else{
+        console.log('varias lineas');
     }
 
     drawPages();
