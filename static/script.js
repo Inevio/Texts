@@ -943,53 +943,56 @@ var handleEnter = function(){
     verticalKeysEnabled = false;
 
     // To Do -> Comprobar que entra en la página
-    // To Do -> Herencia de estilos
 
-    var paragraphId, i;
-    var paragraph = createParagraph( currentPage );
-    var endList   = currentPage.paragraphList.slice( currentParagraphId + 1 );
-
-    // Insertamos el párrafo en su posición
-    currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 );
-    paragraphId               = currentPage.paragraphList.push( paragraph ) - 1;
-    currentPage.paragraphList = currentPage.paragraphList.concat( endList );
+    var i;
+    var newParagraph   = createParagraph( currentPage );
+    var newParagraphId = currentParagraphId + 1;
 
     // Obtenemos las líneas a mover y el texto
     var movedLines = currentParagraph.lineList.slice( currentLineId + 1 );
-    var firstLine  = paragraph.lineList[ 0 ];
+    var newLine    = newParagraph.lineList[ 0 ];
+    var newNode    = newLine.nodeList[ 0 ];
 
-    // To Do -> Herencia de nodos
-    firstLine.nodeList[ 0 ].string = currentLine.nodeList[ 0 ].string.slice( currentNodeCharId );
-    //firstLine.string   = currentLine.string.slice( currentLineCharId );
-    paragraph.lineList = paragraph.lineList.concat( movedLines );
+    // Clonamos el nodo actual
+    newNode.string = currentNode.string.slice( currentNodeCharId );
+    newNode.style  = $.extend( {}, currentNode.style );
 
-    // Actualizamos las alturas del nuevo párrafo
-    for( i = 0; i < movedLines.length; i++ ){
-        paragraph.height += movedLines[ i ].height;
+    setStyle( newNode.style );
+
+    for( i = 1; i <= newNode.string.length; i++ ){
+        newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
     }
 
-    // Actualizamos el tamaño de la primera línea
-    // To Do -> Herencia de nodos
-    firstLine.nodeList[ 0 ].charList = [];
+    newNode.width      = newNode.charList[ newNode.charList.length - 1 ];
+    newLine.totalChars = newNode.string.length;
 
-    setStyle( firstLine.nodeList[ 0 ].style );
+    // Eliminamos el contenido del nodo actual y actualizamos su tamaño
+    currentNode.string     = currentNode.string.slice( 0, currentNodeCharId );
+    currentNode.charList   = currentNode.charList.slice( 0, currentNodeCharId );
+    currentNode.width      = currentNode.charList[ currentNode.charList.length - 1 ];
+    currentLine.totalChars = currentLine.totalChars - newNode.string.length;
 
-    for( i = 1; i <= firstLine.nodeList[ 0 ].string.length; i++ ){
-        firstLine.nodeList[ 0 ].charList.push( ctx.measureText( firstLine.nodeList[ 0 ].string.slice( 0, i ) ).width );
-    }
+    // Movemos los nodos siguientes
+    newLine.nodeList     = newLine.nodeList.concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
+    currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 );
 
-    // Eliminamos las líneas que ya no se van a usar y el texto residual
-    // To Do -> Herencia de nodos
-    currentParagraph.lineList          = currentParagraph.lineList.slice( 0, currentLineId + 1 );
-    currentLine.nodeList[ 0 ].string   = currentLine.nodeList[ 0 ].string.slice( 0, currentNodeCharId );
-    currentLine.nodeList[ 0 ].charList = currentLine.nodeList[ 0 ].charList.slice( 0, currentNodeCharId );
+    // Movemos las líneas siguientes
+    newParagraph.lineList     = newParagraph.lineList.concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
+    currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId + 1 );
 
-    // Actualizamos las alturas del párrafo de origen
+    // Actualizamos las alturas del párrafo de origen y destino
     for( i = 0; i < movedLines.length; i++ ){
+
         currentParagraph.height -= movedLines[ i ].height;
+        newParagraph.height     += movedLines[ i ].height;
+
     }
 
-    setCursor( currentPageId, paragraphId, 0, 0, 0, 0 );
+    // Insertamos el párrafo en su posición
+    currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 ).concat( newParagraph ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
+
+    // Posicionamos el cursor
+    setCursor( currentPageId, newParagraphId, 0, 0, 0, 0 );
     realocateLineInverse( 0, 0 );
     resetBlink();
 
@@ -1155,7 +1158,9 @@ var realocateLine = function( id, propagated ){
 
 var realocateLineInverse = function( id, modifiedChar ){
 
-    var line = currentParagraph.lineList[ id ];
+    var line    = currentParagraph.lineList[ id ];
+    var counter = { lineChar : 0, nodeChar : 0 };
+    var i, j, fitNodeChar, newNode, words;
 
     // Si la línea no existe se ignora
     if( !line ){
@@ -1166,62 +1171,67 @@ var realocateLineInverse = function( id, modifiedChar ){
     if( !id ){
 
         realocateLineInverse( id + 1, 0 );
-        return 0;
+        return counter;
 
     }
 
-    // Si se ha modificado algún caracter de la primera palabra, comprobar si entra en la fila anterior
-    if(
-        line.string.indexOf(' ') >= modifiedChar || // Usamos >= porque ahora el espacio puede estar ocupando la posición eliminada
-        line.string.indexOf(' ') === -1 // Caso especial, solo hay una palabra
-    ){
+    var prevLine = currentParagraph.lineList[ id - 1 ];
 
-        // Generamos el listado de palabras
-        var words   = line.string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
-        var tmp     = currentParagraph.lineList[ id - 1 ].string + ' ' + words[ 0 ].replace( ' ', '' );
-        var newLine = currentParagraph.lineList[ id - 1 ];
-        var i;
+    // Comprobamos nodo por nodo que entra por el final
+    for( i = 0; i < line.nodeList.length; i++ ){
 
-        if( newLine.width >= ctx.measureText( trimRight( tmp ) ).width ){
+        setStyle( line.nodeList[ i ].style );
+        
+        fitNodeChar = 0;
+        words       = line.nodeList[ i ].string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
 
-            newLine.string = tmp;
-            line.string    = words.slice( 1 ).join('');
+        // Comprobamos palabra por palabra que entra por el final (desde la última hasta la primera)
+        for( j = 1; j <= words.length; j++ ){
 
-            if( line.string.length ){
-
-                line.charList = [];
-
-                for( i = 1; i <= line.string.length; i++ ){
-                    line.charList.push( ctx.measureText( line.string.slice( 0, i ) ).width );
-                }
-
+            if( getNodesWidth( prevLine ) + ctx.measureText( trimRight( words.slice( 0, j ).join('') ) ).width <= prevLine.width ){
+                fitNodeChar = words.slice( 0, j ).join('').length;
             }else{
-
-                currentParagraph.lineList = currentParagraph.lineList.filter( function( value, index ){
-
-                    if( id !== index ){
-                        return true;
-                    }
-                    
-                    currentParagraph.height -= value.height;
-
-                    return false;
-
-                });
-
+                j--;
+                break;
             }
 
-            for( i = newLine.charList.length + 1; i <= newLine.string.length; i++ ){
-                newLine.charList.push( ctx.measureText( newLine.string.slice( 0, i ) ).width );
+        }
+
+        if( !fitNodeChar ){
+            break;
+        }
+
+        // Si entra el nodo entero lo movemos
+        if( j === words.length ){
+            // To Do -> Comprobar si este caso se da alguna vez
+            console.log('to do');
+        }else{
+
+            // Clonamos el nodo y modificamos padre e hijo
+            newNode = $.extend( {}, line.nodeList[ i ] );
+
+            newNode.string      = words.slice( 0, j ).join('');
+            newNode.charList    = line.nodeList[ i ].charList.slice( 0, fitNodeChar );
+            newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
+            prevLine.totalChars = prevLine.totalChars + newNode.string.length;
+
+            prevLine.nodeList.push( newNode );
+
+            line.totalChars             = line.totalChars - newNode.string.length;
+            line.nodeList[ i ].string   = line.nodeList[ i ].string.slice( fitNodeChar );
+            line.nodeList[ i ].charList = [];
+
+            for( j = 1; j <= line.nodeList[ i ].string.length; j++ ){
+                line.nodeList[ i ].charList.push( ctx.measureText( line.nodeList[ i ].string.slice( 0, j ) ).width );
             }
 
-            return trimRight( newLine.string ).length;
+            line.nodeList[ i ].width = line.nodeList[ i ].charList[ line.nodeList[ i ].charList.length - 1 ];
 
         }
 
     }
 
-    return 0;
+    return counter;
 
 };
 
