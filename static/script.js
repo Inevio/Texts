@@ -281,6 +281,179 @@ var drawPages = function(){
 
 };
 
+var drawRange = function( start, end ){
+
+    // Calculamos la altura de inicio
+    var startHeight = 0;
+    var i;
+
+    // Gap inicial
+    startHeight += 20;
+
+    // Calculamos la posición vertical de la página de inicio
+    for( i = 0; i < start.pageId; i++ ){
+
+        // Gap
+        startHeight += 20;
+        startHeight += pageList[ i ].height;
+
+    }
+
+    // Tenemos en cuenta el margen superior
+    startHeight += start.page.marginTop;
+
+    // Calculamos la posición vertical del párrafo de inicio
+    for( i = 0; i < start.paragraphId; i++ ){
+        startHeight += start.page.paragraphList[ i ].height;
+    }
+
+    // Calculamos la posición vertical de la linea de inicio
+    for( i = 0; i < start.lineId; i++ ){
+        startHeight += start.paragraph.lineList[ i ].height;
+    }
+
+    // Calculamos el ancho de inicio
+    var startWidth = 0;
+
+    // Gap inicial
+    startWidth += 20;
+
+    // Margen izquierdo
+    startWidth += start.page.marginLeft;
+
+    // Posición del caracter
+    for( i = 0; i < start.nodeId; i++ ){
+        startWidth += start.line.nodeList[ i ].width;
+    }
+
+    startWidth += start.node.charList[ start.nodeChar - 1 ] || 0;
+
+    // Procedimiento de coloreado
+    var width = 0;
+
+    // Si principio y fin están en la misma linea
+    if(
+        start.pageId === end.pageId &&
+        start.paragraphId === end.paragraphId &&
+        start.lineId === end.lineId
+    ){
+
+        checkCanvasSelectSize();
+
+        ctxSel.globalAlpha = 0.3;
+        ctxSel.fillStyle = '#7EBE30';
+
+        // Si el nodo inicial es el mismo que el final
+        if( start.nodeId === end.nodeId ){
+            width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+        }else{
+
+            width += start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+            
+            for( i = start.nodeId + 1; i < end.nodeId; i++ ){
+                width += start.line.nodeList[ i ].width;
+            }
+
+            width += end.node.charList[ end.nodeChar - 1 ] || 0;
+            
+        }
+
+        ctxSel.rect(
+
+            startWidth,
+            startHeight,
+            width,
+            start.line.height
+
+        );
+
+        ctxSel.fill();
+
+        ctxSel.globalAlpha = 1;
+
+    }else{
+
+        checkCanvasSelectSize();
+
+        ctxSel.globalAlpha = 0.3;
+        ctxSel.fillStyle = '#7EBE30';
+
+        // Coloreamos la linea del principio de forma parcial
+        width = start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+            
+        for( i = start.nodeId + 1; i < end.nodeId; i++ ){
+            width += start.line.nodeList[ i ].width;
+        }
+
+        ctxSel.beginPath();
+        ctxSel.rect(
+
+            startWidth,
+            startHeight,
+            width,
+            start.line.height
+
+        );
+
+        ctxSel.fill();
+
+        startHeight += start.line.height;
+
+        // Coloreamos las lineas intermedias de forma completa
+        mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
+
+            width = 0;
+
+            // Obtenemos el tamaño de rectangulo a colorear
+            for( var n = 0; n < line.nodeList.length; n++ ){
+                width += line.nodeList[ n ].width;
+            }
+
+            // Coloreamos la línea
+            ctxSel.beginPath();
+            ctxSel.rect(
+
+                20 + end.page.marginLeft,
+                startHeight,
+                width,
+                end.line.height
+
+            );
+
+            ctxSel.fill();
+            
+            startHeight += line.height;
+
+        });
+
+        // Coloreamos la línea del final de forma parcial
+        width = 0;
+
+        for( i = 0 + 1; i < end.nodeId; i++ ){
+            width += end.line.nodeList[ i ].width;
+        }
+
+        // To Do -> Que debe pasar si es se coge el fallback 0?
+        width += end.node.charList[ end.nodeChar - 1 ] || 0;
+
+        ctxSel.beginPath();
+        ctxSel.rect(
+
+            20 + end.page.marginLeft,
+            startHeight,
+            width,
+            end.line.height
+
+        );
+
+        ctxSel.fill();
+
+        ctxSel.globalAlpha = 1;
+
+    }
+
+};
+
 var getCommonStyles = function( start, end ){
 
     // Comprobamos si es el mismo nodo, es una optimización
@@ -362,6 +535,28 @@ var getNodesWidth = function( line, offset ){
     }
 
     return total;
+
+};
+
+var getNodeInPosition = function( line, lineChar ){
+
+    var result   = { nodeId : 0, nodeChar : 0 };
+    var nodeChar = lineChar;
+
+    for( var i = 0; i < line.nodeList.length; i++ ){
+
+        if( line.nodeList[ i ].string.length >= nodeChar ){
+            break;
+        }
+
+        nodeChar -= line.nodeList[ i ].string.length;
+
+    }
+
+    result.nodeId   = i;
+    result.nodeChar = nodeChar;
+
+    return result;
 
 };
 
@@ -1521,181 +1716,14 @@ var setRange = function( start, end ){
     currentRangeStartHash = startHash;
     currentRangeEndHash   = endHash;
 
-    // Calculamos la altura de inicio
-    var startHeight = 0;
-    var i;
-
-    // Gap inicial
-    startHeight += 20;
-
-    // Calculamos la posición vertical de la página de inicio
-    for( i = 0; i < start.pageId; i++ ){
-
-        // Gap
-        startHeight += 20;
-        startHeight += pageList[ i ].height;
-
-    }
-
-    // Tenemos en cuenta el margen superior
-    startHeight += start.page.marginTop;
-
-    // Calculamos la posición vertical del párrafo de inicio
-    for( i = 0; i < start.paragraphId; i++ ){
-        startHeight += start.page.paragraphList[ i ].height;
-    }
-
-    // Calculamos la posición vertical de la linea de inicio
-    for( i = 0; i < start.lineId; i++ ){
-        startHeight += start.paragraph.lineList[ i ].height;
-    }
-
-    // Calculamos el ancho de inicio
-    var startWidth = 0;
-
-    // Gap inicial
-    startWidth += 20;
-
-    // Margen izquierdo
-    startWidth += start.page.marginLeft;
-
-    // Posición del caracter
-    for( i = 0; i < start.nodeId; i++ ){
-        startWidth += start.line.nodeList[ i ].width;
-    }
-
-    startWidth += start.node.charList[ start.nodeChar - 1 ] || 0;
-
-    // Procedimiento de coloreado
-    var width = 0;
-
-    // Si principio y fin están en la misma linea
-    if(
-        start.pageId === end.pageId &&
-        start.paragraphId === end.paragraphId &&
-        start.lineId === end.lineId
-    ){
-
-        checkCanvasSelectSize();
-
-        ctxSel.globalAlpha = 0.3;
-        ctxSel.fillStyle = '#7EBE30';
-
-        // Si el nodo inicial es el mismo que el final
-        if( start.nodeId === end.nodeId ){
-            width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
-        }else{
-
-            width += start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
-            
-            for( i = start.nodeId + 1; i < end.nodeId; i++ ){
-                width += start.line.nodeList[ i ].width;
-            }
-
-            width += end.node.charList[ end.nodeChar - 1 ] || 0;
-            
-        }
-
-        ctxSel.rect(
-
-            startWidth,
-            startHeight,
-            width,
-            start.line.height
-
-        );
-
-        ctxSel.fill();
-
-        ctxSel.globalAlpha = 1;
-
-    }else{
-
-        checkCanvasSelectSize();
-
-        ctxSel.globalAlpha = 0.3;
-        ctxSel.fillStyle = '#7EBE30';
-
-        // Coloreamos la linea del principio de forma parcial
-        width = start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
-            
-        for( i = start.nodeId + 1; i < end.nodeId; i++ ){
-            width += start.line.nodeList[ i ].width;
-        }
-
-        ctxSel.beginPath();
-        ctxSel.rect(
-
-            startWidth,
-            startHeight,
-            width,
-            start.line.height
-
-        );
-
-        ctxSel.fill();
-
-        startHeight += start.line.height;
-
-        // Coloreamos las lineas intermedias de forma completa
-        mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
-
-            width = 0;
-
-            // Obtenemos el tamaño de rectangulo a colorear
-            for( var n = 0; n < line.nodeList.length; n++ ){
-                width += line.nodeList[ n ].width;
-            }
-
-            // Coloreamos la línea
-            ctxSel.beginPath();
-            ctxSel.rect(
-
-                20 + end.page.marginLeft,
-                startHeight,
-                width,
-                end.line.height
-
-            );
-
-            ctxSel.fill();
-            
-            startHeight += line.height;
-
-        });
-
-        // Coloreamos la línea del final de forma parcial
-        width = 0;
-
-        for( i = 0 + 1; i < end.nodeId; i++ ){
-            width += end.line.nodeList[ i ].width;
-        }
-
-        // To Do -> Que debe pasar si es se coge el fallback 0?
-        width += end.node.charList[ end.nodeChar - 1 ] || 0;
-
-        ctxSel.beginPath();
-        ctxSel.rect(
-
-            20 + end.page.marginLeft,
-            startHeight,
-            width,
-            end.line.height
-
-        );
-
-        ctxSel.fill();
-
-        ctxSel.globalAlpha = 1;
-
-    }
+    drawRange( start, end );
 
 };
 
-var setRangeStyle = function( key, value ){
+var setRangeStyle = function( key, value, propagated ){
 
     // To Do -> Varias lineas
-    var i, newNode, endNode;
+    var i, newNode, endNode, newPositions;
 
     // Mismo nodo
     if(
@@ -1707,14 +1735,25 @@ var setRangeStyle = function( key, value ){
 
         // Si es todo el nodo
         if( currentRangeStart.nodeChar === 0 && currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
-            
-            console.log('to do');
+
+            newNode              = currentRangeStart.node;
+            newNode.style[ key ] = value;
+            newNode.charList     = [];
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
 
         // Si comienza por el principio del nodo
         }else if( currentRangeStart.nodeChar === 0 ){
 
             newNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+            newNode.style                   = $.extend( currentRangeStart.node.style );
             newNode.style[ key ]            = value;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
             currentRangeStart.node.charList = [];
@@ -1735,12 +1774,38 @@ var setRangeStyle = function( key, value ){
 
             currentRangeStart.node.width    = currentRangeStart.node.charList[ i - 2 ] || 0;
             currentRangeStart.line.nodeList = [ newNode ].concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
-            currentNode                     = currentRangeStart.line.nodeList[ currentNodeId ];
+            
+            newPositions = getNodeInPosition( currentRangeEnd.line, currentRangeEnd.lineChar );
+
+            currentRangeEnd.nodeId   = newPositions.nodeId;
+            currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.nodeChar = newPositions.nodeChar;
 
         // Si termina por el final del nodo
         }else if( currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
             
-            console.log('to do');
+            newNode                         = createNode( currentLine );
+            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
+            newNode.style                   = $.extend( currentRangeStart.node.style );
+            newNode.style[ key ]            = value;
+            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
+            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= newNode.string.length; i++ ){
+                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+            }
+
+            newNode.width = newNode.charList[ i - 2 ] || 0;
+
+            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.string.length - 1 ] || 0;
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.concat( newNode );
+            currentNode                     = currentRangeStart.line.nodeList[ currentNodeId ];
+
+            currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
+            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.nodeChar = 0;
 
         // El resto de casos
         }else{
@@ -1748,6 +1813,7 @@ var setRangeStyle = function( key, value ){
             newNode                         = createNode( currentLine );
             endNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+            newNode.style                   = $.extend( currentRangeStart.node.style );
             newNode.style[ key ]            = value;
             endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
             endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
@@ -1772,6 +1838,16 @@ var setRangeStyle = function( key, value ){
             endNode.width                   = endNode.charList[ i - 2 ] || 0;
             currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
             currentNode                     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+
+            var newPositionsStart = getNodeInPosition( currentRangeStart.line, currentRangeStart.lineChar );
+            var newPositionsEnd   = getNodeInPosition( currentRangeEnd.line, currentRangeEnd.lineChar );
+
+            currentRangeStart.nodeId   = newPositionsStart.nodeId;
+            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.nodeChar = newPositionsStart.nodeChar;
+            currentRangeEnd.nodeId     = newPositionsEnd.nodeId;
+            currentRangeEnd.node       = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.nodeChar   = newPositionsEnd.nodeChar;
 
         }
 
@@ -1894,10 +1970,65 @@ var setRangeStyle = function( key, value ){
 
     // Varias líneas
     }else{
-        console.log('varias lineas');
+
+        var originalRangeStart, originalRangeEnd;
+
+        // Aplicamos el estilo a la línea inicial
+        originalRangeStart       = currentRangeStart;
+        originalRangeEnd         = currentRangeEnd;
+        currentRangeEnd          = $.extend( {}, currentRangeStart );
+        currentRangeEnd.lineChar = currentRangeEnd.line.totalChars;
+        currentRangeEnd.nodeId   = currentRangeEnd.line.nodeList.length - 1;
+        currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+        currentRangeEnd.nodeChar = currentRangeEnd.node.string.length;
+
+        setRangeStyle( key, value, true );
+
+        currentRangeEnd = originalRangeEnd;
+
+        // Aplicamos el estilo a nodos intermedios
+        mapRangeLines( false, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
+
+            var newNode, i, j;
+
+            for( i = 0; i < line.nodeList.length; i++ ){
+
+                newNode = line.nodeList[ i ];
+
+                newNode.style[ key ] = value;
+                newNode.charList     = [];
+
+                setStyle( newNode.style );
+
+                for( j = 1; j <= newNode.string.length; j++ ){
+                    newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
+                }
+
+                newNode.width = newNode.charList[ j - 2 ] || 0;
+                
+            }
+            
+        });
+
+        // Aplicamos el estilo a la línea final
+        currentRangeStart          = $.extend( {}, currentRangeEnd );
+        currentRangeStart.lineChar = 0;
+        currentRangeStart.nodeId   = 0;
+        currentRangeStart.node     = currentRangeStart.line.nodeList[ 0 ];
+        currentRangeStart.nodeChar = 0;
+
+        setRangeStyle( key, value, true );
+
+        currentRangeStart = originalRangeStart;
+
     }
 
-    drawPages();
+    if( !propagated ){
+
+        drawPages();
+        drawRange( currentRangeStart, currentRangeEnd );
+
+    }
 
 };
 
