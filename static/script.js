@@ -277,8 +277,6 @@ var drawPages = function(){
             // To Do -> Gaps
             // To Do -> Altura de línea
             line = paragraph.lineList[ j ];
-
-            console.log( paragraph, paragraph.aling );
             
             if( !paragraph.aling ){
                 wHeritage = 0;
@@ -1319,8 +1317,6 @@ var mapRangeLines = function( includeLimits, start, end, callback ){
 
 var mapRangeParagraphs = function( start, end, callback ){
 
-    console.log( 'mapRangeParagraphs', start, end );
-
     var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, finalPage, finalParagraph, j, k;
 
     paragraphLoopId = start.paragraphId;
@@ -1331,15 +1327,9 @@ var mapRangeParagraphs = function( start, end, callback ){
         finalPage = j === end.pageId;
         pageLoop  = pageList[ j ];
 
-        console.log('page', j);
-
         // Recorremos los párrafos
         for( k = paragraphLoopId; ( !finalPage && k < pageLoop.paragraphList.length ) || ( finalPage && k <= end.paragraphId ); k++ ){
-
-            console.log('paragraph', k);
-
             callback( j, pageLoop, k, pageLoop.paragraphList[ k ] );
-
         }
 
         paragraphLoopId = 0;
@@ -2108,12 +2098,9 @@ var setRangeNodeStyle = function( key, value, propagated ){
 };
 
 var setRangeParagraphStyle = function( key, value ){
-
-    console.log( key, value);
     
     mapRangeParagraphs( currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph ){
         paragraph[ key ] = value;
-        console.log( paragraph );
     });
 
     drawPages();
