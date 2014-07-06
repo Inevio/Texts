@@ -1818,7 +1818,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
-            newNode.style                   = $.extend( currentRangeStart.node.style );
+            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
             newNode.style[ key ]            = value;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
             currentRangeStart.node.charList = [];
@@ -1851,7 +1851,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             
             newNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
-            newNode.style                   = $.extend( currentRangeStart.node.style );
+            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
             newNode.style[ key ]            = value;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
             currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
@@ -1878,7 +1878,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode                         = createNode( currentLine );
             endNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
-            newNode.style                   = $.extend( currentRangeStart.node.style );
+            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
             newNode.style[ key ]            = value;
             endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
             endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
@@ -1945,16 +1945,10 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Es parcial
         }else{
             
-            newNode                         = createNode( currentRangeStart.line );
-            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
-            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
-            newNode.style[ key ]            = value;
-            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
-            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
-            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ];
-            currentRangeStart.nodeId        = currentRangeStart.nodeId + 1;
-            currentRangeStart.nodeChar      = 0;
-            currentRangeEnd.nodeId          = currentRangeEnd.nodeId + 1;
+            newNode              = createNode( currentRangeStart.line );
+            newNode.string       = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
+            newNode.style        = $.extend( {}, currentRangeStart.node.style );
+            newNode.style[ key ] = value;
 
             setStyle( newNode.style );
 
@@ -1964,7 +1958,14 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
+            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
+            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
+            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ];
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
+            currentRangeStart.nodeId        = currentRangeStart.nodeId + 1;
+            currentRangeStart.nodeChar      = 0;
+            currentRangeStart.node          = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeEnd.nodeId          = currentRangeEnd.nodeId + 1;
 
         }
 
@@ -2006,12 +2007,10 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Es parcial
         }else{
             
-            newNode                       = createNode( currentRangeEnd.line );
-            newNode.string                = currentRangeEnd.node.string.slice( 0, currentRangeEnd.nodeChar );
-            newNode.style                 = $.extend( {}, currentRangeEnd.node.style );
-            newNode.style[ key ]          = value;
-            currentRangeEnd.node.string   = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
-            currentRangeEnd.node.charList = [];
+            newNode              = createNode( currentRangeEnd.line );
+            newNode.string       = currentRangeEnd.node.string.slice( 0, currentRangeEnd.nodeChar );
+            newNode.style        = $.extend( {}, currentRangeEnd.node.style );
+            newNode.style[ key ] = value;
 
             setStyle( newNode.style );
 
@@ -2021,15 +2020,18 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
+            currentRangeEnd.node.string   = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+            currentRangeEnd.node.charList = [];
+
             setStyle( currentRangeEnd.node.style );
 
             for( i = 1; i <= currentRangeEnd.node.string.length; i++ ){
                 currentRangeEnd.node.charList.push( ctx.measureText( currentRangeEnd.node.string.slice( 0, i ) ).width );
             }
 
-            currentRangeEnd.node.width = currentRangeEnd.node.charList[ i - 2 ] || 0;
-
+            currentRangeEnd.node.width    = currentRangeEnd.node.charList[ i - 2 ] || 0;
             currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( 0, currentRangeEnd.nodeId ).concat( newNode ).concat( currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId ) );
+            currentRangeEnd.node          = newNode;
 
         }
 
