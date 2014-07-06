@@ -969,7 +969,9 @@ var handleBackspace = function(){
     var prev, next, i, realocation;
 
     // Al principio del nodo
-    if( currentNodeCharId === 0 ){
+    if( currentNode.length === 1 && currentNodeCharId === 1 ){
+
+        console.log('way 1', currentNode);
 
         var page, paragraph, line, lineChar, node, nodeChar;
 
@@ -1023,7 +1025,13 @@ var handleBackspace = function(){
             line      = currentLineId;
             lineChar  = currentLineCharId - 1;
             node      = currentNodeId - 1;
-            nodeChar  = currentLine.nodeList[ node ].string.length;
+            nodeChar  = currentLine.nodeList[ node ].string.length - 1;
+
+            currentLine.nodeList[ node ].string   = currentLine.nodeList[ node ].string.slice( 0, -1 );
+            currentLine.nodeList[ node ].charList = currentLine.nodeList[ node ].charList.slice( 0, -1 );
+            currentLine.nodeList[ node ].width    = currentLine.nodeList[ node ].charList.slice( -1 )[ 0 ] || 0;
+
+            currentLine.totalChars--;
 
         }
 
@@ -1051,6 +1059,8 @@ var handleBackspace = function(){
             positionAbsoluteX += currentPage.marginLeft;
             positionAbsoluteX += currentLine.charList[ currentLineCharId - 1 ];
 
+            // To Do -> Total chars
+
         }else{
 
             positionAbsoluteX    += prev - next;
@@ -1062,9 +1072,22 @@ var handleBackspace = function(){
                 currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
             }
 
+            currentNode.width = currentNode.charList.slice( -1 )[ 0 ] || 0;
+
             currentLineCharId--;
             currentNodeCharId--;
+            currentLine.totalChars--;
 
+        }
+
+        if( !currentNodeCharId ){
+
+            setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+
+            if( !currentLine.nodeList[ currentNodeId + 1 ] && !currentLine.nodeList[ currentNodeId + 1 ].string.length ){
+                currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( currentLine.nodeList.slice( currentNodeId + 2 ) );
+            }
+            
         }
 
     }
@@ -1603,7 +1626,7 @@ var start = function(){
 
 };
 
-var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
+var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force ){
 
     currentRangeStart     = null;
     currentRangeEnd       = null;
@@ -1616,7 +1639,8 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar ){
         currentParagraphId === paragraph &&
         currentLineId === line &&
         currentNodeId === node &&
-        currentLineCharId === lineChar
+        currentLineCharId === lineChar &&
+        !force
     ){
         return;
     }
