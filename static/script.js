@@ -134,6 +134,28 @@ var checkCanvasSelectSize = function(){
 
 };
 
+var compareNodeStyles = function( first, second ){
+
+    var firstStyle  = $.extend( {}, first.style );
+    var secondStyle = $.extend( {}, second.style );
+    var firstKeys   = Object.keys( firstStyle );
+    var totalKeys   = firstKeys.length;
+
+    for( var i = 0; i < totalKeys; i++ ){
+
+        if( firstStyle[ firstKeys[ i ] ] !== secondStyle[ firstKeys[ i ] ] ){
+            return false;
+        }
+
+        delete firstStyle[ firstKeys[ i ] ];
+        delete secondStyle[ firstKeys[ i ] ];
+
+    }
+
+    return Object.keys( secondStyle ).length === 0;
+
+};
+
 // Nodos Ready
 var createLine = function( paragraph ){
 
@@ -201,6 +223,19 @@ var createParagraph = function( page ){
     paragraph.height += line.height;
 
     return paragraph;
+
+};
+
+var createWord = function(){
+
+    return {
+
+        string   : '',
+        width    : 0,
+        nodeList : [],
+        offset   : []
+
+    };
 
 };
 
@@ -597,6 +632,62 @@ var getNodeInPosition = function( line, lineChar ){
 
     result.nodeId   = i;
     result.nodeChar = nodeChar;
+
+    return result;
+
+};
+
+var getWordsMetrics = function( line ){
+
+    var nodeList = line.nodeList;
+    var result   = [];
+    var words, breakedWord, currentWord, offset, position, i, j;
+
+    for( i = 0; i < nodeList.length; i++ ){
+
+        offset = 0;
+        words  = nodeList[ i ].string.match(/(\s*\S+\s*)/g);
+
+        for( j = 0; j < words.length; j++ ){
+
+            if( breakedWord ){
+
+                currentWord.string += words[ j ];
+                currentWord.width  += ( nodeList[ i ].charList[ offset + words[ j ].length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
+
+                currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
+                currentWord.nodeList.push( i );
+
+                offset += currentWord.string.length;
+
+                if( words[ j ].indexOf(' ') > -1 || i === nodeList.length - 1 ){
+                    result.push( currentWord );
+                }else{
+                    breakedWord = false;
+                }
+                
+                continue;
+
+            }
+
+            currentWord          = createWord();
+            currentWord.string   = words[ j ];
+            currentWord.width    = ( nodeList[ i ].charList[ offset + words[ j ].length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
+            currentWord.nodeList = [ i ];
+
+            currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
+
+            offset += currentWord.string.length;
+
+            if( words[ j ].indexOf(' ') > -1 || i === nodeList.length - 1 ){
+                result.push( currentWord );
+            }else{
+                breakedWord = true;
+            }
+
+        }
+
+    }
 
     return result;
 
