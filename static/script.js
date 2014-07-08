@@ -116,8 +116,6 @@ setInterval( function(){
     refrescos = 0;
 }, 1000 );
 
-// Nodos Ready
-// Nodos Char Ready
 var checkCanvasPagesSize = function(){
     
     canvasPages.width  = pages.width();
@@ -125,8 +123,6 @@ var checkCanvasPagesSize = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var checkCanvasSelectSize = function(){
 
     canvasSelect.width  = selections.width();
@@ -156,7 +152,6 @@ var compareNodeStyles = function( first, second ){
 
 };
 
-// Nodos Ready
 var createLine = function( paragraph ){
 
     var line = newLine();
@@ -172,7 +167,6 @@ var createLine = function( paragraph ){
 
 };
 
-// Nodos Ready
 var createNode = function(){
 
     var node = newNode();
@@ -184,12 +178,9 @@ var createNode = function(){
 
 };
 
-// Nodos Ready
 var createPage = function( pageInfo, marginInfo ){
 
     var page = newPage();
-
-    pageList.push( page );
 
     // Definimos los atibutos
     page.width        = pageInfo.width;
@@ -206,7 +197,6 @@ var createPage = function( pageInfo, marginInfo ){
 
 };
 
-// Nodos Ready
 var createParagraph = function( page ){
 
     var paragraph = newParagraph();
@@ -240,8 +230,6 @@ var createWord = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var compareHashes = function( first, second ){
 
     for( var i = 0; i < first.length; i++ ){
@@ -258,8 +246,6 @@ var compareHashes = function( first, second ){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var debugTime = function( name ){
 
     if( DEBUG ){
@@ -268,8 +254,6 @@ var debugTime = function( name ){
     
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var debugTimeEnd = function( name ){
     
     if( DEBUG ){
@@ -278,7 +262,6 @@ var debugTimeEnd = function( name ){
     
 };
 
-// Nodos Ready
 var drawPages = function(){
 
     checkCanvasPagesSize();
@@ -598,7 +581,6 @@ var getCommonStyles = function( start, end ){
 
 };
 
-// Nodos Ready
 var getNodesWidth = function( line, offset ){
 
     if( typeof offset === 'undefined' ){
@@ -642,7 +624,7 @@ var getWordsMetrics = function( line ){
 
     var nodeList = line.nodeList;
     var result   = [];
-    var words, breakedWord, currentWord, offset, position, i, j;
+    var words, breakedWord, currentWord, offset, i, j;
 
     for( i = 0; i < nodeList.length; i++ ){
 
@@ -698,8 +680,6 @@ var getWordsMetrics = function( line ){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var handleArrowDown = function(){
 
     var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
@@ -786,8 +766,6 @@ var handleArrowDown = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var handleArrowLeft = function(){
 
     verticalKeysEnabled = false;
@@ -877,8 +855,6 @@ var handleArrowLeft = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var handleArrowRight = function(){
 
     verticalKeysEnabled = false;
@@ -968,8 +944,6 @@ var handleArrowRight = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var handleArrowUp = function(){
 
     var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
@@ -1056,8 +1030,6 @@ var handleArrowUp = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var handleBackspace = function(){
 
     verticalKeysEnabled = false;
@@ -1103,6 +1075,7 @@ var handleBackspace = function(){
             currentLineId             = currentLineId - 1;
             currentLine               = currentParagraph.lineList[ currentLineId ];
 
+            // To Do -> Realocate
             console.log( realocateLine( currentLineId ) );
 
         }
@@ -1152,8 +1125,6 @@ var handleBackspace = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var handleChar = function( newChar ){
 
     verticalKeysEnabled = false;
@@ -1174,9 +1145,7 @@ var handleChar = function( newChar ){
     currentLineCharId++;
     currentNodeCharId++;
 
-    //console.table( currentParagraph.lineList );
     var realocation = realocateLine( currentLineId, currentLineCharId );
-    //console.table( currentParagraph.lineList );
 
     if( realocation > 0 ){
 
@@ -1353,7 +1322,7 @@ var mapRangeLines = function( includeLimits, start, end, callback ){
 
 var mapRangeParagraphs = function( start, end, callback ){
 
-    var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, finalPage, finalParagraph, j, k;
+    var pageLoop, paragraphLoopId, finalPage, j, k;
 
     paragraphLoopId = start.paragraphId;
 
@@ -1374,7 +1343,6 @@ var mapRangeParagraphs = function( start, end, callback ){
 
 };
 
-// Nodos Ready
 var newLine = function(){
 
     return {
@@ -1388,7 +1356,6 @@ var newLine = function(){
 
 };
 
-// Nodos Ready
 var newNode = function(){
 
     return {
@@ -1403,7 +1370,6 @@ var newNode = function(){
 
 };
 
-// Nodos Ready
 var newPage = function(){
     
     return {
@@ -1420,7 +1386,6 @@ var newPage = function(){
 
 };
 
-// Nodos Ready
 var newParagraph = function(){
 
     return {
@@ -1443,7 +1408,8 @@ var normalizeLine = function( line ){
 
     for( var i = 1; i < line.nodeList.length; ){
 
-        /*console.log( */compareNodeStyles( line.nodeList[ i - 1 ], line.nodeList[ i ] )/* )*/;
+        // To Do -> Hacer que funcione
+        // compareNodeStyles( line.nodeList[ i - 1 ], line.nodeList[ i ] );
 
         i++;
 
@@ -1451,36 +1417,16 @@ var normalizeLine = function( line ){
 
 };
 
-var realocateLine = function( id, lineChar, propagated ){
+var realocateLine = function( id, lineChar ){
 
     var line    = currentParagraph.lineList[ id ];
-    var counter = 0/*{ lineChar : 0, nodeChar : 0 }*/;
-    var i;
+    var counter = 0;
 
-    if( !line ){
+    if( !line || getNodesWidth( line ) <= line.width ){
         return counter;
     }
 
-    if( getNodesWidth( line ) <= line.width ){
-
-        /*
-        // To Do -> ¿Esto sigue siendo útil=
-        if( propagated ){
-
-            line.charList = [];
-
-            for( i = 1; i <= line.string.length; i++ ){
-                line.charList.push( ctx.measureText( line.string.slice( 0, i ) ).width );
-            }
-
-        }
-        */
-
-        return counter;
-
-    }
-
-    var words, wordsToMove, newLine, newNode, stop, j, k, heritage, originalChars;
+    var words, wordsToMove, newLine, newNode, stop, i, j, k, heritage;
 
     // Nos hacemos con la nueva línea, si no existe la creamos
     if( !currentParagraph.lineList[ id + 1 ] ){
@@ -1657,7 +1603,7 @@ var realocateLine = function( id, lineChar, propagated ){
     counter.nodeChar = newNode.string.length;
     */
 
-    realocateLine( id + 1, 0, true );
+    realocateLine( id + 1, 0 );
 
     return counter;
 
@@ -1742,7 +1688,6 @@ var realocateLineInverse = function( id, modifiedChar ){
 
 };
 
-// Nodos Ready
 var resetBlink = function(){
 
     blinkTime    = Date.now().
@@ -1758,12 +1703,10 @@ var resetBlink = function(){
 
 };
 
-// Nodos Ready
-// Nodos Char Ready
 var start = function(){
 
     input.focus();
-    createPage( PAGE_A4, MARGIN_NORMAL );
+    pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
     setCursor( 0, 0, 0, 0, 0, 0 );
     drawPages();
 
@@ -1805,15 +1748,6 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         currentLineHeight = currentLine.height;
 
     }
-
-    /*
-    if( node > 0 && nodeChar === 0 ){
-        nodeChar = 1;
-    }
-    
-    // Comprobamos que si debemos movernos a otro nodo
-    console.log( currentLine, node, nodeChar );
-    */
 
     // Comprobamos que estamos en la posición del nodo correcta
     if( node > 0 && nodeChar === 0 ){
@@ -2296,12 +2230,10 @@ var setStyle = function( style ){
 
 };
 
-// Nodos Ready
 var trimRight = function( string ){
     return string.replace(/\s+$/g,'');
 };
 
-// Nodos Ready
 var updateBlink = function(){
 
     if( selectedEnabled ){
@@ -2394,8 +2326,6 @@ input
 });
 
 selections
-// Nodos Ready
-// Nodos Char Ready
 .on( 'mousedown', function(e){
 
     verticalKeysEnabled = false;
