@@ -230,10 +230,11 @@ var createWord = function(){
 
     return {
 
-        string   : '',
-        width    : 0,
-        nodeList : [],
-        offset   : []
+        string    : '',
+        width     : 0,
+        widthTrim : 0,
+        nodeList  : [],
+        offset    : []
 
     };
 
@@ -652,8 +653,9 @@ var getWordsMetrics = function( line ){
 
             if( breakedWord ){
 
-                currentWord.string += words[ j ];
-                currentWord.width  += ( nodeList[ i ].charList[ offset + words[ j ].length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
+                currentWord.string    += words[ j ];
+                currentWord.width     += ( nodeList[ i ].charList[ offset + words[ j ].length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
+                currentWord.widthTrim += ( nodeList[ i ].charList[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
 
                 currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
                 currentWord.nodeList.push( i );
@@ -670,10 +672,11 @@ var getWordsMetrics = function( line ){
 
             }
 
-            currentWord          = createWord();
-            currentWord.string   = words[ j ];
-            currentWord.width    = ( nodeList[ i ].charList[ offset + words[ j ].length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
-            currentWord.nodeList = [ i ];
+            currentWord           = createWord();
+            currentWord.string    = words[ j ];
+            currentWord.width     = ( nodeList[ i ].charList[ offset + words[ j ].length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
+            currentWord.widthTrim = ( nodeList[ i ].charList[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
+            currentWord.nodeList  = [ i ];
 
             currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
 
@@ -1057,132 +1060,92 @@ var handleBackspace = function(){
 
     verticalKeysEnabled = false;
 
-    var prev, next, i, realocation;
+    // Principio del documento
+    if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
+        console.log( 'principio del documento, se ignora' );
+        return;
+    }
 
-    // Al principio del nodo
-    if( currentNode.length === 1 && currentNodeCharId === 1 ){
+    // Principio de línea
+    if( !currentLineCharId ){
 
-        console.log('way 1', currentNode);
+        // La línea es la primera del párrafo
+        if( currentLineId === 0 ){
 
-        var page, paragraph, line, lineChar, node, nodeChar;
-
-        // Al principio de la línea
-        if( /*currentLineId !== 0 &&*/ currentLineCharId === 0 ){
-
-            // Principio del documento, lo comprobamos antes porque es un caso especial
-            if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
-                return;
+            if( currentLine.totalChars ){
+                console.log('falta un realocate a la inversa');
             }
 
-            // Principio de párrafo
-            if( currentLineId === 0 ){
-
-                // Principio de página
-                if( currentParagraphId === 0){
-
-                    page      = currentPageId - 1;
-                    paragraph = pageList[ page ].paragraphList.length - 1;
-                    line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                    lineChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].totalChars;
-                    node      = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1;
-                    nodeChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList[ node ].string.length;
-
-                }else{
-
-                    page      = currentPageId;
-                    paragraph = currentParagraphId - 1;
-                    line      = pageList[ page ].paragraphList[ paragraph ].lineList.length - 1;
-                    lineChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].totalChars;
-                    node      = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList.length - 1;
-                    nodeChar  = pageList[ page ].paragraphList[ paragraph ].lineList[ line ].nodeList[ node ].string.length;
-
-                }
-
-            }else{
-
-                page      = currentPageId;
-                paragraph = currentParagraphId;
-                line      = currentLineId - 1;
-                lineChar  = currentParagraph.lineList[ line ].totalChars;
-                node      = currentParagraph.lineList[ line ].nodeList.length - 1;
-                nodeChar  = currentParagraph.lineList[ line ].nodeList[ node ].string.length;
-
-            }
+            currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
+            currentParagraphId        = currentParagraphId - 1;
+            currentParagraph          = currentPage.paragraphList[ currentParagraphId ];
+            currentLineId             = currentParagraph.lineList.length - 1;
+            currentLine               = currentParagraph.lineList[ currentLineId ];
+            currentLineCharId         = currentLine.totalChars;
+            currentNodeId             = currentLine.nodeList.length - 1;
+            currentNode               = currentLine.nodeList[ currentNodeId ];
+            currentNodeCharId         = currentNode.string.length;
 
         }else{
 
-            page      = currentPageId;
-            paragraph = currentParagraphId;
-            line      = currentLineId;
-            lineChar  = currentLineCharId - 1;
-            node      = currentNodeId - 1;
-            nodeChar  = currentLine.nodeList[ node ].string.length - 1;
+            var prevLine = currentParagraph.lineList[ currentLineId - 1 ];
+            var prevNode = prevLine.nodeList.slice( -1 )[ 0 ];
 
-            currentLine.nodeList[ node ].string   = currentLine.nodeList[ node ].string.slice( 0, -1 );
-            currentLine.nodeList[ node ].charList = currentLine.nodeList[ node ].charList.slice( 0, -1 );
-            currentLine.nodeList[ node ].width    = currentLine.nodeList[ node ].charList.slice( -1 )[ 0 ] || 0;
+            prevNode.string           = prevNode.string.slice( 0, -1 );
+            prevNode.charList         = prevNode.charList.slice( 0, -1 );
+            prevNode.width            = prevNode.charList.slice( -1 )[ 0 ];
+            prevLine.totalChars      += currentLine.totalChars - 1;
+            prevLine.nodeList         = prevLine.nodeList.concat( currentLine.nodeList );
+            currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
+            currentParagraph.height  -= currentLine.height;
+            currentLineId             = currentLineId - 1;
+            currentLine               = currentParagraph.lineList[ currentLineId ];
 
-            currentLine.totalChars--;
+            console.log( realocateLine( currentLineId ) );
 
         }
-
-        setCursor( page, paragraph, line, lineChar, node, nodeChar );
 
     }else{
 
-        prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
-        next = currentNode.charList[ currentNodeCharId - 1 ];
+        var i;
 
-        currentNode.string = currentNode.string.slice( 0, currentNodeCharId - 1 ) + currentNode.string.slice( currentNodeCharId );
-        // To Do -> realocation        = realocateLineInverse( currentLineId, currentLineCharId - 1 );
+        currentNode.string   = currentNode.string.slice( 0, currentNodeCharId - 1 ).concat( currentNode.string.slice( currentNodeCharId ) );
+        currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId - 1 );
 
-        if( realocation ){
+        setStyle( currentNode.style );
 
-            currentLineId--;
-
-            currentLine   = currentParagraph.lineList[ currentLineId ];
-            currentLineCharId = realocation;
-
-            positionAbsoluteY -= currentLine.height;
-
-            // Reiniciamos la posición horizontal
-            positionAbsoluteX  = 20; // Gap
-            positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += currentLine.charList[ currentLineCharId - 1 ];
-
-            // To Do -> Total chars
-
-        }else{
-
-            positionAbsoluteX    += prev - next;
-            currentNode.charList  = currentNode.charList.slice( 0, currentNodeCharId - 1 );
-
-            setStyle( currentNode.style );
-
-            for( i = currentNodeCharId; i <= currentNode.string.length; i++ ){
-                currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
-            }
-
-            currentNode.width = currentNode.charList.slice( -1 )[ 0 ] || 0;
-
-            currentLineCharId--;
-            currentNodeCharId--;
-            currentLine.totalChars--;
-
+        for( i = currentNodeCharId; i <= currentNode.string.length; i++ ){
+            currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
         }
 
-        if( !currentNodeCharId ){
+        currentNode.width = currentNode.charList.slice( -1 )[ 0 ] || 0;
 
-            setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+        currentLineCharId--;
+        currentNodeCharId--;
+        currentLine.totalChars--;
 
-            if( !currentLine.nodeList[ currentNodeId + 1 ] && !currentLine.nodeList[ currentNodeId + 1 ].string.length ){
-                currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( currentLine.nodeList.slice( currentNodeId + 2 ) );
-            }
-            
+        // To Do -> Realocate
+
+        // El nodo se queda vacío
+        if( !currentNodeCharId && currentLine.nodeList.length > 1 ){
+            currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
+        }else if( currentLineId && !currentNodeCharId && currentLine.nodeList.length === 1 ){
+
+            currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
+            currentParagraph.height   = currentParagraph.height - currentLine.height;
+            currentLineId             = currentLineId - 1;
+            currentLine               = currentParagraph.lineList[ currentLineId ];
+            currentLineCharId         = currentLine.totalChars;
+            currentNodeId             = currentLine.nodeList.length - 1;
+            currentNode               = currentLine.nodeList[ currentNodeId ];
+            currentNodeCharId         = currentNode.string.length;
+
         }
 
     }
 
+    // Definimos el cursor
+    setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
     resetBlink();
 
 };
@@ -1193,97 +1156,54 @@ var handleChar = function( newChar ){
 
     verticalKeysEnabled = false;
 
-    /*
-    // Final de linea -> Final del último nodo de la línea
-    if(
-        currentLine.nodeList.length - 1 === currentNodeId &&
-        currentNode.string.length === currentLineCharId
-    ){
+    currentLine.totalChars++;
 
-        currentLine.totalChars++;
+    currentNode.string   = currentNode.string.slice( 0, currentNodeCharId ) + newChar + currentNode.string.slice( currentNodeCharId );
+    currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
 
-        currentNode.string += newChar;
-        tmp                 = ctx.measureText( currentNode.string ).width;
-        currentNode.width   = tmp;
+    setStyle( currentNode.style );
 
-        currentNode.charList.push( tmp );
+    for( var i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
+        currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
+    }
 
-        realocation = realocateLine( currentLineId );
+    currentNode.width = currentNode.charList[ currentNode.charList.length - 1 ];
+    
+    currentLineCharId++;
+    currentNodeCharId++;
 
-        if( realocation ){
+    //console.table( currentParagraph.lineList );
+    var realocation = realocateLine( currentLineId, currentLineCharId );
+    //console.table( currentParagraph.lineList );
 
-            currentLineId++;
+    if( realocation > 0 ){
 
-            currentLine   = currentParagraph.lineList[ currentLineId ];
-            currentNode   = currentLine.nodeList[ currentNodeId ];
-            currentLineCharId = realocation;
+        currentLineId++;
 
-            positionAbsoluteY += currentLine.height;
+        var newNode;
 
-            // Reiniciamos la posición horizontal
-            positionAbsoluteX  = 20; // Gap
-            positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += currentNode.charList[ currentLineCharId - 1 ]; // To Do -> No siempre es el 0 y no se está cambiando
+        currentLine       = currentParagraph.lineList[ currentLineId ];
+        currentLineCharId = realocation;
+        newNode           = getNodeInPosition( currentLine, currentLineCharId );
+        currentNodeId     = newNode.nodeId;
+        currentNode       = currentLine.nodeList[ currentNodeId ];
+        currentNodeCharId = newNode.nodeChar;
 
-        }else{
+        positionAbsoluteY += currentLine.height;
 
-            currentLineCharId++;
+        // Reiniciamos la posición horizontal
+        positionAbsoluteX  = 20; // Gap
+        positionAbsoluteX += currentPage.marginLeft;
+        positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
-            prev = currentNode.charList[ currentLineCharId - 2 ] || 0;
-            next = currentNode.charList[ currentLineCharId - 1 ];
-
-            positionAbsoluteX += next - prev;
-
-        }
-
-    // Cualquier otra posición
     }else{
-    */
 
-        currentLine.totalChars++;
+        var prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
+        var next = currentNode.charList[ currentNodeCharId - 1 ];
 
-        currentNode.string   = currentNode.string.slice( 0, currentNodeCharId ) + newChar + currentNode.string.slice( currentNodeCharId );
-        currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
+        positionAbsoluteX += next - prev;
 
-        setStyle( currentNode.style );
-
-        for( var i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
-            currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
-        }
-
-        currentNode.width = currentNode.charList[ currentNode.charList.length - 1 ];
-        var realocation   = realocateLine( currentLineId );
-
-        if( realocation.lineChar ){
-
-            currentLineId++;
-
-            currentLine       = currentParagraph.lineList[ currentLineId ];
-            currentNodeId     = 0;
-            currentNode       = currentLine.nodeList[ 0 ];
-            currentLineCharId = realocation.lineChar;
-            currentNodeCharId = realocation.nodeChar;
-
-            positionAbsoluteY += currentLine.height;
-
-            // Reiniciamos la posición horizontal
-            positionAbsoluteX  = 20; // Gap
-            positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
-
-        }else{
-
-            currentLineCharId++;
-            currentNodeCharId++;
-
-            var prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
-            var next = currentNode.charList[ currentNodeCharId - 1 ];
-
-            positionAbsoluteX += next - prev;
-
-        }
-
-    /*}*/
+    }
 
     resetBlink();
 
@@ -1513,11 +1433,31 @@ var newParagraph = function(){
 
 };
 
-var realocateLine = function( id, propagated ){
+var normalizeLine = function( line ){
+
+    if( line.nodeList.length === 1 ){
+        return;
+    }
+
+    for( var i = 1; i < line.nodeList.length; ){
+
+        /*console.log( */compareNodeStyles( line.nodeList[ i - 1 ], line.nodeList[ i ] )/* )*/;
+
+        i++;
+
+    }
+
+};
+
+var realocateLine = function( id, lineChar, propagated ){
 
     var line    = currentParagraph.lineList[ id ];
-    var counter = { lineChar : 0, nodeChar : 0 };
+    var counter = 0/*{ lineChar : 0, nodeChar : 0 }*/;
     var i;
+
+    if( !line ){
+        return counter;
+    }
 
     if( getNodesWidth( line ) <= line.width ){
 
@@ -1538,12 +1478,13 @@ var realocateLine = function( id, propagated ){
 
     }
 
-    var words, newLine, newNode, stop, j, k;
+    var words, wordsToMove, newLine, newNode, stop, j, k, heritage, originalChars;
 
     // Nos hacemos con la nueva línea, si no existe la creamos
     if( !currentParagraph.lineList[ id + 1 ] ){
 
         newLine                   = createLine( currentParagraph );
+        newLine.nodeList          = [];
         currentParagraph.height  += newLine.height;
         currentParagraph.lineList = currentParagraph.lineList.slice( 0, id + 1 ).concat( newLine ).concat( currentParagraph.lineList.slice( id + 1 ) );
 
@@ -1551,9 +1492,108 @@ var realocateLine = function( id, propagated ){
         newLine = currentParagraph.lineList[ id + 1 ];
     }
 
-    // Comprobamos nodo por nodo que entra por el final (desde el último hasta el primero)
-    for( i = line.nodeList.length - 1; i >= 0; i-- ){
+    words    = getWordsMetrics( line );
+    heritage = 0;
 
+    for( i = words.length - 1; i >= 0; i-- ){
+        heritage += words[ i ].width;
+    }
+
+    // Comprobamos palabra por palabra que entra por el final (desde la última hasta la primera)
+    for( i = words.length - 1; i >= 0; i-- ){
+
+        console.log( words[ i ], heritage, ( words[ i ].width - words[ i ].widthTrim ), line.width );
+
+        if( heritage - ( words[ i ].width - words[ i ].widthTrim ) <= line.width ){
+                        
+            wordsToMove = words.slice( i + 1 );
+            
+            // Si no hay palabras que mover terminamos (aunque este caso no debería darse nunca )
+            if( !wordsToMove.length ){
+                console.info('caso no posible en realocateLine');
+                break;
+            }
+
+            // Comprobamos si el último nodo de la palabra actual es distinto del de las otras
+            k = words[ i ].nodeList.slice( -1 )[ 0 ];
+
+            // Si es distinto el movimiento es más sencillo
+            if( wordsToMove[ 0 ].nodeList[ 0 ] !== k ){
+
+                // Actualizamos el número total de líneas
+                for( j = wordsToMove[ 0 ].nodeList[ 0 ]; j < line.nodeList.length; j++ ){
+
+                    line.totalChars    -= line.nodeList[ j ].string.length;
+                    newLine.totalChars += line.nodeList[ j ].string.length;
+
+                }
+
+                newLine.nodeList.unshift( line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ] );
+
+                line.nodeList = line.nodeList.slice( 0, wordsToMove[ 0 ].nodeList[ 0 ] );
+
+            // La palabra actual comparte nodos con la siguiente, hay que partir
+            }else{
+
+                // Clonamos el nodo
+                newNode       = createNode( line );
+                newNode.style = $.extend( {}, line.nodeList[ words[ i ].nodeList.slice( -1 )[ 0 ] ].style );
+
+                for( j = 0; j < wordsToMove.length; j++ ){
+
+                    // Si la palabra empieza por el mismo nodo que la palabra límite
+                    if( wordsToMove[ j ].nodeList[ 0 ] === k ){
+
+                        newNode.string                                          += line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].string.slice( wordsToMove[ j ].offset[ 0 ][ 0 ] );
+                        line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].string   = line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].string.slice( 0, wordsToMove[ j ].offset[ 0 ][ 0 ] );
+                        line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].charList = line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].charList.slice( 0, wordsToMove[ j ].offset[ 0 ][ 0 ] );
+                        line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].width    = line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].charList.slice( -1 )[ 0 ];
+
+                        if( wordsToMove[ j ].nodeList[ 1 ] ){
+
+                            for( i = wordsToMove[ j ].nodeList[ 1 ]; i < line.nodeList.length; i++ ){
+
+                                line.totalChars    -= line.nodeList[ i ].string.length;
+                                newLine.totalChars += line.nodeList[ i ].string.length;
+
+                            }
+
+                            newLine.nodeList = newLine.nodeList.concat( line.nodeList.slice( wordsToMove[ j ].nodeList[ 1 ] ) );
+                            line.nodeList    = line.nodeList.slice( 0, wordsToMove[ j ].nodeList[ 1 ] );
+
+                            break;
+
+                        }
+
+                    }else{
+
+                        console.log('to do');
+                        // To Do -> line.nodeList.slice( wordsToMove[ j ].nodeList[ 0 ] );
+                    }
+
+                }
+
+                setStyle( newNode.style );
+
+                for( i = 1; i <= newNode.string.length; i++ ){
+                    newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+                }
+
+                newNode.width       = newNode.charList.slice( -1 )[ 0 ];
+                line.totalChars    -= newNode.string.length;
+                newLine.totalChars += newNode.string.length;
+
+                newLine.nodeList.unshift( newNode );
+
+            }
+
+            break;
+
+        }
+
+        heritage -= words[ i ].width;
+
+        /*
         setStyle( line.nodeList[ i ].style );
         
         words = line.nodeList[ i ].string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
@@ -1590,6 +1630,7 @@ var realocateLine = function( id, propagated ){
             }
 
         }
+        */
 
         // To Do -> Nodos por arrastre
 
@@ -1599,13 +1640,24 @@ var realocateLine = function( id, propagated ){
 
     }
 
+    counter = lineChar - line.totalChars;
+
+    //normalizeLine( newLine );
+
+    /*
     for( i = line.nodeList.length - 1, j = 0; i >= 0; i-- ){
         j += line.nodeList[ i ].string.length;
     }
 
     line.totalChars = j;
+    */
 
-    realocateLine( id + 1, true );
+    /*
+    counter.lineChar = line.totalChars;
+    counter.nodeChar = newNode.string.length;
+    */
+
+    realocateLine( id + 1, 0, true );
 
     return counter;
 
@@ -1780,7 +1832,8 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     if(
         currentPageId !== page ||
         currentParagraphId !== paragraph ||
-        currentLineId !== line
+        currentLineId !== line ||
+        force
     ){
 
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
@@ -1818,7 +1871,8 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         currentParagraphId !== paragraph||
         currentLineId !== line ||
         currentNodeId !== node ||
-        currentLineCharId !== lineChar
+        currentLineCharId !== lineChar ||
+        force
     ){
 
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
@@ -2310,13 +2364,22 @@ input
 .on( 'keydown', function(e){
 
     if( e.key && e.key.length === 1 ){
+        //console.log(' ');
+        //console.log( 'pre', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         handleChar( e.key );
+        //console.log( 'pos', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         drawPages();
     }else if( e.which === 8 ){
+        //console.log(' ');
+        //console.log( 'pre', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         handleBackspace();
+        //console.log( 'pos', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         drawPages();
     }else if( e.which === 13 ){
+        //console.log(' ');
+        //console.log( 'pre', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         handleEnter();
+        //console.log( 'pos', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         drawPages();
     }else if( e.which === 37 ){
         handleArrowLeft();
