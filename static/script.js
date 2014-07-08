@@ -660,12 +660,14 @@ var getWordsMetrics = function( line ){
                 currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
                 currentWord.nodeList.push( i );
 
-                offset += currentWord.string.length;
+                offset += words[ j ].length;
 
                 if( words[ j ].indexOf(' ') > -1 || i === nodeList.length - 1 ){
+
                     result.push( currentWord );
-                }else{
+
                     breakedWord = false;
+
                 }
                 
                 continue;
@@ -680,7 +682,7 @@ var getWordsMetrics = function( line ){
 
             currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
 
-            offset += currentWord.string.length;
+            offset += words[ j ].length;
 
             if( words[ j ].indexOf(' ') > -1 || i === nodeList.length - 1 ){
                 result.push( currentWord );
@@ -1501,8 +1503,6 @@ var realocateLine = function( id, lineChar, propagated ){
 
     // Comprobamos palabra por palabra que entra por el final (desde la última hasta la primera)
     for( i = words.length - 1; i >= 0; i-- ){
-
-        console.log( words[ i ], heritage, ( words[ i ].width - words[ i ].widthTrim ), line.width );
 
         if( heritage - ( words[ i ].width - words[ i ].widthTrim ) <= line.width ){
                         
