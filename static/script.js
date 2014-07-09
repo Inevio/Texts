@@ -629,7 +629,7 @@ var getWordsMetrics = function( line ){
     for( i = 0; i < nodeList.length; i++ ){
 
         offset = 0;
-        words  = nodeList[ i ].string.match(/(\s*\S+\s*)/g);
+        words  = nodeList[ i ].string.match(/(\s*\S+\s*)/g) || [];
 
         for( j = 0; j < words.length; j++ ){
 
@@ -1046,6 +1046,7 @@ var handleBackspace = function(){
         // La línea es la primera del párrafo
         if( currentLineId === 0 ){
 
+            // Si hay contenido fusionamos los párrafos
             if( currentLine.totalChars ){
                 console.log('falta un realocate a la inversa');
             }
@@ -1099,12 +1100,36 @@ var handleBackspace = function(){
         currentNodeCharId--;
         currentLine.totalChars--;
 
-        // To Do -> Realocate
+        // Realocamos el contenido
+        var realocation = realocateLineInverse( currentLineId, currentLineCharId );
 
-        // El nodo se queda vacío
-        if( !currentNodeCharId && currentLine.nodeList.length > 1 ){
+        // Se ha producido una realocation inversa
+        if( realocation.realocation && realocation.lineChar > 0 ){
+
+            // Si la línea se ha quedado vacía la eliminamos
+            if( !currentLine.nodeList.length ){
+
+                currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
+                currentParagraph.height   = currentParagraph.height - currentLine.height;
+
+            }
+
+            currentLineId     = currentLineId - 1;
+            currentLine       = currentParagraph.lineList[ currentLineId ];
+            currentLineCharId = realocation.lineChar;
+
+            var nodePosition = getNodeInPosition( currentLine, realocation.lineChar );
+
+            currentNodeId     = nodePosition.nodeId;
+            currentNode       = currentLine.nodeList[ currentNodeId ];
+            currentNodeCharId = nodePosition.nodeChar;
+
+        // El nodo se queda vacío y hay más nodos en la línea
+        }else if( !currentNode.string.length && currentLine.nodeList.length > 1 ){
             currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
-        }else if( currentLineId && !currentNodeCharId && currentLine.nodeList.length === 1 ){
+
+        // El nodo se queda vacío y no hay más nodos en la línea
+        }else if( currentLineId && !currentNode.string.length && currentLine.nodeList.length === 1 ){
 
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
             currentParagraph.height   = currentParagraph.height - currentLine.height;
@@ -1609,80 +1634,130 @@ var realocateLine = function( id, lineChar ){
 
 };
 
-var realocateLineInverse = function( id, modifiedChar ){
+var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     var line    = currentParagraph.lineList[ id ];
-    var counter = { lineChar : 0, nodeChar : 0 };
-    var i, j, fitNodeChar, newNode, words;
+    var counter = { realocation : false, lineChar : 0 };
+    var i, j, newNode;
 
     // Si la línea no existe se ignora
     if( !line ){
-        return;
-    }
-
-    // Si es la primera línea de un párrafo
-    if( !id ){
-
-        realocateLineInverse( id + 1, 0 );
         return counter;
+    }
+
+    var lineWords = getWordsMetrics( line );
+
+    if( !lineWords.length ){
+        return counter;
+    }
+
+    // Comprobamos si al ser la primera palabra la que ha cambiado debemos intentar hacer un realocado con la linea superior
+    // To Do -> Comprobar si modified char alguna vez coge el valor 0
+    if( !dontPropagate && id > 0 && lineWords[ 0 ].string.length >= modifiedChar ){
+
+        var totalChars = currentParagraph.lineList[ id - 1 ].totalChars;
+
+        counter          = realocateLineInverse( id - 1, 0, true );
+        counter.lineChar = totalChars + currentLineCharId;
 
     }
 
-    var prevLine = currentParagraph.lineList[ id - 1 ];
+    // Comprobamos si la palabra de la siguiente línea puede entrar en la línea actual
+    var nextLine = currentParagraph.lineList[ id + 1 ];
 
-    // Comprobamos nodo por nodo que entra por el final
-    for( i = 0; i < line.nodeList.length; i++ ){
+    if( !nextLine ){
+        return counter;
+    }
 
-        setStyle( line.nodeList[ i ].style );
-        
-        fitNodeChar = 0;
-        words       = line.nodeList[ i ].string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
+    var currentWidth  = getNodesWidth( line );
+    var nextLineWords = getWordsMetrics( nextLine );
+    var heritage      = 0;
+    var wordsToMove   = [];
 
-        // Comprobamos palabra por palabra que entra por el final (desde la última hasta la primera)
-        for( j = 1; j <= words.length; j++ ){
+    for( i = 0; i < nextLineWords.length; i++ ){
 
-            if( getNodesWidth( prevLine ) + ctx.measureText( trimRight( words.slice( 0, j ).join('') ) ).width <= prevLine.width ){
-                fitNodeChar = words.slice( 0, j ).join('').length;
-            }else{
-                j--;
-                break;
-            }
-
-        }
-
-        if( !fitNodeChar ){
+        if( currentWidth + heritage + nextLineWords[ i ].widthTrim > line.width ){
             break;
         }
 
-        // Si entra el nodo entero lo movemos
-        if( j === words.length ){
-            // To Do -> Comprobar si este caso se da alguna vez
-            console.log('to do');
-        }else{
-
-            // Clonamos el nodo y modificamos padre e hijo
-            newNode = $.extend( {}, line.nodeList[ i ] );
-
-            newNode.string      = words.slice( 0, j ).join('');
-            newNode.charList    = line.nodeList[ i ].charList.slice( 0, fitNodeChar );
-            newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
-            prevLine.totalChars = prevLine.totalChars + newNode.string.length;
-
-            prevLine.nodeList.push( newNode );
-
-            line.totalChars             = line.totalChars - newNode.string.length;
-            line.nodeList[ i ].string   = line.nodeList[ i ].string.slice( fitNodeChar );
-            line.nodeList[ i ].charList = [];
-
-            for( j = 1; j <= line.nodeList[ i ].string.length; j++ ){
-                line.nodeList[ i ].charList.push( ctx.measureText( line.nodeList[ i ].string.slice( 0, j ) ).width );
-            }
-
-            line.nodeList[ i ].width = line.nodeList[ i ].charList[ line.nodeList[ i ].charList.length - 1 ];
-
-        }
+        wordsToMove.push( i );
+        
+        heritage += nextLineWords[ i ].width;
 
     }
+
+    if( !wordsToMove.length ){
+        return counter;
+    }
+
+    counter.realocation = true;
+
+    // Comprobamos si la última palabra a mover comparte nodo con la siguiente y hay que partir
+    var lastWordToMove = wordsToMove.slice( -1 )[ 0 ];
+    var charsToMove    = 0;
+
+    // Mismos nodos, necesitamos partir
+    if( nextLineWords[ lastWordToMove + 1 ] && nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] === nextLineWords[ lastWordToMove + 1 ].nodeList[ 0 ] ){
+
+        console.log('necesario partir');
+
+        // Comprobamos si la primera palabra a mover tiene el mismo nodo que la ultima a mover
+        // Partido de un solo nodo
+        if( nextLineWords[ 0 ].nodeList[ 0 ] === nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] ){
+
+            var nextNode = nextLine.nodeList[ nextLineWords[ 0 ].nodeList[ 0 ] ]; // Estamos poniendo nextLineWords[ 0 ].nodeList[ 0 ] pero teóricamente debe ser siempre el 0, puede comprobarse empíricamente y optimizarlo en un futuro
+
+            for( i = 0; i < wordsToMove.length; i++ ){
+                charsToMove = nextLineWords[ wordsToMove[ i ] ].string.length;
+            }
+
+            newNode              = createNode( line );
+            newNode.string       = nextNode.string.slice( 0, charsToMove );
+            newNode.charList     = nextNode.charList.slice( 0, charsToMove );
+            newNode.width        = newNode.charList.slice( -1 )[ 0 ];
+            newNode.style        = $.extend( {}, nextNode.style );
+            line.nodeList        = line.nodeList.concat( newNode );
+            line.totalChars     += charsToMove;
+            nextLine.nodeList    = nextLine.nodeList.slice( nextLineWords[ 0 ].nodeList[ 0 ] ); // Estamos poniendo nextLineWords[ 0 ].nodeList[ 0 ] pero teóricamente debe ser siempre el 0, puede comprobarse empíricamente y optimizarlo en un futuro
+            nextLine.totalChars -= charsToMove;
+            nextNode.string      = nextNode.string.slice( charsToMove );
+            nextNode.charList    = [];
+
+            setStyle( newNode.style );
+
+            for( i = 1; i <= nextNode.string.length; i++ ){
+                nextNode.charList.push( ctx.measureText( nextNode.string.slice( 0, i ) ).width );
+            }
+
+            nextNode.width = newNode.charList.slice( -1 )[ 0 ];
+
+        // Movimiento de nodos y partido del último
+        }else{
+            console.log('movimiento de nodos y partido del ultimo');
+        }
+        
+    // Distintos nodos, podemos mover los nodos completos
+    }else{
+
+        for( i = 0; i < wordsToMove.length; i++ ){
+            charsToMove = nextLineWords[ wordsToMove[ i ] ].string.length;
+        }
+
+        line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 ) );
+        line.totalChars     += charsToMove;
+        nextLine.nodeList    = nextLine.nodeList.slice( nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 );
+        nextLine.totalChars -= charsToMove;
+
+    }
+
+    if( !nextLine.totalChars ){
+
+        currentParagraph.lineList  = currentParagraph.lineList.slice( 0, id + 1 ).concat( currentParagraph.lineList.slice( id + 2 ) );
+        currentParagraph.height   -= nextLine.height;
+
+    }
+
+    // To Do -> Propagation
 
     return counter;
 
