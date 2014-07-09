@@ -1638,7 +1638,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     var line    = currentParagraph.lineList[ id ];
     var counter = { realocation : false, lineChar : 0 };
-    var i, j, newNode;
+    var i, newNode;
 
     // Si la línea no existe se ignora
     if( !line ){
@@ -1729,7 +1729,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
                 nextNode.charList.push( ctx.measureText( nextNode.string.slice( 0, i ) ).width );
             }
 
-            nextNode.width = newNode.charList.slice( -1 )[ 0 ];
+            nextNode.width = nextNode.charList.slice( -1 )[ 0 ];
 
         // Movimiento de nodos y partido del último
         }else{
@@ -1757,7 +1757,9 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     }
 
-    // To Do -> Propagation
+    if( !dontPropagate ){
+        realocateLineInverse( id + 1, 0 );
+    }
 
     return counter;
 
