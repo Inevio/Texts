@@ -1106,14 +1106,6 @@ var handleBackspace = function(){
         // Se ha producido una realocation inversa
         if( realocation.realocation && realocation.lineChar > 0 ){
 
-            // Si la línea se ha quedado vacía la eliminamos
-            if( !currentLine.nodeList.length ){
-
-                currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
-                currentParagraph.height   = currentParagraph.height - currentLine.height;
-
-            }
-
             currentLineId     = currentLineId - 1;
             currentLine       = currentParagraph.lineList[ currentLineId ];
             currentLineCharId = realocation.lineChar;
