@@ -1040,6 +1040,8 @@ var handleBackspace = function(){
         return;
     }
 
+    var nodePosition;
+
     // Principio de línea
     if( !currentLineCharId ){
 
@@ -1054,8 +1056,9 @@ var handleBackspace = function(){
 
             if( mergeParagraphs ){
 
-                mergePreLastLine                                             = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.length - 1;
-                currentPage.paragraphList[ currentParagraphId - 1 ].lineList = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.concat( currentParagraph.lineList );
+                mergePreLastLine                                              = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.length - 1;
+                currentPage.paragraphList[ currentParagraphId - 1 ].lineList  = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.concat( currentParagraph.lineList );
+                currentPage.paragraphList[ currentParagraphId - 1 ].height   += currentParagraph.height;
 
             }
 
@@ -1065,16 +1068,14 @@ var handleBackspace = function(){
 
             if( mergeParagraphs ){
 
-                mergeParagraphs = realocateLineInverse( currentParagraph.lineList.length - 1, currentLineCharId );
+                mergeParagraphs = realocateLineInverse( mergePreLastLine + 1, currentLineCharId );
 
                 if( mergeParagraphs.realocation && mergeParagraphs.lineChar > 0 ){
 
                     currentLineId     = mergePreLastLine;
                     currentLine       = currentParagraph.lineList[ currentLineId ];
                     currentLineCharId = mergeParagraphs.lineChar;
-
-                    var nodePosition = getNodeInPosition( currentLine, mergeParagraphs.lineChar );
-
+                    nodePosition      = getNodeInPosition( currentLine, mergeParagraphs.lineChar );
                     currentNodeId     = nodePosition.nodeId;
                     currentNode       = currentLine.nodeList[ currentNodeId ];
                     currentNodeCharId = nodePosition.nodeChar;
@@ -1149,9 +1150,7 @@ var handleBackspace = function(){
             currentLineId     = currentLineId - 1;
             currentLine       = currentParagraph.lineList[ currentLineId ];
             currentLineCharId = realocation.lineChar;
-
-            var nodePosition = getNodeInPosition( currentLine, realocation.lineChar );
-
+            nodePosition      = getNodeInPosition( currentLine, realocation.lineChar );
             currentNodeId     = nodePosition.nodeId;
             currentNode       = currentLine.nodeList[ currentNodeId ];
             currentNodeCharId = nodePosition.nodeChar;
@@ -1765,6 +1764,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
         // Movimiento de nodos y partido del último
         }else{
+            // To Do
             console.log('movimiento de nodos y partido del ultimo');
         }
         
@@ -2405,22 +2405,13 @@ input
 .on( 'keydown', function(e){
 
     if( e.key && e.key.length === 1 ){
-        //console.log(' ');
-        //console.log( 'pre', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         handleChar( e.key );
-        //console.log( 'pos', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         drawPages();
     }else if( e.which === 8 ){
-        //console.log(' ');
-        //console.log( 'pre', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         handleBackspace();
-        //console.log( 'pos', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         drawPages();
     }else if( e.which === 13 ){
-        //console.log(' ');
-        //console.log( 'pre', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         handleEnter();
-        //console.log( 'pos', [ currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId ] );
         drawPages();
     }else if( e.which === 37 ){
         handleArrowLeft();
