@@ -528,45 +528,26 @@ var getCommonStyles = function( start, end ){
         return start.node.style;
     }
 
-    var style         = $.extend( {}, start.node.style );
+    var style        = $.extend( {}, start.node.style );
     var styleCounter = Object.keys( style ).length;
 
-    // Recorremos todos los elementos seleccionados
-    var page, paragraph, line, node;
+    mapRangeLines( true, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
-    // Las páginas
-    for( var pageId = start.pageId; pageId <= end.pageId; pageId++ ){
+        var node;
 
-        page = pageList[ pageId ];
+        for( var i = 0; i < line.nodeList.length; i++ ){
 
-        // Los párrafos
-        for( var paragraphId = start.paragraphId; paragraphId <= end.paragraphId; paragraphId++ ){
+            node = line.nodeList[ i ];
 
-            paragraph = page.paragraphList[ paragraphId ];
+            for( var j in style ){
 
-            // Las líneas
-            for( var lineId = start.lineId; lineId <= end.lineId; lineId++ ){
+                if( style[ j ] !== node.style[ j ] ){
 
-                line = paragraph.lineList[ lineId ];
+                    delete style[ j ];
+                    styleCounter--;
 
-                // Los nodos
-                for( var nodeId = start.nodeId; nodeId <= end.nodeId; nodeId++ ){
-
-                    node = line.nodeList[ nodeId ];
-
-                    for( var i in style ){
-
-                        if( style[ i ] !== node.style[ i ] ){
-
-                            delete style[ i ];
-                            styleCounter--;
-
-                            if( !styleCounter ){
-                                return {};
-                            }
-
-                        }
-
+                    if( !styleCounter ){
+                        return {};
                     }
 
                 }
@@ -575,7 +556,7 @@ var getCommonStyles = function( start, end ){
 
         }
 
-    }
+    });
 
     return style;
 
@@ -1300,8 +1281,6 @@ var mapRangeLines = function( includeLimits, start, end, callback ){
 
     var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoopId, nodeLoopId, finalPage, finalParagraph, fakeEndLineId, j, k, m;
 
-    // To Do
-    /*
     if( includeLimits ){
 
         fakeEndLineId = end.lineId + 1;
@@ -1313,11 +1292,8 @@ var mapRangeLines = function( includeLimits, start, end, callback ){
         nodeLoopId    = start.nodeId + 1;
 
     }
-    */
-
-    fakeEndLineId = end.lineId;
-    nodeLoopId    = start.nodeId + 1;
-
+    
+    // To Do -> Ver si es necesario el include limits aqui
     if( /*!includeLimits ||*/ !start.line.nodeList[ nodeLoopId ] ){
 
         lineLoopId = start.lineId + 1;
