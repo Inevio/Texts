@@ -1046,20 +1046,60 @@ var handleBackspace = function(){
         // La línea es la primera del párrafo
         if( currentLineId === 0 ){
 
+            // To Do -> Saltos entre distintas páginas
+
             // Si hay contenido fusionamos los párrafos
-            if( currentLine.totalChars ){
-                console.log('falta un realocate a la inversa');
+            var mergeParagraphs  = currentLine.totalChars > 0;
+            var mergePreLastLine;
+
+            if( mergeParagraphs ){
+
+                mergePreLastLine                                             = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.length - 1;
+                currentPage.paragraphList[ currentParagraphId - 1 ].lineList = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.concat( currentParagraph.lineList );
+
             }
 
             currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
             currentParagraphId        = currentParagraphId - 1;
             currentParagraph          = currentPage.paragraphList[ currentParagraphId ];
-            currentLineId             = currentParagraph.lineList.length - 1;
-            currentLine               = currentParagraph.lineList[ currentLineId ];
-            currentLineCharId         = currentLine.totalChars;
-            currentNodeId             = currentLine.nodeList.length - 1;
-            currentNode               = currentLine.nodeList[ currentNodeId ];
-            currentNodeCharId         = currentNode.string.length;
+
+            if( mergeParagraphs ){
+
+                mergeParagraphs = realocateLineInverse( currentParagraph.lineList.length - 1, currentLineCharId );
+
+                if( mergeParagraphs.realocation && mergeParagraphs.lineChar > 0 ){
+
+                    currentLineId     = mergePreLastLine;
+                    currentLine       = currentParagraph.lineList[ currentLineId ];
+                    currentLineCharId = mergeParagraphs.lineChar;
+
+                    var nodePosition = getNodeInPosition( currentLine, mergeParagraphs.lineChar );
+
+                    currentNodeId     = nodePosition.nodeId;
+                    currentNode       = currentLine.nodeList[ currentNodeId ];
+                    currentNodeCharId = nodePosition.nodeChar;
+
+                }else{
+
+                    currentLineId     = currentParagraph.lineList.length - 1;
+                    currentLine       = currentParagraph.lineList[ currentLineId ];
+                    currentLineCharId = currentLine.totalChars;
+                    currentNodeId     = currentLine.nodeList.length - 1;
+                    currentNode       = currentLine.nodeList[ currentNodeId ];
+                    currentNodeCharId = currentNode.string.length;
+
+                }
+
+            }else{
+
+                currentLineId     = currentParagraph.lineList.length - 1;
+                currentLine       = currentParagraph.lineList[ currentLineId ];
+                currentLineCharId = currentLine.totalChars;
+                currentNodeId     = currentLine.nodeList.length - 1;
+                currentNode       = currentLine.nodeList[ currentNodeId ];
+                currentNodeCharId = currentNode.string.length;
+
+            }
 
         }else{
 
@@ -1732,7 +1772,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
     }else{
 
         for( i = 0; i < wordsToMove.length; i++ ){
-            charsToMove = nextLineWords[ wordsToMove[ i ] ].string.length;
+            charsToMove += nextLineWords[ wordsToMove[ i ] ].string.length;
         }
 
         line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 ) );
