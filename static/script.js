@@ -2054,7 +2054,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             currentRangeStart.node.width    = currentRangeStart.node.charList[ i - 2 ] || 0;
             currentRangeStart.line.nodeList = [ newNode ].concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
-            
+
             newPositions = getNodeInPosition( currentRangeEnd.line, currentRangeEnd.lineChar );
 
             currentRangeEnd.nodeId   = newPositions.nodeId;
@@ -2303,6 +2303,11 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
         currentRangeStart = originalRangeStart;
 
+    }
+
+    // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
+    if( !propagated ){
+        currentNode = currentLine.nodeList[ currentNodeId ];
     }
 
     if( !propagated ){
