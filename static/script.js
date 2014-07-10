@@ -1399,6 +1399,22 @@ var mapRangeParagraphs = function( start, end, callback ){
 
 };
 
+var mergeNodes = function( first, second ){
+
+    var i = first.string.length;
+
+    first.string += second.string;
+
+    setStyle( first.style );
+
+    for( i = i + 1; i <= first.string.length; i++ ){
+        first.charList.push( ctx.measureText( first.string.slice( 0, i ) ).width );
+    }
+
+    first.width = first.charList.slice( -1 )[ 0 ];
+
+};
+
 var newLine = function(){
 
     return {
@@ -1462,12 +1478,21 @@ var normalizeLine = function( line ){
         return;
     }
 
+    var comparation;
+
     for( var i = 1; i < line.nodeList.length; ){
 
-        // To Do -> Hacer que funcione
-        // compareNodeStyles( line.nodeList[ i - 1 ], line.nodeList[ i ] );
+        comparation = compareNodeStyles( line.nodeList[ i - 1 ], line.nodeList[ i ] );
 
-        i++;
+        if( comparation ){
+            
+            mergeNodes( line.nodeList[ i - 1 ], line.nodeList[ i ] );
+            
+            line.nodeList = line.nodeList.slice( 0, i).concat( line.nodeList.slice( i + 1 ) );
+
+        }else{
+            i++;
+        }
 
     }
 
@@ -1644,7 +1669,7 @@ var realocateLine = function( id, lineChar ){
 
     counter = lineChar - line.totalChars;
 
-    //normalizeLine( newLine );
+    normalizeLine( newLine );
 
     /*
     for( i = line.nodeList.length - 1, j = 0; i >= 0; i-- ){
@@ -1792,6 +1817,8 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
     if( !dontPropagate ){
         realocateLineInverse( id + 1, 0 );
     }
+
+    normalizeLine( line );
 
     return counter;
 
