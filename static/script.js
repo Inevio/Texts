@@ -71,7 +71,7 @@ var currentLineCharId     = null;
 var currentNode           = null;
 var currentNodeId         = null;
 var currentNodeCharId     = null;
-var currentStyle          = 'Helvetica';
+var currentStyle          = '';
 var currentLineHeight     = null;
 var positionAbsoluteX     = null;
 var positionAbsoluteY     = null;
@@ -1903,13 +1903,10 @@ var setCanvasTextStyle = function( style ){
         font += ( font.length ? ' ' : '' ) + style['font-weight'];
     }
 
-    if( style['font-size'] ){
-        font += ( font.length ? ' ' : '' ) + style['font-size'] + 'pt';
-    }else{
-        font += ( font.length ? ' ' : '' ) + '12pt';
-    }
-
-    font += ' ' + currentStyle;
+    font += ( font.length ? ' ' : '' );
+    font += style['font-size'] + 'pt';
+    font += ' ';
+    font += style['font-family'];
 
     ctx.font = font;
 
@@ -2450,6 +2447,16 @@ var start = function(){
 
     );
 
+    setNodeStyle(
+
+        pageList[ 0 ].paragraphList[ 0 ],
+        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ],
+        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ].nodeList[ 0 ],
+        'font-family',
+        'Cambria'
+
+    );
+
     setCursor( 0, 0, 0, 0, 0, 0 );
     drawPages();
 
@@ -2840,6 +2847,10 @@ toolsLine
 
     buttonAction[ $(this).attr('data-tool') ]();
 
+})
+
+.on( 'click', '.tool-fontfamily', function(){
+    setRangeNodeStyle( 'font-family', 'Courier' );
 })
 
 .on( 'click', '.tool-fontsize', function(){
