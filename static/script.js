@@ -1963,6 +1963,27 @@ var setRange = function( start, end ){
     // To Do -> Podemos pasarle las coordenadas para evitar cálculos
     // To Do -> Si no se le pueden pasar las coordenadas podemos utilizar los bucles para las dos alturas
 
+    // Arreglamos los límites
+    if(
+        start.node.string.length === start.nodeChar &&
+        start.nodeId + 1 < start.line.nodeList.length
+    ){
+        // To Do -> Cambio a otra línea si es necesario
+        start.nodeId   = start.nodeId + 1;
+        start.node     = start.line.nodeList[ start.nodeId ];
+        start.nodeChar = 0;
+    }
+
+    if(
+        end.nodeChar === 0 &&
+        end.nodeId > 0
+    ){
+        // To Do -> Cambio a otra línea si es necesario
+        end.nodeId   = end.nodeId - 1;
+        end.node     = end.line.nodeList[ end.nodeId ];
+        end.nodeChar = end.node.string.length;
+    }
+
     var startHash = [ start.pageId, start.paragraphId, start.lineId, start.lineChar ];
     var endHash   = [ end.pageId, end.paragraphId, end.lineId, end.lineChar ];
 
@@ -2008,8 +2029,7 @@ var setRange = function( start, end ){
 
 var setRangeNodeStyle = function( key, value, propagated ){
 
-    // To Do -> Varias lineas
-    var i, newNode, endNode, newPositions;
+    var i, j, newNode, endNode, newPositions;
 
     // Mismo nodo
     if(
@@ -2373,7 +2393,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
     if( !propagated ){
 
         drawPages();
-        drawRange( currentRangeStart, currentRangeEnd );
+        setRange( currentRangeStart, currentRangeEnd );
 
     }
 
