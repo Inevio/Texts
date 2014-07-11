@@ -1991,7 +1991,7 @@ var setRange = function( start, end ){
     // Arreglamos los límites
     if(
         start.node.string.length === start.nodeChar &&
-        start.nodeId + 1 < start.line.nodeList.length
+        start.nodeId + 1 <= start.line.nodeList.length
     ){
         // To Do -> Cambio a otra línea si es necesario
         start.nodeId   = start.nodeId + 1;
@@ -2105,6 +2105,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             currentRangeStart.node.width    = currentRangeStart.node.charList[ i - 2 ] || 0;
             currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
+            currentRangeStart.node          = currentRangeStart.line.nodeList[ currentRangeEnd.nodeId ];
 
             newPositions = getNodeInPosition( currentRangeEnd.line, currentRangeEnd.lineChar );
 
