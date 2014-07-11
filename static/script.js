@@ -71,7 +71,7 @@ var currentLineCharId     = null;
 var currentNode           = null;
 var currentNodeId         = null;
 var currentNodeCharId     = null;
-var currentStyle          = '12pt Helvetica';
+var currentStyle          = 'Helvetica';
 var currentLineHeight     = null;
 var positionAbsoluteX     = null;
 var positionAbsoluteY     = null;
@@ -322,7 +322,7 @@ var drawPages = function(){
 
                     ctx.fillStyle = '#000';
 
-                    setStyle( node.style );
+                    setCanvasTextStyle( node.style );
 
                     ctx.fillText(
 
@@ -1116,7 +1116,7 @@ var handleBackspace = function(){
         currentNode.string   = currentNode.string.slice( 0, currentNodeCharId - 1 ).concat( currentNode.string.slice( currentNodeCharId ) );
         currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId - 1 );
 
-        setStyle( currentNode.style );
+        setCanvasTextStyle( currentNode.style );
 
         for( i = currentNodeCharId; i <= currentNode.string.length; i++ ){
             currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
@@ -1177,7 +1177,7 @@ var handleChar = function( newChar ){
     currentNode.string   = currentNode.string.slice( 0, currentNodeCharId ) + newChar + currentNode.string.slice( currentNodeCharId );
     currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
 
-    setStyle( currentNode.style );
+    setCanvasTextStyle( currentNode.style );
 
     for( var i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
         currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
@@ -1242,7 +1242,7 @@ var handleEnter = function(){
     newNode.string = currentNode.string.slice( currentNodeCharId );
     newNode.style  = $.extend( {}, currentNode.style );
 
-    setStyle( newNode.style );
+    setCanvasTextStyle( newNode.style );
 
     for( i = 1; i <= newNode.string.length; i++ ){
         newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -1387,7 +1387,7 @@ var mergeNodes = function( first, second ){
 
     first.string += second.string;
 
-    setStyle( first.style );
+    setCanvasTextStyle( first.style );
 
     for( i = i + 1; i <= first.string.length; i++ ){
         first.charList.push( ctx.measureText( first.string.slice( 0, i ) ).width );
@@ -1582,7 +1582,7 @@ var realocateLine = function( id, lineChar ){
 
                 }
 
-                setStyle( newNode.style );
+                setCanvasTextStyle( newNode.style );
 
                 for( i = 1; i <= newNode.string.length; i++ ){
                     newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -1603,7 +1603,7 @@ var realocateLine = function( id, lineChar ){
         heritage -= words[ i ].width;
 
         /*
-        setStyle( line.nodeList[ i ].style );
+        setCanvasTextStyle( line.nodeList[ i ].style );
         
         words = line.nodeList[ i ].string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
 
@@ -1761,7 +1761,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
             nextNode.string      = nextNode.string.slice( charsToMove );
             nextNode.charList    = [];
 
-            setStyle( newNode.style );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= nextNode.string.length; i++ ){
                 nextNode.charList.push( ctx.measureText( nextNode.string.slice( 0, i ) ).width );
@@ -1821,12 +1821,37 @@ var resetBlink = function(){
 
 };
 
-var start = function(){
+var setNodeStyle = function( line, node, key, value ){
 
-    input.focus();
-    pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
-    setCursor( 0, 0, 0, 0, 0, 0 );
-    drawPages();
+    if( value ){
+        node.style[ key ] = value;
+    }else{
+        delete node.style[ key ];
+    }
+
+};
+
+var setCanvasTextStyle = function( style ){
+
+    var font = '';
+
+    if( style['font-style'] ){
+        font += style['font-style'];
+    }
+
+    if( style['font-weight'] ){
+        font += ( font.length ? ' ' : '' ) + style['font-weight'];
+    }
+
+    if( style['font-size'] ){
+        font += ( font.length ? ' ' : '' ) + style['font-size'];
+    }else{
+        font += ( font.length ? ' ' : '' ) + '12pt';
+    }
+
+    font += ' ' + currentStyle;
+
+    ctx.font = font;
 
 };
 
@@ -2042,17 +2067,11 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Si es todo el nodo
         if( currentRangeStart.nodeChar === 0 && currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
 
-            newNode = currentRangeStart.node;
-
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
+            newNode          = currentRangeStart.node;
             newNode.charList = [];
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2063,20 +2082,14 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Si comienza por el principio del nodo
         }else if( currentRangeStart.nodeChar === 0 ){
 
-            newNode        = createNode( currentLine );
-            newNode.string = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
-            newNode.style  = $.extend( {}, currentRangeStart.node.style );
-            
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
+            newNode                         = createNode( currentLine );
+            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
             currentRangeStart.node.charList = [];
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2084,7 +2097,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            setStyle( currentRangeStart.node.style );
+            setCanvasTextStyle( currentRangeStart.node.style );
 
             for( i = 1; i <= currentRangeStart.node.string.length; i++ ){
                 currentRangeStart.node.charList.push( ctx.measureText( currentRangeStart.node.string.slice( 0, i ) ).width );
@@ -2105,17 +2118,11 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
-            
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
             currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2138,20 +2145,14 @@ var setRangeNodeStyle = function( key, value, propagated ){
             endNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
-            
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
             endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
             endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
             currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
             currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2159,7 +2160,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            setStyle( endNode.style );
+            setCanvasTextStyle( endNode.style );
 
             for( i = 1; i <= endNode.string.length; i++ ){
                 endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
@@ -2194,17 +2195,11 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Comprobamos si es una selección completa del nodo
         if( currentRangeStart.nodeChar === 0 && currentRangeStart.nodeChar === currentRangeStart.node.string.length ){
 
-            newNode = currentRangeStart.node;
-
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
+            newNode          = currentRangeStart.node;
             newNode.charList = [];
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2218,14 +2213,9 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode        = createNode( currentRangeStart.line );
             newNode.string = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
             newNode.style  = $.extend( {}, currentRangeStart.node.style );
-            
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2247,17 +2237,11 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Nodos intermedios
         for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
 
-            newNode = currentRangeStart.line.nodeList[ i ];
-
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
+            newNode          = currentRangeStart.line.nodeList[ i ];
             newNode.charList = [];
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( j = 1; j <= newNode.string.length; j++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
@@ -2271,17 +2255,11 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Comprobamos si es una selección completa del nodo
         if( currentRangeEnd.nodeChar === 0 && currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
 
-            newNode = currentRangeEnd.node;
-
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
+            newNode          = currentRangeEnd.node;
             newNode.charList = [];
 
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2296,13 +2274,8 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode.string = currentRangeEnd.node.string.slice( 0, currentRangeEnd.nodeChar );
             newNode.style  = $.extend( {}, currentRangeEnd.node.style );
 
-            if( value ){
-                newNode.style[ key ] = value;
-            }else{
-                delete newNode.style[ key ];
-            }
-
-            setStyle( newNode.style );
+            setNodeStyle( currentLine, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
@@ -2313,7 +2286,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             currentRangeEnd.node.string   = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
             currentRangeEnd.node.charList = [];
 
-            setStyle( currentRangeEnd.node.style );
+            setCanvasTextStyle( currentRangeEnd.node.style );
 
             for( i = 1; i <= currentRangeEnd.node.string.length; i++ ){
                 currentRangeEnd.node.charList.push( ctx.measureText( currentRangeEnd.node.string.slice( 0, i ) ).width );
@@ -2350,17 +2323,11 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             for( i = 0; i < line.nodeList.length; i++ ){
 
-                newNode = line.nodeList[ i ];
-
-                if( value ){
-                    newNode.style[ key ] = value;
-                }else{
-                    delete newNode.style[ key ];
-                }
-
+                newNode          = line.nodeList[ i ];
                 newNode.charList = [];
 
-                setStyle( newNode.style );
+                setNodeStyle( currentLine, newNode, key, value );
+                setCanvasTextStyle( newNode.style );
 
                 for( j = 1; j <= newNode.string.length; j++ ){
                     newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
@@ -2385,12 +2352,10 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
     }
 
-    // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
+    // To Do -> Tocaría hacer un realocateLine por aquí y tal
     if( !propagated ){
-        currentNode = currentLine.nodeList[ currentNodeId ];
-    }
 
-    if( !propagated ){
+        currentNode = currentLine.nodeList[ currentNodeId ]; // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
 
         drawPages();
         setRange( currentRangeStart, currentRangeEnd );
@@ -2409,21 +2374,12 @@ var setRangeParagraphStyle = function( key, value ){
 
 };
 
-var setStyle = function( style ){
+var start = function(){
 
-    var font = '';
-
-    if( style['font-style'] ){
-        font += style['font-style'];
-    }
-
-    if( style['font-weight'] ){
-        font += ( font.length ? ' ' : '' ) + style['font-weight'];
-    }
-
-    font += ' ' + currentStyle;
-
-    ctx.font = font;
+    input.focus();
+    pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
+    setCursor( 0, 0, 0, 0, 0, 0 );
+    drawPages();
 
 };
 
@@ -2812,6 +2768,10 @@ toolsLine
 
     buttonAction[ $(this).attr('data-tool') ]();
 
+})
+
+.on( 'click', '.tool-fontsize', function(){
+    setRangeNodeStyle( 'font-size', '18pt' );
 });
 
 // Start
