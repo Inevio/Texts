@@ -1746,7 +1746,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
             var nextNode = nextLine.nodeList[ nextLineWords[ 0 ].nodeList[ 0 ] ]; // Estamos poniendo nextLineWords[ 0 ].nodeList[ 0 ] pero teóricamente debe ser siempre el 0, puede comprobarse empíricamente y optimizarlo en un futuro
 
             for( i = 0; i < wordsToMove.length; i++ ){
-                charsToMove = nextLineWords[ wordsToMove[ i ] ].string.length;
+                charsToMove += nextLineWords[ wordsToMove[ i ] ].string.length;
             }
 
             newNode              = createNode( line );
