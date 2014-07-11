@@ -2053,7 +2053,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             }
 
             currentRangeStart.node.width    = currentRangeStart.node.charList[ i - 2 ] || 0;
-            currentRangeStart.line.nodeList = [ newNode ].concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
 
             newPositions = getNodeInPosition( currentRangeEnd.line, currentRangeEnd.lineChar );
 
