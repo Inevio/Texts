@@ -163,7 +163,7 @@ var createLine = function( paragraph ){
     var line = newLine();
 
     // To Do -> Asignar la altura dinámicamente
-    line.height = parseInt( testZone.css('line-height'), 10 );
+    line.height = 0;//parseInt( testZone.css('line-height'), 10 );
     line.width  = paragraph.width;
 
     // Creamos el nodo inicial
@@ -178,7 +178,7 @@ var createNode = function(){
     var node = newNode();
 
     // To Do -> Asignar la altura dinámicamente
-    node.height = parseInt( testZone.css('line-height'), 10 );
+    node.width = 0;//;parseInt( testZone.css('line-height'), 10 );
 
     return node;
 
@@ -1229,7 +1229,7 @@ var handleEnter = function(){
 
     // To Do -> Comprobar que entra en la página
 
-    var i;
+    var i, maxSize;
     var newParagraph   = createParagraph( currentPage );
     var newParagraphId = currentParagraphId + 1;
 
@@ -1260,6 +1260,36 @@ var handleEnter = function(){
     // Movemos los nodos siguientes
     newLine.nodeList     = newLine.nodeList.concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
     currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 );
+
+    // Actualizamos las alturas de las líneas
+    maxSize = 0;
+
+    for( i = 0; i < newLine.nodeList.length; i++ ){
+
+        if( newLine.nodeList[ i ].style['font-size'] > maxSize ){
+            maxSize = newLine.nodeList[ i ].style['font-size'];
+        }
+
+    }
+
+    maxSize             = parseInt( testZone.css( 'font-size', maxSize + 'pt' ).css('line-height'), 10 );
+    newParagraph.height = maxSize;
+    newLine.height      = maxSize;
+
+    maxSize = 0;
+    
+    for( i = 0; i < currentLine.nodeList.length; i++ ){
+
+        if( currentLine.nodeList[ i ].style['font-size'] > maxSize ){
+            maxSize = currentLine.nodeList[ i ].style['font-size'];
+        }
+
+    }
+
+    maxSize                  = parseInt( testZone.css( 'font-size', maxSize + 'pt' ).css('line-height'), 10 );
+    currentParagraph.height -= currentLine.height;
+    currentParagraph.height += maxSize;
+    currentLine.height       = maxSize;
 
     // Movemos las líneas siguientes
     newParagraph.lineList     = newParagraph.lineList.concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
@@ -2409,6 +2439,17 @@ var start = function(){
 
     input.focus();
     pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
+
+    setNodeStyle(
+
+        pageList[ 0 ].paragraphList[ 0 ],
+        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ],
+        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ].nodeList[ 0 ],
+        'font-size',
+        12
+
+    );
+
     setCursor( 0, 0, 0, 0, 0, 0 );
     drawPages();
 
