@@ -1681,7 +1681,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     var line    = currentParagraph.lineList[ id ];
     var counter = { realocation : false, lineChar : 0 };
-    var i, newNode;
+    var i, j, newNode, maxSize;
 
     // Si la línea no existe se ignora
     if( !line ){
@@ -1793,6 +1793,43 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
         nextLine.nodeList    = nextLine.nodeList.slice( nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 );
         nextLine.totalChars -= charsToMove;
 
+    }
+
+    // Actualizamos los tamaños
+    maxSize = 0;
+    
+    for( j = 0; j < line.nodeList.length; j++ ){
+
+        if( line.nodeList[ j ].height > maxSize ){
+            maxSize = line.nodeList[ j ].height;
+        }
+
+    }
+
+    if( maxSize !== line.height ){
+
+        currentParagraph.height -= line.height;
+        currentParagraph.height += maxSize;
+        line.height              = maxSize;
+
+    }
+
+    maxSize = 0;
+    
+    for( j = 0; j < nextLine.nodeList.length; j++ ){
+
+        if( nextLine.nodeList[ j ].height > maxSize ){
+            maxSize = nextLine.nodeList[ j ].height;
+        }
+
+    }
+
+    if( maxSize !== nextLine.height ){
+
+        currentParagraph.height -= nextLine.height;
+        currentParagraph.height += maxSize;
+        nextLine.height          = maxSize;
+        
     }
 
     if( !nextLine.totalChars ){
