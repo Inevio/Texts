@@ -1093,6 +1093,7 @@ var handleBackspace = function(){
 
             var prevLine = currentParagraph.lineList[ currentLineId - 1 ];
             var prevNode = prevLine.nodeList.slice( -1 )[ 0 ];
+            var original = prevLine.totalChars - 1;
 
             prevNode.string           = prevNode.string.slice( 0, -1 );
             prevNode.charList         = prevNode.charList.slice( 0, -1 );
@@ -1101,11 +1102,39 @@ var handleBackspace = function(){
             prevLine.nodeList         = prevLine.nodeList.concat( currentLine.nodeList );
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
             currentParagraph.height  -= currentLine.height;
-            currentLineId             = currentLineId - 1;
-            currentLine               = currentParagraph.lineList[ currentLineId ];
+            currentParagraph.height  -= prevLine.height;
 
-            // To Do -> Realocate
-            console.log( realocateLine( currentLineId ) );
+            // Actualizamos las alturas de las líneas
+            var maxSize = 0;
+
+            for( i = 0; i < prevLine.nodeList.length; i++ ){
+
+                if( prevLine.nodeList[ i ].height > maxSize ){
+                    maxSize = prevLine.nodeList[ i ].height;
+                }
+
+            }
+
+            prevLine.height          = maxSize;
+            currentParagraph.height += maxSize;
+            currentLineId            = currentLineId - 1;
+            currentLine              = currentParagraph.lineList[ currentLineId ];
+
+            var realocate = realocateLine( currentLineId, original );
+            
+            if( realocate >= 0 ){
+
+                currentLineId     = currentLineId + 1;
+                currentLine       = currentParagraph.lineList[ currentLineId ];
+                currentLineCharId = realocate;
+
+                var positions = getNodeInPosition( currentLine, realocate );
+
+                currentNodeId     = positions.nodeId;
+                currentNode       = currentLine.nodeList[ currentNodeId ];
+                currentNodeCharId = positions.nodeChar;
+
+            }
 
         }
 
@@ -1267,13 +1296,12 @@ var handleEnter = function(){
 
     for( i = 0; i < newLine.nodeList.length; i++ ){
 
-        if( newLine.nodeList[ i ].style['font-size'] > maxSize ){
-            maxSize = newLine.nodeList[ i ].style['font-size'];
+        if( newLine.nodeList[ i ].height > maxSize ){
+            maxSize = newLine.nodeList[ i ].height;
         }
 
     }
 
-    maxSize             = parseInt( testZone.css( 'font-size', maxSize + 'pt' ).css('line-height'), 10 );
     newParagraph.height = maxSize;
     newLine.height      = maxSize;
 
@@ -1281,13 +1309,12 @@ var handleEnter = function(){
     
     for( i = 0; i < currentLine.nodeList.length; i++ ){
 
-        if( currentLine.nodeList[ i ].style['font-size'] > maxSize ){
-            maxSize = currentLine.nodeList[ i ].style['font-size'];
+        if( currentLine.nodeList[ i ].height > maxSize ){
+            maxSize = currentLine.nodeList[ i ].height;
         }
 
     }
 
-    maxSize                  = parseInt( testZone.css( 'font-size', maxSize + 'pt' ).css('line-height'), 10 );
     currentParagraph.height -= currentLine.height;
     currentParagraph.height += maxSize;
     currentLine.height       = maxSize;
