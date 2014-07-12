@@ -72,7 +72,6 @@ var currentNode           = null;
 var currentNodeId         = null;
 var currentNodeCharId     = null;
 var currentStyle          = '';
-var currentLineHeight     = null;
 var positionAbsoluteX     = null;
 var positionAbsoluteY     = null;
 var currentRangeStart     = null;
@@ -1242,6 +1241,7 @@ var handleEnter = function(){
     // Clonamos el nodo actual
     newNode.string = currentNode.string.slice( currentNodeCharId );
     newNode.style  = $.extend( {}, currentNode.style );
+    newNode.height = currentNode.height;
 
     setCanvasTextStyle( newNode.style );
 
@@ -1576,8 +1576,9 @@ var realocateLine = function( id, lineChar ){
             }else{
 
                 // Clonamos el nodo
-                newNode       = createNode( line );
-                newNode.style = $.extend( {}, line.nodeList[ words[ i ].nodeList.slice( -1 )[ 0 ] ].style );
+                newNode        = createNode( line );
+                newNode.style  = $.extend( {}, line.nodeList[ words[ i ].nodeList.slice( -1 )[ 0 ] ].style );
+                newNode.height = line.nodeList[ words[ i ].nodeList.slice( -1 )[ 0 ] ].height;
 
                 for( j = 0; j < wordsToMove.length; j++ ){
 
@@ -1633,45 +1634,6 @@ var realocateLine = function( id, lineChar ){
 
         heritage -= words[ i ].width;
 
-        /*
-        setCanvasTextStyle( line.nodeList[ i ].style );
-        
-        words = line.nodeList[ i ].string.match(/(\s*\S+\s*)/g); // Separamos conservando espacios
-
-        // Comprobamos palabra por palabra que entra por el final (desde la última hasta la primera)
-        for( j = words.length - 1; j >= 0; j-- ){
-
-            if( getNodesWidth( line, i ) + ctx.measureText( trimRight( words.slice( 0, j ).join('') ) ).width <= line.width ){
-                
-                // Clonamos el nodo y modificamos padre e hijo
-                newNode = createNode( line );
-
-                line.nodeList[ i ].string   = words.slice( 0, j ).join('');
-                line.nodeList[ i ].charList = line.nodeList[ i ].charList.slice( 0, line.nodeList[ i ].string.length );
-                line.nodeList[ i ].width    = line.nodeList[ i ].charList[ line.nodeList[ i ].charList.length - 1 ];
-
-                newNode.string   = words.slice( j ).join('');
-                newNode.charList = [];
-
-                for( k = 1; k <= newNode.string.length; k++ ){
-                    newNode.charList.push( ctx.measureText( newNode.string.slice( 0, k ) ).width );
-                }
-
-                newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
-                newNode.style       = $.extend( {}, line.nodeList[ i ].style );
-                newLine.nodeList    = [ newNode ];
-                newLine.totalChars  = newNode.string.length;
-                counter.lineChar   += newNode.string.length; // To Do -> Y si se estaba escribiendo en medio de la palabra?
-                counter.nodeChar   += newNode.string.length; // To Do -> Y si se estaba escribiendo en medio de la palabra?
-                stop                = true;
-
-                break;
-
-            }
-
-        }
-        */
-
         // To Do -> Nodos por arrastre
 
         if( stop ){
@@ -1683,20 +1645,6 @@ var realocateLine = function( id, lineChar ){
     counter = lineChar - line.totalChars;
 
     normalizeLine( newLine );
-
-    /*
-    for( i = line.nodeList.length - 1, j = 0; i >= 0; i-- ){
-        j += line.nodeList[ i ].string.length;
-    }
-
-    line.totalChars = j;
-    */
-
-    /*
-    counter.lineChar = line.totalChars;
-    counter.nodeChar = newNode.string.length;
-    */
-
     realocateLine( id + 1, 0 );
 
     return counter;
@@ -1785,6 +1733,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
             newNode.charList     = nextNode.charList.slice( 0, charsToMove );
             newNode.width        = newNode.charList.slice( -1 )[ 0 ];
             newNode.style        = $.extend( {}, nextNode.style );
+            newNode.height       = nextNode.height;
             line.nodeList        = line.nodeList.concat( newNode );
             line.totalChars     += charsToMove;
             nextLine.nodeList    = nextLine.nodeList.slice( nextLineWords[ 0 ].nodeList[ 0 ] ); // Estamos poniendo nextLineWords[ 0 ].nodeList[ 0 ] pero teóricamente debe ser siempre el 0, puede comprobarse empíricamente y optimizarlo en un futuro
@@ -1865,6 +1814,8 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
 
         var lineHeight = parseInt( testZone.css( 'font-size', value + 'pt' ).css('line-height'), 10 );
 
+        node.height = lineHeight;
+
         if( line.height === lineHeight ){
             return;
         }
@@ -1944,10 +1895,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     }
 
     if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line ){
-
-        currentLine       = currentParagraph.lineList[ line ];
-        currentLineHeight = currentLine.height;
-
+        currentLine = currentParagraph.lineList[ line ];
     }
 
     // Comprobamos que estamos en la posición del nodo correcta
@@ -2143,6 +2091,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
+            newNode.height                  = currentRangeStart.height;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
             currentRangeStart.node.charList = [];
 
@@ -2177,6 +2126,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
+            newNode.height                  = currentRangeStart.node.height;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
             currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
 
@@ -2204,8 +2154,10 @@ var setRangeNodeStyle = function( key, value, propagated ){
             endNode                         = createNode( currentLine );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
+            newNode.height                  = currentRangeStart.node.height;
             endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
             endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
+            endNode.height                  = currentRangeEnd.node.height;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
             currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
             currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
@@ -2272,6 +2224,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode        = createNode( currentRangeStart.line );
             newNode.string = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
             newNode.style  = $.extend( {}, currentRangeStart.node.style );
+            newNode.height = currentRangeStart.node.height;
 
             setNodeStyle( currentParagraph, currentLine, newNode, key, value );
             setCanvasTextStyle( newNode.style );
@@ -2332,6 +2285,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode        = createNode( currentRangeEnd.line );
             newNode.string = currentRangeEnd.node.string.slice( 0, currentRangeEnd.nodeChar );
             newNode.style  = $.extend( {}, currentRangeEnd.node.style );
+            newNode.height = currentRangeEnd.node.height;
 
             setNodeStyle( currentParagraph, currentLine, newNode, key, value );
             setCanvasTextStyle( newNode.style );
@@ -2502,8 +2456,10 @@ var updateBlink = function(){
 
         blinkCurrent = newCurrent;
 
+        console.log( currentNode );
+
         checkCanvasSelectSize();
-        ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY, 10 ), 1, currentLineHeight );
+        ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY, 10 ) + currentLine.height - currentNode.height, 1, currentNode.height );
         ctxSel.fill();
 
         debugTimeEnd('cursor on');
