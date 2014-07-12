@@ -1949,15 +1949,15 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     var i;
 
     // Actualizamos solo los campos que sean necesarios
-    if( currentPageId !== page ){
+    if( force || currentPageId !== page ){
         currentPage = pageList[ page ];
     }
 
-    if( currentPageId !== page || currentParagraphId !== paragraph ){
+    if( force || currentPageId !== page || currentParagraphId !== paragraph ){
         currentParagraph = currentPage.paragraphList[ paragraph ];
     }
 
-    if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line ){
+    if( force || currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line ){
         currentLine = currentParagraph.lineList[ line ];
     }
 
@@ -1970,16 +1970,16 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     }
 
     // Actualizamos el nodo si es necesario
-    if( currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line || currentNodeId !== node ){
+    if( force || currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line || currentNodeId !== node ){
         currentNode = currentLine.nodeList[ node ];
     }
 
     // Calculamos la posición vertical si es necesario
     if(
+        force ||
         currentPageId !== page ||
         currentParagraphId !== paragraph ||
-        currentLineId !== line ||
-        force
+        currentLineId !== line
     ){
 
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
@@ -2013,12 +2013,12 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
     // Calculamos la posición horizontal si es necesario
     if(
+        force ||
         currentPageId !== page ||
         currentParagraphId !== paragraph||
         currentLineId !== line ||
         currentNodeId !== node ||
-        currentLineCharId !== lineChar ||
-        force
+        currentLineCharId !== lineChar
     ){
 
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
