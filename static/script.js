@@ -1989,7 +1989,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     
 };
 
-var setRange = function( start, end ){
+var setRange = function( start, end, force ){
 
     // To Do -> Podemos pasarle las coordenadas para evitar cálculos
     // To Do -> Si no se le pueden pasar las coordenadas podemos utilizar los bucles para las dos alturas
@@ -2019,7 +2019,7 @@ var setRange = function( start, end ){
     var endHash   = [ end.pageId, end.paragraphId, end.lineId, end.lineChar ];
 
     // Si son iguales no es un rango
-    if( compareHashes( startHash, endHash ) === 0 ){
+    if( !force && compareHashes( startHash, endHash ) === 0 ){
         resetBlink();
         return;
     }
@@ -2040,6 +2040,7 @@ var setRange = function( start, end ){
     }
 
     if(
+        !force &&
         currentRangeStartHash &&
         currentRangeEndHash &&
         compareHashes( currentRangeStartHash, startHash ) === 0 &&
@@ -2371,7 +2372,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
         currentNode = currentLine.nodeList[ currentNodeId ]; // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
 
         drawPages();
-        setRange( currentRangeStart, currentRangeEnd );
+        setRange( currentRangeStart, currentRangeEnd, true );
 
     }
 
