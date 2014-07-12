@@ -530,6 +530,7 @@ var getCommonStyles = function( start, end ){
         start.paragraphId === end.paragraphId &&
         start.lineId === end.lineId &&
         start.nodeId === end.nodeId
+
     ){
         return start.node.style;
     }
@@ -2523,6 +2524,30 @@ var updateBlink = function(){
 
 };
 
+var updateToolsLineStatus = function(){
+
+    var styles;
+
+    if( currentRangeStart ){
+        styles = getCommonStyles( currentRangeStart, currentRangeEnd );
+    }else{
+        styles = currentNode.style;
+    }
+
+    if( styles['font-weight'] ){
+        $('.tool-button-bold', toolsLine ).addClass('active');
+    }else{
+        $('.tool-button-bold', toolsLine ).removeClass('active');
+    }
+
+    if( styles['font-style'] ){
+        $('.tool-button-italic', toolsLine ).addClass('active');
+    }else{
+        $('.tool-button-italic', toolsLine ).removeClass('active');
+    }
+
+};
+
 // Events
 input
 .on( 'keydown', function(e){
@@ -2837,7 +2862,11 @@ selections
 })
 
 .on( 'mouseup', function(){
+
     selectionEnabled = false;
+
+    updateToolsLineStatus();
+
 });
 
 toolsLine
