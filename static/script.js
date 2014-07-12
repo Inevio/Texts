@@ -1261,67 +1261,98 @@ var handleEnter = function(){
     var i, maxSize;
     var newParagraph   = createParagraph( currentPage );
     var newParagraphId = currentParagraphId + 1;
+    var movedLines, newLine, newNode;
 
-    // Obtenemos las líneas a mover y el texto
-    var movedLines = currentParagraph.lineList.slice( currentLineId + 1 );
-    var newLine    = newParagraph.lineList[ 0 ];
-    var newNode    = newLine.nodeList[ 0 ];
+    // Partimos la línea si no estamos al principio de ella
+    if( currentLineCharId ){
 
-    // Clonamos el nodo actual
-    newNode.string = currentNode.string.slice( currentNodeCharId );
-    newNode.style  = $.extend( {}, currentNode.style );
-    newNode.height = currentNode.height;
+        // Obtenemos las líneas a mover y el texto
+        movedLines = currentParagraph.lineList.slice( currentLineId + 1 );
+        newLine    = newParagraph.lineList[ 0 ];
+        newNode    = newLine.nodeList[ 0 ];
 
-    setCanvasTextStyle( newNode.style );
+        // Clonamos el nodo actual
+        newNode.string = currentNode.string.slice( currentNodeCharId );
+        newNode.style  = $.extend( {}, currentNode.style );
+        newNode.height = currentNode.height;
 
-    for( i = 1; i <= newNode.string.length; i++ ){
-        newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-    }
+        setCanvasTextStyle( newNode.style );
 
-    newNode.width      = newNode.charList[ newNode.charList.length - 1 ];
-    newLine.totalChars = newNode.string.length;
-
-    // Eliminamos el contenido del nodo actual y actualizamos su tamaño
-    currentNode.string     = currentNode.string.slice( 0, currentNodeCharId );
-    currentNode.charList   = currentNode.charList.slice( 0, currentNodeCharId );
-    currentNode.width      = currentNode.charList[ currentNode.charList.length - 1 ];
-    currentLine.totalChars = currentLine.totalChars - newNode.string.length;
-
-    // Movemos los nodos siguientes
-    newLine.nodeList     = newLine.nodeList.concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
-    currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 );
-
-    // Actualizamos las alturas de las líneas
-    maxSize = 0;
-
-    for( i = 0; i < newLine.nodeList.length; i++ ){
-
-        if( newLine.nodeList[ i ].height > maxSize ){
-            maxSize = newLine.nodeList[ i ].height;
+        for( i = 1; i <= newNode.string.length; i++ ){
+            newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
         }
 
-    }
+        newNode.width      = newNode.charList[ newNode.charList.length - 1 ];
+        newLine.totalChars = newNode.string.length;
 
-    newParagraph.height = maxSize;
-    newLine.height      = maxSize;
+        // Eliminamos el contenido del nodo actual y actualizamos su tamaño
+        currentNode.string     = currentNode.string.slice( 0, currentNodeCharId );
+        currentNode.charList   = currentNode.charList.slice( 0, currentNodeCharId );
+        currentNode.width      = currentNode.charList[ currentNode.charList.length - 1 ];
+        currentLine.totalChars = currentLine.totalChars - newNode.string.length;
 
-    maxSize = 0;
-    
-    for( i = 0; i < currentLine.nodeList.length; i++ ){
+        // Movemos los nodos siguientes
+        newLine.nodeList     = newLine.nodeList.concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
+        currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 );
 
-        if( currentLine.nodeList[ i ].height > maxSize ){
-            maxSize = currentLine.nodeList[ i ].height;
+        // Actualizamos las alturas de las líneas
+        maxSize = 0;
+
+        for( i = 0; i < newLine.nodeList.length; i++ ){
+
+            if( newLine.nodeList[ i ].height > maxSize ){
+                maxSize = newLine.nodeList[ i ].height;
+            }
+
         }
 
+        newParagraph.height = maxSize;
+        newLine.height      = maxSize;
+
+        maxSize = 0;
+        
+        for( i = 0; i < currentLine.nodeList.length; i++ ){
+
+            if( currentLine.nodeList[ i ].height > maxSize ){
+                maxSize = currentLine.nodeList[ i ].height;
+            }
+
+        }
+
+        currentParagraph.height -= currentLine.height;
+        currentParagraph.height += maxSize;
+        currentLine.height       = maxSize;
+
+        // Movemos las líneas siguientes
+        newParagraph.lineList     = newParagraph.lineList.concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
+        currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId + 1 );
+
+        // Insertamos el párrafo en su posición
+        currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 ).concat( newParagraph ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
+
+    // Si estamos al principio de la línea pero no en la primera linea del párrafo
+    }else if( currentLineId ){
+
+        movedLines                = currentParagraph.lineList.slice( currentLineId );
+        newParagraph.lineList     = movedLines;
+        currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId );
+        currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 ).concat( newParagraph ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
+
+    // Al principio del párrafo
+    }else{
+
+        newLine             = newParagraph.lineList[ 0 ];
+        newNode             = newLine.nodeList[ 0 ];
+        movedLines          = [];
+        newNode.style       = $.extend( {}, currentNode.style );
+        newNode.height      = currentNode.height;
+        newLine.height      = currentNode.height;
+        newParagraph.height = currentNode.height;
+
+        // Insertamos el párrafo en su posición
+        currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId ).concat( newParagraph ).concat( currentPage.paragraphList.slice( currentParagraphId ) );
+
     }
-
-    currentParagraph.height -= currentLine.height;
-    currentParagraph.height += maxSize;
-    currentLine.height       = maxSize;
-
-    // Movemos las líneas siguientes
-    newParagraph.lineList     = newParagraph.lineList.concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
-    currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId + 1 );
 
     // Actualizamos las alturas del párrafo de origen y destino
     for( i = 0; i < movedLines.length; i++ ){
@@ -1330,9 +1361,6 @@ var handleEnter = function(){
         newParagraph.height     += movedLines[ i ].height;
 
     }
-
-    // Insertamos el párrafo en su posición
-    currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 ).concat( newParagraph ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
 
     // Posicionamos el cursor
     setCursor( currentPageId, newParagraphId, 0, 0, 0, 0 );
