@@ -1520,18 +1520,21 @@ var realocateLine = function( id, lineChar ){
         return counter;
     }
 
-    var words, wordsToMove, newLine, newNode, stop, i, j, k, heritage;
+    var words, wordsToMove, newLine, newNode, stop, i, j, k, heritage, created;
 
     // Nos hacemos con la nueva línea, si no existe la creamos
     if( !currentParagraph.lineList[ id + 1 ] ){
 
+        created                   = true;
         newLine                   = createLine( currentParagraph );
         newLine.nodeList          = [];
-        currentParagraph.height  += newLine.height;
         currentParagraph.lineList = currentParagraph.lineList.slice( 0, id + 1 ).concat( newLine ).concat( currentParagraph.lineList.slice( id + 1 ) );
 
     }else{
+
+        created = false;
         newLine = currentParagraph.lineList[ id + 1 ];
+
     }
 
     words    = getWordsMetrics( line );
@@ -1616,8 +1619,8 @@ var realocateLine = function( id, lineChar ){
 
                 setCanvasTextStyle( newNode.style );
 
-                for( i = 1; i <= newNode.string.length; i++ ){
-                    newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+                for( j = 1; j <= newNode.string.length; j++ ){
+                    newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
                 }
 
                 newNode.width       = newNode.charList.slice( -1 )[ 0 ];
@@ -1634,11 +1637,34 @@ var realocateLine = function( id, lineChar ){
 
         heritage -= words[ i ].width;
 
-        // To Do -> Nodos por arrastre
+        // To Do -> Nodos por arrastre (que narices es esto?)
 
         if( stop ){
             break;
         }
+
+    }
+
+    var maxSize = 0;
+    
+    for( j = 0; j < newLine.nodeList.length; j++ ){
+
+        if( newLine.nodeList[ j ].height > maxSize ){
+            maxSize = newLine.nodeList[ j ].height;
+        }
+
+    }
+
+    if( created ){
+
+        currentParagraph.height += maxSize;
+        newLine.height           = maxSize;
+
+    }else{
+
+        currentParagraph.height -= newLine.height;
+        currentParagraph.height += maxSize;
+        newLine.height           = maxSize;
 
     }
 
@@ -2456,8 +2482,6 @@ var updateBlink = function(){
         debugTime('cursor on');
 
         blinkCurrent = newCurrent;
-
-        console.log( currentNode );
 
         checkCanvasSelectSize();
         ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY, 10 ) + currentLine.height - currentNode.height, 1, currentNode.height );
