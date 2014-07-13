@@ -807,6 +807,7 @@ var handleArrowLeft = function(){
     if( currentRangeStart ){
         
         setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+        updateToolsLineStatus();
         resetBlink();
         return;
 
@@ -873,6 +874,7 @@ var handleArrowLeft = function(){
         }
 
         setCursor( page, paragraph, line, lineChar, node, nodeChar );
+        updateToolsLineStatus();
 
     }else{
 
@@ -896,6 +898,7 @@ var handleArrowRight = function(){
     if( currentRangeEnd ){
         
         setCursor( currentRangeEnd.pageId, currentRangeEnd.paragraphId, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+        updateToolsLineStatus();
         resetBlink();
         return;
 
@@ -961,6 +964,7 @@ var handleArrowRight = function(){
         }
 
         setCursor( page, paragraph, line, lineChar, node, nodeChar );
+        updateToolsLineStatus();
 
     }else{
 
@@ -3068,8 +3072,8 @@ toolsLine
 .on( 'click', '.tool-button', function(){
 
     input.focus();
-
     buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
+    updateToolsLineStatus(); // To Do -> Quizás pueda optimizarse y aplicarse solo a los estilos que lo necesiten
 
 })
 
