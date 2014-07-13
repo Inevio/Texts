@@ -777,6 +777,7 @@ var handleArrowDown = function(){
 
         nodeId   = i;
         charList = nodeList[ i ].charList;
+        nodeChar = 0;
 
         for( j = 0; j < charList.length; j++ ){
 
@@ -1054,6 +1055,7 @@ var handleArrowUp = function(){
 
         nodeId   = i;
         charList = nodeList[ i ].charList;
+        nodeChar = 0;
 
         for( j = 0; j < charList.length; j++ ){
 
