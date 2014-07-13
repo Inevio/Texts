@@ -663,7 +663,7 @@ var getWordsMetrics = function( line ){
     for( i = 0; i < nodeList.length; i++ ){
 
         offset = 0;
-        words  = nodeList[ i ].string.match(/(\s*\S+\s*)/g) || [];
+        words  = nodeList[ i ].string.match(/(\s*\S+\s*|\s+)/g) || [''];
 
         for( j = 0; j < words.length; j++ ){
 
@@ -1107,14 +1107,15 @@ var handleBackspace = function(){
             // To Do -> Saltos entre distintas páginas
 
             // Si hay contenido fusionamos los párrafos
-            var mergeParagraphs  = currentLine.totalChars > 0;
+            var prevParagraph   = currentPage.paragraphList[ currentParagraphId - 1 ];
+            var mergeParagraphs = currentLine.totalChars > 0;
             var mergePreLastLine;
 
             if( mergeParagraphs ){
 
-                mergePreLastLine                                              = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.length - 1;
-                currentPage.paragraphList[ currentParagraphId - 1 ].lineList  = currentPage.paragraphList[ currentParagraphId - 1 ].lineList.concat( currentParagraph.lineList );
-                currentPage.paragraphList[ currentParagraphId - 1 ].height   += currentParagraph.height;
+                mergePreLastLine        = prevParagraph.lineList.length - 1;
+                prevParagraph.lineList  = prevParagraph.lineList.concat( currentParagraph.lineList );
+                prevParagraph.height   += currentParagraph.height;
 
             }
 
