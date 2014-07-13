@@ -101,15 +101,15 @@ var buttonAction = {
     },
 
     left : function(){
-        setRangeParagraphStyle( 'aling', ALING_LEFT );
+        setSelectedParagraphsStyle( 'aling', ALING_LEFT );
     },
 
     center : function(){
-        setRangeParagraphStyle( 'aling', ALING_CENTER );
+        setSelectedParagraphsStyle( 'aling', ALING_CENTER );
     },
 
     right : function(){
-        setRangeParagraphStyle( 'aling', ALING_RIGHT );
+        setSelectedParagraphsStyle( 'aling', ALING_RIGHT );
     },
 
     justify : function(){
@@ -1994,6 +1994,21 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
 
 };
 
+var setParagraphStyle = function( paragraph, key, value ){
+
+    paragraph[ key ] = value;
+
+    drawPages();
+
+    if( paragraph === currentParagraph ){
+
+        setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+        resetBlink();
+
+    }
+
+};
+
 var setCanvasTextStyle = function( style ){
 
     var font = '';
@@ -2540,6 +2555,16 @@ var setRangeParagraphStyle = function( key, value ){
 
     drawPages();
     setRange( currentRangeStart, currentRangeEnd, true );
+
+};
+
+var setSelectedParagraphsStyle = function( key, value ){
+
+    if( currentRangeStart ){
+        setRangeParagraphStyle( key, value );
+    }else{
+        setParagraphStyle( currentParagraph, key, value );
+    }
 
 };
 
