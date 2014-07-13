@@ -531,13 +531,25 @@ var getCommonStyles = function( start, end ){
         start.nodeId === end.nodeId
 
     ){
-        return start.node.style;
+        return {
+            
+            node      : start.node.style,
+            paragraph : start.paragraph.aling
+
+        };
+
     }
 
-    var style        = $.extend( {}, start.node.style );
-    var styleCounter = Object.keys( style ).length;
+    var paragraphStyle = start.paragraph.aling;
+    var style          = $.extend( {}, start.node.style );
+    var styleCounter   = Object.keys( style ).length;
 
     mapRangeLines( true, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
+
+        // To Do -> Quizás esto se pueda optimizar, es una comprobación que se está haciendo cada n líneas en vez de cada m párrafos
+        if( paragraphStyle !== paragraph.aling ){
+            paragraphStyle = -1;
+        }
 
         var node;
 
@@ -564,7 +576,12 @@ var getCommonStyles = function( start, end ){
 
     });
 
-    return style;
+    return {
+
+        node : style,
+        paragraph : paragraphStyle
+
+    };
 
 };
 
@@ -2653,36 +2670,69 @@ var updateBlink = function(){
 
 var updateToolsLineStatus = function(){
 
-    var styles;
+    var styles, nodeStyles, paragraphStyles;
 
     if( currentRangeStart ){
-        styles = getCommonStyles( currentRangeStart, currentRangeEnd );
+
+        styles          = getCommonStyles( currentRangeStart, currentRangeEnd );
+        nodeStyles      = styles.node;
+        paragraphStyles = styles.paragraph;
+
     }else{
-        styles = currentNode.style;
+        
+        nodeStyles      = currentNode.style;
+        paragraphStyles = currentParagraph.aling;
+
     }
 
-    if( styles['font-family'] ){
-        $('.tool-fontfamily', toolsLine ).text( styles['font-family'] );
+    // Estilos de nodos
+    if( nodeStyles['font-family'] ){
+        $( '.tool-fontfamily', toolsLine ).text( nodeStyles['font-family'] );
     }else{
-        $('.tool-fontfamily', toolsLine ).text('');
+        $( '.tool-fontfamily', toolsLine ).text('');
     }
 
-    if( styles['font-size'] ){
-        $('.tool-fontsize', toolsLine ).text( styles['font-size'] );
+    if( nodeStyles['font-size'] ){
+        $( '.tool-fontsize', toolsLine ).text( nodeStyles['font-size'] );
     }else{
-        $('.tool-fontsize', toolsLine ).text('');
+        $( '.tool-fontsize', toolsLine ).text('');
     }
 
-    if( styles['font-weight'] ){
-        $('.tool-button-bold', toolsLine ).addClass('active');
+    if( nodeStyles['font-weight'] ){
+        $( '.tool-button-bold', toolsLine ).addClass('active');
     }else{
-        $('.tool-button-bold', toolsLine ).removeClass('active');
+        $( '.tool-button-bold', toolsLine ).removeClass('active');
     }
 
-    if( styles['font-style'] ){
-        $('.tool-button-italic', toolsLine ).addClass('active');
+    if( nodeStyles['font-style'] ){
+        $( '.tool-button-italic', toolsLine ).addClass('active');
     }else{
-        $('.tool-button-italic', toolsLine ).removeClass('active');
+        $( '.tool-button-italic', toolsLine ).removeClass('active');
+    }
+
+    // Estilos de párrafos
+    if( paragraphStyles === 0 ){
+        $( '.tool-button-left', toolsLine ).addClass('active');
+    }else{
+        $( '.tool-button-left', toolsLine ).removeClass('active');
+    }
+
+    if( paragraphStyles === 1 ){
+        $( '.tool-button-center', toolsLine ).addClass('active');
+    }else{
+        $( '.tool-button-center', toolsLine ).removeClass('active');
+    }
+
+    if( paragraphStyles === 2 ){
+        $( '.tool-button-right', toolsLine ).addClass('active');
+    }else{
+        $( '.tool-button-right', toolsLine ).removeClass('active');
+    }
+
+    if( paragraphStyles === 3 ){
+        $( '.tool-button-justify', toolsLine ).addClass('active');
+    }else{
+        $( '.tool-button-justify', toolsLine ).removeClass('active');
     }
 
 };
