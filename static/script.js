@@ -392,7 +392,8 @@ var drawRange = function( start, end ){
     startWidth += start.node.charList[ start.nodeChar - 1 ] || 0;
 
     // Procedimiento de coloreado
-    var width = 0;
+    var width  = 0;
+    var offset = 0;
 
     // Si principio y fin están en la misma linea
     if(
@@ -465,7 +466,8 @@ var drawRange = function( start, end ){
         // Coloreamos las lineas intermedias de forma completa
         mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
-            width = 0;
+            offset = 20 + end.page.marginLeft + getLineOffset( line, paragraph );
+            width  = 0;
 
             // Obtenemos el tamaño de rectangulo a colorear
             for( var n = 0; n < line.nodeList.length; n++ ){
@@ -476,7 +478,7 @@ var drawRange = function( start, end ){
             ctxSel.beginPath();
             ctxSel.rect(
 
-                20 + end.page.marginLeft,
+                offset,
                 startHeight,
                 width,
                 end.line.height
@@ -490,7 +492,8 @@ var drawRange = function( start, end ){
         });
 
         // Coloreamos la línea del final de forma parcial
-        width = 0;
+        width  = 0;
+        offset = 20 + end.page.marginLeft + getLineOffset( end.line, end.paragraph );
 
         for( i = 0 + 1; i < end.nodeId; i++ ){
             width += end.line.nodeList[ i ].width;
@@ -502,7 +505,7 @@ var drawRange = function( start, end ){
         ctxSel.beginPath();
         ctxSel.rect(
 
-            20 + end.page.marginLeft,
+            offset,
             startHeight,
             width,
             end.line.height
