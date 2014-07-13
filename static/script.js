@@ -346,9 +346,6 @@ var drawRange = function( start, end ){
     var startHeight = 0;
     var i;
 
-    // Gap inicial
-    startHeight += 20;
-
     // Calculamos la posición vertical de la página de inicio
     for( i = 0; i < start.pageId; i++ ){
 
@@ -357,6 +354,9 @@ var drawRange = function( start, end ){
         startHeight += pageList[ i ].height;
 
     }
+
+    // Gap inicial de la página actuals
+    startHeight += 20;
 
     // Tenemos en cuenta el margen superior
     startHeight += start.page.marginTop;
@@ -383,7 +383,7 @@ var drawRange = function( start, end ){
     // Alineación del párrafo
     startWidth += getLineOffset( start.line, start.paragraph );
 
-    // Posición del caracter
+    // Calculamos la posición del caracter
     for( i = 0; i < start.nodeId; i++ ){
         startWidth += start.line.nodeList[ i ].width;
     }
@@ -434,6 +434,7 @@ var drawRange = function( start, end ){
 
         ctxSel.globalAlpha = 1;
 
+    // Principio y fin en distintas líneas
     }else{
 
         checkCanvasSelectSize();
@@ -444,7 +445,7 @@ var drawRange = function( start, end ){
         // Coloreamos la linea del principio de forma parcial
         width = start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
             
-        for( i = start.nodeId + 1; i < end.nodeId; i++ ){
+        for( i = start.nodeId + 1; i < start.line.nodeList.length; i++ ){
             width += start.line.nodeList[ i ].width;
         }
 
@@ -1460,7 +1461,7 @@ var mapRangeLines = function( includeLimits, start, end, callback ){
     }
     
     // To Do -> Ver si es necesario el include limits aqui
-    if( /*!includeLimits ||*/ !start.line.nodeList[ nodeLoopId ] ){
+    if( !includeLimits || !start.line.nodeList[ nodeLoopId ] ){
 
         lineLoopId = start.lineId + 1;
         nodeLoopId = 0;
