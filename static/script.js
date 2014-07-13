@@ -117,7 +117,7 @@ var buttonAction = {
 var refrescos = 0;
 
 setInterval( function(){
-    //console.log( refrescos );
+    //console.log( refrescos + ' fps' );
     refrescos = 0;
 }, 1000 );
 
@@ -302,6 +302,7 @@ var drawPages = function(){
             // To Do -> Altura de línea
             line = paragraph.lineList[ j ];
 
+            wHeritage = getLineOffset( line, paragraph );
 
             // To Do -> Optimizar, evitar que se renderice una línea vacía if( line.totalChars ){
 
@@ -2562,6 +2563,7 @@ var start = function(){
 
     setCursor( 0, 0, 0, 0, 0, 0 );
     drawPages();
+    updateToolsLineStatus();
 
 };
 
@@ -2634,6 +2636,18 @@ var updateToolsLineStatus = function(){
         styles = getCommonStyles( currentRangeStart, currentRangeEnd );
     }else{
         styles = currentNode.style;
+    }
+
+    if( styles['font-family'] ){
+        $('.tool-fontfamily', toolsLine ).text( styles['font-family'] );
+    }else{
+        $('.tool-fontfamily', toolsLine ).text('');
+    }
+
+    if( styles['font-size'] ){
+        $('.tool-fontsize', toolsLine ).text( styles['font-size'] );
+    }else{
+        $('.tool-fontsize', toolsLine ).text('');
     }
 
     if( styles['font-weight'] ){
@@ -2987,7 +3001,7 @@ toolsLine
 })
 
 .on( 'click', '.tool-fontfamily', function(){
-    setRangeNodeStyle( 'font-family', 'Courier' );
+    setRangeNodeStyle( 'font-family', 'Tekton Pro' );
 })
 
 .on( 'click', '.tool-fontsize', function(){
