@@ -1293,6 +1293,9 @@ var handleEnter = function(){
     var newParagraphId = currentParagraphId + 1;
     var movedLines, newLine, newNode;
 
+    // Heredamos la alineación
+    newParagraph.aling = currentParagraph.aling;
+
     // Partimos la línea si no estamos al principio de ella
     if( currentLineCharId ){
 
