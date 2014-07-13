@@ -781,7 +781,7 @@ var handleArrowDown = function(){
         for( j = 0; j < charList.length; j++ ){
 
             if( charList[ j ] > verticalKeysPosition ){
-                nodeChar = j - 1;
+                nodeChar = j;
                 break;
             }else if( j === charList.length - 1 || charList[ j ] === verticalKeysPosition ){
                 nodeChar = j + 1;
@@ -1058,7 +1058,7 @@ var handleArrowUp = function(){
         for( j = 0; j < charList.length; j++ ){
 
             if( charList[ j ] > verticalKeysPosition ){
-                nodeChar = j - 1;
+                nodeChar = j;
                 break;
             }else if( j === charList.length - 1 || charList[ j ] === verticalKeysPosition ){
                 nodeChar = j + 1;
