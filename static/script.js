@@ -301,24 +301,13 @@ var drawPages = function(){
             // To Do -> Gaps
             // To Do -> Altura de línea
             line = paragraph.lineList[ j ];
-            
-            if( !paragraph.aling ){
-                wHeritage = 0;
-            }else if( paragraph.aling === 1 ){
-                wHeritage = ( line.width - getNodesWidth( line ) ) / 2;
-            }else if( paragraph.aling === 2 ){
-                wHeritage = line.width - getNodesWidth( line );
-            }else{
-                wHeritage = 0; // To Do -> Justificado
-            }
 
 
-            // To Do -> if( line.totalChars ){
+            // To Do -> Optimizar, evitar que se renderice una línea vacía if( line.totalChars ){
 
                 for( var k = 0; k < line.nodeList.length; k++ ){
 
-                    node = line.nodeList[ k ];
-
+                    node          = line.nodeList[ k ];
                     ctx.fillStyle = '#000';
 
                     setCanvasTextStyle( node.style );
@@ -386,6 +375,9 @@ var drawRange = function( start, end ){
 
     // Margen izquierdo
     startWidth += start.page.marginLeft;
+
+    // Alineación del párrafo
+    startWidth += getLineOffset( start.line, start.paragraph );
 
     // Posición del caracter
     for( i = 0; i < start.nodeId; i++ ){
@@ -565,6 +557,36 @@ var getCommonStyles = function( start, end ){
     });
 
     return style;
+
+};
+
+var getLineOffset = function( line, paragraph ){
+    
+    if( !paragraph.aling ){
+        return 0;
+    }else if( paragraph.aling === 1 ){
+        return ( line.width - getLineTextTrimmedWidth( line ) ) / 2;
+    }else if( paragraph.aling === 2 ){
+        return line.width - getLineTextTrimmedWidth( line );
+    }
+    
+    return 0; // To Do -> Justificado
+
+};
+
+var getLineTextTrimmedWidth = function( line ){
+
+    var nodeList = line.nodeList;
+    var result   = 0;
+
+    for( var i = 0; i < nodeList.length - 1; i++ ){
+        result += nodeList.width;
+    }
+
+    nodeList  = nodeList.slice( -1 )[ 0 ];
+    result   += nodeList.charList[ trimRight( nodeList.string ).length - 1 ] || 0;
+
+    return result;
 
 };
 
@@ -1237,14 +1259,17 @@ var handleChar = function( newChar ){
         // Reiniciamos la posición horizontal
         positionAbsoluteX  = 20; // Gap
         positionAbsoluteX += currentPage.marginLeft;
+        positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
         positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
     }else{
 
-        var prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
-        var next = currentNode.charList[ currentNodeCharId - 1 ];
-
-        positionAbsoluteX += next - prev;
+        // Reiniciamos la posición horizontal
+        // To Do -> Quizás pueda optimizarse
+        positionAbsoluteX  = 20; // Gap
+        positionAbsoluteX += currentPage.marginLeft;
+        positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
+        positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
     }
 
@@ -2085,6 +2110,9 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         // Márgen superior
         positionAbsoluteX += currentPage.marginLeft;
 
+        // Alineación de la línea
+        positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
+
         // Posicion dentro de la linea
         for( i = 0; i < node; i++ ){
             positionAbsoluteX += currentLine.nodeList[ i ].width;
@@ -2503,6 +2531,7 @@ var setRangeParagraphStyle = function( key, value ){
     });
 
     drawPages();
+    setRange( currentRangeStart, currentRangeEnd, true );
 
 };
 
@@ -2716,6 +2745,9 @@ selections
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
 
+    // Tenemos en cuenta la alineación del párrafo
+    width += getLineOffset( line, paragraph );
+
     // Buscamos el nodo y el nodeChar
     // Principio del primer nodo
     if( width >= posX ){
@@ -2855,6 +2887,9 @@ selections
 
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
+
+    // Tenemos en cuenta la alineación del párrafo
+    width += getLineOffset( line, paragraph );
 
     // Buscamos el nodo y el nodeChar
     // Principio del primer nodo
