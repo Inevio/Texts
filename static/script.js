@@ -585,7 +585,7 @@ var getLineTextTrimmedWidth = function( line ){
     var result   = 0;
 
     for( var i = 0; i < nodeList.length - 1; i++ ){
-        result += nodeList.width;
+        result += nodeList[ i ].width;
     }
 
     nodeList  = nodeList.slice( -1 )[ 0 ];
