@@ -166,7 +166,7 @@ var createLine = function( paragraph ){
     var line = newLine();
 
     // To Do -> Asignar la altura dinámicamente
-    line.height = 0;//parseInt( testZone.css('line-height'), 10 );
+    line.height = 0;
     line.width  = paragraph.width;
 
     // Creamos el nodo inicial
@@ -181,7 +181,7 @@ var createNode = function(){
     var node = newNode();
 
     // To Do -> Asignar la altura dinámicamente
-    node.width = 0;//;parseInt( testZone.css('line-height'), 10 );
+    node.width = 0;
 
     return node;
 
@@ -1987,7 +1987,7 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
     // Cambiamos la altura de la línea y el párrafo si es necesario
     if( key === 'font-size' ){
 
-        var lineHeight = parseInt( testZone.css( 'font-size', value + 'pt' ).css('line-height'), 10 );
+        var lineHeight = parseInt( testZone.css( 'font-size', value + 'pt' )[ 0 ].scrollHeight, 10 );
 
         node.height = lineHeight;
 
@@ -2453,7 +2453,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
                 newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
             }
 
-            newNode.width = newNode.charList[ i - 2 ] || 0;
+            newNode.width = newNode.charList[ j - 2 ] || 0;
 
         }
 
