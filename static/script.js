@@ -71,7 +71,6 @@ var currentLineCharId     = null;
 var currentNode           = null;
 var currentNodeId         = null;
 var currentNodeCharId     = null;
-var currentStyle          = '';
 var positionAbsoluteX     = null;
 var positionAbsoluteY     = null;
 var currentRangeStart     = null;
@@ -716,7 +715,7 @@ var getWordsMetrics = function( line ){
 
 var handleArrowDown = function(){
 
-    var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
+    var pageId, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j;
 
     // Comprobamos si es la última línea del párrafo
     if( currentLineId === currentParagraph.lineList.length - 1 ){
@@ -755,19 +754,20 @@ var handleArrowDown = function(){
     if( !verticalKeysEnabled ){
         
         verticalKeysEnabled  = true;
-        verticalKeysPosition = currentNode.charList[ currentNodeCharId ];
+        verticalKeysPosition = currentNode.charList[ currentNodeCharId - 1 ] || 0;
 
-        for( var k = 0; k < currentNodeId; k++ ){
-            verticalKeysPosition += currentLine.nodeList[ k ].width;
+        for( i = 0; i < currentNodeId; i++ ){
+            verticalKeysPosition += currentLine.nodeList[ i ].width;
         }
 
     }
 
     // Buscamos el nuevo caracter
-    nodeList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].nodeList;
+    line     = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ];
+    nodeList = line.nodeList;
     lineChar = 0;
 
-    for( var i = 0; i < nodeList.length; i++ ){
+    for( i = 0; i < nodeList.length; i++ ){
 
         if( nodeList[ i ].width < verticalKeysPosition ){
             lineChar += nodeList[ i ].string.length;
@@ -777,12 +777,12 @@ var handleArrowDown = function(){
         nodeId   = i;
         charList = nodeList[ i ].charList;
 
-        for( var j = 0; j < charList.length; j++ ){
+        for( j = 0; j < charList.length; j++ ){
 
             if( charList[ j ] > verticalKeysPosition ){
                 nodeChar = j - 1;
                 break;
-            }else if( j === charList.length - 1 ){
+            }else if( j === charList.length - 1 || charList[ j ] === verticalKeysPosition ){
                 nodeChar = j + 1;
                 break;
             }
@@ -792,6 +792,14 @@ var handleArrowDown = function(){
         lineChar += nodeChar;
 
         break;
+
+    }
+
+    if( typeof nodeId === 'undefined' ){
+
+        i        = getNodeInPosition( line, lineChar );
+        nodeId   = i.nodeId;
+        nodeChar = i.nodeChar;
 
     }
 
@@ -984,7 +992,7 @@ var handleArrowRight = function(){
 
 var handleArrowUp = function(){
 
-    var pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, nodeList, charList;
+    var pageId, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j;
 
     // Comprobamos si es la primera línea del párrafo
     if( currentLineId === 0 ){
@@ -1023,19 +1031,20 @@ var handleArrowUp = function(){
     if( !verticalKeysEnabled ){
         
         verticalKeysEnabled  = true;
-        verticalKeysPosition = currentNode.charList[ currentNodeCharId ];
+        verticalKeysPosition = currentNode.charList[ currentNodeCharId - 1 ] || 0;
 
-        for( var k = 0; k < currentNodeId; k++ ){
-            verticalKeysPosition += currentLine.nodeList[ k ].width;
+        for( i = 0; i < currentNodeId; i++ ){
+            verticalKeysPosition += currentLine.nodeList[ i ].width;
         }
 
     }
 
     // Buscamos el nuevo caracter
-    nodeList = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ].nodeList;
+    line     = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ];
+    nodeList = line.nodeList;
     lineChar = 0;
 
-    for( var i = 0; i < nodeList.length; i++ ){
+    for( i = 0; i < nodeList.length; i++ ){
 
         if( nodeList[ i ].width < verticalKeysPosition ){
             lineChar += nodeList[ i ].string.length;
@@ -1045,12 +1054,12 @@ var handleArrowUp = function(){
         nodeId   = i;
         charList = nodeList[ i ].charList;
 
-        for( var j = 0; j < charList.length; j++ ){
+        for( j = 0; j < charList.length; j++ ){
 
             if( charList[ j ] > verticalKeysPosition ){
                 nodeChar = j - 1;
                 break;
-            }else if( j === charList.length - 1 ){
+            }else if( j === charList.length - 1 || charList[ j ] === verticalKeysPosition ){
                 nodeChar = j + 1;
                 break;
             }
@@ -1060,6 +1069,14 @@ var handleArrowUp = function(){
         lineChar += nodeChar;
 
         break;
+
+    }
+
+    if( typeof nodeId === 'undefined' ){
+
+        i        = getNodeInPosition( line, lineChar );
+        nodeId   = i.nodeId;
+        nodeChar = i.nodeChar;
 
     }
 
