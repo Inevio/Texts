@@ -114,6 +114,13 @@
     background-position: -21px 0;
 }
 
+.tool-button-color i{
+    margin: 5px;
+    width: 12px;
+    height: 12px;
+    background: #f00;
+}
+
 .tool-button-underline i{
     margin: 6px 6px 6px 7px;
     width: 11px;

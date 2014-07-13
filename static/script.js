@@ -96,6 +96,10 @@ var buttonAction = {
         setRangeNodeStyle( 'font-style', 'italic' );
     },
 
+    color : function( value ){
+        setRangeNodeStyle( 'color', value );
+    },
+
     left : function(){
         setRangeParagraphStyle( 'aling', ALING_LEFT );
     },
@@ -309,7 +313,7 @@ var drawPages = function(){
                 for( var k = 0; k < line.nodeList.length; k++ ){
 
                     node          = line.nodeList[ k ];
-                    ctx.fillStyle = '#000';
+                    ctx.fillStyle = node.style.color;
 
                     setCanvasTextStyle( node.style );
 
@@ -2541,25 +2545,13 @@ var start = function(){
     input.focus();
     pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
 
-    setNodeStyle(
+    var paragraph = pageList[ 0 ].paragraphList[ 0 ];
+    var line      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ];
+    var node      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ].nodeList[ 0 ];
 
-        pageList[ 0 ].paragraphList[ 0 ],
-        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ],
-        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ].nodeList[ 0 ],
-        'font-size',
-        12
-
-    );
-
-    setNodeStyle(
-
-        pageList[ 0 ].paragraphList[ 0 ],
-        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ],
-        pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ].nodeList[ 0 ],
-        'font-family',
-        'Cambria'
-
-    );
+    setNodeStyle( paragraph, line, node, 'font-size', 12 );
+    setNodeStyle( paragraph, line, node, 'font-family', 'Cambria' );
+    setNodeStyle( paragraph, line, node, 'color', '#000000' );
 
     setCursor( 0, 0, 0, 0, 0, 0 );
     drawPages();
@@ -2996,7 +2988,7 @@ toolsLine
 
     input.focus();
 
-    buttonAction[ $(this).attr('data-tool') ]();
+    buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
 
 })
 
