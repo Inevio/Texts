@@ -2169,7 +2169,7 @@ var setRange = function( start, end, force ){
     // Arreglamos los límites
     if(
         start.node.string.length === start.nodeChar &&
-        start.nodeId + 1 <= start.line.nodeList.length
+        start.nodeId + 1 < start.line.nodeList.length
     ){
         // To Do -> Cambio a otra línea si es necesario
         start.nodeId   = start.nodeId + 1;
