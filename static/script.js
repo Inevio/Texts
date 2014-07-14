@@ -1376,7 +1376,7 @@ var handleChar = function( newChar ){
         for( i = 0; i < currentNodeId; i++ ){
             positionAbsoluteX += currentLine.nodeList[ i ].width;
         }
-        
+
         positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
     }else if( temporalStyle ){
@@ -1431,6 +1431,16 @@ var handleEnter = function(){
         newNode.string = currentNode.string.slice( currentNodeCharId );
         newNode.style  = $.extend( {}, currentNode.style );
         newNode.height = currentNode.height;
+
+        if( currentLineCharId === currentLine.totalChars ){
+
+            for( i in temporalStyle ){
+                setNodeStyle( currentParagraph, currentLine, newNode, i, temporalStyle[ i ] );
+            }
+
+            temporalStyle = null;
+
+        }
 
         setCanvasTextStyle( newNode.style );
 
