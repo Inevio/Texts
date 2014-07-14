@@ -11,6 +11,7 @@ var ALING_RIGHT = 2;
 var ALING_JUSTIFY = 3;
 var DEBUG = false;
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
+var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var MARGIN_NORMAL = {
 
     top    : 94, //2.5 cm
@@ -136,6 +137,7 @@ var buttonAction = {
 
 // Preprocesed data
 var fontfamilyCode = '';
+var fontsizeCode = '';
 
 var refrescos = 0;
 
@@ -3330,25 +3332,48 @@ toolsLine
 
         })
         .html( fontfamilyCode );
-        
+
 })
 
 .on( 'click', '.tool-fontsize', function(){
-    setRangeNodeStyle( 'font-size', 18 );
+
+    if( !fontsizeCode ){
+
+        for( var i = 0; i < FONTSIZE.length; i++ ){
+            fontsizeCode += '<li>' + FONTSIZE[ i ] + '</li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-fontsize')
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            width   : $(this).outerWidth() * 2,
+            display : 'block'
+
+        })
+        .html( fontsizeCode );
+
 });
 
 toolsList.on( 'click', 'li', function(){
 
+    toolsList.css( 'display', 'none' );
+
     // Modo Tipografía
     if( toolsList.hasClass('active-fontfamily') ){
-
-        toolsList.css( 'display', 'none' );
         setSelectedNodeStyle( 'font-family', $(this).text() );
 
     // Modo Tamaño de letra
     }else{
-
+        setSelectedNodeStyle( 'font-size', parseInt( $(this).text(), 10 ) );
     }
+
+    toolsList.removeClass('active-fontfamily active-fontsize');
+    updateToolsLineStatus();
 
 });
 
