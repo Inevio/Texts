@@ -169,8 +169,20 @@ var checkCanvasSelectSize = function(){
 
 };
 
-var checkTemporalStyle = function( key ){
-    return temporalStyle && temporalStyle[ key ];
+var checkTemporalStyle = function( key, useCurrentNode ){
+
+    if( useCurrentNode ){
+
+        if( temporalStyle && typeof temporalStyle[ key ] !== 'undefined' ){
+            return temporalStyle[ key ];
+        }else{
+            return currentNode.style[ key ];
+        }
+
+    }else{
+        return temporalStyle && temporalStyle[ key ];
+    }
+
 };
 
 var clearTemporalStyle = function(){
@@ -1141,7 +1153,7 @@ var handleBackspace = function(){
         return;
     }
 
-    var nodePosition;
+    var nodePosition, updateTools;
 
     // Principio de línea
     if( !currentLineCharId ){
@@ -1253,6 +1265,8 @@ var handleBackspace = function(){
 
         }
 
+        updateTools = true;
+
     }else{
 
         var i;
@@ -1288,7 +1302,9 @@ var handleBackspace = function(){
 
         // El nodo se queda vacío y hay más nodos en la línea
         }else if( !currentNode.string.length && currentLine.nodeList.length > 1 ){
+
             currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
+            updateTools          = true;
 
         // El nodo se queda vacío y no hay más nodos en la línea
         }else if( currentLineId && !currentNode.string.length && currentLine.nodeList.length === 1 ){
@@ -1301,6 +1317,7 @@ var handleBackspace = function(){
             currentNodeId             = currentLine.nodeList.length - 1;
             currentNode               = currentLine.nodeList[ currentNodeId ];
             currentNodeCharId         = currentNode.string.length;
+            updateTools               = true;
 
         }
 
@@ -1309,6 +1326,10 @@ var handleBackspace = function(){
     // Definimos el cursor
     setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
     resetBlink();
+
+    if( updateTools ){
+        updateToolsLineStatus();
+    }
 
 };
 
@@ -2863,8 +2884,8 @@ var updateToolsLineStatus = function(){
 
     if( temporalStyle ){
 
-        if( temporalStyle['font-weight'] ){
-        $( '.tool-button-bold', toolsLine ).addClass('active');
+        if( checkTemporalStyle( 'font-weight', true ) ){
+            $( '.tool-button-bold', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-bold', toolsLine ).removeClass('active');
         }
@@ -2881,7 +2902,7 @@ var updateToolsLineStatus = function(){
 
     if( temporalStyle ){
 
-        if( temporalStyle['font-style'] ){
+        if( checkTemporalStyle( 'font-style', true ) ){
             $( '.tool-button-italic', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-italic', toolsLine ).removeClass('active');
