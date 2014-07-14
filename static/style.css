@@ -60,7 +60,7 @@
 }
 
 .tool-fontfamily{
-    width: 88px;
+    width: 100px;
     height: 24px;
     border-radius: 3px;
     background-color: #fff;
@@ -147,6 +147,14 @@
     width: 14px;
     height: 11px;
     background-position: -56px 0;
+}
+
+.toolbar-list{
+    position: absolute;
+    z-index: 1;
+    height: auto;
+    max-height: 450px;
+    display: none;
 }
 
 .editor{

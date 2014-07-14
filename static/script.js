@@ -10,6 +10,7 @@ var ALING_CENTER = 1;
 var ALING_RIGHT = 2;
 var ALING_JUSTIFY = 3;
 var DEBUG = false;
+var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var MARGIN_NORMAL = {
 
     top    : 94, //2.5 cm
@@ -29,6 +30,7 @@ var PAGE_A4 = {
 var win          = $(this);
 var header       = $('.wz-ui-header');
 var toolsLine    = $('.tools-line');
+var toolsList    = $('.toolbar-list');
 var pages        = $('.pages');
 var selections   = $('.selections');
 var input        = $('.input');
@@ -131,6 +133,9 @@ var buttonAction = {
     }
 
 };
+
+// Preprocesed data
+var fontfamilyCode = '';
 
 var refrescos = 0;
 
@@ -3305,11 +3310,46 @@ toolsLine
 })
 
 .on( 'click', '.tool-fontfamily', function(){
-    setRangeNodeStyle( 'font-family', 'Tekton Pro' );
+
+    if( !fontfamilyCode ){
+
+        for( var i = 0; i < FONTFAMILY.length; i++ ){
+            fontfamilyCode += '<li>' + FONTFAMILY[ i ] + '</li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-fontfamily')
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            width   : $(this).outerWidth() * 2,
+            display : 'block'
+
+        })
+        .html( fontfamilyCode );
+        
 })
 
 .on( 'click', '.tool-fontsize', function(){
     setRangeNodeStyle( 'font-size', 18 );
+});
+
+toolsList.on( 'click', 'li', function(){
+
+    // Modo Tipografía
+    if( toolsList.hasClass('active-fontfamily') ){
+
+        toolsList.css( 'display', 'none' );
+        setSelectedNodeStyle( 'font-family', $(this).text() );
+
+    // Modo Tamaño de letra
+    }else{
+
+    }
+
 });
 
 // Start
