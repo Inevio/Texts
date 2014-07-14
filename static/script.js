@@ -862,6 +862,7 @@ var handleArrowDown = function(){
 
     setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
     resetBlink();
+    clearTemporalStyle();
 
 };
 
@@ -953,6 +954,7 @@ var handleArrowLeft = function(){
     }
 
     resetBlink();
+    clearTemporalStyle();
 
 };
 
@@ -1044,6 +1046,7 @@ var handleArrowRight = function(){
     }
 
     resetBlink();
+    clearTemporalStyle();
 
 };
 
@@ -1140,6 +1143,7 @@ var handleArrowUp = function(){
 
     setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
     resetBlink();
+    clearTemporalStyle();
 
 };
 
@@ -1326,6 +1330,7 @@ var handleBackspace = function(){
     // Definimos el cursor
     setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
     resetBlink();
+    clearTemporalStyle();
 
     if( updateTools ){
         updateToolsLineStatus();
@@ -2328,6 +2333,18 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
             positionAbsoluteX += currentNode.charList[ nodeChar - 1 ];
         }
 
+    }
+
+    // Si hubo cambios limpiamos los estilos temporales
+    if(
+        currentPageId !== page ||
+        currentParagraphId !== paragraph ||
+        currentLineId !== line ||
+        currentLineCharId !== lineChar ||
+        currentNodeId !== node ||
+        currentNodeCharId !== nodeChar
+    ){
+        clearTemporalStyle();
     }
     
     currentPageId      = page;
