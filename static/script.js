@@ -1316,7 +1316,7 @@ var handleChar = function( newChar ){
 
     verticalKeysEnabled = false;
 
-    var newNode, i;
+    var newNode, endNode, i;
 
     if( temporalStyle ){
 
@@ -1330,10 +1330,39 @@ var handleChar = function( newChar ){
             setNodeStyle( currentParagraph, currentLine, newNode, i, temporalStyle[ i ] );
         }
 
-        currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( newNode ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
-        currentNodeId        = currentNodeId + 1;
-        currentNode          = currentLine.nodeList[ currentNodeId ];
-        currentNodeCharId    = 0;
+        // Introducimos el nodo nuevo en el lugar adecuado
+        // Si el cursor está al principio del nodo
+        if( currentNodeCharId === 0 ){
+            currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId ).concat( newNode ).concat( currentLine.nodeList.slice( currentNodeId ) );
+        // Si el cursor está al final del nodo
+        }else if( currentNodeCharId === currentNode.string.length ){
+
+            currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( newNode ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
+            currentNodeId        = currentNodeId + 1;
+
+        // Si el cursor está en medio del nodo
+        }else{
+
+            endNode              = createNode( currentLine );
+            endNode.string       = currentNode.string.slice( currentNodeCharId );
+            endNode.style        = $.extend( {}, currentNode.style );
+            endNode.height       = currentNode.height;
+            currentNode.string   = currentNode.string.slice( 0, currentNodeCharId );
+            currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
+            currentNode.width    = currentNode.charList.slice( -1 )[ 0 ];
+
+            for( i = 1; i <= endNode.string.length; i++ ){
+                endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
+            }
+
+            endNode.width        = endNode.charList.slice( -1 )[ 0 ];
+            currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
+            currentNodeId        = currentNodeId + 1;
+
+        }
+
+        currentNode       = currentLine.nodeList[ currentNodeId ];
+        currentNodeCharId = 0;
 
     }
 
