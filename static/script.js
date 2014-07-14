@@ -77,26 +77,41 @@ var currentRangeStart     = null;
 var currentRangeEnd       = null;
 var currentRangeStartHash = null;
 var currentRangeEndHash   = null;
+var temporalStyle         = null;
 
 // Button actions
 var buttonAction = {
 
     bold : function(){
 
-        if( currentRangeStart.node.style['font-weight'] ){
-            setRangeNodeStyle( 'font-weight' );
+        if(
+            ( currentRangeStart && currentRangeStart.node.style['font-weight'] ) ||
+            currentNode.style['font-weight'] ||
+            checkTemporalStyle('font-weight')
+        ){
+            setSelectedNodeStyle( 'font-weight' );
         }else{
-            setRangeNodeStyle( 'font-weight', 'bold' );
+            setSelectedNodeStyle( 'font-weight', 'bold' );
         }
         
     },
 
     italic : function(){
-        setRangeNodeStyle( 'font-style', 'italic' );
+        
+        if(
+            ( currentRangeStart && currentRangeStart.node.style['font-style'] ) ||
+            currentNode.style['font-style'] ||
+            checkTemporalStyle('font-style')
+        ){
+            setSelectedNodeStyle( 'font-style' );
+        }else{
+            setSelectedNodeStyle( 'font-style', 'italic' );
+        }
+
     },
 
     color : function( value ){
-        setRangeNodeStyle( 'color', value );
+        setSelectedNodeStyle( 'color', value );
     },
 
     left : function(){
@@ -124,6 +139,22 @@ setInterval( function(){
     refrescos = 0;
 }, 1000 );
 
+var addTemporalStyle = function( key, value ){
+
+    if( !temporalStyle ){
+        temporalStyle = {};
+    }
+
+    if( value ){
+        temporalStyle[ key ] = value;
+    }else{
+        temporalStyle[ key ] = false;
+    }
+    
+    updateToolsLineStatus();
+
+};
+
 var checkCanvasPagesSize = function(){
     
     canvasPages.width  = pages.width();
@@ -135,6 +166,18 @@ var checkCanvasSelectSize = function(){
 
     canvasSelect.width  = selections.width();
     canvasSelect.height = selections.height();
+
+};
+
+var checkTemporalStyle = function( key ){
+    return temporalStyle && temporalStyle[ key ];
+};
+
+var clearTemporalStyle = function(){
+    
+    temporalStyle = null;
+
+    updateToolsLineStatus();
 
 };
 
@@ -1273,19 +1316,39 @@ var handleChar = function( newChar ){
 
     verticalKeysEnabled = false;
 
-    currentLine.totalChars++;
+    var newNode, i;
+
+    if( temporalStyle ){
+
+        newNode = createNode( currentLine );
+
+        for( i in currentNode.style ){
+            setNodeStyle( currentParagraph, currentLine, newNode, i, currentNode.style[ i ] );
+        }
+
+        for( i in temporalStyle ){
+            setNodeStyle( currentParagraph, currentLine, newNode, i, temporalStyle[ i ] );
+        }
+
+        currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( newNode ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
+        currentNodeId        = currentNodeId + 1;
+        currentNode          = currentLine.nodeList[ currentNodeId ];
+        currentNodeCharId    = 0;
+
+    }
 
     currentNode.string   = currentNode.string.slice( 0, currentNodeCharId ) + newChar + currentNode.string.slice( currentNodeCharId );
     currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
 
     setCanvasTextStyle( currentNode.style );
 
-    for( var i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
+    for( i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
         currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
     }
 
     currentNode.width = currentNode.charList[ currentNode.charList.length - 1 ];
-    
+
+    currentLine.totalChars++;
     currentLineCharId++;
     currentNodeCharId++;
 
@@ -1295,14 +1358,13 @@ var handleChar = function( newChar ){
 
         currentLineId++;
 
-        var newNode;
-
         currentLine       = currentParagraph.lineList[ currentLineId ];
         currentLineCharId = realocation;
         newNode           = getNodeInPosition( currentLine, currentLineCharId );
         currentNodeId     = newNode.nodeId;
         currentNode       = currentLine.nodeList[ currentNodeId ];
         currentNodeCharId = newNode.nodeChar;
+        temporalStyle     = null;
 
         positionAbsoluteY += currentLine.height;
 
@@ -1310,7 +1372,18 @@ var handleChar = function( newChar ){
         positionAbsoluteX  = 20; // Gap
         positionAbsoluteX += currentPage.marginLeft;
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
+
+        for( i = 0; i < currentNodeId; i++ ){
+            positionAbsoluteX += currentLine.nodeList[ i ].width;
+        }
+        
         positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
+
+    }else if( temporalStyle ){
+
+        setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+        
+        temporalStyle = null;
 
     }else{
 
@@ -1319,6 +1392,11 @@ var handleChar = function( newChar ){
         positionAbsoluteX  = 20; // Gap
         positionAbsoluteX += currentPage.marginLeft;
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
+
+        for( i = 0; i < currentNodeId; i++ ){
+            positionAbsoluteX += currentLine.nodeList[ i ].width;
+        }
+
         positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
     }
@@ -2603,6 +2681,23 @@ var setRangeParagraphStyle = function( key, value ){
 
 };
 
+var setSelectedNodeStyle = function( key, value ){
+
+    // Selección normal
+    if( currentRangeStart ){
+        setRangeNodeStyle( key, value );
+
+    // Principio de un párrafo vacío
+    }else if( currentLineId === 0 && currentLine.totalChars === 0 ){
+        setNodeStyle( currentParagraph, currentLine, currentNode, key, value );
+
+    // Falso mononodo, acumulado de estilos
+    }else{
+        addTemporalStyle( key, value );
+    }
+
+};
+
 var setSelectedParagraphsStyle = function( key, value ){
 
     if( currentRangeStart ){
@@ -2711,28 +2806,56 @@ var updateToolsLineStatus = function(){
     }
 
     // Estilos de nodos
-    if( nodeStyles['font-family'] ){
+    if( temporalStyle && checkTemporalStyle('font-family') ){
+        $( '.tool-fontfamily', toolsLine ).text( temporalStyle['font-family'] );
+    }else if( nodeStyles['font-family'] ){
         $( '.tool-fontfamily', toolsLine ).text( nodeStyles['font-family'] );
     }else{
         $( '.tool-fontfamily', toolsLine ).text('');
     }
 
-    if( nodeStyles['font-size'] ){
+    if( temporalStyle && checkTemporalStyle('font-size') ){
+        $( '.tool-fontsize', toolsLine ).text( temporalStyle['font-size'] );
+    }else if( nodeStyles['font-size'] ){
         $( '.tool-fontsize', toolsLine ).text( nodeStyles['font-size'] );
     }else{
         $( '.tool-fontsize', toolsLine ).text('');
     }
 
-    if( nodeStyles['font-weight'] ){
+    if( temporalStyle ){
+
+        if( temporalStyle['font-weight'] ){
         $( '.tool-button-bold', toolsLine ).addClass('active');
+        }else{
+            $( '.tool-button-bold', toolsLine ).removeClass('active');
+        }
+
     }else{
-        $( '.tool-button-bold', toolsLine ).removeClass('active');
+
+        if( nodeStyles['font-weight'] ){
+            $( '.tool-button-bold', toolsLine ).addClass('active');
+        }else{
+            $( '.tool-button-bold', toolsLine ).removeClass('active');
+        }
+
     }
 
-    if( nodeStyles['font-style'] ){
-        $( '.tool-button-italic', toolsLine ).addClass('active');
+    if( temporalStyle ){
+
+        if( temporalStyle['font-style'] ){
+            $( '.tool-button-italic', toolsLine ).addClass('active');
+        }else{
+            $( '.tool-button-italic', toolsLine ).removeClass('active');
+        }
+
     }else{
-        $( '.tool-button-italic', toolsLine ).removeClass('active');
+
+        if( nodeStyles['font-style'] ){
+            $( '.tool-button-italic', toolsLine ).addClass('active');
+        }else{
+            $( '.tool-button-italic', toolsLine ).removeClass('active');
+        }
+
     }
 
     // Estilos de párrafos
@@ -2767,14 +2890,20 @@ input
 .on( 'keydown', function(e){
 
     if( e.key && e.key.length === 1 ){
+
         handleChar( e.key );
         drawPages();
+
     }else if( e.which === 8 ){
+
         handleBackspace();
         drawPages();
+
     }else if( e.which === 13 ){
+
         handleEnter();
         drawPages();
+
     }else if( e.which === 37 ){
         handleArrowLeft();
     }else if( e.which === 38 ){
