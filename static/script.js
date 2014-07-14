@@ -2446,7 +2446,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode          = currentRangeStart.node;
             newNode.charList = [];
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2458,14 +2458,14 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Si comienza por el principio del nodo
         }else if( currentRangeStart.nodeChar === 0 ){
 
-            newNode                         = createNode( currentLine );
+            newNode                         = createNode( currentRangeStart.line );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
             newNode.height                  = currentRangeStart.height;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
             currentRangeStart.node.charList = [];
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2493,14 +2493,14 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Si termina por el final del nodo
         }else if( currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
             
-            newNode                         = createNode( currentLine );
+            newNode                         = createNode( currentRangeStart.line );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
             newNode.height                  = currentRangeStart.node.height;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
             currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2520,8 +2520,8 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // El resto de casos
         }else{
 
-            newNode                         = createNode( currentLine );
-            endNode                         = createNode( currentLine );
+            newNode                         = createNode( currentRangeStart.line );
+            endNode                         = createNode( currentRangeStart.line );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
             newNode.height                  = currentRangeStart.node.height;
@@ -2532,7 +2532,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
             currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2579,7 +2579,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode          = currentRangeStart.node;
             newNode.charList = [];
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2596,7 +2596,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode.style  = $.extend( {}, currentRangeStart.node.style );
             newNode.height = currentRangeStart.node.height;
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2622,7 +2622,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode          = currentRangeStart.line.nodeList[ i ];
             newNode.charList = [];
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( j = 1; j <= newNode.string.length; j++ ){
@@ -2640,7 +2640,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode          = currentRangeEnd.node;
             newNode.charList = [];
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeEnd.paragraph, currentRangeEnd.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2657,7 +2657,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode.style  = $.extend( {}, currentRangeEnd.node.style );
             newNode.height = currentRangeEnd.node.height;
 
-            setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+            setNodeStyle( currentRangeEnd.paragraph, currentRangeEnd.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -2709,7 +2709,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
                 newNode          = line.nodeList[ i ];
                 newNode.charList = [];
 
-                setNodeStyle( currentParagraph, currentLine, newNode, key, value );
+                setNodeStyle( paragraph, line, newNode, key, value );
                 setCanvasTextStyle( newNode.style );
 
                 for( j = 1; j <= newNode.string.length; j++ ){
