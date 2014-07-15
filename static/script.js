@@ -80,6 +80,7 @@ var currentRangeStart     = null;
 var currentRangeEnd       = null;
 var currentRangeStartHash = null;
 var currentRangeEndHash   = null;
+var currentMultipleHash   = null;
 var temporalStyle         = null;
 
 // Button actions
@@ -3124,24 +3125,147 @@ selections
 
     }
 
+    var clickCounter = e.originalEvent.detail;
+
     // To Do -> No usar un setCursor, ya tenemos calculadas todas las posiciones
-    setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
-    resetBlink();
+    if( clickCounter === 1 ){
+        currentMultipleHash = [ start.pageId, start.paragraphId, start.lineId, start.lineChar ];
+    }
 
-    selectionStart = {
+    // Click que no coincide con los clicks previos
+    if(
+        clickCounter === 1 ||
+        ( clickCounter > 1 && compareHashes( currentMultipleHash, [ start.pageId, start.paragraphId, start.lineId, start.lineChar ] ) )
+    ){
 
-        pageId      : pageId,
-        page        : page,
-        paragraphId : paragraphId,
-        paragraph   : paragraph,
-        lineId      : lineId,
-        line        : line,
-        lineChar    : lineChar,
-        nodeId      : nodeId,
-        node        : node,
-        nodeChar    : nodeChar
+        setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
+        resetBlink();
 
-    };
+        selectionStart = {
+
+            pageId      : pageId,
+            page        : page,
+            paragraphId : paragraphId,
+            paragraph   : paragraph,
+            lineId      : lineId,
+            line        : line,
+            lineChar    : lineChar,
+            nodeId      : nodeId,
+            node        : node,
+            nodeChar    : nodeChar
+
+        };
+
+    // Click que coincide con los clicks previos y corresponde a seleccionar la palabra
+    }else if( clickCounter === 2 || clickCounter === 4 ){
+
+        var words  = getWordsMetrics( line );
+        var wordId = 0;
+
+        lineChar = 0;
+
+        offset = 20 + page.marginLeft + getLineOffset( line, paragraph );
+
+        if( posX > offset ){
+
+            for( wordId = 0; wordId < words.length - 1; wordId++ ){
+
+                if( offset <= posX && words[ wordId ].width + offset >= posX ){
+                    break;
+                }
+
+                lineChar += words[ wordId ].string.length;
+                offset   += words[ wordId ].width;
+
+
+            }
+
+        }
+
+        var word = words[ wordId ];
+
+        selectionStart = {
+
+            pageId      : pageId,
+            page        : page,
+            paragraphId : paragraphId,
+            paragraph   : paragraph,
+            lineId      : lineId,
+            line        : line,
+            lineChar    : lineChar,
+            nodeId      : word.nodeList[ 0 ],
+            node        : line.nodeList[ word.nodeList[ 0 ] ],
+            nodeChar    : word.offset[ 0 ][ 0 ]
+
+        };
+
+        setRange(
+
+            selectionStart,
+
+            {
+
+                pageId      : pageId,
+                page        : page,
+                paragraphId : paragraphId,
+                paragraph   : paragraph,
+                lineId      : lineId,
+                line        : line,
+                lineChar    : lineChar + word.string.length,
+                nodeId      : word.nodeList.slice( -1 )[ 0 ],
+                node        : line.nodeList[ word.nodeList.slice( -1 )[ 0 ] ],
+                nodeChar    : word.offset.slice( -1 )[ 0 ][ 1 ] + 1
+
+            }
+
+        );
+
+        console.log('selecciona la palabra', wordId, word );
+
+    // Click que coincide con los clicks previos y corresponde a seleccionar el párrafo
+    }else if( clickCounter === 3 ){
+        console.log('seleccionamos el párrafo', paragraphId, paragraph );
+
+        selectionStart = {
+
+            pageId      : pageId,
+            page        : page,
+            paragraphId : paragraphId,
+            paragraph   : paragraph,
+            lineId      : 0,
+            line        : paragraph.lineList[ 0 ],
+            lineChar    : 0,
+            nodeId      : 0,
+            node        : paragraph.lineList[ 0 ].nodeList[ 0 ],
+            nodeChar    : 0
+
+        };
+
+        line = paragraph.lineList.slice( -1 )[ 0 ];
+        node = line.nodeList.slice( -1 )[ 0 ];
+
+        setRange(
+
+            selectionStart,
+
+            {
+
+                pageId      : pageId,
+                page        : page,
+                paragraphId : paragraphId,
+                paragraph   : paragraph,
+                lineId      : paragraph.lineList.length - 1,
+                line        : line,
+                lineChar    : line.totalChars,
+                nodeId      : line.nodeList.length - 1,
+                node        : node,
+                nodeChar    : node.string.length
+
+            }
+
+        );
+
+    }
 
 })
 
