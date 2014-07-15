@@ -3177,7 +3177,6 @@ selections
                 lineChar += words[ wordId ].string.length;
                 offset   += words[ wordId ].width;
 
-
             }
 
         }
@@ -3485,6 +3484,7 @@ toolsLine
 
 toolsList.on( 'click', 'li', function(){
 
+    input.focus();
     toolsList.css( 'display', 'none' );
 
     // Modo Tipografía
