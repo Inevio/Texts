@@ -69,10 +69,12 @@
     font-size: 12px;
     color: #424242;
     margin-right: 10px;
+    line-height: 24px;
+    padding: 0 6px;
 }
 
 .tool-fontsize{
-    width: 45px;
+    width: 40px;
     height: 24px;
     border-radius: 3px;
     background-color: #fff;
@@ -80,6 +82,8 @@
     border: solid 1px #cacaca;
     font-size: 12px;
     color: #424242;
+    line-height: 24px;
+    padding: 0 6px;
 }
 
 .tool-button{
@@ -89,14 +93,24 @@
     border: 1px solid transparent;
 }
 
+.tool-button:hover{
+    background-color: #e5e5e5;
+    border-color: #cacaca;
+}
+
 .tool-button.active{
+    background-color: #fff;
+    border-color: #dcdcdc;
+}
+
+.tool-button:hover .active{
     background-color: #fff;
     border-color: #dcdcdc;
 }
 
 .tool-button i{
     background: url('@static/sprite.png') 0 0;
-    background-size: 70px 12px;
+    background-size: 155px 17px;
     display: block;
 }
 
@@ -115,10 +129,10 @@
 }
 
 .tool-button-color i{
-    margin: 5px;
-    width: 12px;
-    height: 12px;
-    background: #f00;
+    margin: 4px;
+    width: 16px;
+    height: 16px;
+    background: #7ebe30;
 }
 
 .tool-button-underline i{
@@ -147,6 +161,48 @@
     width: 14px;
     height: 11px;
     background-position: -56px 0;
+}
+
+.tool-button-justify i{
+    margin: 6px 5px 7px;
+    width: 14px;
+    height: 11px;
+    background-position: -70px 0;
+}
+
+.tool-button-line-spacing i{
+    margin: 5px 4px 6px;
+    width: 16px;
+    height: 13px;
+    background-position: -84px 0;
+}
+
+.tool-button-list-unsorted i{
+    margin: 4px 5px 5px 6px;
+    width: 13px;
+    height: 15px;
+    background-position: -100px 0;
+}
+
+.tool-button-list-sorted i{
+    margin: 3px 5px 4px;
+    width: 14px;
+    height: 17px;
+    background-position: -113px 0;
+}
+
+.tool-button-indent-dec i{
+    margin: 6px 5px 7px;
+    width: 14px;
+    height: 11px;
+    background-position: -127px 0;
+}
+
+.tool-button-indent-inc i{
+    margin: 6px 5px 7px;
+    width: 14px;
+    height: 11px;
+    background-position: -141px 0;
 }
 
 .toolbar-list{
