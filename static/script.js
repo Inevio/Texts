@@ -29,18 +29,24 @@ var PAGE_A4 = {
 };
 
 // DOM variables
-var win          = $(this);
-var header       = $('.wz-ui-header');
-var toolsLine    = $('.tools-line');
-var toolsList    = $('.toolbar-list');
-var pages        = $('.pages');
-var selections   = $('.selections');
-var input        = $('.input');
-var testZone     = $('.test-zone');
-var canvasPages  = pages[ 0 ];
-var canvasSelect = selections[ 0 ];
-var ctx          = canvasPages.getContext('2d');
-var ctxSel       = canvasSelect.getContext('2d');
+var win            = $(this);
+var header         = $('.wz-ui-header');
+var toolsLine      = $('.tools-line');
+var toolsList      = $('.toolbar-list');
+var pages          = $('.pages');
+var selections     = $('.selections');
+var ruleLeft       = $('.rule-left');
+var ruleTop        = $('.rule-top');
+var input          = $('.input');
+var testZone       = $('.test-zone');
+var canvasPages    = pages[ 0 ];
+var canvasSelect   = selections[ 0 ];
+var canvasRuleLeft = ruleLeft[ 0 ];
+var canvasRuleTop  = ruleTop[ 0 ];
+var ctx            = canvasPages.getContext('2d');
+var ctxSel         = canvasSelect.getContext('2d');
+var ctxRuleLeft    = canvasRuleLeft.getContext('2d');
+var ctxRuleTop     = canvasRuleTop.getContext('2d');
 
 // Node variables
 var pageList = [];
@@ -175,6 +181,20 @@ var checkCanvasSelectSize = function(){
 
     canvasSelect.width  = selections.width();
     canvasSelect.height = selections.height();
+
+};
+
+var checkCanvasRuleLeftSize = function(){
+
+    canvasRuleLeft.width  = ruleLeft.width();
+    canvasRuleLeft.height = ruleLeft.height();
+
+};
+
+var checkCanvasRuleTopSize = function(){
+
+    canvasRuleTop.width  = ruleTop.width();
+    canvasRuleTop.height = ruleTop.height();
 
 };
 
@@ -581,6 +601,192 @@ var drawRange = function( start, end ){
         ctxSel.globalAlpha = 1;
 
     }
+
+};
+
+var drawRuleLeft = function(){
+
+    // To Do -> Seguramente el alto no corresponde
+
+    checkCanvasRuleLeftSize();
+
+    // Dibujamos el fondo
+    ctxRuleLeft.beginPath();
+    ctxRuleLeft.rect( 0.5, 0.5, 14, currentPage.height );
+    ctxRuleLeft.fillStyle = '#ffffff';
+    ctxRuleLeft.fill();
+    ctxRuleLeft.lineWidth = 1;
+    ctxRuleLeft.strokeStyle = '#cacaca';
+    ctxRuleLeft.stroke();
+
+    // Establecemos el area de recorte
+    ctxRuleLeft.save();
+    ctxRuleLeft.beginPath();
+    ctxRuleLeft.rect( 1, 1, 13, currentPage.height );
+    ctxRuleLeft.clip();
+
+    // Dibujamos el fondo del margen izquierdo
+    ctxRuleLeft.beginPath();
+    ctxRuleLeft.rect( 1, 1, 13, currentPage.marginTop );
+    ctxRuleLeft.fillStyle = '#e4e4e4';
+    ctxRuleLeft.fill();
+
+    // Dibujamos el fondo del margen derecho
+    ctxRuleLeft.beginPath();
+    ctxRuleLeft.rect( 1, currentPage.height - currentPage.marginBottom, 13, currentPage.marginBottom );
+    ctxRuleLeft.fillStyle = '#e4e4e4';
+    ctxRuleLeft.fill();
+
+    // Calculamos la posición de inicio
+    var limit  = ( currentPage.height - currentPage.marginTop ) / CENTIMETER ;
+    var pos    = -( currentPage.marginTop / CENTIMETER );
+    var height = 0;
+
+    // To Do -> Ajustarlo para que la posición siempre sea un múltiplo de 0,25
+
+    // Dibujamos las líneas
+    ctxRuleLeft.font         = '10px Effra';
+    ctxRuleLeft.textAlign    = 'center';
+    ctxRuleLeft.textBaseline = 'middle';
+
+    while( pos < limit ){
+
+        // Si es 0 no lo representamos
+        if( !pos ){
+
+            height += 0.25 * CENTIMETER;
+            pos   += 0.25;
+            continue;
+
+        }
+
+        // Si es una posición entera ponemos el número
+        if( parseInt( pos, 10 ) === pos ){
+
+            ctxRuleLeft.fillStyle = '#6e6e6e';
+
+            ctxRuleLeft.fillText( Math.abs( pos ).toString(), 8, height );
+
+        // Si es múltiplo de 0.5, le toca linea grande
+        }else if( pos % 0.5 === 0 ){ // To Do -> Quizás haya algún problema con la precisión de las divisiones de JS. Estar pendientes
+
+            ctxRuleLeft.fillStyle = '#cacaca';
+
+            ctxRuleLeft.beginPath();
+            ctxRuleLeft.rect( 4, parseInt( height ), 7, 1 );
+            ctxRuleLeft.fill();
+
+        // Es un múltiplo de 0.25, le toca linea pequeña
+        }else{
+
+            ctxRuleLeft.fillStyle = '#cacaca';
+
+            ctxRuleLeft.beginPath();
+            ctxRuleLeft.rect( 6, parseInt( height ), 3, 1 );
+            ctxRuleLeft.fill();
+
+        }
+
+        height += 0.25 * CENTIMETER;
+        pos    += 0.25;
+
+    }
+
+    // Restablecemos el area de recorte
+    ctxRuleLeft.restore();
+
+};
+
+var drawRuleTop = function(){
+
+    // To Do -> Seguramente el ancho no corresponde
+
+    checkCanvasRuleTopSize();
+
+    // Dibujamos el fondo
+    ctxRuleTop.beginPath();
+    ctxRuleTop.rect( 0.5, 0.5, currentPage.width, 14 );
+    ctxRuleTop.fillStyle = '#ffffff';
+    ctxRuleTop.fill();
+    ctxRuleTop.lineWidth = 1;
+    ctxRuleTop.strokeStyle = '#cacaca';
+    ctxRuleTop.stroke();
+
+    // Establecemos el area de recorte
+    ctxRuleTop.save();
+    ctxRuleTop.beginPath();
+    ctxRuleTop.rect( 1, 1, currentPage.width, 13 );
+    ctxRuleTop.clip();
+
+    // Dibujamos el fondo del margen izquierdo
+    ctxRuleTop.beginPath();
+    ctxRuleTop.rect( 1, 1, currentPage.marginLeft, 13 );
+    ctxRuleTop.fillStyle = '#e4e4e4';
+    ctxRuleTop.fill();
+
+    // Dibujamos el fondo del margen derecho
+    ctxRuleTop.beginPath();
+    ctxRuleTop.rect( currentPage.width - currentPage.marginRight, 1, currentPage.marginRight, 13 );
+    ctxRuleTop.fillStyle = '#e4e4e4';
+    ctxRuleTop.fill();
+
+    // Calculamos la posición de inicio
+    var limit = ( currentPage.width - currentPage.marginLeft ) / CENTIMETER ;
+    var pos   = -( currentPage.marginLeft / CENTIMETER );
+    var width = 0;
+
+    // To Do -> Ajustarlo para que la posición siempre sea un múltiplo de 0,25
+
+    // Dibujamos las líneas
+    ctxRuleTop.font         = '10px Effra';
+    ctxRuleTop.textAlign    = 'center';
+    ctxRuleTop.textBaseline = 'middle';
+
+    while( pos < limit ){
+
+        // Si es 0 no lo representamos
+        if( !pos ){
+
+            width += 0.25 * CENTIMETER;
+            pos   += 0.25;
+            continue;
+
+        }
+
+        // Si es una posición entera ponemos el número
+        if( parseInt( pos, 10 ) === pos ){
+
+            ctxRuleTop.fillStyle = '#6e6e6e';
+
+            ctxRuleTop.fillText( Math.abs( pos ).toString(), width, 8 );
+
+        // Si es múltiplo de 0.5, le toca linea grande
+        }else if( pos % 0.5 === 0 ){ // To Do -> Quizás haya algún problema con la precisión de las divisiones de JS. Estar pendientes
+
+            ctxRuleTop.fillStyle = '#cacaca';
+
+            ctxRuleTop.beginPath();
+            ctxRuleTop.rect( parseInt( width ), 4, 1, 7 );
+            ctxRuleTop.fill();
+
+        // Es un múltiplo de 0.25, le toca linea pequeña
+        }else{
+
+            ctxRuleTop.fillStyle = '#cacaca';
+
+            ctxRuleTop.beginPath();
+            ctxRuleTop.rect( parseInt( width ), 6, 1, 3 );
+            ctxRuleTop.fill();
+
+        }
+
+        width += 0.25 * CENTIMETER;
+        pos   += 0.25;
+
+    }
+
+    // Restablecemos el area de recorte
+    ctxRuleTop.restore();
 
 };
 
@@ -2808,6 +3014,8 @@ var start = function(){
     setNodeStyle( paragraph, line, node, 'color', '#000000' );
 
     setCursor( 0, 0, 0, 0, 0, 0 );
+    drawRuleLeft();
+    drawRuleTop();
     drawPages();
     updateToolsLineStatus();
 

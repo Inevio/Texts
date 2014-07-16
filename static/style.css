@@ -20,14 +20,14 @@
 }
 
 .toolbar-menus ul{
-    padding: 4px 0px 0px 7px;
+    padding: 4px 0 0 7px;
 }
 
 .toolbar-menus li{
     float: left;
     font-size: 13px;
     color: #666;
-    border-radius: 3px 3px 0px 0px;
+    border-radius: 3px 3px 0 0;
     padding: 7px 11px 6px;
     border : 1px solid transparent;
 }
@@ -213,16 +213,32 @@
     display: none;
 }
 
+.rule-top{
+    width: 866px;
+    height: 15px;
+    float: left;
+    padding: 8px 0 11px 34px;
+    background: #ebebeb;
+}
+
+.rule-left{
+    width: 15px;
+    height: 476px;
+    float: left;
+    padding: 0 11px 0 8px;
+    background: #ebebeb;
+}
+
 .editor{
-    width: 900px;
-    height: 493px;
+    width: 866px;
+    height: 476px;
     float: left;
     position: relative;
 }
 
 .pages{
-    width: 900px;
-    height: 492px;
+    width: 866px;
+    height: 476px;
     position: absolute;
     top: 0;
     left: 0;
@@ -230,8 +246,8 @@
 }
 
 .selections{
-    width: 900px;
-    height: 492px;
+    width: 866px;
+    height: 476px;
     position: absolute;
     top: 0;
     left: 0;
@@ -243,12 +259,18 @@
 
 .input{
     position: absolute;
+    /*
     top: 0;
     left: 0;
+    */
+    z-index: -1;
 }
 
 .test-zone{
     position: absolute;
+    /*
     top: 15px;
     left: 0;
+    */
+    z-index: -1;
 }
