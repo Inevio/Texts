@@ -2011,6 +2011,7 @@ var realocateLine = function( id, lineChar ){
         created                   = true;
         newLine                   = createLine( currentParagraph );
         newLine.nodeList          = [];
+        newLine.spacing           = line.spacing;
         currentParagraph.lineList = currentParagraph.lineList.slice( 0, id + 1 ).concat( newLine ).concat( currentParagraph.lineList.slice( id + 1 ) );
 
     }else{
