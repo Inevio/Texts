@@ -13,6 +13,7 @@ var CENTIMETER = 37.795275591;
 var DEBUG = false;
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
+var LINESPACING = [ '1.0', '1.15', '1.5', '2.0', '2.5', '3.0' ];
 var MARGIN_NORMAL = {
 
     top    : 2.5 * CENTIMETER,
@@ -23,7 +24,7 @@ var MARGIN_NORMAL = {
 };
 var PAGE_A4 = {
 
-    width  : 21  * CENTIMETER,
+    width  : 10 * CENTIMETER,
     height : 29.7 * CENTIMETER
 
 };
@@ -147,8 +148,9 @@ var buttonAction = {
 };
 
 // Preprocesed data
-var fontfamilyCode = '';
-var fontsizeCode = '';
+var fontfamilyCode  = '';
+var fontsizeCode    = '';
+var linespacingCode = '';
 
 var refrescos = 0;
 
@@ -417,7 +419,7 @@ var drawPages = function(){
 
             //}
 
-            hHeritage += line.height;
+            hHeritage += line.height * line.spacing;
 
         }
 
@@ -450,7 +452,7 @@ var drawRange = function( start, end ){
 
     // Calculamos la posición vertical de la linea de inicio
     for( i = 0; i < start.lineId; i++ ){
-        startHeight += start.paragraph.lineList[ i ].height;
+        startHeight += start.paragraph.lineList[ i ].height * start.paragraph.lineList[ i ].spacing;
     }
 
     // Calculamos el ancho de inicio
@@ -483,7 +485,7 @@ var drawRange = function( start, end ){
         checkCanvasSelectSize();
 
         ctxSel.globalAlpha = 0.3;
-        ctxSel.fillStyle = '#7EBE30';
+        ctxSel.fillStyle   = '#7EBE30';
 
         // Si el nodo inicial es el mismo que el final
         if( start.nodeId === end.nodeId ){
@@ -505,7 +507,7 @@ var drawRange = function( start, end ){
             startWidth,
             startHeight,
             width,
-            start.line.height
+            start.line.height * start.line.spacing
 
         );
 
@@ -534,18 +536,18 @@ var drawRange = function( start, end ){
             startWidth,
             startHeight,
             width,
-            start.line.height
+            start.line.height * start.line.spacing
 
         );
 
         ctxSel.fill();
 
-        startHeight += start.line.height;
+        startHeight += start.line.height * start.line.spacing;
 
         // Coloreamos las lineas intermedias de forma completa
         mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
-            offset = end.page.marginLeft + getLineOffset( line, paragraph );
+            offset = page.marginLeft + getLineOffset( line, paragraph );
             width  = 0;
 
             // Obtenemos el tamaño de rectangulo a colorear
@@ -560,13 +562,13 @@ var drawRange = function( start, end ){
                 offset,
                 startHeight,
                 width,
-                end.line.height
+                line.height * line.spacing
 
             );
 
             ctxSel.fill();
             
-            startHeight += line.height;
+            startHeight += line.height * line.spacing;
 
         });
 
@@ -587,7 +589,7 @@ var drawRange = function( start, end ){
             offset,
             startHeight,
             width,
-            end.line.height
+            end.line.height * end.line.spacing
 
         );
 
@@ -1435,8 +1437,8 @@ var handleBackspace = function(){
             prevLine.totalChars      += currentLine.totalChars - 1;
             prevLine.nodeList         = prevLine.nodeList.concat( currentLine.nodeList );
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
-            currentParagraph.height  -= currentLine.height;
-            currentParagraph.height  -= prevLine.height;
+            currentParagraph.height  -= currentLine.height * currentLine.spacing;
+            currentParagraph.height  -= prevLine.height * prevLine.spacing;
 
             // Actualizamos las alturas de las líneas
             var maxSize = 0;
@@ -1450,7 +1452,7 @@ var handleBackspace = function(){
             }
 
             prevLine.height          = maxSize;
-            currentParagraph.height += maxSize;
+            currentParagraph.height += maxSize * prevLine.spacing; // To Do -> Estamos seguros de que esto es correcto?
             currentLineId            = currentLineId - 1;
             currentLine              = currentParagraph.lineList[ currentLineId ];
 
@@ -1517,7 +1519,7 @@ var handleBackspace = function(){
         }else if( currentLineId && !currentNode.string.length && currentLine.nodeList.length === 1 ){
 
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
-            currentParagraph.height   = currentParagraph.height - currentLine.height;
+            currentParagraph.height   = currentParagraph.height - ( currentLine.height * currentLine.spacing );
             currentLineId             = currentLineId - 1;
             currentLine               = currentParagraph.lineList[ currentLineId ];
             currentLineCharId         = currentLine.totalChars;
@@ -1624,7 +1626,7 @@ var handleChar = function( newChar ){
         currentNodeCharId = newNode.nodeChar;
         temporalStyle     = null;
 
-        positionAbsoluteY += currentLine.height;
+        positionAbsoluteY += currentLine.height * currentLine.spacing;
 
         // Reiniciamos la posición horizontal
         positionAbsoluteX  = 0;
@@ -1672,18 +1674,21 @@ var handleEnter = function(){
     var i, maxSize;
     var newParagraph   = createParagraph( currentPage );
     var newParagraphId = currentParagraphId + 1;
-    var movedLines, newLine, newNode;
+    var newLine        = newParagraph.lineList[ 0 ];
+    var newNode        = newLine.nodeList[ 0 ];
+    var movedLines;
 
     // Heredamos la alineación
     newParagraph.aling = currentParagraph.aling;
+
+    // Heredamos la altura de la línea
+    newLine.spacing = currentLine.spacing;
 
     // Partimos la línea si no estamos al principio de ella
     if( currentLineCharId ){
 
         // Obtenemos las líneas a mover y el texto
         movedLines = currentParagraph.lineList.slice( currentLineId + 1 );
-        newLine    = newParagraph.lineList[ 0 ];
-        newNode    = newLine.nodeList[ 0 ];
 
         // Clonamos el nodo actual
         newNode.string = currentNode.string.slice( currentNodeCharId );
@@ -1730,7 +1735,7 @@ var handleEnter = function(){
 
         }
 
-        newParagraph.height = maxSize;
+        newParagraph.height = maxSize * newLine.spacing;
         newLine.height      = maxSize;
 
         maxSize = 0;
@@ -1743,8 +1748,8 @@ var handleEnter = function(){
 
         }
 
-        currentParagraph.height -= currentLine.height;
-        currentParagraph.height += maxSize;
+        currentParagraph.height -= currentLine.height * currentLine.spacing;
+        currentParagraph.height += maxSize * currentLine.spacing;
         currentLine.height       = maxSize;
 
         // Movemos las líneas siguientes
@@ -1765,13 +1770,11 @@ var handleEnter = function(){
     // Al principio del párrafo
     }else{
 
-        newLine             = newParagraph.lineList[ 0 ];
-        newNode             = newLine.nodeList[ 0 ];
         movedLines          = [];
         newNode.style       = $.extend( {}, currentNode.style );
         newNode.height      = currentNode.height;
         newLine.height      = currentNode.height;
-        newParagraph.height = currentNode.height;
+        newParagraph.height = currentNode.height * newLine.spacing;
 
         // Insertamos el párrafo en su posición
         currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId ).concat( newParagraph ).concat( currentPage.paragraphList.slice( currentParagraphId ) );
@@ -1781,8 +1784,8 @@ var handleEnter = function(){
     // Actualizamos las alturas del párrafo de origen y destino
     for( i = 0; i < movedLines.length; i++ ){
 
-        currentParagraph.height -= movedLines[ i ].height;
-        newParagraph.height     += movedLines[ i ].height;
+        currentParagraph.height -= movedLines[ i ].height * movedLines[ i ].spacing;
+        newParagraph.height     += movedLines[ i ].height * movedLines[ i ].spacing;
 
     }
 
@@ -1914,7 +1917,8 @@ var newLine = function(){
         height     : 0,
         nodeList   : [],
         totalChars : 0,
-        width      : 0
+        width      : 0,
+        spacing    : 1
 
     };
 
@@ -2136,13 +2140,13 @@ var realocateLine = function( id, lineChar ){
 
     if( created ){
 
-        currentParagraph.height += maxSize;
+        currentParagraph.height += maxSize * newLine.spacing;
         newLine.height           = maxSize;
 
     }else{
 
-        currentParagraph.height -= newLine.height;
-        currentParagraph.height += maxSize;
+        currentParagraph.height -= newLine.height * newLine.spacing;
+        currentParagraph.height += maxSize * newLine.spacing;
         newLine.height           = maxSize;
 
     }
@@ -2287,8 +2291,8 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     if( maxSize !== line.height ){
 
-        currentParagraph.height -= line.height;
-        currentParagraph.height += maxSize;
+        currentParagraph.height -= line.height * line.spacing;
+        currentParagraph.height += maxSize * line.spacing;
         line.height              = maxSize;
 
     }
@@ -2305,8 +2309,8 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     if( maxSize !== nextLine.height ){
 
-        currentParagraph.height -= nextLine.height;
-        currentParagraph.height += maxSize;
+        currentParagraph.height -= nextLine.height * nextLine.spacing;
+        currentParagraph.height += maxSize * nextLine.spacing;
         nextLine.height          = maxSize;
         
     }
@@ -2314,7 +2318,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
     if( !nextLine.totalChars ){
 
         currentParagraph.lineList  = currentParagraph.lineList.slice( 0, id + 1 ).concat( currentParagraph.lineList.slice( id + 2 ) );
-        currentParagraph.height   -= nextLine.height;
+        currentParagraph.height   -= nextLine.height * nextLine.spacing;
 
     }
 
@@ -2338,6 +2342,27 @@ var resetBlink = function(){
 
         selectedEnabled = false;
         updateBlink();
+
+    }
+
+};
+
+var setLineStyle = function( paragraph, line, key, value ){
+
+    var prev = line[ key ];
+
+    // Si no hay un cambio real no hacemos nada
+    if( value === prev ){
+        return;
+    }
+
+    line[ key ] = value;
+
+    // Propagamos lo cambios necesarios al párrafo
+    if( key === 'spacing' ){
+
+        paragraph.height -= line.height * prev;
+        paragraph.height += line.height * value;
 
     }
 
@@ -2377,8 +2402,8 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
             return;
         }
 
-        paragraph.height -= line.height;
-        paragraph.height += lineHeight;
+        paragraph.height -= line.height * line.spacing;
+        paragraph.height += lineHeight * line.spacing;
         line.height       = lineHeight;
 
     }
@@ -2496,7 +2521,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
         // Tamaño de cada línea
         for( i = 0; i < line; i++ ){
-            positionAbsoluteY += currentParagraph.lineList[ i ].height;
+            positionAbsoluteY += currentParagraph.lineList[ i ].height * currentParagraph.lineList[ i ].spacing;
             // To Do -> Gaps entre páginas
         }
 
@@ -2625,6 +2650,15 @@ var setRange = function( start, end, force ){
 
 };
 
+var setRangeLineStyle = function( key, value ){
+
+    // Aplicamos el estilo a nodos intermedios
+    mapRangeLines( true, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
+        setLineStyle( paragraph, line, key, value );
+    });
+
+};
+
 var setRangeNodeStyle = function( key, value, propagated ){
 
     var i, j, newNode, endNode, newPositions;
@@ -2658,7 +2692,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode                         = createNode( currentRangeStart.line );
             newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
             newNode.style                   = $.extend( {}, currentRangeStart.node.style );
-            newNode.height                  = currentRangeStart.height;
+            newNode.height                  = currentRangeStart.node.height;
             currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
             currentRangeStart.node.charList = [];
 
@@ -2955,6 +2989,23 @@ var setRangeParagraphStyle = function( key, value ){
 
 };
 
+var setSelectedLineStyle = function( key, value ){
+
+    // Selección normal
+    if( currentRangeStart ){
+
+        setRangeLineStyle( key, value );
+        drawRange( currentRangeStart, currentRangeEnd );
+
+    // Principio de un párrafo vacío
+    }else{
+        setLineStyle( currentParagraph, currentLine, key, value );
+    }
+
+    drawPages();
+
+};
+
 var setSelectedNodeStyle = function( key, value ){
 
     // Selección normal
@@ -3244,8 +3295,8 @@ selections
     // Buscamos la línea
     for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
         
-        if( paragraph.lineList[ lineId ].height + height < posY ){
-            height += paragraph.lineList[ lineId ].height;
+        if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
+            height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
         }else{
             break;
         }
@@ -3503,8 +3554,8 @@ selections
     // Buscamos la línea
     for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
         
-        if( paragraph.lineList[ lineId ].height + height < posY ){
-            height += paragraph.lineList[ lineId ].height;
+        if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
+            height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
         }else{
             break;
         }
@@ -3663,6 +3714,30 @@ toolsLine
         })
         .html( fontsizeCode );
 
+})
+
+.on( 'click', '.tool-button-line-spacing', function(){
+
+    if( !linespacingCode ){
+
+        for( var i = 0; i < LINESPACING.length; i++ ){
+            linespacingCode += '<li>' + LINESPACING[ i ] + '</li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-linespacing')
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            width   : $(this).outerWidth() * 2,
+            display : 'block'
+
+        })
+        .html( linespacingCode );
+
 });
 
 toolsList.on( 'click', 'li', function(){
@@ -3675,11 +3750,15 @@ toolsList.on( 'click', 'li', function(){
         setSelectedNodeStyle( 'font-family', $(this).text() );
 
     // Modo Tamaño de letra
-    }else{
+    }else if( toolsList.hasClass('active-fontsize') ){
         setSelectedNodeStyle( 'font-size', parseInt( $(this).text(), 10 ) );
+    
+    // Modo Interlineado
+    }else if( toolsList.hasClass('active-linespacing') ){
+        setSelectedLineStyle( 'spacing', parseFloat( $(this).text() ) );
     }
 
-    toolsList.removeClass('active-fontfamily active-fontsize');
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
     updateToolsLineStatus();
 
 });

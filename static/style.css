@@ -86,14 +86,14 @@
     padding: 0 6px;
 }
 
-.tool-button{
+.tool-button, .tool-list-button{
     width: 24px;
     height: 24px;
     border-radius: 3px;
     border: 1px solid transparent;
 }
 
-.tool-button:hover{
+.tool-button:hover, .tool-list-button:hover{
     background-color: #e5e5e5;
     border-color: #cacaca;
 }
@@ -108,7 +108,7 @@
     border-color: #dcdcdc;
 }
 
-.tool-button i{
+.tool-button i, .tool-list-button i{
     background: url('@static/sprite.png') 0 0;
     background-size: 155px 17px;
     display: block;
