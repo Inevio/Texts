@@ -9,21 +9,22 @@ var ALING_LEFT = 0;
 var ALING_CENTER = 1;
 var ALING_RIGHT = 2;
 var ALING_JUSTIFY = 3;
+var CENTIMETER = 37.795275591;
 var DEBUG = false;
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var MARGIN_NORMAL = {
 
-    top    : 94, //2.5 cm
-    right  : 94, //2.5 cm
-    bottom : 94, //2.5 cm
-    left   : 94  //2.5 cm
+    top    : 2.5 * CENTIMETER,
+    right  : 2.5 * CENTIMETER,
+    bottom : 2.5 * CENTIMETER,
+    left   : 2.5 * CENTIMETER
 
 };
 var PAGE_A4 = {
 
-    width  : 300,//794, // 21 cm
-    height : 1122 // 29.7 cm
+    width  : 21  * CENTIMETER,
+    height : 29.7 * CENTIMETER
 
 };
 
