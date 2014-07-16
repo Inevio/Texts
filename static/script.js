@@ -366,7 +366,7 @@ var drawPages = function(){
     var page = pageList[ 0 ];
 
     ctx.beginPath();
-    ctx.rect( 20.5, 20.5, page.width, page.height );
+    ctx.rect( 0.5, 0.5, page.width, page.height );
     ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.lineWidth = 1;
@@ -403,8 +403,8 @@ var drawPages = function(){
                     ctx.fillText(
 
                         node.string,
-                        page.marginLeft + 20 + wHeritage,
-                        page.marginTop + 20 + line.height + hHeritage
+                        page.marginLeft + wHeritage,
+                        page.marginTop + line.height + hHeritage
 
                     );
 
@@ -432,15 +432,10 @@ var drawRange = function( start, end ){
 
     // Calculamos la posición vertical de la página de inicio
     for( i = 0; i < start.pageId; i++ ){
-
-        // Gap
-        startHeight += 20;
-        startHeight += pageList[ i ].height;
-
+        startHeight += pageList[ i ].height; // To Do -> Gap
     }
 
-    // Gap inicial de la página actuals
-    startHeight += 20;
+    // To Do -> Gap
 
     // Tenemos en cuenta el margen superior
     startHeight += start.page.marginTop;
@@ -457,9 +452,6 @@ var drawRange = function( start, end ){
 
     // Calculamos el ancho de inicio
     var startWidth = 0;
-
-    // Gap inicial
-    startWidth += 20;
 
     // Margen izquierdo
     startWidth += start.page.marginLeft;
@@ -550,7 +542,7 @@ var drawRange = function( start, end ){
         // Coloreamos las lineas intermedias de forma completa
         mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
-            offset = 20 + end.page.marginLeft + getLineOffset( line, paragraph );
+            offset = end.page.marginLeft + getLineOffset( line, paragraph );
             width  = 0;
 
             // Obtenemos el tamaño de rectangulo a colorear
@@ -577,7 +569,7 @@ var drawRange = function( start, end ){
 
         // Coloreamos la línea del final de forma parcial
         width  = 0;
-        offset = 20 + end.page.marginLeft + getLineOffset( end.line, end.paragraph );
+        offset = end.page.marginLeft + getLineOffset( end.line, end.paragraph );
 
         for( i = 0 + 1; i < end.nodeId; i++ ){
             width += end.line.nodeList[ i ].width;
@@ -1639,7 +1631,7 @@ var handleChar = function( newChar ){
         positionAbsoluteY += currentLine.height;
 
         // Reiniciamos la posición horizontal
-        positionAbsoluteX  = 20; // Gap
+        positionAbsoluteX  = 0;
         positionAbsoluteX += currentPage.marginLeft;
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
 
@@ -1659,7 +1651,7 @@ var handleChar = function( newChar ){
 
         // Reiniciamos la posición horizontal
         // To Do -> Quizás pueda optimizarse
-        positionAbsoluteX  = 20; // Gap
+        positionAbsoluteX  = 0;
         positionAbsoluteX += currentPage.marginLeft;
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
 
@@ -2491,9 +2483,6 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
         positionAbsoluteY = 0;
 
-        // Gap inicial
-        positionAbsoluteY += 20;
-
         // Tamaño de cada página
         for( i = 0; i < page; i++ ){
             positionAbsoluteY += pageList[ i ].height;
@@ -2529,9 +2518,6 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
         positionAbsoluteX = 0;
-
-        // Gap inicial
-        positionAbsoluteX += 20;
 
         // Márgen superior
         positionAbsoluteX += currentPage.marginLeft;
@@ -3226,9 +3212,6 @@ selections
     // Buscamos la posición vertical
     var height = 0;
 
-    // Tenemos en cuenta el gap
-    height += 20;
-
     // Buscamos la página
     for( pageId = 0; pageId < pageList.length; pageId++ ){
 
@@ -3273,9 +3256,6 @@ selections
 
     // Buscamos la posición horizontal
     var width = 0;
-
-    // Tenemos en cuenta el gap
-    width += 20;
 
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
@@ -3373,7 +3353,7 @@ selections
 
         lineChar = 0;
 
-        offset = 20 + page.marginLeft + getLineOffset( line, paragraph );
+        offset = page.marginLeft + getLineOffset( line, paragraph );
 
         if( posX > offset ){
 
@@ -3491,9 +3471,6 @@ selections
     // Buscamos la posición vertical
     var height = 0;
 
-    // Tenemos en cuenta el gap
-    height += 20;
-
     // Buscamos la página
     for( pageId = 0; pageId < pageList.length; pageId++ ){
 
@@ -3538,9 +3515,6 @@ selections
 
     // Buscamos la posición horizontal
     var width = 0;
-
-    // Tenemos en cuenta el gap
-    width += 20;
 
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
