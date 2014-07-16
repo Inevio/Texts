@@ -213,12 +213,49 @@
     display: none;
 }
 
-.rule-top{
+.ruler-top{
     width: 866px;
     height: 15px;
     float: left;
     padding: 8px 0 11px 34px;
     background: #ebebeb;
+    position: relative;
+}
+
+.ruler-arrow-up{
+    width: 0; 
+    height: 0; 
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #7ebe30;
+    position: absolute;
+    margin-top: 8px;
+    margin-left: -5px;
+}
+
+.ruler-arrow-down{
+    width: 0; 
+    height: 0; 
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #7ebe30;
+    position: absolute;
+    margin-left: -5px;
+}
+
+.ruler-box{
+    width: 10px;
+    height: 5px;
+    background: #7ebe30;
+    position: absolute;
+    margin-top: 15px;
+    margin-left: -4px;
+}
+
+.rule-top{
+    width: 866px;
+    height: 15px;
+    position: absolute;
 }
 
 .rule-left{

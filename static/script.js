@@ -37,6 +37,9 @@ var pages          = $('.pages');
 var selections     = $('.selections');
 var ruleLeft       = $('.rule-left');
 var ruleTop        = $('.rule-top');
+var marginTopDown  = $('.ruler-arrow-down');
+var marginTopUp    = $('.ruler-arrow-up');
+var marginTopBox   = $('.ruler-box');
 var input          = $('.input');
 var testZone       = $('.test-zone');
 var canvasPages    = pages[ 0 ];
@@ -604,18 +607,12 @@ var drawRuleLeft = function(){
 
     // Dibujamos el fondo
     ctxRuleLeft.beginPath();
-    ctxRuleLeft.rect( 0.5, 0.5, 14, currentPage.height );
+    ctxRuleLeft.rect( 0, 0, 15, currentPage.height );
     ctxRuleLeft.fillStyle = '#ffffff';
     ctxRuleLeft.fill();
     ctxRuleLeft.lineWidth = 1;
     ctxRuleLeft.strokeStyle = '#cacaca';
     ctxRuleLeft.stroke();
-
-    // Establecemos el area de recorte
-    ctxRuleLeft.save();
-    ctxRuleLeft.beginPath();
-    ctxRuleLeft.rect( 1, 1, 13, currentPage.height );
-    ctxRuleLeft.clip();
 
     // Dibujamos el fondo del margen izquierdo
     ctxRuleLeft.beginPath();
@@ -665,7 +662,7 @@ var drawRuleLeft = function(){
             ctxRuleLeft.fillStyle = '#cacaca';
 
             ctxRuleLeft.beginPath();
-            ctxRuleLeft.rect( 4, parseInt( height ), 7, 1 );
+            ctxRuleLeft.rect( 4, parseInt( height, 10 ), 7, 1 );
             ctxRuleLeft.fill();
 
         // Es un múltiplo de 0.25, le toca linea pequeña
@@ -674,7 +671,7 @@ var drawRuleLeft = function(){
             ctxRuleLeft.fillStyle = '#cacaca';
 
             ctxRuleLeft.beginPath();
-            ctxRuleLeft.rect( 6, parseInt( height ), 3, 1 );
+            ctxRuleLeft.rect( 6, parseInt( height, 10 ), 3, 1 );
             ctxRuleLeft.fill();
 
         }
@@ -684,8 +681,12 @@ var drawRuleLeft = function(){
 
     }
 
-    // Restablecemos el area de recorte
-    ctxRuleLeft.restore();
+    // Dibujamos el borde
+    ctxRuleLeft.beginPath();
+    ctxRuleLeft.rect( 0.5, 0.5, 14, currentPage.height );
+    ctxRuleLeft.lineWidth = 1;
+    ctxRuleLeft.strokeStyle = '#cacaca';
+    ctxRuleLeft.stroke();
 
 };
 
@@ -697,18 +698,9 @@ var drawRuleTop = function(){
 
     // Dibujamos el fondo
     ctxRuleTop.beginPath();
-    ctxRuleTop.rect( 0.5, 0.5, currentPage.width, 14 );
+    ctxRuleTop.rect( 0, 0, currentPage.width, 15 );
     ctxRuleTop.fillStyle = '#ffffff';
     ctxRuleTop.fill();
-    ctxRuleTop.lineWidth = 1;
-    ctxRuleTop.strokeStyle = '#cacaca';
-    ctxRuleTop.stroke();
-
-    // Establecemos el area de recorte
-    ctxRuleTop.save();
-    ctxRuleTop.beginPath();
-    ctxRuleTop.rect( 1, 1, currentPage.width, 13 );
-    ctxRuleTop.clip();
 
     // Dibujamos el fondo del margen izquierdo
     ctxRuleTop.beginPath();
@@ -777,8 +769,12 @@ var drawRuleTop = function(){
 
     }
 
-    // Restablecemos el area de recorte
-    ctxRuleTop.restore();
+    // Dibujamos el borde¡e
+    ctxRuleTop.beginPath();
+    ctxRuleTop.rect( 0.5, 0.5, currentPage.width, 14 );
+    ctxRuleTop.lineWidth = 1;
+    ctxRuleTop.strokeStyle = '#cacaca';
+    ctxRuleTop.stroke();
 
 };
 
@@ -3004,6 +3000,10 @@ var start = function(){
     drawRuleTop();
     drawPages();
     updateToolsLineStatus();
+
+    marginTopDown.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
+    marginTopUp.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
+    marginTopBox.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
 
 };
 
