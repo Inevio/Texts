@@ -2432,6 +2432,12 @@ var setParagraphStyle = function( paragraph, key, value ){
 
     if( key === 'indentationLeftAdd' ){
 
+        if( paragraph.indentationLeft + value < 0 ){
+            value = -paragraph.indentationLeft;
+        }else if( paragraph.width - value <= 0 ){
+            return;
+        }
+
         paragraph.indentationLeft += value;
         paragraph.width           -= value;
 
@@ -2442,10 +2448,8 @@ var setParagraphStyle = function( paragraph, key, value ){
         }
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
-            realocateLine( paragraph.lineList[ i ], 0 );
+            realocateLine( i, 0 );
         }
-
-        console.log( paragraph );
 
     }else{
         paragraph[ key ] = value;
