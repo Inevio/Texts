@@ -142,7 +142,15 @@ var buttonAction = {
     },
 
     justify : function(){
-        setRangeParagraphStyle( 'aling', ALING_JUSTIFY );
+        setSelectedParagraphsStyle( 'aling', ALING_JUSTIFY );
+    },
+
+    indentDec : function(){
+        setSelectedParagraphsStyle( 'indentationLeftAdd', -1.27 * CENTIMETER );
+    },
+
+    indentInc : function(){
+        setSelectedParagraphsStyle( 'indentationLeftAdd', 1.27 * CENTIMETER );
     }
 
 };
@@ -408,7 +416,7 @@ var drawPages = function(){
                     ctx.fillText(
 
                         node.string,
-                        page.marginLeft + wHeritage,
+                        page.marginLeft + paragraph.indentationLeft + wHeritage,
                         page.marginTop + line.height + hHeritage
 
                     );
@@ -460,6 +468,9 @@ var drawRange = function( start, end ){
 
     // Margen izquierdo
     startWidth += start.page.marginLeft;
+
+    // Margen izquierdo del párrafo
+    startWidth += start.paragraph.indentationLeft;
 
     // Alineación del párrafo
     startWidth += getLineOffset( start.line, start.paragraph );
@@ -547,7 +558,7 @@ var drawRange = function( start, end ){
         // Coloreamos las lineas intermedias de forma completa
         mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
-            offset = page.marginLeft + getLineOffset( line, paragraph );
+            offset = page.marginLeft + paragraph.indentationLeft + getLineOffset( line, paragraph );
             width  = 0;
 
             // Obtenemos el tamaño de rectangulo a colorear
@@ -574,7 +585,7 @@ var drawRange = function( start, end ){
 
         // Coloreamos la línea del final de forma parcial
         width  = 0;
-        offset = end.page.marginLeft + getLineOffset( end.line, end.paragraph );
+        offset = end.page.marginLeft + end.paragraph.indentationLeft + getLineOffset( end.line, end.paragraph );
 
         for( i = 0 + 1; i < end.nodeId; i++ ){
             width += end.line.nodeList[ i ].width;
@@ -1631,6 +1642,7 @@ var handleChar = function( newChar ){
         // Reiniciamos la posición horizontal
         positionAbsoluteX  = 0;
         positionAbsoluteX += currentPage.marginLeft;
+        positionAbsoluteX += currentParagraph.indentationLeft;
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
 
         for( i = 0; i < currentNodeId; i++ ){
@@ -1651,6 +1663,7 @@ var handleChar = function( newChar ){
         // To Do -> Quizás pueda optimizarse
         positionAbsoluteX  = 0;
         positionAbsoluteX += currentPage.marginLeft;
+        positionAbsoluteX += currentParagraph.indentationLeft;
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
 
         for( i = 0; i < currentNodeId; i++ ){
@@ -1678,8 +1691,10 @@ var handleEnter = function(){
     var newNode        = newLine.nodeList[ 0 ];
     var movedLines;
 
-    // Heredamos la alineación
-    newParagraph.aling = currentParagraph.aling;
+    // Heredamos las propiedades del párrafo
+    newParagraph.aling            = currentParagraph.aling;
+    newParagraph.indentationLeft  = currentParagraph.indentationLeft;
+    newParagraph.indentationRight = currentParagraph.indentationRight;
 
     // Heredamos la altura de la línea
     newLine.spacing = currentLine.spacing;
@@ -1958,11 +1973,13 @@ var newParagraph = function(){
 
     return {
 
-        aling     : ALING_LEFT,
-        height    : 0,
-        interline : 0,
-        lineList  : [],
-        width     : 0
+        aling            : ALING_LEFT,
+        height           : 0,
+        indentationLeft  : 0,
+        indentationRight : 0,
+        interline        : 0,
+        lineList         : [],
+        width            : 0
 
     };
 
@@ -2413,11 +2430,30 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
 
 var setParagraphStyle = function( paragraph, key, value ){
 
-    paragraph[ key ] = value;
+    if( key === 'indentationLeftAdd' ){
+
+        paragraph.indentationLeft += value;
+        paragraph.width           -= value;
+
+        var i;
+
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            paragraph.lineList[ i ].width -= value;
+        }
+
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            realocateLine( paragraph.lineList[ i ], 0 );
+        }
+
+        console.log( paragraph );
+
+    }else{
+        paragraph[ key ] = value;
+    }
 
     drawPages();
 
-    if( paragraph === currentParagraph ){
+    if( paragraph === currentParagraph && !currentRangeStart ){
 
         setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
         resetBlink();
@@ -2541,8 +2577,11 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
         positionAbsoluteX = 0;
 
-        // Márgen superior
+        // Márgen lateral de la página
         positionAbsoluteX += currentPage.marginLeft;
+
+        // Margen lateral del párrafo
+        positionAbsoluteX += currentParagraph.indentationLeft;
 
         // Alineación de la línea
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
@@ -2981,11 +3020,14 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
 var setRangeParagraphStyle = function( key, value ){
     
+    console.log('#', currentRangeStart, currentRangeEnd);
     mapRangeParagraphs( currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph ){
-        paragraph[ key ] = value;
+        setParagraphStyle( paragraph, key, value );
     });
+    console.log('#', currentRangeStart, currentRangeEnd);
 
     drawPages();
+    console.log('#', currentRangeStart, currentRangeEnd);
     setRange( currentRangeStart, currentRangeEnd, true );
 
 };
@@ -3312,6 +3354,9 @@ selections
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
 
+    // Tenemos en cuenta el margen del párrafo
+    width += paragraph.indentationLeft;
+
     // Tenemos en cuenta la alineación del párrafo
     width += getLineOffset( line, paragraph );
 
@@ -3570,6 +3615,9 @@ selections
 
     // Tenemos en cuenta el margen izquierdo
     width += page.marginLeft;
+
+    // Tenemos en cuenta el margen del párrafo
+    width += paragraph.indentationLeft;
 
     // Tenemos en cuenta la alineación del párrafo
     width += getLineOffset( line, paragraph );
