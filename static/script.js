@@ -16,6 +16,9 @@ var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var INDENTATION_NONE = 0;
 var INDENTATION_FIRSTLINE = 1;
 var INDENTATION_HANGING = 2;
+var LIST_NONE = 0;
+var LIST_BULLET = 1;
+var LIST_NUMBER = 2;
 var LINESPACING = [ '1.0', '1.15', '1.5', '2.0', '2.5', '3.0' ];
 var MARGIN_NORMAL = {
 
@@ -154,6 +157,14 @@ var buttonAction = {
 
     indentInc : function(){
         setSelectedParagraphsStyle( 'indentationLeftAdd', 1.27 * CENTIMETER );
+    },
+
+    listBullet : function(){
+        setSelectedParagraphsStyle('listBullet');
+    },
+
+    listNumber : function(){
+
     }
 
 };
@@ -768,7 +779,7 @@ var drawRuleTop = function(){
             ctxRuleTop.fillStyle = '#cacaca';
 
             ctxRuleTop.beginPath();
-            ctxRuleTop.rect( parseInt( width ), 4, 1, 7 );
+            ctxRuleTop.rect( parseInt( width, 10 ), 4, 1, 7 );
             ctxRuleTop.fill();
 
         // Es un múltiplo de 0.25, le toca linea pequeña
@@ -777,7 +788,7 @@ var drawRuleTop = function(){
             ctxRuleTop.fillStyle = '#cacaca';
 
             ctxRuleTop.beginPath();
-            ctxRuleTop.rect( parseInt( width ), 6, 1, 3 );
+            ctxRuleTop.rect( parseInt( width, 10 ), 6, 1, 3 );
             ctxRuleTop.fill();
 
         }
@@ -1928,6 +1939,68 @@ var mapRangeParagraphs = function( start, end, callback ){
 
 };
 
+var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nodeChar ){
+
+    var i;
+
+    setCanvasTextStyle( node.style );
+
+    node.charList = node.charList.slice( 0, nodeChar );
+
+    // Si tiene tabuladores seguiremos un procedimiento especial
+    if( /\t/.test( node.string ) ){
+
+        // To Do -> Herencia de nodos anteriores
+        // To Do -> Offset de la línea
+
+        var current    = 0;
+        var prev       = 0;
+        var multiples  = 0;
+        var heritage   = 0;
+        var identation = getLineIndentationLeft( lineId, paragraph );
+
+        for( i = nodeChar + 1; i <= node.string.length; i++ ){
+
+            // Si no es un tabulador seguimos el procedimiento habitual
+            if( node.string[ i - 1 ] !== '\t' ){
+                node.charList.push( ctx.measureText( node.string.slice( 0, i ) ).width + heritage );
+                continue;
+            }
+
+            // Posición actual
+            current = ctx.measureText( node.string.slice( 0, i ) ).width + heritage;
+
+            // Posición anterior
+            prev = node.charList.slice( -1 )[ 0 ] || 0;
+
+            // Multiplos anteriores
+            multiples = Math.ceil( prev / ( 1.26 * CENTIMETER ), 10 );
+
+            // Si estamos justo en el límite sumamos 1
+            if( ( prev / ( 1.26 * CENTIMETER ) ) === 0 ){
+                multiples++;
+            }
+
+            // Calculamos la nueva posición
+            heritage = ( 1.26 * CENTIMETER * multiples ) - identation - current;
+            current  = ( 1.26 * CENTIMETER * multiples ) - identation;
+
+            node.charList.push( current );
+
+        }
+
+    }else{
+
+        for( i = nodeChar + 1; i <= node.string.length; i++ ){
+            node.charList.push( ctx.measureText( node.string.slice( 0, i ) ).width );
+        }
+
+    }
+
+    node.width = node.charList.slice( -1 )[ 0 ];
+
+};
+
 var mergeNodes = function( first, second ){
 
     var i = first.string.length;
@@ -1950,9 +2023,10 @@ var newLine = function(){
 
         height     : 0,
         nodeList   : [],
+        tabList    : [],
+        spacing    : 1,
         totalChars : 0,
-        width      : 0,
-        spacing    : 1
+        width      : 0
 
     };
 
@@ -2000,6 +2074,7 @@ var newParagraph = function(){
         indentationSpecialValue : 0,
         interline               : 0,
         lineList                : [],
+        listMode                : LIST_NONE,
         width                   : 0
 
     };
@@ -2451,6 +2526,8 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
 
 var setParagraphStyle = function( paragraph, key, value ){
 
+    var i;
+
     if( key === 'indentationLeftAdd' ){
 
         if( paragraph.indentationLeft + value < 0 ){
@@ -2462,7 +2539,35 @@ var setParagraphStyle = function( paragraph, key, value ){
         paragraph.indentationLeft += value;
         paragraph.width           -= value;
 
-        var i;
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            paragraph.lineList[ i ].width -= value;
+        }
+
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            realocateLine( i, 0 );
+        }
+
+    }else if( key === 'listBullet' ){
+
+        var newNode = createNode( paragraph.lineList[ 0 ] );
+
+        setParagraphStyle( paragraph, 'indentationLeftAdd', 0.63 * CENTIMETER );
+        paragraph.lineList[ 0 ].nodeList.unshift( newNode );
+
+        paragraph.listMode                = LIST_BULLET;
+        paragraph.indentationSpecialType  = INDENTATION_HANGING;
+        paragraph.indentationSpecialValue = 0.63 * CENTIMETER;
+        paragraph.lineList[ 0 ].tabList   = [ 1 ]; // To Do -> Conservar el resto de tabuladores
+        newNode.style.color               = '#000000';
+        newNode.style['font-family']      = 'Webdings'; // To Do -> No usar webdings
+
+        setNodeStyle( paragraph, paragraph.lineList[ 0 ], newNode, 'font-size', paragraph.lineList[ 0 ].nodeList[ 1 ].style['font-size'] );
+
+        newNode.string = String.fromCharCode( 8226 ) + '\t';
+
+        measureNode( paragraph, paragraph.lineList[ 0 ], 0, 0, newNode, 0, 0 );
+
+        console.table( paragraph.lineList );
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
             paragraph.lineList[ i ].width -= value;
