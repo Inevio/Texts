@@ -2560,21 +2560,24 @@ var setParagraphStyle = function( paragraph, key, value ){
 
     }else if( key === 'listBullet' ){
 
+        value = 0.63 * CENTIMETER;
+
         var newNode = createNode( paragraph.lineList[ 0 ] );
 
-        setParagraphStyle( paragraph, 'indentationLeftAdd', 0.63 * CENTIMETER );
+        setParagraphStyle( paragraph, 'indentationLeftAdd', value );
         paragraph.lineList[ 0 ].nodeList.unshift( newNode );
 
-        paragraph.listMode                = LIST_BULLET;
-        paragraph.indentationSpecialType  = INDENTATION_HANGING;
-        paragraph.indentationSpecialValue = 0.63 * CENTIMETER;
-        paragraph.lineList[ 0 ].tabList   = [ 1 ]; // To Do -> Conservar el resto de tabuladores
-        newNode.style.color               = '#000000';
-        newNode.style['font-family']      = 'Webdings'; // To Do -> No usar webdings
+        paragraph.listMode                  = LIST_BULLET;
+        paragraph.indentationSpecialType    = INDENTATION_HANGING;
+        paragraph.indentationSpecialValue   = value;
+        paragraph.lineList[ 0 ].tabList     = [ 1 ]; // To Do -> Conservar el resto de tabuladores
+        paragraph.lineList[ 0 ].totalChars += 2;
+        newNode.blocked                     = true;
+        newNode.string                      = String.fromCharCode( 8226 ) + '\t';
+        newNode.style.color                 = '#000000';
+        newNode.style['font-family']        = 'Webdings'; // To Do -> No usar webdings
 
         setNodeStyle( paragraph, paragraph.lineList[ 0 ], newNode, 'font-size', paragraph.lineList[ 0 ].nodeList[ 1 ].style['font-size'] );
-
-        newNode.string = String.fromCharCode( 8226 ) + '\t';
 
         measureNode( paragraph, paragraph.lineList[ 0 ], 0, 0, newNode, 0, 0 );
 
