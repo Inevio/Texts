@@ -1726,6 +1726,17 @@ var handleEnter = function(){
     newParagraph.indentationLeft  = currentParagraph.indentationLeft;
     newParagraph.indentationRight = currentParagraph.indentationRight;
 
+    // To Do -> A tener en cuenta con el siguiente paso ( herencia de altura de la linea ), quizás el primer nodo pase a tener un tamaño diferente que el de la linea actual
+    // Si es una lista lo clonamos
+    if( currentParagraph.listMode ){
+
+        newParagraph.listMode = currentParagraph.listMode;
+        newLine.tabList       = [ 1 ]; // To Do -> Herencia de tabs
+
+        newLine.nodeList.unshift( $.extend( true, {}, currentParagraph.lineList[ 0 ].nodeList[ 0 ] ) );
+
+    }
+
     // Heredamos la altura de la línea
     newLine.spacing = currentLine.spacing;
 
