@@ -1722,18 +1722,23 @@ var handleEnter = function(){
     var movedLines;
 
     // Heredamos las propiedades del párrafo
-    newParagraph.aling            = currentParagraph.aling;
-    newParagraph.indentationLeft  = currentParagraph.indentationLeft;
-    newParagraph.indentationRight = currentParagraph.indentationRight;
+    newParagraph.aling                   = currentParagraph.aling;
+    newParagraph.indentationLeft         = currentParagraph.indentationLeft;
+    newParagraph.indentationRight        = currentParagraph.indentationRight;
+    newParagraph.indentationSpecialType  = currentParagraph.indentationSpecialType;
+    newParagraph.indentationSpecialValue = currentParagraph.indentationSpecialValue;
+    newParagraph.interline               = currentParagraph.interline;
+    newParagraph.width                   = currentParagraph.width;
 
     // To Do -> A tener en cuenta con el siguiente paso ( herencia de altura de la linea ), quizás el primer nodo pase a tener un tamaño diferente que el de la linea actual
     // Si es una lista lo clonamos
     if( currentParagraph.listMode ){
 
+        newLine.nodeList.unshift( $.extend( true, {}, currentParagraph.lineList[ 0 ].nodeList[ 0 ] ) );
+
         newParagraph.listMode = currentParagraph.listMode;
         newLine.tabList       = [ 1 ]; // To Do -> Herencia de tabs
-
-        newLine.nodeList.unshift( $.extend( true, {}, currentParagraph.lineList[ 0 ].nodeList[ 0 ] ) );
+        newLine.totalChars    = newLine.nodeList[ 0 ].string.length;
 
     }
 
@@ -1767,8 +1772,8 @@ var handleEnter = function(){
             newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
         }
 
-        newNode.width      = newNode.charList[ newNode.charList.length - 1 ];
-        newLine.totalChars = newNode.string.length;
+        newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
+        newLine.totalChars += newNode.string.length;
 
         // Eliminamos el contenido del nodo actual y actualizamos su tamaño
         currentNode.string     = currentNode.string.slice( 0, currentNodeCharId );
@@ -2581,8 +2586,6 @@ var setParagraphStyle = function( paragraph, key, value ){
 
         measureNode( paragraph, paragraph.lineList[ 0 ], 0, 0, newNode, 0, 0 );
 
-        console.table( paragraph.lineList );
-
         for( i = 0; i < paragraph.lineList.length; i++ ){
             paragraph.lineList[ i ].width -= value;
         }
@@ -3314,7 +3317,7 @@ var updateToolsLineStatus = function(){
         paragraphStyles = styles.paragraph;
 
     }else{
-        
+
         nodeStyles      = currentNode.style;
         paragraphStyles = currentParagraph.aling;
 
