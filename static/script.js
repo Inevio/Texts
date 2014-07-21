@@ -67,6 +67,9 @@ var usersActive   = {};
 var usersPosition = {};
 var usersEditing  = {};
 
+// Waiting variables
+var waitingPageUpdate = false;
+
 // Blink variables
 var blinkEnabled = false;
 var blinkTime    = 0;
@@ -382,6 +385,8 @@ var debugTimeEnd = function( name ){
 };
 
 var drawPages = function(){
+
+    waitingPageUpdate = false;
 
     checkCanvasPagesSize();
 
@@ -2052,6 +2057,7 @@ var newNode = function(){
 
     return {
 
+        blocked  : false,
         charList : [],
         height   : 0,
         string   : '',
@@ -2598,7 +2604,7 @@ var setParagraphStyle = function( paragraph, key, value ){
         paragraph[ key ] = value;
     }
 
-    drawPages();
+    updatePages();
 
     if( paragraph === currentParagraph && !currentRangeStart ){
 
@@ -3158,7 +3164,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
         currentNode = currentLine.nodeList[ currentNodeId ]; // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
 
-        drawPages();
+        updatePages();
         setRange( currentRangeStart, currentRangeEnd, true );
 
     }
@@ -3171,7 +3177,7 @@ var setRangeParagraphStyle = function( key, value ){
         setParagraphStyle( paragraph, key, value );
     });
 
-    drawPages();
+    updatePages();
     setRange( currentRangeStart, currentRangeEnd, true );
 
 };
@@ -3189,7 +3195,7 @@ var setSelectedLineStyle = function( key, value ){
         setLineStyle( currentParagraph, currentLine, key, value );
     }
 
-    drawPages();
+    updatePages();
 
 };
 
@@ -3236,7 +3242,7 @@ var start = function(){
     setCursor( 0, 0, 0, 0, 0, 0 );
     drawRuleLeft();
     drawRuleTop();
-    drawPages();
+    updatePages();
     updateToolsLineStatus();
 
     marginTopDown.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
@@ -3303,6 +3309,19 @@ var updateBlink = function(){
     }
 
     requestAnimationFrame( updateBlink );
+
+};
+
+var updatePages = function(){
+
+    if( waitingPageUpdate ){
+        return;
+    }
+
+    console.log('en cola');
+    waitingPageUpdate = true;
+
+    requestAnimationFrame( drawPages );
 
 };
 
@@ -3410,17 +3429,17 @@ input
     if( e.key && e.key.length === 1 ){
 
         handleChar( e.key );
-        drawPages();
+        updatePages();
 
     }else if( e.which === 8 ){
 
         handleBackspace();
-        drawPages();
+        updatePages();
 
     }else if( e.which === 13 ){
 
         handleEnter();
-        drawPages();
+        updatePages();
 
     }else if( e.which === 37 ){
         handleArrowLeft();
