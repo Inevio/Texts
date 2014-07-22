@@ -13,6 +13,7 @@ var CENTIMETER = 37.795275591;
 var DEBUG = false;
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
+var GAP = 20;
 var INDENTATION_NONE = 0;
 var INDENTATION_FIRSTLINE = 1;
 var INDENTATION_HANGING = 2;
@@ -31,7 +32,7 @@ var MARGIN_NORMAL = {
 var PAGE_A4 = {
 
     width  : 10 * CENTIMETER,
-    height : /*29.7*/ 10 * CENTIMETER
+    height : /*29.7*/ 6 * CENTIMETER
 
 };
 
@@ -471,14 +472,14 @@ var drawPages = function(){
 
         }
 
-        pageHeight            += 20;
+        pageHeight            += GAP;
         pageHeight            += Math.round( page.height );
-        currentDocumentHeight += 20;
+        currentDocumentHeight += GAP;
         currentDocumentHeight += Math.round( page.height );
 
         if( m + 1 < pageList.length ){
 
-            maxScrollTop += 20;
+            maxScrollTop += GAP;
             maxScrollTop += Math.round( page.height );
 
         }
@@ -2588,8 +2589,6 @@ var realocatePage = function( id ){
 
     }
 
-    console.table( pageList );
-
     return result;
 
 };
@@ -2824,7 +2823,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         for( i = 0; i < page; i++ ){
 
             positionAbsoluteY += pageList[ i ].height;
-            positionAbsoluteY += 20;
+            positionAbsoluteY += GAP;
 
         }
 
@@ -3600,7 +3599,7 @@ selections
         if( pageList[ pageId ].height + height < posY ){
 
             height += pageList[ pageId ].height;
-            height += 20; // Gap
+            height += GAP;
 
         }else{
             break;
@@ -3875,7 +3874,10 @@ selections
     for( pageId = 0; pageId < pageList.length; pageId++ ){
 
         if( pageList[ pageId ].height + height < posY ){
+
             height += pageList[ pageId ].height;
+            height += GAP;
+
         }else{
             break;
         }
