@@ -31,7 +31,7 @@ var MARGIN_NORMAL = {
 var PAGE_A4 = {
 
     width  : 10 * CENTIMETER,
-    height : 29.7 * CENTIMETER
+    height : /*29.7*/ 10 * CENTIMETER
 
 };
 
@@ -83,7 +83,13 @@ var selectedEnabled      = true;
 var verticalKeysEnabled  = false;
 var verticalKeysPosition = 0;
 
+// Scroll variables
+var scrollTop    = 0;
+var scrollLeft   = 0;
+var maxScrollTop = 0;
+
 // Current variables
+var currentDocumentHeight = 0;
 var currentPage           = null;
 var currentPageId         = null;
 var currentParagraph      = null;
@@ -388,67 +394,94 @@ var drawPages = function(){
 
     waitingPageUpdate = false;
 
+    var page       = null;
+    var paragraph  = null;
+    var line       = null;
+    var node       = null;
+    var pageHeight = 0.5;
+    var wHeritage  = 0;
+    var hHeritage  = 0;
+    var i, j, k, m;
+
     checkCanvasPagesSize();
 
     debugTime('draw');
 
+    // To Do -> El scroll podría estar más optimizado
+    currentDocumentHeight  = pageHeight;
+    maxScrollTop           = pageHeight;
+    pageHeight            -= parseInt( scrollTop, 10 );
+
     // To Do -> Soportar varias páginas
+    for( m = 0; m < pageList.length; m++ ){
 
-    // Draw the page
-    var page = pageList[ 0 ];
+        // Draw the page
+        page      = pageList[ m ];
+        hHeritage = 0;
 
-    ctx.beginPath();
-    ctx.rect( 0.5, 0.5, page.width, page.height );
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = '#cacaca';
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.rect( 0.5, pageHeight, page.width, page.height );
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#cacaca';
+        ctx.stroke();
 
-    // Draw the lines
-    var paragraph = null;
-    var line      = null;
-    var node      = null;
-    var wHeritage = 0;
-    var hHeritage = 0;
-    var i, j, k;
+        // Draw the lines
+        for( i = 0; i < page.paragraphList.length; i++ ){
 
-    for( i = 0; i < page.paragraphList.length; i++ ){
+            paragraph = page.paragraphList[ i ];
 
-        paragraph = page.paragraphList[ i ];
+            for( j = 0; j < paragraph.lineList.length; j++ ){
 
-        for( j = 0; j < paragraph.lineList.length; j++ ){
+                // To Do -> Gaps
+                // To Do -> Altura de línea
+                line = paragraph.lineList[ j ];
 
-            // To Do -> Gaps
-            // To Do -> Altura de línea
-            line = paragraph.lineList[ j ];
+                // To Do -> Optimizar, evitar que se renderice una línea vacía if( line.totalChars ){
+                if( line.totalChars ){
 
-            wHeritage = getLineOffset( line, paragraph );
+                    wHeritage = getLineOffset( line, paragraph );
 
-            // To Do -> Optimizar, evitar que se renderice una línea vacía if( line.totalChars ){
+                    for( k = 0; k < line.nodeList.length; k++ ){
 
-                for( k = 0; k < line.nodeList.length; k++ ){
+                        node          = line.nodeList[ k ];
+                        ctx.fillStyle = node.style.color;
 
-                    node          = line.nodeList[ k ];
-                    ctx.fillStyle = node.style.color;
+                        setCanvasTextStyle( node.style );
 
-                    setCanvasTextStyle( node.style );
+                        ctx.fillText(
 
-                    ctx.fillText(
+                            node.string,
+                            page.marginLeft + getLineIndentationLeft( j, paragraph ) + wHeritage,
+                            pageHeight + page.marginTop + line.height + hHeritage
 
-                        node.string,
-                        page.marginLeft + getLineIndentationLeft( j, paragraph ) + wHeritage,
-                        page.marginTop + line.height + hHeritage
+                        );
 
-                    );
+                        console.log( 'dibuja', node.string, page.marginLeft + getLineIndentationLeft( j, paragraph ) + wHeritage, pageHeight + page.marginTop + line.height + hHeritage );
 
-                    wHeritage += node.width;
+                        wHeritage += node.width;
 
+                    }
+
+                //}
                 }
 
-            //}
+                hHeritage += line.height * line.spacing;
 
-            hHeritage += line.height * line.spacing;
+            }
+
+        }
+
+        pageHeight            += 20;
+        pageHeight            += Math.round( page.height );
+        currentDocumentHeight += 20;
+        currentDocumentHeight += Math.round( page.height );
+
+        if( m + 1 < pageList.length ){
+
+            maxScrollTop += 20;
+            maxScrollTop += Math.round( page.height );
 
         }
 
@@ -1720,6 +1753,7 @@ var handleEnter = function(){
     // To Do -> Comprobar que entra en la página
 
     var i, maxSize;
+    var newPageId      = 0;
     var newParagraph   = createParagraph( currentPage );
     var newParagraphId = currentParagraphId + 1;
     var newLine        = newParagraph.lineList[ 0 ];
@@ -1855,8 +1889,21 @@ var handleEnter = function(){
 
     }
 
+    console.log( currentPageId );
+    var realocation = realocatePage( currentPageId );
+    console.log( currentPageId );
+
+    if( realocation ){
+
+        newPageId      = realocation.pageId;
+        newParagraphId = realocation.paragraphId;
+
+    }else{
+        newPageId = currentPageId;
+    }
+
     // Posicionamos el cursor
-    setCursor( currentPageId, newParagraphId, 0, 0, 0, 0 );
+    setCursor( newPageId, newParagraphId, 0, 0, 0, 0 );
     realocateLineInverse( 0, 0 );
     resetBlink();
 
@@ -2279,6 +2326,8 @@ var realocateLine = function( id, lineChar ){
         currentParagraph.height += maxSize * newLine.spacing;
         newLine.height           = maxSize;
 
+        realocatePage( currentPageId );
+
     }else{
 
         currentParagraph.height -= newLine.height * newLine.spacing;
@@ -2468,6 +2517,87 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
 };
 
+var realocatePage = function( id ){
+
+    var page        = pageList[ id ];
+    var height      = page.marginTop + page.marginBottom;
+    var overflow    = false;
+    var paragraphId = 0;
+
+    // Comprobamos si entran todos los párrafos
+    for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
+
+        if( page.height < height + page.paragraphList[ paragraphId ].height ){
+            overflow = true;
+            break;
+        }
+
+        height += page.paragraphList[ paragraphId ].height;
+        
+    }
+
+    if( !overflow ){
+        return;
+    }
+
+    var paragraph = page.paragraphList[ paragraphId ];
+    var lineId    = 0;
+    var result    = null;
+
+    // Comprobamos en que línea supera el tamaño
+    for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
+
+        if( page.height < height + paragraph.lineList[ lineId ].height ){
+            break;
+        }
+
+    }
+
+    // To Do -> Que coja una página si ya existía previamente
+
+    var newPage = createPage(
+
+        {
+            width  : page.width,
+            height : page.height
+        },
+
+        {
+            top    : page.marginTop,
+            right  : page.marginRight,
+            bottom : page.marginBottom,
+            left   : page.marginLeft
+        }
+
+    );
+
+    pageList.push( newPage );
+
+    // Si la línea es 0 el movimiento es sencillo
+    if( lineId === 0 ){
+
+        newPage.paragraphList = page.paragraphList.slice( paragraphId );
+        page.paragraphList    = page.paragraphList.slice( 0, paragraphId );
+
+        result = {
+
+            pageId      : id + 1,
+            paragraphId : 0,
+            lineId      : 0
+
+        };
+
+    // Si la línea es distinta de 0 el movimiento requiere partir párrafos
+    }else{
+
+    }
+
+    console.table( pageList );
+
+    return result;
+
+};
+
 var resetBlink = function(){
 
     blinkTime    = Date.now().
@@ -2638,6 +2768,8 @@ var setCanvasTextStyle = function( style ){
 
 var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force ){
 
+    console.log( page, paragraph, line, node );
+
     currentRangeStart     = null;
     currentRangeEnd       = null;
     currentRangeStartHash = null;
@@ -2657,8 +2789,11 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
     var i;
 
+    console.log('pasa');
+
     // Actualizamos solo los campos que sean necesarios
     if( force || currentPageId !== page ){
+        console.log('pasa 2', pageList );
         currentPage = pageList[ page ];
     }
 
@@ -2696,8 +2831,10 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
         // Tamaño de cada página
         for( i = 0; i < page; i++ ){
+
             positionAbsoluteY += pageList[ i ].height;
-            // To Do -> Gaps entre páginas
+            positionAbsoluteY += 20;
+            
         }
 
         // Márgen superior
@@ -2706,13 +2843,11 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         // Tamaño de cada párrafo
         for( i = 0; i < paragraph; i++ ){
             positionAbsoluteY += currentPage.paragraphList[ i ].height;
-            // To Do -> Gaps entre páginas
         }
 
         // Tamaño de cada línea
         for( i = 0; i < line; i++ ){
             positionAbsoluteY += currentParagraph.lineList[ i ].height * currentParagraph.lineList[ i ].spacing;
-            // To Do -> Gaps entre páginas
         }
 
     }
@@ -2761,6 +2896,8 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     ){
         clearTemporalStyle();
     }
+
+    console.log( currentPage, currentParagraph, currentLine, currentNode );
     
     currentPageId      = page;
     currentParagraphId = paragraph;
@@ -3291,7 +3428,7 @@ var updateBlink = function(){
         blinkCurrent = newCurrent;
 
         checkCanvasSelectSize();
-        ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY, 10 ) + currentLine.height - currentNode.height, 1, currentNode.height );
+        ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ), 1, currentNode.height );
         ctxSel.fill();
 
         debugTimeEnd('cursor on');
@@ -3318,7 +3455,6 @@ var updatePages = function(){
         return;
     }
 
-    console.log('en cola');
     waitingPageUpdate = true;
 
     requestAnimationFrame( drawPages );
@@ -3868,6 +4004,31 @@ selections
     selectionEnabled = false;
 
     updateToolsLineStatus();
+
+})
+
+.on( 'mousewheel', function( e, delta, x, y ){
+
+    if( currentDocumentHeight <= canvasPages.height ){
+        return;
+    }
+
+    var originalScrollTop = scrollTop;
+
+    scrollTop -= y * 30;
+
+    if( scrollTop < 0 ){
+        scrollTop = 0;
+    }else if( scrollTop > maxScrollTop ){
+        scrollTop = maxScrollTop;
+    }
+
+    if( originalScrollTop === scrollTop ){
+        return;
+    }
+
+    updatePages();
+    resetBlink();
 
 });
 
