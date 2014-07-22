@@ -3608,7 +3608,11 @@ selections
 
     }
 
-    page = pageList[ pageId ];
+    if( pageList[ pageId ] ){
+        page = pageList[ pageId ];
+    }else{
+        page = pageList[ --pageId ];
+    }
 
     // Tenemos en cuenta el margen superior
     height += page.marginTop;
@@ -3624,7 +3628,11 @@ selections
 
     }
 
-    paragraph = page.paragraphList[ paragraphId ];
+    if( page.paragraphList[ paragraphId ] ){
+        paragraph = page.paragraphList[ paragraphId ];
+    }else{
+        paragraph = page.paragraphList[ --paragraphId ];
+    }
 
     // Buscamos la línea
     for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
@@ -3637,7 +3645,11 @@ selections
 
     }
 
-    line = paragraph.lineList[ lineId ];
+    if( paragraph.lineList[ lineId ] ){
+        line = paragraph.lineList[ lineId ];
+    }else{
+        line = paragraph.lineList[ --lineId ];
+    }
 
     // Buscamos la posición horizontal
     var width = 0;
@@ -3857,7 +3869,7 @@ selections
     var posY   = e.pageY - offset.top;
 
     // Buscamos la posición vertical
-    var height = 0;
+    var height = -scrollTop;
 
     // Buscamos la página
     for( pageId = 0; pageId < pageList.length; pageId++ ){
@@ -3870,7 +3882,13 @@ selections
 
     }
 
-    page = pageList[ pageId ];
+    console.log( 'pageId', pageId );
+
+    if( pageList[ pageId ] ){
+        page = pageList[ pageId ];
+    }else{
+        page = pageList[ --pageId ];
+    }
 
     // Tenemos en cuenta el margen superior
     height += page.marginTop;
@@ -3886,7 +3904,11 @@ selections
 
     }
 
-    paragraph = page.paragraphList[ paragraphId ];
+    if( page.paragraphList[ paragraphId ] ){
+        paragraph = page.paragraphList[ paragraphId ];
+    }else{
+        paragraph = page.paragraphList[ --paragraphId ];
+    }
 
     // Buscamos la línea
     for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
@@ -3899,7 +3921,11 @@ selections
 
     }
 
-    line = paragraph.lineList[ lineId ];
+    if( paragraph.lineList[ lineId ] ){
+        line = paragraph.lineList[ lineId ];
+    }else{
+        line = paragraph.lineList[ --lineId ];
+    }
 
     // Buscamos la posición horizontal
     var width = 0;
