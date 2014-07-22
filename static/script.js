@@ -2596,7 +2596,7 @@ var realocatePage = function( id ){
 
 var resetBlink = function(){
 
-    blinkTime    = Date.now().
+    blinkTime    = Date.now();
     blinkStatus  = 0;
     blinkCurrent = false;
 
