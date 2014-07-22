@@ -458,8 +458,6 @@ var drawPages = function(){
 
                         );
 
-                        console.log( 'dibuja', node.string, page.marginLeft + getLineIndentationLeft( j, paragraph ) + wHeritage, pageHeight + page.marginTop + line.height + hHeritage );
-
                         wHeritage += node.width;
 
                     }
@@ -1889,9 +1887,7 @@ var handleEnter = function(){
 
     }
 
-    console.log( currentPageId );
     var realocation = realocatePage( currentPageId );
-    console.log( currentPageId );
 
     if( realocation ){
 
@@ -2768,8 +2764,6 @@ var setCanvasTextStyle = function( style ){
 
 var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force ){
 
-    console.log( page, paragraph, line, node );
-
     currentRangeStart     = null;
     currentRangeEnd       = null;
     currentRangeStartHash = null;
@@ -2789,11 +2783,8 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
     var i;
 
-    console.log('pasa');
-
     // Actualizamos solo los campos que sean necesarios
     if( force || currentPageId !== page ){
-        console.log('pasa 2', pageList );
         currentPage = pageList[ page ];
     }
 
@@ -2834,7 +2825,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
             positionAbsoluteY += pageList[ i ].height;
             positionAbsoluteY += 20;
-            
+
         }
 
         // Márgen superior
@@ -2896,8 +2887,6 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     ){
         clearTemporalStyle();
     }
-
-    console.log( currentPage, currentParagraph, currentLine, currentNode );
     
     currentPageId      = page;
     currentParagraphId = paragraph;
@@ -3603,13 +3592,16 @@ selections
     var posY   = e.pageY - offset.top;
 
     // Buscamos la posición vertical
-    var height = 0;
+    var height = -scrollTop;
 
     // Buscamos la página
     for( pageId = 0; pageId < pageList.length; pageId++ ){
 
         if( pageList[ pageId ].height + height < posY ){
+
             height += pageList[ pageId ].height;
+            height += 20; // Gap
+
         }else{
             break;
         }
