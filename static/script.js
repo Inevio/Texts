@@ -1496,6 +1496,7 @@ var handleBackspace = function(){
             // Si hay contenido fusionamos los párrafos
             var prevParagraph   = currentPage.paragraphList[ currentParagraphId - 1 ];
             var mergeParagraphs = currentLine.totalChars > 0;
+            var pageId          = currentPageId;
             var mergePreLastLine;
 
             if( mergeParagraphs ){
@@ -1555,6 +1556,8 @@ var handleBackspace = function(){
                 currentNodeCharId = currentNode.string.length;
 
             }
+
+            realocatePageInverse( pageId );
 
         }else{
 
@@ -2680,7 +2683,17 @@ var realocatePage = function( id ){
 };
 
 var realocatePageInverse = function( id ){
-    // To Do
+
+    var page     = pageList[ id ];
+    var prevPage = pageList[ id + 1 ];
+
+    // Si no hay párrafos en la página la eliminamos (salvo la primera que no puede eliminarse)
+    if( id && !page.paragraphList.length ){
+        pageList = pageList.slice( 0, id ).concat( pageList.slice( id + 1 ) );
+    }
+
+    // To Do -> Realocate de líneas
+    
 };
 
 var resetBlink = function(){
