@@ -1912,9 +1912,10 @@ var handleEnter = function(){
 
     }
 
-    var realocation = realocatePage( currentPageId );
+    var lastLineInPage = currentPage.paragraphList.length - 2 === currentParagraphId && currentParagraph.lineList.length - 1 === currentLineId;
+    var realocation    = realocatePage( currentPageId );
 
-    if( realocation ){
+    if( realocation && lastLineInPage ){
 
         newPageId      = realocation.pageId;
         newParagraphId = realocation.paragraphId;
@@ -2574,30 +2575,38 @@ var realocatePage = function( id ){
 
     }
 
-    // To Do -> Que coja una página si ya existía previamente
+    var newPage;
 
-    var newPage = createPage(
+    if( pageList[ id + 1 ] ){
+        newPage = pageList[ id + 1 ];
+    }else{
 
-        {
-            width  : page.width,
-            height : page.height
-        },
+        newPage = createPage(
 
-        {
-            top    : page.marginTop,
-            right  : page.marginRight,
-            bottom : page.marginBottom,
-            left   : page.marginLeft
-        }
+            {
+                width  : page.width,
+                height : page.height
+            },
 
-    );
+            {
+                top    : page.marginTop,
+                right  : page.marginRight,
+                bottom : page.marginBottom,
+                left   : page.marginLeft
+            }
 
-    pageList.push( newPage );
+        );
+
+        newPage.paragraphList = [];
+
+        pageList.push( newPage );
+
+    }
 
     // Si la línea es 0 el movimiento es sencillo
     if( lineId === 0 ){
 
-        newPage.paragraphList = page.paragraphList.slice( paragraphId );
+        newPage.paragraphList = page.paragraphList.slice( paragraphId ).concat( newPage.paragraphList );
         page.paragraphList    = page.paragraphList.slice( 0, paragraphId );
 
         result = {
@@ -2612,6 +2621,8 @@ var realocatePage = function( id ){
     }else{
 
     }
+
+    realocatePage( id + 1 );
 
     return result;
 
