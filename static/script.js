@@ -69,7 +69,8 @@ var usersPosition = {};
 var usersEditing  = {};
 
 // Waiting variables
-var waitingPageUpdate = false;
+var waitingPageUpdate  = false;
+var waitingRangeUpdate = false;
 
 // Blink variables
 var blinkEnabled = false;
@@ -472,16 +473,11 @@ var drawPages = function(){
 
         }
 
-        pageHeight            += GAP;
-        pageHeight            += Math.round( page.height );
-        currentDocumentHeight += GAP;
-        currentDocumentHeight += Math.round( page.height );
+        pageHeight            += Math.round( page.height ) + GAP;
+        currentDocumentHeight += Math.round( page.height ) + GAP;
 
         if( m + 1 < pageList.length ){
-
-            maxScrollTop += GAP;
-            maxScrollTop += Math.round( page.height );
-
+            maxScrollTop += Math.round( page.height ) + GAP;
         }
 
     }
@@ -490,50 +486,50 @@ var drawPages = function(){
 
 };
 
-var drawRange = function( start, end ){
+var drawRange = function(){
+
+    waitingRangeUpdate = false;
 
     // Calculamos la altura de inicio
     var startHeight = 0;
     var i;
 
     // Calculamos la posición vertical de la página de inicio
-    for( i = 0; i < start.pageId; i++ ){
-        startHeight += pageList[ i ].height; // To Do -> Gap
+    for( i = 0; i < currentRangeStart.pageId; i++ ){
+        startHeight += pageList[ i ].height + GAP;
     }
 
-    // To Do -> Gap
-
     // Tenemos en cuenta el margen superior
-    startHeight += start.page.marginTop;
+    startHeight += currentRangeStart.page.marginTop;
 
     // Calculamos la posición vertical del párrafo de inicio
-    for( i = 0; i < start.paragraphId; i++ ){
-        startHeight += start.page.paragraphList[ i ].height;
+    for( i = 0; i < currentRangeStart.paragraphId; i++ ){
+        startHeight += currentRangeStart.page.paragraphList[ i ].height;
     }
 
     // Calculamos la posición vertical de la linea de inicio
-    for( i = 0; i < start.lineId; i++ ){
-        startHeight += start.paragraph.lineList[ i ].height * start.paragraph.lineList[ i ].spacing;
+    for( i = 0; i < currentRangeStart.lineId; i++ ){
+        startHeight += currentRangeStart.paragraph.lineList[ i ].height * currentRangeStart.paragraph.lineList[ i ].spacing;
     }
 
     // Calculamos el ancho de inicio
     var startWidth = 0;
 
     // Margen izquierdo
-    startWidth += start.page.marginLeft;
+    startWidth += currentRangeStart.page.marginLeft;
 
     // Margen izquierdo del párrafo
-    startWidth += getLineIndentationLeft( start.lineId, start.paragraph );
+    startWidth += getLineIndentationLeft( currentRangeStart.lineId, currentRangeStart.paragraph );
 
     // Alineación del párrafo
-    startWidth += getLineOffset( start.line, start.paragraph );
+    startWidth += getLineOffset( currentRangeStart.line, currentRangeStart.paragraph );
 
     // Calculamos la posición del caracter
-    for( i = 0; i < start.nodeId; i++ ){
-        startWidth += start.line.nodeList[ i ].width;
+    for( i = 0; i < currentRangeStart.nodeId; i++ ){
+        startWidth += currentRangeStart.line.nodeList[ i ].width;
     }
 
-    startWidth += start.node.charList[ start.nodeChar - 1 ] || 0;
+    startWidth += currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0;
 
     // Procedimiento de coloreado
     var width  = 0;
@@ -541,9 +537,9 @@ var drawRange = function( start, end ){
 
     // Si principio y fin están en la misma linea
     if(
-        start.pageId === end.pageId &&
-        start.paragraphId === end.paragraphId &&
-        start.lineId === end.lineId
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId
     ){
 
         checkCanvasSelectSize();
@@ -552,26 +548,26 @@ var drawRange = function( start, end ){
         ctxSel.fillStyle   = '#7EBE30';
 
         // Si el nodo inicial es el mismo que el final
-        if( start.nodeId === end.nodeId ){
-            width = end.node.charList[ end.nodeChar - 1 ] - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+        if( currentRangeStart.nodeId === currentRangeEnd.nodeId ){
+            width = currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
         }else{
 
-            width += start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+            width += currentRangeStart.node.width - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
             
-            for( i = start.nodeId + 1; i < end.nodeId; i++ ){
-                width += start.line.nodeList[ i ].width;
+            for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+                width += currentRangeStart.line.nodeList[ i ].width;
             }
 
-            width += end.node.charList[ end.nodeChar - 1 ] || 0;
+            width += currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] || 0;
             
         }
 
         ctxSel.rect(
 
             startWidth,
-            startHeight,
+            startHeight - scrollTop,
             width,
-            start.line.height * start.line.spacing
+            currentRangeStart.line.height * currentRangeStart.line.spacing
 
         );
 
@@ -588,28 +584,48 @@ var drawRange = function( start, end ){
         ctxSel.fillStyle = '#7EBE30';
 
         // Coloreamos la linea del principio de forma parcial
-        width = start.node.width - ( start.node.charList[ start.nodeChar - 1 ] || 0 );
+        width = currentRangeStart.node.width - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
             
-        for( i = start.nodeId + 1; i < start.line.nodeList.length; i++ ){
-            width += start.line.nodeList[ i ].width;
+        for( i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
+            width += currentRangeStart.line.nodeList[ i ].width;
         }
 
         ctxSel.beginPath();
         ctxSel.rect(
 
             startWidth,
-            startHeight,
+            parseInt( startHeight - scrollTop, 10 ),
             width,
-            start.line.height * start.line.spacing
+            currentRangeStart.line.height * currentRangeStart.line.spacing
 
         );
 
         ctxSel.fill();
 
-        startHeight += start.line.height * start.line.spacing;
+        startHeight += currentRangeStart.line.height * currentRangeStart.line.spacing;
+
+        var currentPageId  = currentRangeStart.pageId;
+        var heightHeritage = 0;
 
         // Coloreamos las lineas intermedias de forma completa
-        mapRangeLines( false, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
+        mapRangeLines( true, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
+
+            // To Do -> Esto es un workaround porque el false no funciona como debería
+            // To Do -> Esta podría ser una solución mejor para evitar los límites en el mapRangeLines
+            if(
+                ( pageId === currentRangeStart.pageId && paragraphId === currentRangeStart.paragraphId && lineId === currentRangeStart.lineId ) ||
+                ( pageId === currentRangeEnd.pageId && paragraphId === currentRangeEnd.paragraphId && lineId === currentRangeEnd.lineId )
+            ){
+                return;
+            }
+
+            if( currentPageId !== pageId ){
+
+                heightHeritage += pageList[ currentPageId ].height + GAP;
+                currentPageId   = pageId;
+                startHeight     = page.marginTop;
+
+            }
 
             offset = page.marginLeft + getLineIndentationLeft( lineId, paragraph ) + getLineOffset( line, paragraph );
             width  = 0;
@@ -624,7 +640,7 @@ var drawRange = function( start, end ){
             ctxSel.rect(
 
                 offset,
-                startHeight,
+                parseInt( heightHeritage + startHeight - scrollTop, 10 ),
                 width,
                 line.height * line.spacing
 
@@ -636,24 +652,32 @@ var drawRange = function( start, end ){
 
         });
 
+        if( currentPageId !== currentRangeEnd.pageId ){
+
+            heightHeritage += pageList[ currentPageId ].height + GAP;
+            currentPageId   = currentRangeEnd.lineId;
+            startHeight     = currentRangeEnd.page.marginTop;
+
+        }
+
         // Coloreamos la línea del final de forma parcial
         width  = 0;
-        offset = end.page.marginLeft + getLineIndentationLeft( end.lineId, end.paragraph ) + getLineOffset( end.line, end.paragraph );
+        offset = currentRangeEnd.page.marginLeft + getLineIndentationLeft( currentRangeEnd.lineId, currentRangeEnd.paragraph ) + getLineOffset( currentRangeEnd.line, currentRangeEnd.paragraph );
 
-        for( i = 0 + 1; i < end.nodeId; i++ ){
-            width += end.line.nodeList[ i ].width;
+        for( i = 0 + 1; i < currentRangeEnd.nodeId; i++ ){
+            width += currentRangeEnd.line.nodeList[ i ].width;
         }
 
         // To Do -> Que debe pasar si es se coge el fallback 0?
-        width += end.node.charList[ end.nodeChar - 1 ] || 0;
+        width += currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] || 0;
 
         ctxSel.beginPath();
         ctxSel.rect(
 
             offset,
-            startHeight,
+            parseInt( heightHeritage + startHeight - scrollTop, 10 ),
             width,
-            end.line.height * end.line.spacing
+            currentRangeEnd.line.height * currentRangeEnd.line.spacing
 
         );
 
@@ -2821,10 +2845,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
         // Tamaño de cada página
         for( i = 0; i < page; i++ ){
-
-            positionAbsoluteY += pageList[ i ].height;
-            positionAbsoluteY += GAP;
-
+            positionAbsoluteY += pageList[ i ].height + GAP;
         }
 
         // Márgen superior
@@ -2964,7 +2985,7 @@ var setRange = function( start, end, force ){
     currentRangeStartHash = startHash;
     currentRangeEndHash   = endHash;
 
-    drawRange( start, end );
+    updateRange();
 
 };
 
@@ -3313,7 +3334,7 @@ var setSelectedLineStyle = function( key, value ){
     if( currentRangeStart ){
 
         setRangeLineStyle( key, value );
-        drawRange( currentRangeStart, currentRangeEnd );
+        updateRange();
 
     // Principio de un párrafo vacío
     }else{
@@ -3446,6 +3467,18 @@ var updatePages = function(){
     waitingPageUpdate = true;
 
     requestAnimationFrame( drawPages );
+
+};
+
+var updateRange = function(){
+
+    if( waitingRangeUpdate ){
+        return;
+    }
+
+    waitingRangeUpdate = true;
+
+    requestAnimationFrame( drawRange );
 
 };
 
@@ -3596,11 +3629,8 @@ selections
     // Buscamos la página
     for( pageId = 0; pageId < pageList.length; pageId++ ){
 
-        if( pageList[ pageId ].height + height < posY ){
-
-            height += pageList[ pageId ].height;
-            height += GAP;
-
+        if( pageList[ pageId ].height + GAP + height < posY ){
+            height += pageList[ pageId ].height + GAP;
         }else{
             break;
         }
@@ -3873,18 +3903,13 @@ selections
     // Buscamos la página
     for( pageId = 0; pageId < pageList.length; pageId++ ){
 
-        if( pageList[ pageId ].height + height < posY ){
-
-            height += pageList[ pageId ].height;
-            height += GAP;
-
+        if( pageList[ pageId ].height + GAP + height < posY ){
+            height += pageList[ pageId ].height + GAP;
         }else{
             break;
         }
 
     }
-
-    console.log( 'pageId', pageId );
 
     if( pageList[ pageId ] ){
         page = pageList[ pageId ];
@@ -4048,7 +4073,12 @@ selections
     }
 
     updatePages();
-    resetBlink();
+
+    if( currentRangeStart ){
+        updateRange();
+    }else{
+        resetBlink();
+    }
 
 });
 
