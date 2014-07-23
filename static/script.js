@@ -39,6 +39,7 @@ var PAGE_A4 = {
 // DOM variables
 var win            = $(this);
 var header         = $('.wz-ui-header');
+var saveButton     = $('.option-save');
 var toolsLine      = $('.tools-line');
 var toolsList      = $('.toolbar-list');
 var pages          = $('.pages');
@@ -91,6 +92,7 @@ var scrollLeft   = 0;
 var maxScrollTop = 0;
 
 // Current variables
+var currentOpenFile       = null;
 var currentDocumentHeight = 0;
 var currentPage           = null;
 var currentPageId         = null;
@@ -279,6 +281,23 @@ var compareNodeStyles = function( first, second ){
     }
 
     return Object.keys( secondStyle ).length === 0;
+
+};
+
+var createDocument = function(){
+
+    var name = Math.random();
+
+    wz.fs.create( name, 'application/texts', 'root', JSON.stringify( pageList ), function( error, structure ){
+
+        if( error ){
+            alert( error );
+            return;
+        }
+
+        currentOpenFile = structure;
+
+    });
 
 };
 
@@ -2208,6 +2227,28 @@ var normalizeLine = function( line ){
 
 };
 
+var openFile = function( structure ){
+
+    if( structure.mime === 'application/texts' ){
+
+        structure.read( function( error, data ){
+
+            // Asociamos todos los datos del fichero con sus variables correspondientes
+            currentOpenFile = structure;
+            pageList        = wz.tool.decodeJSON( data );
+
+            start();
+
+        });
+
+    }else{
+        alert( 'FILE FORMAT NOT RECOGNIZED' );
+    }
+    
+};
+
+
+
 var realocateLine = function( id, lineChar ){
 
     var line    = currentParagraph.lineList[ id ];
@@ -2654,6 +2695,19 @@ var resetBlink = function(){
         updateBlink();
 
     }
+
+};
+
+var saveDocument = function(){
+
+    currentOpenFile.write( JSON.stringify( pageList ), function( error ){
+
+        if( error ){
+            alert( 'Error: ' + error );
+            return;
+        }
+
+    });
 
 };
 
@@ -3400,7 +3454,10 @@ var setSelectedParagraphsStyle = function( key, value ){
 var start = function(){
 
     input.focus();
-    pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
+
+    if( !currentOpenFile ){
+        pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
+    }
 
     var paragraph = pageList[ 0 ].paragraphList[ 0 ];
     var line      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ];
@@ -3605,8 +3662,26 @@ var updateToolsLineStatus = function(){
 };
 
 // Events
-input
-.on( 'keydown', function(e){
+win.on( 'app-param', function( e, params ){
+
+    // To Do -> Comprobar que params no va vacio
+    if( params && params.command === 'openFile' ){
+        openFile( params.data );
+    }
+
+});
+
+saveButton.on( 'click', function(){
+    
+    if( currentOpenFile ){
+        saveDocument();
+    }else{
+        createDocument();
+    }
+
+});
+
+input.on( 'keydown', function(e){
 
     if( e.key && e.key.length === 1 ){
 
@@ -4212,4 +4287,7 @@ toolsList.on( 'click', 'li', function(){
 });
 
 // Start
-start();
+// Start
+if( !params ){
+    start();
+}
