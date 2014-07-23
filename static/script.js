@@ -1488,8 +1488,18 @@ var handleBackspace = function(){
             }
 
             currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
-            currentParagraphId        = currentParagraphId - 1;
-            currentParagraph          = currentPage.paragraphList[ currentParagraphId ];
+
+            if( currentParagraphId - 1 >= 0 ){
+                currentParagraphId = currentParagraphId - 1;
+            }else{
+
+                currentPageId      = currentPageId - 1;
+                currentPage        = pageList[ currentPageId ];
+                currentParagraphId = currentPage.paragraphList.length - 1;
+                
+            }
+
+            currentParagraph = currentPage.paragraphList[ currentParagraphId ];
 
             if( mergeParagraphs ){
 
@@ -2626,6 +2636,10 @@ var realocatePage = function( id ){
 
     return result;
 
+};
+
+var realocatePageInverse = function( id ){
+    // To Do
 };
 
 var resetBlink = function(){
