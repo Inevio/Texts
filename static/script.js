@@ -1,4 +1,7 @@
 /*global $:true */
+/*global wz:true*/
+/*global alert:true*/
+/*global params:true*/
 /*global console:true*/
 /*global requestAnimationFrame:true*/
 
@@ -10,6 +13,10 @@ var ALING_CENTER = 1;
 var ALING_RIGHT = 2;
 var ALING_JUSTIFY = 3;
 var CENTIMETER = 37.795275591;
+var CMD_POSITION = 0;
+var CMD_NEWCHAR = 1;
+var CMD_STYLE_MARGIN = 2;
+var CMD_STYLE_LISTBULLET = 3;
 var DEBUG = false;
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
@@ -193,6 +200,83 @@ setInterval( function(){
     //console.log( refrescos + ' fps' );
     refrescos = 0;
 }, 1000 );
+
+var activeRealTime = function(){
+
+    if( !currentOpenFile ){
+        return [];
+    }
+
+    realtime = currentOpenFile.realtime();
+
+    realtime.connect(function( error, firstConnection){
+        console.log( error, 'connected', 'firstConnection', firstConnection );
+    });
+
+    realtime.on( 'message', function( info, data ){
+
+        if( info.selfClient ){
+            return;
+        }
+
+        console.log( 'El usuario', info.sender, ' está editando', data );
+
+        var page, paragraph, line, node;
+
+        if( data.cmd === CMD_NEWCHAR ){
+
+            page      = pageList[ data.data[ 0 ] ];
+            paragraph = page.paragraphList[ data.data[ 1 ] ];
+            line      = paragraph.lineList[ data.data[ 2 ] ];
+            node      = line.nodeList[ data.data[ 3 ] ];
+
+            handleRemoteChar( data.data[ 0 ], page, data.data[ 1 ], paragraph, data.data[ 2 ], line, data.data[ 3 ], node, data.data[ 4 ], data.data[ 5 ] );
+
+        }else if( data.cmd === CMD_STYLE_LISTBULLET ){
+
+            page      = pageList[ data.data[ 0 ] ];
+            paragraph = page.paragraphList[ data.data[ 1 ] ];
+
+            setParagraphStyle( data.data[ 0 ], page, data.data[ 1 ], paragraph, 'listBullet', null, true );
+
+        }
+
+        updateRemoteUserPosition( info.sender, data.pos );
+
+        return;
+
+        /*
+        if( data.cmd === 'enableEditionMode' ){
+
+            //usersPosition[ info.sender ] = data.cell.x + '-' + data.cell.y;
+            usersEditing[ data.cell.x + '-' + data.cell.y ] = info.sender;
+
+            draw();
+
+        }else if( data.cmd === 'disableEditionMode' ){
+
+            if( data.cell.value ){
+                cells[ data.cell.x + '-' + data.cell.y ] = data.cell.value;
+            }else{
+                delete cells[ data.cell.x + '-' + data.cell.y ];
+            }
+
+            delete usersEditing[ data.cell.x + '-' + data.cell.y ];
+
+            draw();
+
+        }
+        */
+
+        console.log( 'Editando ', usersEditing );
+
+    });
+
+    realtime.on( 'userConnect', function( info ){
+        console.log( info );
+    });
+
+};
 
 var addTemporalStyle = function( key, value ){
 
@@ -600,7 +684,7 @@ var drawRange = function(){
         checkCanvasSelectSize();
 
         ctxSel.globalAlpha = 0.3;
-        ctxSel.fillStyle = '#7EBE30';
+        ctxSel.fillStyle   = '#7EBE30';
 
         // Coloreamos la linea del principio de forma parcial
         width = currentRangeStart.node.width - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
@@ -1190,6 +1274,13 @@ var handleArrowDown = function(){
     resetBlink();
     clearTemporalStyle();
 
+    realtime.send({
+
+        cmd : CMD_POSITION,
+        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
+
 };
 
 var handleArrowLeft = function(){
@@ -1282,6 +1373,13 @@ var handleArrowLeft = function(){
     resetBlink();
     clearTemporalStyle();
 
+    realtime.send({
+
+        cmd : CMD_POSITION,
+        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        
+    });
+
 };
 
 var handleArrowRight = function(){
@@ -1373,6 +1471,13 @@ var handleArrowRight = function(){
 
     resetBlink();
     clearTemporalStyle();
+
+    realtime.send({
+
+        cmd : CMD_POSITION,
+        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        
+    });
 
 };
 
@@ -1470,6 +1575,13 @@ var handleArrowUp = function(){
     setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
     resetBlink();
     clearTemporalStyle();
+
+    realtime.send({
+
+        cmd : CMD_POSITION,
+        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        
+    });
 
 };
 
@@ -1799,6 +1911,14 @@ var handleChar = function( newChar ){
 
     resetBlink();
 
+    realtime.send({
+        
+        cmd  : CMD_NEWCHAR,
+        data : [ currentPageId, currentParagraphId, currentLineId, currentNodeId, currentNodeCharId - 1, newChar ],
+        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
+
 };
 
 var handleEnter = function(){
@@ -1960,6 +2080,16 @@ var handleEnter = function(){
     setCursor( newPageId, newParagraphId, 0, 0, 0, 0 );
     realocateLineInverse( 0, 0 );
     resetBlink();
+
+};
+
+var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, line, nodeId, node, nodeChar, newChar ){
+
+    node.string = node.string.slice( 0, nodeChar ) + newChar + node.string.slice( nodeChar );
+
+    measureNode( paragraph, line, lineId, null, node, nodeId, nodeChar );
+
+    updatePages();
 
 };
 
@@ -2249,8 +2379,6 @@ var openFile = function( structure ){
     }
     
 };
-
-
 
 var realocateLine = function( id, lineChar ){
 
@@ -2787,7 +2915,7 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
 
 };
 
-var setParagraphStyle = function( paragraph, key, value ){
+var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, value, stopPropagation ){
 
     var i;
 
@@ -2812,11 +2940,23 @@ var setParagraphStyle = function( paragraph, key, value ){
 
     }else if( key === 'listBullet' ){
 
+        if( !stopPropagation ){
+
+            realtime.send({
+
+                cmd  : CMD_STYLE_LISTBULLET,
+                data : [ pageId, paragraphId ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
+        }
+
         value = 0.63 * CENTIMETER;
 
         var newNode = createNode( paragraph.lineList[ 0 ] );
 
-        setParagraphStyle( paragraph, 'indentationLeftAdd', value );
+        setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value );
         paragraph.lineList[ 0 ].nodeList.unshift( newNode );
 
         paragraph.listMode                  = LIST_BULLET;
@@ -3412,7 +3552,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 var setRangeParagraphStyle = function( key, value ){
     
     mapRangeParagraphs( currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph ){
-        setParagraphStyle( paragraph, key, value );
+        setParagraphStyle( pageId, page, paragraphId, paragraph, key, value );
     });
 
     updatePages();
@@ -3459,7 +3599,7 @@ var setSelectedParagraphsStyle = function( key, value ){
     if( currentRangeStart ){
         setRangeParagraphStyle( key, value );
     }else{
-        setParagraphStyle( currentParagraph, key, value );
+        setParagraphStyle( currentPageId, currentPage, currentParagraphId, currentParagraph, key, value );
     }
 
 };
@@ -3485,6 +3625,7 @@ var start = function(){
     drawRuleTop();
     updatePages();
     updateToolsLineStatus();
+    activeRealTime();
 
     marginTopDown.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     marginTopUp.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
@@ -3529,11 +3670,51 @@ var updateBlink = function(){
 
         debugTime('cursor on');
 
-        blinkCurrent = newCurrent;
-
         checkCanvasSelectSize();
-        ctxSel.rect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ), 1, currentNode.height );
-        ctxSel.fill();
+
+        // Los cursores remotos deben dibujarse antes para estar por devahi del actual
+        for( var i in usersPosition ){
+
+            ctxSel.fillStyle = '#9575cd';
+            ctxSel.font      = '11px Lato';
+
+            // Cursor
+            ctxSel.fillRect(
+
+                parseInt( usersPosition[ i ][ 0 ], 10 ),
+                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ),
+                2,
+                usersPosition[ i ][ 3 ]
+
+            );
+
+            // Fondo del nombre
+            ctxSel.fillRect(
+
+                parseInt( usersPosition[ i ][ 0 ], 10 ),
+                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 - 11, // 2 por la separación respecto al cursor y 11 de la fuente
+                ctxSel.measureText( i ).width + 8, // 4 y 4 de margenes laterales
+                14
+
+            );
+            
+            // Texto del nombre
+            ctxSel.fillStyle = '#fff';
+
+            ctxSel.fillText(
+
+                i,
+                parseInt( usersPosition[ i ][ 0 ], 10 ) + 4, // 4 del margen lateral izquierdo
+                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 // 2 por la separación respecto al cursor
+
+            );
+            
+        }
+
+        blinkCurrent     = newCurrent;
+        ctxSel.fillStyle = '#000';
+
+        ctxSel.fillRect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ), 1, currentNode.height );
 
         debugTimeEnd('cursor on');
 
@@ -3575,6 +3756,10 @@ var updateRange = function(){
 
     requestAnimationFrame( drawRange );
 
+};
+
+var updateRemoteUserPosition = function( userId, pos ){
+    usersPosition[ userId ] = pos;
 };
 
 var updateToolsLineStatus = function(){
@@ -3886,6 +4071,13 @@ selections
             nodeChar    : nodeChar
 
         };
+
+        realtime.send({
+
+            cmd : CMD_POSITION,
+            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+            
+        });
 
     // Click que coincide con los clicks previos y corresponde a seleccionar la palabra
     }else if( clickCounter === 2 || clickCounter === 4 ){
