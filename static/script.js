@@ -230,6 +230,10 @@ var activeRealTime = function(){
 
         });
 
+        if( !realtime ){
+            return;
+        }
+
         realtime.send({
 
             cmd : CMD_POSITION,
@@ -315,6 +319,10 @@ var activeRealTime = function(){
             console.log( usersEditing );
 
         });
+
+        if( !realtime ){
+            return;
+        }
 
         realtime.send({
 
@@ -1323,6 +1331,10 @@ var handleArrowDown = function(){
     resetBlink();
     clearTemporalStyle();
 
+    if( !realtime ){
+        return;
+    }
+
     realtime.send({
 
         cmd : CMD_POSITION,
@@ -1422,6 +1434,10 @@ var handleArrowLeft = function(){
     resetBlink();
     clearTemporalStyle();
 
+    if( !realtime ){
+        return;
+    }
+
     realtime.send({
 
         cmd : CMD_POSITION,
@@ -1520,6 +1536,10 @@ var handleArrowRight = function(){
 
     resetBlink();
     clearTemporalStyle();
+
+    if( !realtime ){
+        return;
+    }
 
     realtime.send({
 
@@ -1624,6 +1644,10 @@ var handleArrowUp = function(){
     setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
     resetBlink();
     clearTemporalStyle();
+
+    if( !realtime ){
+        return;
+    }
 
     realtime.send({
 
@@ -1959,6 +1983,10 @@ var handleChar = function( newChar ){
     }
 
     resetBlink();
+
+    if( !realtime ){
+        return;
+    }
 
     realtime.send({
         
@@ -2989,18 +3017,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
     }else if( key === 'listBullet' ){
 
-        if( !stopPropagation ){
-
-            realtime.send({
-
-                cmd  : CMD_STYLE_LISTBULLET,
-                data : [ pageId, paragraphId ],
-                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-            });
-
-        }
-
         value = 0.63 * CENTIMETER;
 
         var newNode = createNode( paragraph.lineList[ 0 ] );
@@ -3028,6 +3044,18 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
             realocateLine( i, 0 );
+        }
+
+        if( !stopPropagation && realtime ){
+
+            realtime.send({
+
+                cmd  : CMD_STYLE_LISTBULLET,
+                data : [ pageId, paragraphId ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
         }
 
     }else{
@@ -4135,6 +4163,10 @@ selections
             nodeChar    : nodeChar
 
         };
+
+        if( !realtime ){
+            return;
+        }
 
         realtime.send({
 
