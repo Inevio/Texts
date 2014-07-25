@@ -77,14 +77,16 @@ var usersPosition = {};
 var usersEditing  = {};
 
 // Waiting variables
-var waitingPageUpdate  = false;
-var waitingRangeUpdate = false;
+var waitingPageUpdate   = false;
+var waitingCursorUpdate = false;
+var waitingRangeUpdate  = false;
 
 // Blink variables
 var blinkEnabled = false;
 var blinkTime    = 0;
 var blinkStatus  = 0;
 var blinkCurrent = false;
+var blinkGlobal  = false;
 
 // Selection variables
 var selectionEnabled     = false;
@@ -210,7 +212,31 @@ var activeRealTime = function(){
     realtime = currentOpenFile.realtime();
 
     realtime.connect(function( error, firstConnection){
+
+        // To Do -> Error
         console.log( error, 'connected', 'firstConnection', firstConnection );
+        console.log( 1 );
+        realtime.getUserList( true, function( error, list ){
+
+            console.log( 2 );
+
+            // To Do -> Error
+            for( var i in list ){
+                usersEditing[ list[ i ].id ] = list[ i ];
+            }
+    
+            console.log( usersEditing );
+            console.log( error, list );
+
+        });
+
+        realtime.send({
+
+            cmd : CMD_POSITION,
+            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+        });
+        
     });
 
     realtime.on( 'message', function( info, data ){
@@ -243,8 +269,6 @@ var activeRealTime = function(){
 
         updateRemoteUserPosition( info.sender, data.pos );
 
-        return;
-
         /*
         if( data.cmd === 'enableEditionMode' ){
 
@@ -273,7 +297,32 @@ var activeRealTime = function(){
     });
 
     realtime.on( 'userConnect', function( info ){
+
+        if( info.selfUser ){
+            return;
+        }
+
         console.log( info );
+
+        wz.user( info.sender, function( error, user ){
+
+            console.log( arguments );
+
+            // To Do -> Error
+
+            usersEditing[ info.sender ] = user;
+
+            console.log( usersEditing );
+
+        });
+
+        realtime.send({
+
+            cmd : CMD_POSITION,
+            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+        });
+        
     });
 
 };
@@ -3665,15 +3714,20 @@ var updateBlink = function(){
     }
 
     var newCurrent = blinkStatus < 600;
+    var needUpdate = waitingRangeUpdate || ( !blinkCurrent && newCurrent ) || ( blinkCurrent && !newCurrent );
 
-    if( !blinkCurrent && newCurrent ){
+    if( needUpdate ){
 
-        debugTime('cursor on');
+        waitingRangeUpdate = false;
 
         checkCanvasSelectSize();
 
         // Los cursores remotos deben dibujarse antes para estar por devahi del actual
         for( var i in usersPosition ){
+
+            if( !usersEditing[ i ] ){
+                continue;
+            }
 
             ctxSel.fillStyle = '#9575cd';
             ctxSel.font      = '11px Lato';
@@ -3692,41 +3746,48 @@ var updateBlink = function(){
             ctxSel.fillRect(
 
                 parseInt( usersPosition[ i ][ 0 ], 10 ),
-                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 - 11, // 2 por la separación respecto al cursor y 11 de la fuente
-                ctxSel.measureText( i ).width + 8, // 4 y 4 de margenes laterales
+                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 - 14, // 2 por la separación respecto al cursor y 14 del tamaño de la caja
+                ctxSel.measureText( usersEditing[ i ].fullName ).width + 8, // 4 y 4 de margenes laterales
                 14
 
             );
-            
+
             // Texto del nombre
             ctxSel.fillStyle = '#fff';
 
             ctxSel.fillText(
 
-                i,
+                usersEditing[ i ].fullName,
                 parseInt( usersPosition[ i ][ 0 ], 10 ) + 4, // 4 del margen lateral izquierdo
-                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 // 2 por la separación respecto al cursor
+                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 - 3 // 2 por la separación respecto al cursor y 3 de la diferencia con el tamaño de la caja
 
             );
-            
+
         }
 
-        blinkCurrent     = newCurrent;
-        ctxSel.fillStyle = '#000';
+        if( ( blinkGlobal && !( blinkCurrent && !newCurrent ) ) || ( !blinkCurrent && newCurrent ) ){
 
-        ctxSel.fillRect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ), 1, currentNode.height );
+            blinkGlobal = true;
 
-        debugTimeEnd('cursor on');
+            debugTime('cursor on');
 
-    }else if( blinkCurrent && !newCurrent ){
+            blinkCurrent     = newCurrent;
+            ctxSel.fillStyle = '#000';
 
-        debugTime('cursor off');
+            ctxSel.fillRect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ), 1, currentNode.height );
 
-        blinkCurrent = newCurrent;
+            debugTimeEnd('cursor on');
 
-        checkCanvasSelectSize();
+        }else if( blinkCurrent && !newCurrent ){
 
-        debugTimeEnd('cursor off');
+            debugTime('cursor off');
+
+            blinkGlobal  = false;
+            blinkCurrent = newCurrent;
+
+            debugTimeEnd('cursor off');
+
+        }
 
     }
 
@@ -3759,7 +3820,10 @@ var updateRange = function(){
 };
 
 var updateRemoteUserPosition = function( userId, pos ){
+
     usersPosition[ userId ] = pos;
+    waitingRangeUpdate      = true;
+
 };
 
 var updateToolsLineStatus = function(){

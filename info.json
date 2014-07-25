@@ -74,7 +74,14 @@
             "read"   : true
         },
 
-        "service" : true
+        "service" : true,
+
+        "user" : {
+
+            "modify" : true,
+            "read"   : true
+            
+        }
 
     }
 
