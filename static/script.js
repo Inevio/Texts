@@ -3453,7 +3453,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
         // Tratamiento del primer nodo
         // Comprobamos si es una selección completa del nodo
-        if( currentRangeStart.nodeChar === 0 && currentRangeStart.nodeChar === currentRangeStart.node.string.length ){
+        if( currentRangeStart.nodeChar === 0 ){
 
             newNode          = currentRangeStart.node;
             newNode.charList = [];
@@ -3514,7 +3514,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
         // Tratamiento del último nodo
         // Comprobamos si es una selección completa del nodo
-        if( currentRangeEnd.nodeChar === 0 && currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
+        if( currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
 
             newNode          = currentRangeEnd.node;
             newNode.charList = [];
