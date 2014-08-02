@@ -2012,6 +2012,8 @@ var handleCharNormal = function( newChar ){
 
 var handleCharSelection = function( newChar ){
 
+    var i;
+
     // Si está en el mismo nodo
     if(
         currentRangeStart.pageId === currentRangeEnd.pageId &&
@@ -2041,7 +2043,7 @@ var handleCharSelection = function( newChar ){
         measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
 
         // Eliminado de nodos intermedios
-        for( var i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+        for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
             currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
         }
 
@@ -2066,20 +2068,18 @@ var handleCharSelection = function( newChar ){
         measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
 
         // Eliminamos los nodos siguientes de la línea
-        for( var i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
+        for( i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
             currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
         }
 
         currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
 
         // Líneas intermedias
-        var prevPageId, prevParagraphId, prevLineId;
-
         removeRangeLines( false, currentRangeStart, currentRangeEnd );
 
         // Línea final
         // Eliminamos los primeros nodes de la línea
-        for( var i = 0; i < currentRangeEnd.nodeId; i++ ){
+        for( i = 0; i < currentRangeEnd.nodeId; i++ ){
             currentRangeEnd.line.totalChars -= currentRangeEnd.line.nodeList[ i ].string.length;
         }
 
