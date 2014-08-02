@@ -211,6 +211,22 @@
     height: auto;
     max-height: 450px;
     display: none;
+    width: auto;
+}
+
+.toolbar-list li{
+    padding-right: 21px;
+}
+
+.toolbar-list i{
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    display: inline-block;
+}
+
+.toolbar-list .active i{
+    background: #f00;
 }
 
 .ruler-top{

@@ -8,10 +8,10 @@
 'use strict';
 
 // Constantes
-var ALING_LEFT = 0;
-var ALING_CENTER = 1;
-var ALING_RIGHT = 2;
-var ALING_JUSTIFY = 3;
+var ALIGN_LEFT = 0;
+var ALIGN_CENTER = 1;
+var ALIGN_RIGHT = 2;
+var ALIGN_JUSTIFY = 3;
 var CENTIMETER = 37.795275591;
 var CMD_POSITION = 0;
 var CMD_NEWCHAR = 1;
@@ -38,7 +38,7 @@ var MARGIN_NORMAL = {
 };
 var PAGE_A4 = {
 
-    width  : 21 * CENTIMETER,
+    width  : /*21*/ 10 * CENTIMETER,
     height : 29.7 * CENTIMETER
 
 };
@@ -158,19 +158,19 @@ var buttonAction = {
     },
 
     left : function(){
-        setSelectedParagraphsStyle( 'aling', ALING_LEFT );
+        setSelectedParagraphsStyle( 'align', ALIGN_LEFT );
     },
 
     center : function(){
-        setSelectedParagraphsStyle( 'aling', ALING_CENTER );
+        setSelectedParagraphsStyle( 'align', ALIGN_CENTER );
     },
 
     right : function(){
-        setSelectedParagraphsStyle( 'aling', ALING_RIGHT );
+        setSelectedParagraphsStyle( 'align', ALIGN_RIGHT );
     },
 
     justify : function(){
-        setSelectedParagraphsStyle( 'aling', ALING_JUSTIFY );
+        setSelectedParagraphsStyle( 'align', ALIGN_JUSTIFY );
     },
 
     indentDec : function(){
@@ -627,7 +627,7 @@ var drawPages = function(){
                 //}
                 }
 
-                hHeritage += line.height * line.spacing;
+                hHeritage += line.height * paragraph.spacing;
 
             }
 
@@ -671,7 +671,7 @@ var drawRange = function(){
 
     // Calculamos la posición vertical de la linea de inicio
     for( i = 0; i < currentRangeStart.lineId; i++ ){
-        startHeight += currentRangeStart.paragraph.lineList[ i ].height * currentRangeStart.paragraph.lineList[ i ].spacing;
+        startHeight += currentRangeStart.paragraph.lineList[ i ].height * currentRangeStart.paragraph.spacing;
     }
 
     // Calculamos el ancho de inicio
@@ -729,7 +729,7 @@ var drawRange = function(){
             startWidth,
             startHeight - scrollTop,
             width,
-            currentRangeStart.line.height * currentRangeStart.line.spacing
+            currentRangeStart.line.height * currentRangeStart.paragraph.spacing
 
         );
 
@@ -758,13 +758,13 @@ var drawRange = function(){
             startWidth,
             parseInt( startHeight - scrollTop, 10 ),
             width,
-            currentRangeStart.line.height * currentRangeStart.line.spacing
+            currentRangeStart.line.height * currentRangeStart.paragraph.spacing
 
         );
 
         ctxSel.fill();
 
-        startHeight += currentRangeStart.line.height * currentRangeStart.line.spacing;
+        startHeight += currentRangeStart.line.height * currentRangeStart.paragraph.spacing;
 
         var currentPageId  = currentRangeStart.pageId;
         var heightHeritage = 0;
@@ -804,13 +804,13 @@ var drawRange = function(){
                 offset,
                 parseInt( heightHeritage + startHeight - scrollTop, 10 ),
                 width,
-                line.height * line.spacing
+                line.height * paragraph.spacing
 
             );
 
             ctxSel.fill();
             
-            startHeight += line.height * line.spacing;
+            startHeight += line.height * paragraph.spacing;
 
         });
 
@@ -831,6 +831,7 @@ var drawRange = function(){
         }
 
         // To Do -> Que debe pasar si es se coge el fallback 0?
+        console.log( currentRangeEnd.nodeChar, currentRangeEnd.node.charList, currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] );
         width += currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] || 0;
 
         ctxSel.beginPath();
@@ -839,7 +840,7 @@ var drawRange = function(){
             offset,
             parseInt( heightHeritage + startHeight - scrollTop, 10 ),
             width,
-            currentRangeEnd.line.height * currentRangeEnd.line.spacing
+            currentRangeEnd.line.height * currentRangeEnd.paragraph.spacing
 
         );
 
@@ -1044,21 +1045,30 @@ var getCommonStyles = function( start, end ){
         return {
             
             node      : start.node.style,
-            paragraph : start.paragraph.aling
+            paragraph : start.paragraph.align
 
         };
 
     }
 
-    var paragraphStyle = start.paragraph.aling;
     var style          = $.extend( {}, start.node.style );
     var styleCounter   = Object.keys( style ).length;
+    var paragraphStyle = {
+
+        align   : start.paragraph.align,
+        spacing : start.paragraph.spacing
+
+    };
 
     mapRangeLines( true, start, end, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
         // To Do -> Quizás esto se pueda optimizar, es una comprobación que se está haciendo cada n líneas en vez de cada m párrafos
-        if( paragraphStyle !== paragraph.aling ){
-            paragraphStyle = -1;
+        if( paragraphStyle.align !== paragraph.align ){
+            paragraphStyle.align = -1;
+        }
+
+        if( paragraphStyle.spacing !== paragraph.spacing ){
+            paragraphStyle.spacing = -1;
         }
 
         var node;
@@ -1086,9 +1096,11 @@ var getCommonStyles = function( start, end ){
 
     });
 
+    console.log( paragraphStyles );
+
     return {
 
-        node : style,
+        node      : style,
         paragraph : paragraphStyle
 
     };
@@ -1111,11 +1123,11 @@ var getLineIndentationLeft = function( id, paragraph ){
 
 var getLineOffset = function( line, paragraph ){
     
-    if( !paragraph.aling ){
+    if( !paragraph.align ){
         return 0;
-    }else if( paragraph.aling === 1 ){
+    }else if( paragraph.align === 1 ){
         return ( line.width - getLineTextTrimmedWidth( line ) ) / 2;
-    }else if( paragraph.aling === 2 ){
+    }else if( paragraph.align === 2 ){
         return line.width - getLineTextTrimmedWidth( line );
     }
     
@@ -1758,8 +1770,8 @@ var handleBackspace = function(){
             prevLine.totalChars      += currentLine.totalChars - 1;
             prevLine.nodeList         = prevLine.nodeList.concat( currentLine.nodeList );
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
-            currentParagraph.height  -= currentLine.height * currentLine.spacing;
-            currentParagraph.height  -= prevLine.height * prevLine.spacing;
+            currentParagraph.height  -= currentLine.height * currentParagraph.spacing;
+            currentParagraph.height  -= prevLine.height * currentParagraph.spacing;
 
             // Actualizamos las alturas de las líneas
             var maxSize = 0;
@@ -1773,7 +1785,7 @@ var handleBackspace = function(){
             }
 
             prevLine.height          = maxSize;
-            currentParagraph.height += maxSize * prevLine.spacing; // To Do -> Estamos seguros de que esto es correcto?
+            currentParagraph.height += maxSize * currentParagraph.spacing; // To Do -> Estamos seguros de que esto es correcto?
             currentLineId            = currentLineId - 1;
             currentLine              = currentParagraph.lineList[ currentLineId ];
 
@@ -1840,7 +1852,7 @@ var handleBackspace = function(){
         }else if( currentLineId && !currentNode.string.length && currentLine.nodeList.length === 1 ){
 
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
-            currentParagraph.height   = currentParagraph.height - ( currentLine.height * currentLine.spacing );
+            currentParagraph.height   = currentParagraph.height - ( currentLine.height * currentParagraph.spacing );
             currentLineId             = currentLineId - 1;
             currentLine               = currentParagraph.lineList[ currentLineId ];
             currentLineCharId         = currentLine.totalChars;
@@ -1866,7 +1878,7 @@ var handleBackspace = function(){
 
 var handleChar = function( newChar ){
 
-    if( selectionStart ){
+    if( currentRangeStart ){
         handleCharSelection( newChar );
     }else{
         handleCharNormal( newChar );
@@ -1957,7 +1969,7 @@ var handleCharNormal = function( newChar ){
         currentNodeCharId = newNode.nodeChar;
         temporalStyle     = null;
 
-        positionAbsoluteY += currentLine.height * currentLine.spacing;
+        positionAbsoluteY += currentLine.height * currentParagraph.spacing;
 
         // Reiniciamos la posición horizontal
         positionAbsoluteX  = 0;
@@ -2112,12 +2124,13 @@ var handleEnter = function(){
     var movedLines;
 
     // Heredamos las propiedades del párrafo
-    newParagraph.aling                   = currentParagraph.aling;
+    newParagraph.align                   = currentParagraph.align;
     newParagraph.indentationLeft         = currentParagraph.indentationLeft;
     newParagraph.indentationRight        = currentParagraph.indentationRight;
     newParagraph.indentationSpecialType  = currentParagraph.indentationSpecialType;
     newParagraph.indentationSpecialValue = currentParagraph.indentationSpecialValue;
     newParagraph.interline               = currentParagraph.interline;
+    newParagraph.spacing                 = currentParagraph.spacing;
     newParagraph.width                   = currentParagraph.width;
 
     // To Do -> A tener en cuenta con el siguiente paso ( herencia de altura de la linea ), quizás el primer nodo pase a tener un tamaño diferente que el de la linea actual
@@ -2131,9 +2144,6 @@ var handleEnter = function(){
         newLine.totalChars    = newLine.nodeList[ 0 ].string.length;
 
     }
-
-    // Heredamos la altura de la línea
-    newLine.spacing = currentLine.spacing;
 
     // Partimos la línea si no estamos al principio de ella
     if( currentLineCharId ){
@@ -2186,7 +2196,7 @@ var handleEnter = function(){
 
         }
 
-        newParagraph.height = maxSize * newLine.spacing;
+        newParagraph.height = maxSize * newParagraph.spacing;
         newLine.height      = maxSize;
 
         maxSize = 0;
@@ -2199,8 +2209,8 @@ var handleEnter = function(){
 
         }
 
-        currentParagraph.height -= currentLine.height * currentLine.spacing;
-        currentParagraph.height += maxSize * currentLine.spacing;
+        currentParagraph.height -= currentLine.height * currentParagraph.spacing;
+        currentParagraph.height += maxSize * currentParagraph.spacing;
         currentLine.height       = maxSize;
 
         // Movemos las líneas siguientes
@@ -2225,7 +2235,7 @@ var handleEnter = function(){
         newNode.style       = $.extend( {}, currentNode.style );
         newNode.height      = currentNode.height;
         newLine.height      = currentNode.height;
-        newParagraph.height = currentNode.height * newLine.spacing;
+        newParagraph.height = currentNode.height * newParagraph.spacing;
 
         // Insertamos el párrafo en su posición
         currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId ).concat( newParagraph ).concat( currentPage.paragraphList.slice( currentParagraphId ) );
@@ -2235,8 +2245,8 @@ var handleEnter = function(){
     // Actualizamos las alturas del párrafo de origen y destino
     for( i = 0; i < movedLines.length; i++ ){
 
-        currentParagraph.height -= movedLines[ i ].height * movedLines[ i ].spacing;
-        newParagraph.height     += movedLines[ i ].height * movedLines[ i ].spacing;
+        currentParagraph.height -= movedLines[ i ].height * currentParagraph.spacing;
+        newParagraph.height     += movedLines[ i ].height * currentParagraph.spacing;
 
     }
 
@@ -2452,7 +2462,6 @@ var newLine = function(){
         height     : 0,
         nodeList   : [],
         tabList    : [],
-        spacing    : 1,
         totalChars : 0,
         width      : 0
 
@@ -2495,7 +2504,7 @@ var newParagraph = function(){
 
     return {
 
-        aling                   : ALING_LEFT,
+        align                   : ALIGN_LEFT,
         height                  : 0,
         indentationLeft         : 0,
         indentationRight        : 0,
@@ -2504,6 +2513,7 @@ var newParagraph = function(){
         interline               : 0,
         lineList                : [],
         listMode                : LIST_NONE,
+        spacing                 : 1,
         width                   : 0
 
     };
@@ -2573,7 +2583,6 @@ var realocateLine = function( id, lineChar ){
         created                   = true;
         newLine                   = createLine( id + 1, currentParagraph );
         newLine.nodeList          = [];
-        newLine.spacing           = line.spacing;
         currentParagraph.lineList = currentParagraph.lineList.slice( 0, id + 1 ).concat( newLine ).concat( currentParagraph.lineList.slice( id + 1 ) );
 
     }else{
@@ -2703,15 +2712,15 @@ var realocateLine = function( id, lineChar ){
 
     if( created ){
 
-        currentParagraph.height += maxSize * newLine.spacing;
+        currentParagraph.height += maxSize * currentParagraph.spacing;
         newLine.height           = maxSize;
 
         realocatePage( currentPageId );
 
     }else{
 
-        currentParagraph.height -= newLine.height * newLine.spacing;
-        currentParagraph.height += maxSize * newLine.spacing;
+        currentParagraph.height -= newLine.height * currentParagraph.spacing;
+        currentParagraph.height += maxSize * currentParagraph.spacing;
         newLine.height           = maxSize;
 
     }
@@ -2856,8 +2865,8 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     if( maxSize !== line.height ){
 
-        currentParagraph.height -= line.height * line.spacing;
-        currentParagraph.height += maxSize * line.spacing;
+        currentParagraph.height -= line.height * currentParagraph.spacing;
+        currentParagraph.height += maxSize * currentParagraph.spacing;
         line.height              = maxSize;
 
     }
@@ -2874,8 +2883,8 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     if( maxSize !== nextLine.height ){
 
-        currentParagraph.height -= nextLine.height * nextLine.spacing;
-        currentParagraph.height += maxSize * nextLine.spacing;
+        currentParagraph.height -= nextLine.height * currentParagraph.spacing;
+        currentParagraph.height += maxSize * currentParagraph.spacing;
         nextLine.height          = maxSize;
         
     }
@@ -2883,7 +2892,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
     if( !nextLine.totalChars ){
 
         currentParagraph.lineList  = currentParagraph.lineList.slice( 0, id + 1 ).concat( currentParagraph.lineList.slice( id + 2 ) );
-        currentParagraph.height   -= nextLine.height * nextLine.spacing;
+        currentParagraph.height   -= nextLine.height * currentParagraph.spacing;
 
     }
 
@@ -3038,7 +3047,7 @@ var removeRangeLines = function( includeLimits, start, end, callback ){
 
             paragraphLoop.lineList = paragraphLoop.lineList.filter( function( line ){
 
-                paragraphLoop.height -= line.height * line.spacing;
+                paragraphLoop.height -= line.height * paragraphLoop.spacing;
 
                 return line.nodeList.length;
 
@@ -3090,27 +3099,6 @@ var saveDocument = function(){
 
 };
 
-var setLineStyle = function( paragraph, line, key, value ){
-
-    var prev = line[ key ];
-
-    // Si no hay un cambio real no hacemos nada
-    if( value === prev ){
-        return;
-    }
-
-    line[ key ] = value;
-
-    // Propagamos lo cambios necesarios al párrafo
-    if( key === 'spacing' ){
-
-        paragraph.height -= line.height * prev;
-        paragraph.height += line.height * value;
-
-    }
-
-};
-
 var setNodeStyle = function( paragraph, line, node, key, value ){
 
     if( value ){
@@ -3145,8 +3133,8 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
             return;
         }
 
-        paragraph.height -= line.height * line.spacing;
-        paragraph.height += lineHeight * line.spacing;
+        paragraph.height -= line.height * paragraph.spacing;
+        paragraph.height += lineHeight * paragraph.spacing;
         line.height       = lineHeight;
 
     }
@@ -3216,6 +3204,25 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
                 pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
             });
+
+        }
+
+    }else if( key == 'spacing' ){
+
+        var prev = paragraph['spacing'];
+
+        // Si no hay un cambio real no hacemos nada
+        if( value === prev ){
+            return;
+        }
+
+        paragraph['spacing'] = value;
+
+        // Propagamos lo cambios necesarios al párrafo
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+
+            paragraph.height -= paragraph.lineList[ i ].height * prev;
+            paragraph.height += paragraph.lineList[ i ].height * value;
 
         }
 
@@ -3328,7 +3335,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
         // Tamaño de cada línea
         for( i = 0; i < line; i++ ){
-            positionAbsoluteY += currentParagraph.lineList[ i ].height * currentParagraph.lineList[ i ].spacing;
+            positionAbsoluteY += currentParagraph.lineList[ i ].height * currentParagraph.spacing;
         }
 
     }
@@ -3456,15 +3463,6 @@ var setRange = function( start, end, force ){
     currentRangeEndHash   = endHash;
 
     updateRange();
-
-};
-
-var setRangeLineStyle = function( key, value ){
-
-    // Aplicamos el estilo a nodos intermedios
-    mapRangeLines( true, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
-        setLineStyle( paragraph, line, key, value );
-    });
 
 };
 
@@ -3798,23 +3796,6 @@ var setRangeParagraphStyle = function( key, value ){
 
 };
 
-var setSelectedLineStyle = function( key, value ){
-
-    // Selección normal
-    if( currentRangeStart ){
-
-        setRangeLineStyle( key, value );
-        updateRange();
-
-    // Principio de un párrafo vacío
-    }else{
-        setLineStyle( currentParagraph, currentLine, key, value );
-    }
-
-    updatePages();
-
-};
-
 var setSelectedNodeStyle = function( key, value ){
 
     // Selección normal
@@ -4028,7 +4009,12 @@ var updateToolsLineStatus = function(){
     }else{
 
         nodeStyles      = currentNode.style;
-        paragraphStyles = currentParagraph.aling;
+        paragraphStyles = {
+
+            align   : currentParagraph.align,
+            spacing : currentParagraph.spacing
+
+        };
 
     }
 
@@ -4086,28 +4072,35 @@ var updateToolsLineStatus = function(){
     }
 
     // Estilos de párrafos
-    if( paragraphStyles === 0 ){
+    if( paragraphStyles.align === 0 ){
         $( '.tool-button-left', toolsLine ).addClass('active');
     }else{
         $( '.tool-button-left', toolsLine ).removeClass('active');
     }
 
-    if( paragraphStyles === 1 ){
+    if( paragraphStyles.align === 1 ){
         $( '.tool-button-center', toolsLine ).addClass('active');
     }else{
         $( '.tool-button-center', toolsLine ).removeClass('active');
     }
 
-    if( paragraphStyles === 2 ){
+    if( paragraphStyles.align === 2 ){
         $( '.tool-button-right', toolsLine ).addClass('active');
     }else{
         $( '.tool-button-right', toolsLine ).removeClass('active');
     }
 
-    if( paragraphStyles === 3 ){
+    if( paragraphStyles.align === 3 ){
         $( '.tool-button-justify', toolsLine ).addClass('active');
     }else{
         $( '.tool-button-justify', toolsLine ).removeClass('active');
+
+    }
+
+    if( paragraphStyles.spacing > 0 ){
+        $( '.tool-button-line-spacing', toolsLine ).attr( 'data-value', paragraphStyles.spacing );
+    }else{
+        $( '.tool-button-line-spacing', toolsLine ).removeAttr('data-value');
     }
 
 };
@@ -4213,8 +4206,8 @@ selections
             // Buscamos la línea
             for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
             
-                if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
-                    height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
+                if( ( paragraph.lineList[ lineId ].height * paragraph.spacing ) + height < posY ){
+                    height += paragraph.lineList[ lineId ].height * paragraph.spacing;
                 }else{
                     break;
                 }
@@ -4512,8 +4505,8 @@ selections
             // Buscamos la línea
             for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
             
-                if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
-                    height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
+                if( ( paragraph.lineList[ lineId ].height * paragraph.spacing ) + height < posY ){
+                    height += paragraph.lineList[ lineId ].height * paragraph.spacing;
                 }else{
                     break;
                 }
@@ -4686,7 +4679,7 @@ toolsLine
     if( !fontfamilyCode ){
 
         for( var i = 0; i < FONTFAMILY.length; i++ ){
-            fontfamilyCode += '<li>' + FONTFAMILY[ i ] + '</li>';
+            fontfamilyCode += '<li data-value="' + FONTFAMILY[ i ] + '"><i></i><span>' + FONTFAMILY[ i ] + '</span></li>';
         }
 
     }
@@ -4697,11 +4690,12 @@ toolsLine
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
-            width   : $(this).outerWidth() * 2,
             display : 'block'
 
         })
         .html( fontfamilyCode );
+
+    toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
 
 })
 
@@ -4710,7 +4704,7 @@ toolsLine
     if( !fontsizeCode ){
 
         for( var i = 0; i < FONTSIZE.length; i++ ){
-            fontsizeCode += '<li>' + FONTSIZE[ i ] + '</li>';
+            fontsizeCode += '<li data-value="' + FONTSIZE[ i ] + '"><i></i><span>' + FONTSIZE[ i ] + '</span></li>';
         }
 
     }
@@ -4721,11 +4715,12 @@ toolsLine
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
-            width   : $(this).outerWidth() * 2,
             display : 'block'
 
         })
         .html( fontsizeCode );
+
+    toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
 
 })
 
@@ -4734,7 +4729,7 @@ toolsLine
     if( !linespacingCode ){
 
         for( var i = 0; i < LINESPACING.length; i++ ){
-            linespacingCode += '<li>' + LINESPACING[ i ] + '</li>';
+            linespacingCode += '<li data-value="' + parseFloat( LINESPACING[ i ] ) + '"><i></i><span>' + LINESPACING[ i ] + '</span></li>';
         }
 
     }
@@ -4745,11 +4740,12 @@ toolsLine
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
-            width   : $(this).outerWidth() * 2,
             display : 'block'
 
         })
         .html( linespacingCode );
+
+    toolsList.find('[data-value="' + $(this).attr('data-value') + '"]').addClass('active');
 
 });
 
@@ -4768,7 +4764,7 @@ toolsList.on( 'click', 'li', function(){
     
     // Modo Interlineado
     }else if( toolsList.hasClass('active-linespacing') ){
-        setSelectedLineStyle( 'spacing', parseFloat( $(this).text() ) );
+        setSelectedParagraphsStyle( 'spacing', parseFloat( $(this).text() ) );
     }
 
     toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
