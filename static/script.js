@@ -4189,46 +4189,60 @@ selections
     }
 
     if( pageList[ pageId ] ){
+
         page = pageList[ pageId ];
-    }else{
-        page = pageList[ --pageId ];
-    }
 
-    // Tenemos en cuenta el margen superior
-    height += page.marginTop;
+        // Tenemos en cuenta el margen superior
+        height += page.marginTop;
 
-    // Buscamos el párrafo
-    for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
+        // Buscamos el párrafo
+        for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
 
-        if( page.paragraphList[ paragraphId ].height + height < posY ){
-            height += page.paragraphList[ paragraphId ].height;
-        }else{
-            break;
+            if( page.paragraphList[ paragraphId ].height + height < posY ){
+                height += page.paragraphList[ paragraphId ].height;
+            }else{
+                break;
+            }
+
         }
 
-    }
+        if( page.paragraphList[ paragraphId ] ){
+            
+            paragraph = page.paragraphList[ paragraphId ];
 
-    if( page.paragraphList[ paragraphId ] ){
-        paragraph = page.paragraphList[ paragraphId ];
-    }else{
-        paragraph = page.paragraphList[ --paragraphId ];
-    }
+            // Buscamos la línea
+            for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
+            
+                if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
+                    height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
+                }else{
+                    break;
+                }
 
-    // Buscamos la línea
-    for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
-        
-        if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
-            height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
+            }
+
+            if( paragraph.lineList[ lineId ] ){
+                line = paragraph.lineList[ lineId ];
+            }else{
+                line = paragraph.lineList[ --lineId ];
+            }
+
         }else{
-            break;
+
+            paragraph = page.paragraphList[ --paragraphId ];
+            lineId    = paragraph.lineList.length - 1;
+            line      = paragraph.lineList[ lineId ];
+
         }
 
-    }
-
-    if( paragraph.lineList[ lineId ] ){
-        line = paragraph.lineList[ lineId ];
     }else{
-        line = paragraph.lineList[ --lineId ];
+
+        page        = pageList[ --pageId ];
+        paragraphId = page.paragraphList.length - 1;
+        paragraph   = page.paragraphList[ paragraphId ];
+        lineId      = paragraph.lineList.length - 1;
+        line        = paragraph.lineList[ lineId ];
+
     }
 
     // Buscamos la posición horizontal
@@ -4474,46 +4488,60 @@ selections
     }
 
     if( pageList[ pageId ] ){
+
         page = pageList[ pageId ];
-    }else{
-        page = pageList[ --pageId ];
-    }
 
-    // Tenemos en cuenta el margen superior
-    height += page.marginTop;
+        // Tenemos en cuenta el margen superior
+        height += page.marginTop;
 
-    // Buscamos el párrafo
-    for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
+        // Buscamos el párrafo
+        for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
 
-        if( page.paragraphList[ paragraphId ].height + height < posY ){
-            height += page.paragraphList[ paragraphId ].height;
-        }else{
-            break;
+            if( page.paragraphList[ paragraphId ].height + height < posY ){
+                height += page.paragraphList[ paragraphId ].height;
+            }else{
+                break;
+            }
+
         }
 
-    }
+        if( page.paragraphList[ paragraphId ] ){
+            
+            paragraph = page.paragraphList[ paragraphId ];
 
-    if( page.paragraphList[ paragraphId ] ){
-        paragraph = page.paragraphList[ paragraphId ];
-    }else{
-        paragraph = page.paragraphList[ --paragraphId ];
-    }
+            // Buscamos la línea
+            for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
+            
+                if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
+                    height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
+                }else{
+                    break;
+                }
 
-    // Buscamos la línea
-    for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
-        
-        if( ( paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing ) + height < posY ){
-            height += paragraph.lineList[ lineId ].height * paragraph.lineList[ lineId ].spacing;
+            }
+
+            if( paragraph.lineList[ lineId ] ){
+                line = paragraph.lineList[ lineId ];
+            }else{
+                line = paragraph.lineList[ --lineId ];
+            }
+
         }else{
-            break;
+
+            paragraph = page.paragraphList[ --paragraphId ];
+            lineId    = paragraph.lineList.length - 1;
+            line      = paragraph.lineList[ lineId ];
+
         }
 
-    }
-
-    if( paragraph.lineList[ lineId ] ){
-        line = paragraph.lineList[ lineId ];
     }else{
-        line = paragraph.lineList[ --lineId ];
+
+        page        = pageList[ --pageId ];
+        paragraphId = page.paragraphList.length - 1;
+        paragraph   = page.paragraphList[ paragraphId ];
+        lineId      = paragraph.lineList.length - 1;
+        line        = paragraph.lineList[ lineId ];
+
     }
 
     // Buscamos la posición horizontal
