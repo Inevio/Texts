@@ -77,9 +77,11 @@ var usersPosition = {};
 var usersEditing  = {};
 
 // Waiting variables
-var waitingPageUpdate   = false;
-var waitingCursorUpdate = false;
-var waitingRangeUpdate  = false;
+var waitingPageUpdate       = false;
+var waitingCursorUpdate     = false;
+var waitingRangeUpdate      = false;
+var waitingCheckLetter      = false;
+var waitingCheckLetterInput = false;
 
 // Blink variables
 var blinkEnabled = false;
@@ -4291,6 +4293,33 @@ input.on( 'keydown', function(e){
 
         handleDel();
         updatePages();
+
+    }else{
+        waitingCheckLetter = true;
+    }
+
+});
+
+input.on( 'keypress', function(e){
+    
+    if( waitingCheckLetter && !waitingCheckLetterInput ){
+
+        waitingCheckLetterInput = true;
+
+        setTimeout( function(){
+
+            if( input[ 0 ].value ){
+
+                handleChar( input[ 0 ].value );
+                updatePages();
+
+            }
+
+            input[ 0 ].value        = '';
+            waitingCheckLetter      = false;
+            waitingCheckLetterInput = false;
+
+        }, 4 );
 
     }
 
