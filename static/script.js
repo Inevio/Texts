@@ -38,7 +38,7 @@ var MARGIN_NORMAL = {
 };
 var PAGE_A4 = {
 
-    width  : /*21*/ 10 * CENTIMETER,
+    width  : /*21*/ 6 * CENTIMETER,
     height : 29.7 * CENTIMETER
 
 };
@@ -1679,94 +1679,7 @@ var handleBackspace = function(){
 
 };
 
-var handleBackspaceSelection = function(){
-
-    var i;
-
-    // Si está en el mismo nodo
-    if(
-        currentRangeStart.pageId === currentRangeEnd.pageId &&
-        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
-        currentRangeStart.lineId === currentRangeEnd.lineId &&
-        currentRangeStart.nodeId === currentRangeEnd.nodeId
-    ){
-
-        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
-        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
-        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
-        
-        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
-
-        console.log( currentRangeStart.node );
-        
-    // Si está en la misma línea pero en distintos nodos
-    }else if(
-        currentRangeStart.pageId === currentRangeEnd.pageId &&
-        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
-        currentRangeStart.lineId === currentRangeEnd.lineId
-    ){
-
-        // Nodo inicial
-        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
-        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
-        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
-
-        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
-
-        // Eliminado de nodos intermedios
-        for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
-            currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
-        }
-
-        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId ) );
-
-        // Nodo final
-        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
-        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
-        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
-
-        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
-        
-    // Si están en varias líneas
-    }else{
-
-        // Línea inicial
-        // Nodo inicial
-        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
-        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
-        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
-
-        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
-
-        // Eliminamos los nodos siguientes de la línea
-        for( i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
-            currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
-        }
-
-        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
-
-        // Líneas intermedias
-        removeRangeLines( false, currentRangeStart, currentRangeEnd );
-
-        // Línea final
-        // Eliminamos los primeros nodes de la línea
-        for( i = 0; i < currentRangeEnd.nodeId; i++ ){
-            currentRangeEnd.line.totalChars -= currentRangeEnd.line.nodeList[ i ].string.length;
-        }
-
-        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
-        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
-        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
-
-        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
-
-    }
-
-    setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar, true );
-    realocateLineInverse( currentLineId, currentLineCharId );
-    resetBlink();
-
-};
+var handleBackspaceNormal = function(){
 
     verticalKeysEnabled = false;
 
@@ -1966,6 +1879,122 @@ var handleBackspaceSelection = function(){
 
     if( updateTools ){
         updateToolsLineStatus();
+    }
+
+};
+
+var handleBackspaceSelection = function(){
+
+    var i;
+
+    // Si está en el mismo nodo
+    if(
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId &&
+        currentRangeStart.nodeId === currentRangeEnd.nodeId
+    ){
+
+        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
+        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
+        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
+        
+        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+
+        console.log( currentRangeStart.node );
+        
+    // Si está en la misma línea pero en distintos nodos
+    }else if(
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId
+    ){
+
+        // Nodo inicial
+        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
+        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
+        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
+
+        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+
+        // Eliminado de nodos intermedios
+        for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+            currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
+        }
+
+        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId ) );
+
+        // Nodo final
+        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
+        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
+
+        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+        
+    // Si están en varias líneas
+    }else{
+
+        // Línea inicial
+        // Nodo inicial
+        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
+        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
+        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
+
+        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+
+        // Eliminamos los nodos siguientes de la línea
+        for( i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
+            currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
+        }
+
+        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
+
+        // Líneas intermedias
+        removeRangeLines( false, currentRangeStart, currentRangeEnd );
+
+        // Línea final
+        // Eliminamos los primeros nodes de la línea
+        for( i = 0; i < currentRangeEnd.nodeId; i++ ){
+            currentRangeEnd.line.totalChars -= currentRangeEnd.line.nodeList[ i ].string.length;
+        }
+
+        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
+        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
+
+        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+
+    }
+
+    setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar, true );
+    realocateLineInverse( currentLineId, currentLineCharId );
+    resetBlink();
+
+};
+
+var handleDel = function(){
+
+    if( currentRangeStart ){
+        handleBackspaceSelection();
+    }else{
+        handleDelNormal();
+    }
+
+};
+
+var handleDelNormal = function(){
+
+    verticalKeysEnabled = false;
+
+    // Final del documento
+    if(
+        currentPageId === pageList.length - 1 &&
+        currentParagraphId === currentPage.paragraphList.length -1 &&
+        currentLineId === currentParagraph.lineList.length - 1 &&
+        currentLineCharId === currentLine.totalChars
+    ){
+        console.log( 'final del documento, se ignora' );
+        return;
     }
 
 };
@@ -4244,6 +4273,11 @@ input.on( 'keydown', function(e){
         handleArrowRight();
     }else if( e.which === 40 ){
         handleArrowDown();
+    }else if( e.which === 46 ){
+
+        handleDel();
+        updatePages();
+
     }
 
 });
