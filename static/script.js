@@ -1900,8 +1900,6 @@ var handleBackspaceSelection = function(){
         currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
         
         measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
-
-        console.log( currentRangeStart.node );
         
     // Si está en la misma línea pero en distintos nodos
     }else if(
@@ -1996,6 +1994,22 @@ var handleDelNormal = function(){
         console.log( 'final del documento, se ignora' );
         return;
     }
+
+    // Final del nodo
+    if( currentNodeCharId === currentNode.string.length ){
+        console.log('to do');
+    }else{
+
+        currentNode.string      = currentNode.string.slice( 0, currentNodeCharId - 1 ) + currentNode.string.slice( currentNodeCharId );
+        currentLine.totalChars -= 1;
+
+        measureNode( currentParagraph, currentLine, currentLineId, currentLineCharId, currentNode, currentNodeId, currentNodeCharId );
+
+    }
+
+    setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+    realocateLineInverse( currentLineId, currentLineCharId );
+    resetBlink();
 
 };
 
