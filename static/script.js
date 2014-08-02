@@ -826,7 +826,7 @@ var drawRange = function(){
         width  = 0;
         offset = currentRangeEnd.page.marginLeft + getLineIndentationLeft( currentRangeEnd.lineId, currentRangeEnd.paragraph ) + getLineOffset( currentRangeEnd.line, currentRangeEnd.paragraph );
 
-        for( i = 0 + 1; i < currentRangeEnd.nodeId; i++ ){
+        for( i = 0; i < currentRangeEnd.nodeId; i++ ){
             width += currentRangeEnd.line.nodeList[ i ].width;
         }
 
