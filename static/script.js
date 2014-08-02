@@ -1866,6 +1866,16 @@ var handleBackspace = function(){
 
 var handleChar = function( newChar ){
 
+    if( selectionStart ){
+        handleCharSelection( newChar );
+    }else{
+        handleCharNormal( newChar );
+    }
+
+};
+
+var handleCharNormal = function( newChar ){
+
     verticalKeysEnabled = false;
 
     var newNode, endNode, i;
@@ -1997,6 +2007,93 @@ var handleChar = function( newChar ){
         pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
     });
+
+};
+
+var handleCharSelection = function( newChar ){
+
+    // Si está en el mismo nodo
+    if(
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId &&
+        currentRangeStart.nodeId === currentRangeEnd.nodeId
+    ){
+
+        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
+        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + newChar + currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
+        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
+        
+        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+        
+    // Si está en la misma línea pero en distintos nodos
+    }else if(
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId
+    ){
+
+        // Nodo inicial
+        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
+        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + newChar;
+        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
+
+        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+
+        // Eliminado de nodos intermedios
+        for( var i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+            currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
+        }
+
+        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId ) );
+
+        // Nodo final
+        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
+        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
+
+        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+        
+    // Si están en varias líneas
+    }else{
+
+        // Línea inicial
+        // Nodo inicial
+        currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
+        currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + newChar;
+        currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
+
+        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+
+        // Eliminamos los nodos siguientes de la línea
+        for( var i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
+            currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
+        }
+
+        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
+
+        // Líneas intermedias
+        var prevPageId, prevParagraphId, prevLineId;
+
+        removeRangeLines( false, currentRangeStart, currentRangeEnd );
+
+        // Línea final
+        // Eliminamos los primeros nodes de la línea
+        for( var i = 0; i < currentRangeEnd.nodeId; i++ ){
+            currentRangeEnd.line.totalChars -= currentRangeEnd.line.nodeList[ i ].string.length;
+        }
+
+        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
+        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
+
+        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+
+    }
+
+    setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar + 1, currentRangeStart.nodeId, currentRangeStart.nodeChar + 1, true );
+    realocateLineInverse( currentLineId, currentLineCharId );
+    resetBlink();
 
 };
 
@@ -2901,6 +2998,68 @@ var realocatePageInverse = function( id ){
 
     // To Do -> Realocate de líneas
     
+};
+
+var removeRangeLines = function( includeLimits, start, end, callback ){
+
+    var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoopId, nodeLoopId, finalPage, finalParagraph, fakeEndLineId, j, k, m;
+
+    lineLoopId      = start.lineId;
+    paragraphLoopId = start.paragraphId;
+    pageLoopId      = start.pageId;
+
+    // Recorremos las páginas
+    for( j = pageLoopId; j <= end.pageId; j++ ){
+
+        finalPage = j === end.pageId;
+        pageLoop  = pageList[ j ];
+
+        // Recorremos los párrafos
+        for( k = paragraphLoopId; ( !finalPage && k < pageLoop.paragraphList.length ) || ( finalPage && k <= end.paragraphId ); k++ ){
+
+            finalParagraph = finalPage && k === end.paragraphId;
+            paragraphLoop  = pageLoop.paragraphList[ k ];
+
+            // Recorremos las líneas
+            for( m = lineLoopId; ( !finalParagraph && m < paragraphLoop.lineList.length ) || ( finalParagraph && m < end.lineId ); m++ ){
+
+                if(
+                    !includeLimits && (
+                        ( j === currentRangeStart.pageId && k === currentRangeStart.paragraphId && m === currentRangeStart.lineId ) ||
+                        ( j === currentRangeEnd.pageId && k === currentRangeEnd.paragraphId && m === currentRangeEnd.lineId )
+                    )
+                ){
+                    continue;
+                }
+                
+                paragraphLoop.lineList[ m ].nodeList = [];
+
+            }
+
+            paragraphLoop.lineList = paragraphLoop.lineList.filter( function( line ){
+
+                paragraphLoop.height -= line.height * line.spacing;
+
+                return line.nodeList.length;
+
+            });
+
+            lineLoopId = 0;
+
+        }
+
+        pageLoop.paragraphList = pageLoop.paragraphList.filter( function( paragraph ){
+            return paragraph.lineList.length;
+        });
+
+        paragraphLoopId = 0;
+
+    }
+
+    pageList = pageList.filter( function( page ){
+        return page.paragraphList.length;
+    });
+
 };
 
 var resetBlink = function(){
