@@ -38,8 +38,8 @@ var MARGIN_NORMAL = {
 };
 var PAGE_A4 = {
 
-    width  : 10 * CENTIMETER,
-    height : /*29.7*/ 6 * CENTIMETER
+    width  : 21 * CENTIMETER,
+    height : 29.7 * CENTIMETER
 
 };
 
@@ -638,6 +638,8 @@ var drawPages = function(){
 
         if( m + 1 < pageList.length ){
             maxScrollTop += Math.round( page.height ) + GAP;
+        }else if( canvasPages.height < page.height ){
+            maxScrollTop += page.height - canvasPages.height + ( GAP * 2 );
         }
 
     }
