@@ -2268,7 +2268,6 @@ var handleEnter = function(){
     newParagraph.indentationRight        = currentParagraph.indentationRight;
     newParagraph.indentationSpecialType  = currentParagraph.indentationSpecialType;
     newParagraph.indentationSpecialValue = currentParagraph.indentationSpecialValue;
-    newParagraph.interline               = currentParagraph.interline;
     newParagraph.spacing                 = currentParagraph.spacing;
     newParagraph.width                   = currentParagraph.width;
 
@@ -2574,7 +2573,7 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
 
     }
 
-    node.width = node.charList.slice( -1 )[ 0 ];
+    node.width = node.charList.slice( -1 )[ 0 ] || 0;
 
 };
 
@@ -2649,7 +2648,6 @@ var newParagraph = function(){
         indentationRight        : 0,
         indentationSpecialType  : INDENTATION_NONE,
         indentationSpecialValue : 0,
-        interline               : 0,
         lineList                : [],
         listMode                : LIST_NONE,
         spacing                 : 1,
@@ -2687,6 +2685,8 @@ var normalizeLine = function( line ){
 
 var openFile = function( structure ){
 
+    // To Do -> Error
+
     if( structure.mime === 'application/texts' ){
 
         structure.read( function( error, data ){
@@ -2699,8 +2699,94 @@ var openFile = function( structure ){
 
         });
 
+    }else if( structure.formats['inevio-texts-unprocessed'] ){
+
+        structure.formats['inevio-texts-unprocessed'].read( function( error, data ){
+
+            // Asociamos todos los datos del fichero con sus variables correspondientes
+            currentOpenFile = structure;
+
+            processUnprocessedFile( data );
+
+            start();
+
+        });
+
     }else{
         alert( 'FILE FORMAT NOT RECOGNIZED' );
+    }
+    
+};
+
+var processUnprocessedFile = function( data ){
+
+    data = JSON.parse( data );
+
+    var i, j;
+    var node;
+    var line;
+    var paragraph;
+    var page = createPage(
+
+        {
+            width  : data.page.width * CENTIMETER,
+            height : data.page.height * CENTIMETER
+        },
+
+        {
+            top    : data.page.marginTop * CENTIMETER,
+            right  : data.page.marginRight * CENTIMETER,
+            bottom : data.page.marginBottom * CENTIMETER,
+            left   : data.page.marginLeft * CENTIMETER
+        }
+
+    );
+
+    page.paragraphList = [];
+
+    for( i = 0; i < data.paragraphList.length; i++ ){
+
+        paragraph = createParagraph( page );
+
+        // To Do -> Importar estilos
+
+        line          = paragraph.lineList[ 0 ];
+        line.nodeList = [];
+
+        for( j = 0; j < data.paragraphList[ i ].nodeList.length; j++ ){
+            
+            // To Do -> Importar estilos
+
+            node        = createNode( line );
+            node.string = data.paragraphList[ i ].nodeList[ j ].text;
+
+            setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style['color'] );
+            setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
+            setNodeStyle( paragraph, line, node, 'font-size', data.paragraphList[ i ].nodeList[ j ].style['font-size'] );
+
+            measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
+            line.nodeList.push( node );
+
+            line.totalChars += node.string.length;
+
+        }
+
+        page.paragraphList.push( paragraph );
+
+    }
+
+    pageList.push( page );
+
+    // Realocamos el contenido
+    for( i = 0; i < pageList.length; i++ ){
+
+        for( j = 0; j < pageList[ i ].paragraphList.length; j++ ){
+
+            setCursor( i, j, 0, 0, 0, 0, true );
+            realocateLine( 0, 0 );
+
+        }
+
     }
     
 };
