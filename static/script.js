@@ -4048,15 +4048,16 @@ var start = function(){
 
     if( !currentOpenFile ){
         pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
+        
+        var paragraph = pageList[ 0 ].paragraphList[ 0 ];
+        var line      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ];
+        var node      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ].nodeList[ 0 ];
+
+        setNodeStyle( paragraph, line, node, 'font-size', 12 );
+        setNodeStyle( paragraph, line, node, 'font-family', 'Cambria' );
+        setNodeStyle( paragraph, line, node, 'color', '#000000' );
+
     }
-
-    var paragraph = pageList[ 0 ].paragraphList[ 0 ];
-    var line      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ];
-    var node      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ].nodeList[ 0 ];
-
-    setNodeStyle( paragraph, line, node, 'font-size', 12 );
-    setNodeStyle( paragraph, line, node, 'font-family', 'Cambria' );
-    setNodeStyle( paragraph, line, node, 'color', '#000000' );
 
     setCursor( 0, 0, 0, 0, 0, 0 );
     drawRuleLeft();
