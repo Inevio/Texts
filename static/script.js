@@ -2879,51 +2879,29 @@ var realocateLine = function( id, lineChar ){
                 newNode.style  = $.extend( {}, line.nodeList[ words[ i ].nodeList.slice( -1 )[ 0 ] ].style );
                 newNode.height = line.nodeList[ words[ i ].nodeList.slice( -1 )[ 0 ] ].height;
 
-                for( j = 0; j < wordsToMove.length; j++ ){
+                newLine.nodeList.unshift( newNode ); // To Do -> Quizás haya que actualizar la altura
 
-                    // Si la palabra empieza por el mismo nodo que la palabra límite
-                    if( wordsToMove[ j ].nodeList[ 0 ] === k ){
+                // Movemos el resto del contenido del nodo
+                newNode.string                                            = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string.slice( wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
+                newLine.totalChars                                       += newNode.string.length;
+                line.totalChars                                          -= newNode.string.length;
+                line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string    = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string.slice( 0, wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
+                line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].charList  = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].charList.slice( 0, wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
 
-                        newNode.string                                          += line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].string.slice( wordsToMove[ j ].offset[ 0 ][ 0 ] );
-                        line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].string   = line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].string.slice( 0, wordsToMove[ j ].offset[ 0 ][ 0 ] );
-                        line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].charList = line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].charList.slice( 0, wordsToMove[ j ].offset[ 0 ][ 0 ] );
-                        line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].width    = line.nodeList[ wordsToMove[ j ].nodeList[ 0 ] ].charList.slice( -1 )[ 0 ];
+                measureNode( currentParagraph, line, 0, 0, newNode, 0, 0 );
 
-                        if( wordsToMove[ j ].nodeList[ 1 ] ){
+                var nodesToMove = line.nodeList.slice( wordsToMove[ 0 ].nodeList[ 0 ] + 1 );
+                var charsMoved  = 0;
 
-                            for( i = wordsToMove[ j ].nodeList[ 1 ]; i < line.nodeList.length; i++ ){
-
-                                line.totalChars    -= line.nodeList[ i ].string.length;
-                                newLine.totalChars += line.nodeList[ i ].string.length;
-
-                            }
-
-                            newLine.nodeList = newLine.nodeList.concat( line.nodeList.slice( wordsToMove[ j ].nodeList[ 1 ] ) );
-                            line.nodeList    = line.nodeList.slice( 0, wordsToMove[ j ].nodeList[ 1 ] );
-
-                            break;
-
-                        }
-
-                    }else{
-
-                        console.log('to do');
-                        // To Do -> line.nodeList.slice( wordsToMove[ j ].nodeList[ 0 ] );
-                    }
-
+                for( j = 0; j < nodesToMove.length; j++ ){
+                    charsMoved += nodesToMove[ j ].string.length;
                 }
 
-                setCanvasTextStyle( newNode.style );
-
-                for( j = 1; j <= newNode.string.length; j++ ){
-                    newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
-                }
-
-                newNode.width       = newNode.charList.slice( -1 )[ 0 ];
-                line.totalChars    -= newNode.string.length;
-                newLine.totalChars += newNode.string.length;
-
-                newLine.nodeList.unshift( newNode );
+                // Movemos el resto de nodos a la siguiente linea
+                newLine.nodeList    = newLine.nodeList.concat( nodesToMove );
+                newLine.totalChars += charsMoved;
+                line.nodeList       = line.nodeList.slice( 0, wordsToMove[ 0 ].nodeList[ 0 ] + 1 );
+                line.totalChars    -= charsMoved;
 
             }
 
