@@ -1193,12 +1193,25 @@ var getWordsMetrics = function( line ){
 
     var nodeList = line.nodeList;
     var result   = [];
-    var words, breakedWord, currentWord, offset, i, j;
+    var words, breakedWord, currentWord, offset, i, j, tmp;
 
     for( i = 0; i < nodeList.length; i++ ){
 
         offset = 0;
-        words  = nodeList[ i ].string.match(/(\s*\S+\s*|\s+)/g) || [''];
+
+        if(
+            breakedWord &&
+            nodeList[ i ].string[ 0 ] === ' '
+        ){
+
+            tmp   = nodeList[ i ].string.split(/(\s+)/g);
+            words = [ tmp[ 1 ] ];
+            tmp   = nodeList[ i ].string.slice( tmp[ 1 ].length );
+            words = words.concat( tmp.match(/(\s*\S+\s*|\s+)/g) || [''] );
+
+        }else{
+            words = nodeList[ i ].string.match(/(\s*\S+\s*|\s+)/g) || [''];
+        }
 
         for( j = 0; j < words.length; j++ ){
 
@@ -1235,7 +1248,10 @@ var getWordsMetrics = function( line ){
 
             offset += words[ j ].length;
 
-            if( words[ j ].indexOf(' ') > -1 || i === nodeList.length - 1 ){
+            if(
+                words[ j ].indexOf(' ') > -1 ||
+                i === nodeList.length - 1
+            ){
                 result.push( currentWord );
             }else{
                 breakedWord = true;
