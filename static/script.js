@@ -1206,8 +1206,14 @@ var getWordsMetrics = function( line ){
 
             tmp   = nodeList[ i ].string.split(/(\s+)/g);
             words = [ tmp[ 1 ] ];
-            tmp   = nodeList[ i ].string.slice( tmp[ 1 ].length );
-            words = words.concat( tmp.match(/(\s*\S+\s*|\s+)/g) || [''] );
+
+            // Sino no solo hay espacio
+            if( nodeList[ i ].string.length !== nodeList[ i ].string.split(' ').length - 1 ){
+
+                tmp   = nodeList[ i ].string.slice( tmp[ 1 ].length );
+                words = words.concat( tmp.match(/(\s*\S+\s*|\s+)/g) || [''] );
+
+            }
 
         }else{
             words = nodeList[ i ].string.match(/(\s*\S+\s*|\s+)/g) || [''];
