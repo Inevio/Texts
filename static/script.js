@@ -450,7 +450,7 @@ var createLine = function( id, paragraph ){
 
     // To Do -> Asignar la altura dinámicamente
     line.height = 0;
-    line.width  = paragraph.width - getLineIndentationLeft( id, paragraph );
+    line.width  = paragraph.width;// - getLineIndentationLeft( id, paragraph ); // To Do -> Esto falla cuando es un párrafo múltiple
 
     // Creamos el nodo inicial
     line.nodeList.push( createNode() );
@@ -2744,7 +2744,7 @@ var processUnprocessedFile = function( data ){
 
     data = JSON.parse( data );
 
-    var i, j;
+    var i, j, value;
     var node;
     var line;
     var paragraph;
@@ -2770,8 +2770,6 @@ var processUnprocessedFile = function( data ){
 
         paragraph = createParagraph( page );
 
-        // To Do -> Importar estilos
-
         line          = paragraph.lineList[ 0 ];
         line.nodeList = [];
 
@@ -2784,12 +2782,26 @@ var processUnprocessedFile = function( data ){
 
             setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style['color'] );
             setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
+            setNodeStyle( paragraph, line, node, 'font-style', data.paragraphList[ i ].nodeList[ j ].style['font-style'] );
+            setNodeStyle( paragraph, line, node, 'font-weight', data.paragraphList[ i ].nodeList[ j ].style['font-weight'] );
             setNodeStyle( paragraph, line, node, 'font-size', data.paragraphList[ i ].nodeList[ j ].style['font-size'] );
 
             measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
             line.nodeList.push( node );
 
             line.totalChars += node.string.length;
+
+        }
+
+        //To Do -> Importar estilos
+        setParagraphStyle( 0, page, i, paragraph, 'align', data.paragraphList[ i ].align );
+        
+        if( data.paragraphList[ i ].indentationLeft ){
+
+            value                      = data.paragraphList[ i ].indentationLeft * CENTIMETER;
+            paragraph.indentationLeft += value;
+            paragraph.width           -= value;
+            line.width                -= value;
 
         }
 
@@ -3392,8 +3404,19 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             paragraph.lineList[ i ].width -= value;
         }
 
-        for( i = 0; i < paragraph.lineList.length; i++ ){
-            realocateLine( i, 0 );
+        if( value >= 0 ){
+
+            for( i = 0; i < paragraph.lineList.length; i++ ){
+                realocateLine( i, 0 );
+            }
+
+        }else{
+
+            for( i = 0; i < paragraph.lineList.length; i++ ){
+                realocateLineInverse( i, 0 );
+
+            }
+
         }
 
     }else if( key === 'listBullet' ){
