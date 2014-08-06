@@ -38,7 +38,7 @@ var MARGIN_NORMAL = {
 };
 var PAGE_A4 = {
 
-    width  : /*21*/ 6 * CENTIMETER,
+    width  : /*21*/ 12 * CENTIMETER,
     height : 29.7 * CENTIMETER
 
 };
@@ -1969,7 +1969,17 @@ var handleBackspaceSelection = function(){
             currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
         }
 
-        currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
+        // Si el nodo no se queda vacío
+        if( currentRangeStart.node.string.length ){
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
+        }else{
+
+            currentRangeStart.line.nodeList  = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId );
+            currentRangeStart.nodeId         = currentRangeStart.nodeId - 1; // To Do -> Y si el nodoId es 0? -> Y si se selecciona el párrafo entero?
+            currentRangeStart.node           = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.nodeChar       = currentRangeStart.node.string.length;
+
+        }
 
         // Líneas intermedias
         removeRangeLines( false, currentRangeStart, currentRangeEnd );
@@ -1984,7 +1994,14 @@ var handleBackspaceSelection = function(){
         currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
         currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
 
-        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+        // Si el nodo no se queda vacío
+        if( currentRangeEnd.node.string.length ){
+            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId );
+        }else{
+            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId + 1 ); // To Do -> Estamos seguros de que esto es correcto?
+        }
+
+        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, 0 );
 
     }
 
@@ -2259,8 +2276,9 @@ var handleCharSelection = function( newChar ){
         currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
         currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
         currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
+        currentRangeEnd.line.nodeList    = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId );
 
-        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
+        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, 0 );
 
     }
 
@@ -2744,6 +2762,8 @@ var processUnprocessedFile = function( data ){
 
     data = JSON.parse( data );
 
+    //console.log( JSON.stringify( data, null, 4 ) );
+
     var i, j, value;
     var node;
     var line;
@@ -3079,7 +3099,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
         // Movimiento de nodos y partido del último
         }else{
             // To Do
-            console.log('movimiento de nodos y partido del ultimo');
+            console.log('to do - movimiento de nodos y partido del ultimo');
         }
         
     // Distintos nodos, podemos mover los nodos completos
