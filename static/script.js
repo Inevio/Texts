@@ -2862,20 +2862,24 @@ var realocateLine = function( id, lineChar ){
             // Comprobamos si el último nodo de la palabra actual es distinto del de las otras
             k = words[ i ].nodeList.slice( -1 )[ 0 ];
 
+            var nodesToMove;
+            var charsMoved;
+
             // Si es distinto el movimiento es más sencillo
             if( wordsToMove[ 0 ].nodeList[ 0 ] !== k ){
 
-                // Actualizamos el número total de líneas
-                for( j = wordsToMove[ 0 ].nodeList[ 0 ]; j < line.nodeList.length; j++ ){
+                nodesToMove = line.nodeList.slice( wordsToMove[ 0 ].nodeList[ 0 ] );
+                charsMoved  = 0;
 
-                    line.totalChars    -= line.nodeList[ j ].string.length;
-                    newLine.totalChars += line.nodeList[ j ].string.length;
-
+                for( j = 0; j < nodesToMove.length; j++ ){
+                    charsMoved += nodesToMove[ j ].string.length;
                 }
 
-                newLine.nodeList.unshift( line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ] );
+                newLine.totalChars += charsMoved;
+                line.nodeList       = line.nodeList.slice( 0, wordsToMove[ 0 ].nodeList[ 0 ] );
+                line.totalChars    -= charsMoved;
 
-                line.nodeList = line.nodeList.slice( 0, wordsToMove[ 0 ].nodeList[ 0 ] );
+                newLine.nodeList = nodesToMove.concat( newLine.nodeList );
 
             // La palabra actual comparte nodos con la siguiente, hay que partir
             }else{
@@ -2896,15 +2900,15 @@ var realocateLine = function( id, lineChar ){
 
                 measureNode( currentParagraph, line, 0, 0, newNode, 0, 0 );
 
-                var nodesToMove = line.nodeList.slice( wordsToMove[ 0 ].nodeList[ 0 ] + 1 );
-                var charsMoved  = 0;
+                nodesToMove = line.nodeList.slice( wordsToMove[ 0 ].nodeList[ 0 ] + 1 );
+                charsMoved  = 0;
 
                 for( j = 0; j < nodesToMove.length; j++ ){
                     charsMoved += nodesToMove[ j ].string.length;
                 }
 
                 // Movemos el resto de nodos a la siguiente linea
-                newLine.nodeList    = newLine.nodeList.concat( nodesToMove );
+                newLine.nodeList    = newLine.nodeList.slice( 0, 1 ).concat( nodesToMove ).concat( newLine.nodeList.slice( 1 ) );
                 newLine.totalChars += charsMoved;
                 line.nodeList       = line.nodeList.slice( 0, wordsToMove[ 0 ].nodeList[ 0 ] + 1 );
                 line.totalChars    -= charsMoved;
