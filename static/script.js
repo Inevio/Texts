@@ -2893,6 +2893,9 @@ var realocateLine = function( id, lineChar ){
 
                 // Movemos el resto del contenido del nodo
                 newNode.string                                            = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string.slice( wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
+                line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string    = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string.slice( 0, wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
+                line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].charList  = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].charList.slice( 0, wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
+                line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].width     = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].charList.slice( -1 )[ 0 ];
                 newLine.totalChars                                       += newNode.string.length;
                 line.totalChars                                          -= newNode.string.length;
                 line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string    = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string.slice( 0, wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
