@@ -2800,7 +2800,7 @@ var processUnprocessedFile = function( data ){
             node        = createNode( line );
             node.string = data.paragraphList[ i ].nodeList[ j ].text;
 
-            setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style['color'] );
+            setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style.color );
             setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
             setNodeStyle( paragraph, line, node, 'font-style', data.paragraphList[ i ].nodeList[ j ].style['font-style'] );
             setNodeStyle( paragraph, line, node, 'font-weight', data.paragraphList[ i ].nodeList[ j ].style['font-weight'] );
@@ -2815,6 +2815,18 @@ var processUnprocessedFile = function( data ){
 
         //To Do -> Importar estilos
         setParagraphStyle( 0, page, i, paragraph, 'align', data.paragraphList[ i ].align );
+
+        if( data.paragraphList[ i ].listMode ){
+            paragraph.listMode = data.paragraphList[ i ].listMode;
+        }
+
+        if( data.paragraphList[ i ].indentationSpecialType ){
+            paragraph.indentationSpecialType = data.paragraphList[ i ].indentationSpecialType;
+        }
+
+        if( data.paragraphList[ i ].indentationSpecialValue ){
+            paragraph.indentationSpecialValue = data.paragraphList[ i ].indentationSpecialValue * CENTIMETER;
+        }
         
         if( data.paragraphList[ i ].indentationLeft ){
 
@@ -3572,7 +3584,17 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     }
 
     // Comprobamos que estamos en la posición del nodo correcta
-    if( node > 0 && nodeChar === 0 ){
+    if(
+        node > 0 &&
+        nodeChar === 0 &&
+        (
+            !currentLine.nodeList[ node - 1 ] ||
+            (
+                currentLine.nodeList[ node - 1 ] &&
+                !currentLine.nodeList[ node - 1 ].blocked
+            )
+        )
+    ){
         
         node     = node - 1;
         nodeChar = currentLine.nodeList[ node ].string.length;
