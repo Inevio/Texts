@@ -189,7 +189,7 @@ var buttonAction = {
     },
 
     listNumber : function(){
-
+        setSelectedParagraphsStyle('listNumber');
     }
 
 };
@@ -2350,13 +2350,24 @@ var handleEnter = function(){
 
     // To Do -> A tener en cuenta con el siguiente paso ( herencia de altura de la linea ), quizás el primer nodo pase a tener un tamaño diferente que el de la linea actual
     // Si es una lista lo clonamos
-    if( currentParagraph.listMode ){
+    if( currentParagraph.listMode === LIST_BULLET){
 
         newLine.nodeList.unshift( $.extend( true, {}, currentParagraph.lineList[ 0 ].nodeList[ 0 ] ) );
 
         newParagraph.listMode = currentParagraph.listMode;
         newLine.tabList       = [ 1 ]; // To Do -> Herencia de tabs
         newLine.totalChars    = newLine.nodeList[ 0 ].string.length;
+
+    }else if( currentParagraph.listMode === LIST_NUMBER){
+
+        newLine.nodeList.unshift( $.extend( true, {}, currentParagraph.lineList[ 0 ].nodeList[ 0 ] ) );
+
+        newParagraph.listMode        = currentParagraph.listMode;
+        newLine.nodeList[ 0 ].string = ( parseInt( newLine.nodeList[ 0 ].string, 10 ) + 1 ) + '.' + '\t';
+        newLine.tabList              = [ newLine.nodeList[ 0 ].string.indexOf('\t') ]; // To Do -> Herencia de tabs
+        newLine.totalChars           = newLine.nodeList[ 0 ].string.length;
+
+        measureNode( newParagraph, newLine, 0, 0, newLine.nodeList[ 0 ], 0, 0 );
 
     }
 
@@ -3489,7 +3500,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         }
 
-    }else if( key === 'listBullet' ){
+    }else if( key === 'listBullet' || key === 'listNumber' ){
 
         value = 0.63 * CENTIMETER;
 
@@ -3498,14 +3509,41 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value );
         paragraph.lineList[ 0 ].nodeList.unshift( newNode );
 
+        if( key === 'listNumber' ){
+
+            paragraph.listMode = LIST_NUMBER;
+
+            var number = 1;
+
+            if( paragraphId > 0 ){
+
+                if( page.paragraphList[ paragraphId - 1 ].listMode === LIST_NUMBER ){
+                    number = parseInt( page.paragraphList[ paragraphId - 1 ].lineList[ 0 ].nodeList[ 0 ].string, 10 ) + 1;
+                }
+
+            }else if( pageId > 0 ){
+
+                if( pageList[ pageId - 1 ].paragraphList.slice( -1 )[ 0 ].listMode === LIST_NUMBER ){
+                    number = parseInt( pageList[ pageId - 1 ].paragraphList.slice( -1 )[ 0 ].lineList[ 0 ].nodeList[ 0 ].string, 10 ) + 1;
+                }
+
+            }
+
+            newNode.string = number + '.' + '\t';
+
+        }else{
+
+            paragraph.listMode = LIST_BULLET;
+            newNode.string     = String.fromCharCode( 8226 ) + '\t';
+
+        }
+
         newNode.blocked                     = true;
-        newNode.string                      = String.fromCharCode( 8226 ) + '\t';
         newNode.style.color                 = '#000000';
         newNode.style['font-family']        = 'Webdings'; // To Do -> No usar webdings
-        paragraph.listMode                  = LIST_BULLET;
         paragraph.indentationSpecialType    = INDENTATION_HANGING;
         paragraph.indentationSpecialValue   = value;
-        paragraph.lineList[ 0 ].tabList     = [ 1 ]; // To Do -> Conservar el resto de tabuladores
+        paragraph.lineList[ 0 ].tabList     = [ newNode.string.indexOf('\t') ]; // To Do -> Conservar el resto de tabuladores
         paragraph.lineList[ 0 ].totalChars += newNode.string.length;
 
         setNodeStyle( paragraph, paragraph.lineList[ 0 ], newNode, 'font-size', paragraph.lineList[ 0 ].nodeList[ 1 ].style['font-size'] );
