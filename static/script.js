@@ -77,11 +77,12 @@ var usersPosition = {};
 var usersEditing  = {};
 
 // Waiting variables
-var waitingPageUpdate       = false;
-var waitingCursorUpdate     = false;
-var waitingRangeUpdate      = false;
 var waitingCheckLetter      = false;
 var waitingCheckLetterInput = false;
+var waitingCursorUpdate     = false;
+var waitingPageUpdate       = false;
+var waitingRangeUpdate      = false;
+var waitingRuleLeftUpdate   = false;
 
 // Blink variables
 var blinkEnabled = false;
@@ -576,7 +577,7 @@ var drawPages = function(){
     maxScrollTop           = pageHeight;
     pageHeight            -= parseInt( scrollTop, 10 );
 
-    // To Do -> Soportar varias páginas
+    // To Do -> Renderizar solo la parte que deba mostrarse
     for( m = 0; m < pageList.length; m++ ){
 
         // Draw the page
@@ -854,6 +855,8 @@ var drawRange = function(){
 };
 
 var drawRuleLeft = function(){
+
+    waitingRuleLeftUpdate = false;
 
     // To Do -> Seguramente el alto no corresponde
     // To Do -> Renderizar solo la parte que deba mostrarse
@@ -4173,7 +4176,7 @@ var start = function(){
     }
 
     setCursor( 0, 0, 0, 0, 0, 0 );
-    drawRuleLeft();
+    updateRuleLeft();
     drawRuleTop();
     updatePages();
     updateToolsLineStatus();
@@ -4326,6 +4329,18 @@ var updateRemoteUserPosition = function( userId, pos ){
 
     usersPosition[ userId ] = pos;
     waitingRangeUpdate      = true;
+
+};
+
+var updateRuleLeft = function(){
+
+    if( waitingRuleLeftUpdate ){
+        return;
+    }
+
+    waitingRuleLeftUpdate = true;
+
+    requestAnimationFrame( drawRuleLeft );
 
 };
 
@@ -5011,7 +5026,8 @@ selections
 
     var originalScrollTop = scrollTop;
 
-    scrollTop -= y * 30;
+    // El plugin de mousewheel está ya normalizado, anteriormete teníamos un factor de correción de x30
+    scrollTop -= y;
 
     if( scrollTop < 0 ){
         scrollTop = 0;
@@ -5024,6 +5040,7 @@ selections
     }
 
     updatePages();
+    updateRuleLeft();
 
     if( currentRangeStart ){
         updateRange();
