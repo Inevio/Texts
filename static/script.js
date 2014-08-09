@@ -1436,7 +1436,16 @@ var handleArrowLeft = function(){
     }
 
     // Principio del nodo
-    if( currentNodeCharId === 0 || ( currentNodeId > 0 && currentNodeCharId === 1 ) ){
+    if(
+
+        currentNodeCharId === 0 ||
+        (
+            currentNodeId > 0 &&
+            currentNodeCharId === 1 &&
+            !currentLine.nodeList[ currentNodeId - 1 ].blocked
+        )
+        
+    ){
 
         var page, paragraph, line, lineChar, node, nodeChar;
 
