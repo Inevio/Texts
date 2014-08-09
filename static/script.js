@@ -1422,7 +1422,7 @@ var handleArrowLeft = function(){
 
     if( currentRangeStart ){
         
-        setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+        setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar, false, true );
         updateToolsLineStatus();
         resetBlink();
         return;
@@ -1489,7 +1489,7 @@ var handleArrowLeft = function(){
 
         }
 
-        setCursor( page, paragraph, line, lineChar, node, nodeChar );
+        setCursor( page, paragraph, line, lineChar, node, nodeChar, false, true );
         updateToolsLineStatus();
 
     }else{
@@ -3498,15 +3498,15 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value );
         paragraph.lineList[ 0 ].nodeList.unshift( newNode );
 
-        paragraph.listMode                  = LIST_BULLET;
-        paragraph.indentationSpecialType    = INDENTATION_HANGING;
-        paragraph.indentationSpecialValue   = value;
-        paragraph.lineList[ 0 ].tabList     = [ 1 ]; // To Do -> Conservar el resto de tabuladores
-        paragraph.lineList[ 0 ].totalChars += 2;
         newNode.blocked                     = true;
         newNode.string                      = String.fromCharCode( 8226 ) + '\t';
         newNode.style.color                 = '#000000';
         newNode.style['font-family']        = 'Webdings'; // To Do -> No usar webdings
+        paragraph.listMode                  = LIST_BULLET;
+        paragraph.indentationSpecialType    = INDENTATION_HANGING;
+        paragraph.indentationSpecialValue   = value;
+        paragraph.lineList[ 0 ].tabList     = [ 1 ]; // To Do -> Conservar el resto de tabuladores
+        paragraph.lineList[ 0 ].totalChars += newNode.string.length;
 
         setNodeStyle( paragraph, paragraph.lineList[ 0 ], newNode, 'font-size', paragraph.lineList[ 0 ].nodeList[ 1 ].style['font-size'] );
 
@@ -3529,6 +3529,23 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
                 pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
             });
+
+        }
+
+        if( currentRangeStart ){
+
+            currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
+            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.lineChar = currentRangeStart.lineChar + newNode.string.length;
+            currentRangeEnd.nodeId     = currentRangeEnd.nodeId + 1;
+            currentRangeEnd.node       = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.lineChar   = currentRangeEnd.lineChar + newNode.string.length;
+
+        }else{
+
+            currentNodeId     = currentNodeId + 1;
+            currentNode       = currentLine.nodeList[ currentNodeId ];
+            currentLineCharId = currentLineCharId + newNode.string.length;
 
         }
 
@@ -3587,7 +3604,7 @@ var setCanvasTextStyle = function( style ){
 
 };
 
-var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force ){
+var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force, moveToLeft ){
 
     currentRangeStart     = null;
     currentRangeEnd       = null;
@@ -3642,6 +3659,73 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     // Actualizamos el nodo si es necesario
     if( force || currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line || currentNodeId !== node ){
         currentNode = currentLine.nodeList[ node ];
+    }
+
+    // Si intentamos posicionarnos en un nodo bloqueado nos vamos al siguiente
+    if( currentNode.blocked ){
+
+        if( moveToLeft ){
+
+            // Ignoramos el nodo anterior en la linea anterior porque a día de hoy no se dará nunca el caso
+
+            // Si existe una línea anterior en el párrafo actual
+            if( currentParagraph.lineList[ line - 1 ] ){
+
+                return setCursor(
+
+                    page,
+                    paragraph,
+                    line - 1,
+                    currentParagraph.lineList[ line - 1 ].totalChars,
+                    currentParagraph.lineList[ line - 1 ].nodeList.length - 1,
+                    currentParagraph.lineList[ line - 1 ].nodeList.slice( -1 )[ 0 ].string.length,
+                    true
+
+                );
+
+            }
+
+            // Si existe un párrafo anterior en la página actual
+            if( currentPage.paragraphList[ paragraph - 1 ] ){
+
+                return setCursor(
+
+                    page,
+                    paragraph - 1,
+                    currentPage.paragraphList[ paragraph - 1 ].lineList.length - 1,
+                    currentPage.paragraphList[ paragraph - 1 ].lineList.slice( -1 )[ 0 ].totalChars,
+                    currentPage.paragraphList[ paragraph - 1 ].lineList.slice( -1 )[ 0 ].nodeList.length - 1,
+                    currentPage.paragraphList[ paragraph - 1 ].lineList.slice( -1 )[ 0 ].nodeList.slice( -1 )[ 0 ].string.length,
+                    true
+
+                );
+
+            }
+
+            // Si existe una página anterior en el documento
+            if( pageList[ page - 1 ] ){
+
+                return setCursor(
+
+                    page - 1,
+                    pageList[ page - 1 ].paragraphList.length - 1,
+                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.length - 1,
+                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.slice( -1 )[ 0 ].totalChars,
+                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.slice( -1 )[ 0 ].nodeList.length - 1,
+                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.slice( -1 )[ 0 ].nodeList.slice( -1 )[ 0 ].string.length,
+                    true
+
+                );
+                
+            }
+
+            // En tal caso nos encontramos al principio del documento, setteamos el elemento siguiente al nodo bloqueado
+            return setCursor( page, paragraph, line, currentNode.string.length, node + 1, 0, true );
+
+        }
+
+        return setCursor( page, paragraph, line, currentNode.string.length, node + 1, 0, true );
+
     }
 
     // Calculamos la posición vertical si es necesario
@@ -4697,7 +4781,7 @@ selections
         ( clickCounter > 1 && compareHashes( currentMultipleHash, [ start.pageId, start.paragraphId, start.lineId, start.lineChar ] ) )
     ){
 
-        setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
+        setCursor( pageId, paragraphId, lineId, lineChar, nodeId, nodeChar, true );
         resetBlink();
 
         selectionStart = {
