@@ -856,12 +856,28 @@ var drawRange = function(){
 var drawRuleLeft = function(){
 
     // To Do -> Seguramente el alto no corresponde
+    // To Do -> Renderizar solo la parte que deba mostrarse
 
     checkCanvasRuleLeftSize();
 
+    // Calculamos cuanto espacio hay por encima de la página actual
+    var top = 0;
+
+    for( var i = 0; i < currentPageId; i++ ){
+        top = pageList[ i ].height + GAP;
+    }
+
+    // Comprobamos si deben dibujarse los márgenes de la página actual
+    if( scrollTop > top + currentPage.height ){
+        console.log('no hay nada que renderizar');
+        return;
+    }
+
+    top -= scrollTop;
+
     // Dibujamos el fondo
     ctxRuleLeft.beginPath();
-    ctxRuleLeft.rect( 0, 0, 15, currentPage.height );
+    ctxRuleLeft.rect( 0, top, 15, currentPage.height );
     ctxRuleLeft.fillStyle = '#ffffff';
     ctxRuleLeft.fill();
     ctxRuleLeft.lineWidth = 1;
@@ -870,13 +886,13 @@ var drawRuleLeft = function(){
 
     // Dibujamos el fondo del margen izquierdo
     ctxRuleLeft.beginPath();
-    ctxRuleLeft.rect( 1, 1, 13, currentPage.marginTop );
+    ctxRuleLeft.rect( 1, 1 + top, 13, currentPage.marginTop );
     ctxRuleLeft.fillStyle = '#e4e4e4';
     ctxRuleLeft.fill();
 
     // Dibujamos el fondo del margen derecho
     ctxRuleLeft.beginPath();
-    ctxRuleLeft.rect( 1, currentPage.height - currentPage.marginBottom, 13, currentPage.marginBottom );
+    ctxRuleLeft.rect( 1, top + currentPage.height - currentPage.marginBottom, 13, currentPage.marginBottom );
     ctxRuleLeft.fillStyle = '#e4e4e4';
     ctxRuleLeft.fill();
 
@@ -910,7 +926,7 @@ var drawRuleLeft = function(){
 
             ctxRuleLeft.fillStyle = '#6e6e6e';
 
-            ctxRuleLeft.fillText( Math.abs( pos ).toString(), 8, height );
+            ctxRuleLeft.fillText( Math.abs( pos ).toString(), 7.5, parseInt( height + top, 10 ) );
 
         // Si es múltiplo de 0.5, le toca linea grande
         }else if( pos % 0.5 === 0 ){ // To Do -> Quizás haya algún problema con la precisión de las divisiones de JS. Estar pendientes
@@ -918,7 +934,7 @@ var drawRuleLeft = function(){
             ctxRuleLeft.fillStyle = '#cacaca';
 
             ctxRuleLeft.beginPath();
-            ctxRuleLeft.rect( 4, parseInt( height, 10 ), 7, 1 );
+            ctxRuleLeft.rect( 4, parseInt( height + top, 10 ), 7, 1 );
             ctxRuleLeft.fill();
 
         // Es un múltiplo de 0.25, le toca linea pequeña
@@ -927,7 +943,7 @@ var drawRuleLeft = function(){
             ctxRuleLeft.fillStyle = '#cacaca';
 
             ctxRuleLeft.beginPath();
-            ctxRuleLeft.rect( 6, parseInt( height, 10 ), 3, 1 );
+            ctxRuleLeft.rect( 6, parseInt( height + top, 10 ), 3, 1 );
             ctxRuleLeft.fill();
 
         }
@@ -939,7 +955,7 @@ var drawRuleLeft = function(){
 
     // Dibujamos el borde
     ctxRuleLeft.beginPath();
-    ctxRuleLeft.rect( 0.5, 0.5, 14, currentPage.height );
+    ctxRuleLeft.rect( 0.5, 0.5 + top, 14, currentPage.height );
     ctxRuleLeft.lineWidth = 1;
     ctxRuleLeft.strokeStyle = '#cacaca';
     ctxRuleLeft.stroke();
