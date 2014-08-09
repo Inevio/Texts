@@ -1310,7 +1310,7 @@ var getWordsMetrics = function( line ){
 
 var handleArrowDown = function(){
 
-    var pageId, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j;
+    var pageId, paragraph, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j, wHeritage;
 
     // Comprobamos si es la última línea del párrafo
     if( currentLineId === currentParagraph.lineList.length - 1 ){
@@ -1348,8 +1348,9 @@ var handleArrowDown = function(){
     // Si no estaba activado el modo de teclas verticales lo activamos
     if( !verticalKeysEnabled ){
         
-        verticalKeysEnabled  = true;
-        verticalKeysPosition = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        verticalKeysEnabled   = true;
+        verticalKeysPosition  = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        verticalKeysPosition += getLineIndentationLeftOffset( currentLineId, currentParagraph );
 
         for( i = 0; i < currentNodeId; i++ ){
             verticalKeysPosition += currentLine.nodeList[ i ].width;
@@ -1358,15 +1359,20 @@ var handleArrowDown = function(){
     }
 
     // Buscamos el nuevo caracter
-    line     = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ];
-    nodeList = line.nodeList;
-    lineChar = 0;
+    paragraph = pageList[ pageId ].paragraphList[ paragraphId ];
+    line      = paragraph.lineList[ lineId ];
+    nodeList  = line.nodeList;
+    lineChar  = 0;
+    wHeritage = getLineIndentationLeftOffset( lineId, paragraph );
 
     for( i = 0; i < nodeList.length; i++ ){
 
-        if( nodeList[ i ].width < verticalKeysPosition ){
-            lineChar += nodeList[ i ].string.length;
+        if( wHeritage + nodeList[ i ].width < verticalKeysPosition ){
+
+            lineChar  += nodeList[ i ].string.length;
+            wHeritage += nodeList[ i ].width;
             continue;
+            
         }
 
         nodeId   = i;
@@ -1375,10 +1381,10 @@ var handleArrowDown = function(){
 
         for( j = 0; j < charList.length; j++ ){
 
-            if( charList[ j ] > verticalKeysPosition ){
+            if( wHeritage + charList[ j ] > verticalKeysPosition ){
                 nodeChar = j;
                 break;
-            }else if( j === charList.length - 1 || charList[ j ] === verticalKeysPosition ){
+            }else if( j === charList.length - 1 || wHeritage + charList[ j ] === verticalKeysPosition ){
                 nodeChar = j + 1;
                 break;
             }
@@ -1624,7 +1630,7 @@ var handleArrowRight = function(){
 
 var handleArrowUp = function(){
 
-    var pageId, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j;
+    var pageId, paragraph, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j, wHeritage;
 
     // Comprobamos si es la primera línea del párrafo
     if( currentLineId === 0 ){
@@ -1662,8 +1668,9 @@ var handleArrowUp = function(){
     // Si no estaba activado el modo de teclas verticales lo activamos
     if( !verticalKeysEnabled ){
         
-        verticalKeysEnabled  = true;
-        verticalKeysPosition = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        verticalKeysEnabled   = true;
+        verticalKeysPosition  = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        verticalKeysPosition += getLineIndentationLeftOffset( currentLineId, currentParagraph );
 
         for( i = 0; i < currentNodeId; i++ ){
             verticalKeysPosition += currentLine.nodeList[ i ].width;
@@ -1672,15 +1679,20 @@ var handleArrowUp = function(){
     }
 
     // Buscamos el nuevo caracter
-    line     = pageList[ pageId ].paragraphList[ paragraphId ].lineList[ lineId ];
-    nodeList = line.nodeList;
-    lineChar = 0;
+    paragraph = pageList[ pageId ].paragraphList[ paragraphId ];
+    line      = paragraph.lineList[ lineId ];
+    nodeList  = line.nodeList;
+    lineChar  = 0;
+    wHeritage = getLineIndentationLeftOffset( lineId, paragraph );
 
     for( i = 0; i < nodeList.length; i++ ){
 
-        if( nodeList[ i ].width < verticalKeysPosition ){
-            lineChar += nodeList[ i ].string.length;
+        if( wHeritage + nodeList[ i ].width < verticalKeysPosition ){
+
+            lineChar  += nodeList[ i ].string.length;
+            wHeritage += nodeList[ i ].width;
             continue;
+
         }
 
         nodeId   = i;
@@ -1689,10 +1701,10 @@ var handleArrowUp = function(){
 
         for( j = 0; j < charList.length; j++ ){
 
-            if( charList[ j ] > verticalKeysPosition ){
+            if( wHeritage + charList[ j ] > verticalKeysPosition ){
                 nodeChar = j;
                 break;
-            }else if( j === charList.length - 1 || charList[ j ] === verticalKeysPosition ){
+            }else if( j === charList.length - 1 || wHeritage +  charList[ j ] === verticalKeysPosition ){
                 nodeChar = j + 1;
                 break;
             }
