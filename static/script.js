@@ -4445,6 +4445,9 @@ input.on( 'keydown', function(e){
         handleChar( e.key );
         updatePages();
 
+        waitingCheckLetter = false;
+        input[ 0 ].value   = '';
+
     }else if( e.which === 8 ){
 
         handleBackspace();
