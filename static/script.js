@@ -2870,8 +2870,9 @@ var processUnprocessedFile = function( data ){
             
             // To Do -> Importar estilos
 
-            node        = createNode( line );
-            node.string = data.paragraphList[ i ].nodeList[ j ].text;
+            node         = createNode( line );
+            node.string  = data.paragraphList[ i ].nodeList[ j ].text;
+            node.blocked = !!data.paragraphList[ i ].nodeList[ j ].blocked;
 
             setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style.color );
             setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
