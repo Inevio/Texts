@@ -881,11 +881,13 @@ var drawRuleLeft = function(){
     ctxRuleLeft.fill();
 
     // Calculamos la posición de inicio
-    var limit  = ( currentPage.height - currentPage.marginTop ) / CENTIMETER ;
-    var pos    = -( currentPage.marginTop / CENTIMETER );
-    var height = 0;
+    var limit      = ( currentPage.height - currentPage.marginTop ) / CENTIMETER;
+    var pos        = -parseFloat( ( currentPage.marginTop / CENTIMETER ).toFixed( 2 ) );
+    var correction = parseFloat( ( parseFloat( Math.ceil( pos * 4 ) / 4 ).toFixed( 2 ) - pos ).toFixed( 2 ) ); // Redondea al múltiplo de 0.25 más cercano
+    var height     = correction * CENTIMETER;
 
-    // To Do -> Ajustarlo para que la posición siempre sea un múltiplo de 0,25
+    // Ajusta la posición al redondea al múltiplo de 0.25 más cercano
+    pos += correction;
 
     // Dibujamos las líneas
     ctxRuleLeft.font         = '10px Effra';
@@ -898,7 +900,7 @@ var drawRuleLeft = function(){
         if( !pos ){
 
             height += 0.25 * CENTIMETER;
-            pos   += 0.25;
+            pos    += 0.25;
             continue;
 
         }
@@ -969,11 +971,13 @@ var drawRuleTop = function(){
     ctxRuleTop.fill();
 
     // Calculamos la posición de inicio
-    var limit = ( currentPage.width - currentPage.marginLeft ) / CENTIMETER ;
-    var pos   = -( currentPage.marginLeft / CENTIMETER );
-    var width = 0;
+    var limit      = ( currentPage.width - currentPage.marginLeft ) / CENTIMETER ;
+    var pos        = -parseFloat( ( currentPage.marginLeft / CENTIMETER ).toFixed( 2 ) );
+    var correction = parseFloat( ( parseFloat( Math.ceil( pos * 4 ) / 4 ).toFixed( 2 ) - pos ).toFixed( 2 ) ); // Redondea al múltiplo de 0.25 más cercano
+    var width      = correction * CENTIMETER;
 
-    // To Do -> Ajustarlo para que la posición siempre sea un múltiplo de 0,25
+    // Ajusta la posición al redondea al múltiplo de 0.25 más cercano
+    pos += correction;
 
     // Dibujamos las líneas
     ctxRuleTop.font         = '10px Effra';
