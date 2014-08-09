@@ -1372,7 +1372,7 @@ var handleArrowDown = function(){
             lineChar  += nodeList[ i ].string.length;
             wHeritage += nodeList[ i ].width;
             continue;
-            
+
         }
 
         nodeId   = i;
@@ -2856,6 +2856,10 @@ var processUnprocessedFile = function( data ){
         //To Do -> Importar estilos
         setParagraphStyle( 0, page, i, paragraph, 'align', data.paragraphList[ i ].align );
 
+        if( data.paragraphList[ i ].spacing ){
+            paragraph.spacing = data.paragraphList[ i ].spacing;
+        }
+
         if( data.paragraphList[ i ].listMode ){
             paragraph.listMode = data.paragraphList[ i ].listMode;
         }
@@ -3136,9 +3140,7 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     // Mismos nodos, necesitamos partir
     if( nextLineWords[ lastWordToMove + 1 ] && nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] === nextLineWords[ lastWordToMove + 1 ].nodeList[ 0 ] ){
-
-        console.log('necesario partir');
-
+        
         // Comprobamos si la primera palabra a mover tiene el mismo nodo que la ultima a mover
         // Partido de un solo nodo
         if( nextLineWords[ 0 ].nodeList[ 0 ] === nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] ){
