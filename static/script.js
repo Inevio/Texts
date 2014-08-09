@@ -450,7 +450,7 @@ var createLine = function( id, paragraph ){
 
     // To Do -> Asignar la altura dinámicamente
     line.height = 0;
-    line.width  = paragraph.width;// - getLineIndentationLeft( id, paragraph ); // To Do -> Esto falla cuando es un párrafo múltiple
+    line.width  = paragraph.width - getLineIndentationLeft( id, paragraph );
 
     // Creamos el nodo inicial
     line.nodeList.push( createNode() );
@@ -617,7 +617,7 @@ var drawPages = function(){
                         ctx.fillText(
 
                             node.string,
-                            page.marginLeft + getLineIndentationLeft( j, paragraph ) + wHeritage,
+                            page.marginLeft + getLineIndentationLeftOffset( j, paragraph ) + wHeritage,
                             pageHeight + page.marginTop + line.height + hHeritage
 
                         );
@@ -683,7 +683,7 @@ var drawRange = function(){
     startWidth += currentRangeStart.page.marginLeft;
 
     // Margen izquierdo del párrafo
-    startWidth += getLineIndentationLeft( currentRangeStart.lineId, currentRangeStart.paragraph );
+    startWidth += getLineIndentationLeftOffset( currentRangeStart.lineId, currentRangeStart.paragraph );
 
     // Alineación del párrafo
     startWidth += getLineOffset( currentRangeStart.line, currentRangeStart.paragraph );
@@ -791,7 +791,7 @@ var drawRange = function(){
 
             }
 
-            offset = page.marginLeft + getLineIndentationLeft( lineId, paragraph ) + getLineOffset( line, paragraph );
+            offset = page.marginLeft + getLineIndentationLeftOffset( lineId, paragraph ) + getLineOffset( line, paragraph );
             width  = 0;
 
             // Obtenemos el tamaño de rectangulo a colorear
@@ -826,7 +826,7 @@ var drawRange = function(){
 
         // Coloreamos la línea del final de forma parcial
         width  = 0;
-        offset = currentRangeEnd.page.marginLeft + getLineIndentationLeft( currentRangeEnd.lineId, currentRangeEnd.paragraph ) + getLineOffset( currentRangeEnd.line, currentRangeEnd.paragraph );
+        offset = currentRangeEnd.page.marginLeft + getLineIndentationLeftOffset( currentRangeEnd.lineId, currentRangeEnd.paragraph ) + getLineOffset( currentRangeEnd.line, currentRangeEnd.paragraph );
 
         for( i = 0; i < currentRangeEnd.nodeId; i++ ){
             width += currentRangeEnd.line.nodeList[ i ].width;
@@ -1108,11 +1108,25 @@ var getCommonStyles = function( start, end ){
 
 var getLineIndentationLeft = function( id, paragraph ){
 
+    if( !id && paragraph.indentationSpecialType === 1 ){
+        return paragraph.indentationSpecialValue;
+    }
+
+    if( id && paragraph.indentationSpecialType === 2 ){
+        return paragraph.indentationSpecialValue;
+    }
+
+    return 0;
+
+};
+
+var getLineIndentationLeftOffset = function( id, paragraph ){
+
     var width = paragraph.indentationLeft;
 
-    if( paragraph.indentationSpecialType === 1 && !id ){
+    if( !id && paragraph.indentationSpecialType === 1 ){
         width += paragraph.indentationSpecialValue;
-    }else if( paragraph.indentationSpecialType === 2 && id ){
+    }else if( id && paragraph.indentationSpecialType === 2 ){
         width += paragraph.indentationSpecialValue;
     }
 
@@ -2152,7 +2166,7 @@ var handleCharNormal = function( newChar ){
         // Reiniciamos la posición horizontal
         positionAbsoluteX  = 0;
         positionAbsoluteX += currentPage.marginLeft;
-        positionAbsoluteX += getLineIndentationLeft( currentLineId, currentParagraph );
+        positionAbsoluteX += getLineIndentationLeftOffset( currentLineId, currentParagraph );
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
 
         for( i = 0; i < currentNodeId; i++ ){
@@ -2173,7 +2187,7 @@ var handleCharNormal = function( newChar ){
         // To Do -> Quizás pueda optimizarse
         positionAbsoluteX  = 0;
         positionAbsoluteX += currentPage.marginLeft;
-        positionAbsoluteX += getLineIndentationLeft( currentLineId, currentParagraph );
+        positionAbsoluteX += getLineIndentationLeftOffset( currentLineId, currentParagraph );
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
 
         for( i = 0; i < currentNodeId; i++ ){
@@ -2573,7 +2587,7 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
         var prev       = 0;
         var multiples  = 0;
         var heritage   = 0;
-        var identation = getLineIndentationLeft( lineId, paragraph );
+        var identation = getLineIndentationLeftOffset( lineId, paragraph );
 
         for( i = nodeChar + 1; i <= node.string.length; i++ ){
 
@@ -2793,26 +2807,6 @@ var processUnprocessedFile = function( data ){
         line          = paragraph.lineList[ 0 ];
         line.nodeList = [];
 
-        for( j = 0; j < data.paragraphList[ i ].nodeList.length; j++ ){
-            
-            // To Do -> Importar estilos
-
-            node        = createNode( line );
-            node.string = data.paragraphList[ i ].nodeList[ j ].text;
-
-            setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style.color );
-            setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
-            setNodeStyle( paragraph, line, node, 'font-style', data.paragraphList[ i ].nodeList[ j ].style['font-style'] );
-            setNodeStyle( paragraph, line, node, 'font-weight', data.paragraphList[ i ].nodeList[ j ].style['font-weight'] );
-            setNodeStyle( paragraph, line, node, 'font-size', data.paragraphList[ i ].nodeList[ j ].style['font-size'] );
-
-            measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
-            line.nodeList.push( node );
-
-            line.totalChars += node.string.length;
-
-        }
-
         //To Do -> Importar estilos
         setParagraphStyle( 0, page, i, paragraph, 'align', data.paragraphList[ i ].align );
 
@@ -2833,7 +2827,28 @@ var processUnprocessedFile = function( data ){
             value                      = data.paragraphList[ i ].indentationLeft * CENTIMETER;
             paragraph.indentationLeft += value;
             paragraph.width           -= value;
-            line.width                -= value;
+
+        }
+
+        line.width -= getLineIndentationLeftOffset( 0, paragraph );
+
+        for( j = 0; j < data.paragraphList[ i ].nodeList.length; j++ ){
+            
+            // To Do -> Importar estilos
+
+            node        = createNode( line );
+            node.string = data.paragraphList[ i ].nodeList[ j ].text;
+
+            setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style.color );
+            setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
+            setNodeStyle( paragraph, line, node, 'font-style', data.paragraphList[ i ].nodeList[ j ].style['font-style'] );
+            setNodeStyle( paragraph, line, node, 'font-weight', data.paragraphList[ i ].nodeList[ j ].style['font-weight'] );
+            setNodeStyle( paragraph, line, node, 'font-size', data.paragraphList[ i ].nodeList[ j ].style['font-size'] );
+
+            measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
+            line.nodeList.push( node );
+
+            line.totalChars += node.string.length;
 
         }
 
@@ -3654,7 +3669,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         positionAbsoluteX += currentPage.marginLeft;
 
         // Margen lateral del párrafo
-        positionAbsoluteX += getLineIndentationLeft( line, currentParagraph );
+        positionAbsoluteX += getLineIndentationLeftOffset( line, currentParagraph );
 
         // Alineación de la línea
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
@@ -4575,7 +4590,7 @@ selections
     width += page.marginLeft;
 
     // Tenemos en cuenta el margen del párrafo
-    width += getLineIndentationLeft( lineId, paragraph );
+    width += getLineIndentationLeftOffset( lineId, paragraph );
 
     // Tenemos en cuenta la alineación del párrafo
     width += getLineOffset( line, paragraph );
@@ -4874,7 +4889,7 @@ selections
     width += page.marginLeft;
 
     // Tenemos en cuenta el margen del párrafo
-    width += getLineIndentationLeft( lineId, paragraph );
+    width += getLineIndentationLeftOffset( lineId, paragraph );
 
     // Tenemos en cuenta la alineación del párrafo
     width += getLineOffset( line, paragraph );
