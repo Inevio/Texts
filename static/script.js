@@ -4675,6 +4675,10 @@ win.on( 'app-param', function( e, params ){
 
 });
 
+win.parent().on( 'wz-dragend', function(){
+    input.focus();
+});
+
 saveButton.on( 'click', function(){
     
     if( currentOpenFile ){
