@@ -18,6 +18,7 @@ var CMD_NEWCHAR = 1;
 var CMD_STYLE_MARGIN = 2;
 var CMD_STYLE_LISTBULLET = 3;
 var DEBUG = false;
+var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff'
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var GAP = 20;
@@ -28,18 +29,32 @@ var LIST_NONE = 0;
 var LIST_BULLET = 1;
 var LIST_NUMBER = 2;
 var LINESPACING = [ '1.0', '1.15', '1.5', '2.0', '2.5', '3.0' ];
-var MARGIN_NORMAL = {
+var MARGIN = {
 
-    top    : 2.5 * CENTIMETER,
-    right  : 2.5 * CENTIMETER,
-    bottom : 2.5 * CENTIMETER,
-    left   : 2.5 * CENTIMETER
+    'Normal'              : { top : 2.54, left : 2.54, bottom : 2.54, right : 2.54 },
+    'Narrow'              : { top : 1.27, left : 1.27, bottom : 1.27, right : 1.27 },
+    'Moderate'            : { top : 2.54, left : 1.9,  bottom : 2.54, right : 1.9  },
+    'Wide'                : { top : 2.54, left : 5.08, bottom : 2.54, right : 5.08 },
+    'Mirrored'            : { top : 2.54, left : 3.17, bottom : 2.54, right : 2.54 },
+    'Office 2003 Default' : { top : 2.54, left : 3.17, bottom : 2.54, right : 3.17 }
 
 };
-var PAGE_A4 = {
+var PAGEDIMENSIONS = {
 
-    width  : /*21*/ 12 * CENTIMETER,
-    height : 29.7 * CENTIMETER
+    'US Letter'          : { width : 21.59, height : 27.94 },
+    'US Legal'           : { width : 21.59, height : 35.56 },
+    'A4'                 : { width : 21,    height : 29.7  },
+    'A5'                 : { width : 14.81, height : 20.99 },
+    'JIS B5'             : { width : 18.2,  height : 25.71 },
+    'B5'                 : { width : 17.6,  height : 25.01 },
+    'Envelope #10'       : { width : 10.48, height : 24.13 },
+    'Envelope DL'        : { width : 11.01, height : 22.01 },
+    'Tabloid'            : { width : 27.94, height : 43.17 },
+    'A3'                 : { width : 29.7,  height : 42.01 },
+    'Tabloid Oversize'   : { width : 30.48, height : 45.71 },
+    'ROC 16K'            : { width : 19.68, height : 27.3  },
+    'Envelope Choukei 3' : { width : 11.99, height : 23.49 },
+    'Super B/A3'         : { width : 33.02, height : 48.25 }
 
 };
 
@@ -47,6 +62,7 @@ var PAGE_A4 = {
 var win            = $(this);
 var header         = $('.wz-ui-header');
 var saveButton     = $('.option-save');
+var toolsMenu      = $('.toolbar-menu');
 var toolsLine      = $('.tools-line');
 var toolsList      = $('.toolbar-list');
 var pages          = $('.pages');
@@ -190,20 +206,27 @@ var buttonAction = {
 
     listNumber : function(){
         setSelectedParagraphsStyle('listNumber');
+    },
+
+    pageBackgroundColor : function( value ){
+        console.log( 'pageBackgroundColor', value );
+        setPagesStyle( 'pageBackgroundColor', value );
     }
 
 };
 
 // Preprocesed data
-var fontfamilyCode  = '';
-var fontsizeCode    = '';
-var linespacingCode = '';
+var fontfamilyCode     = '';
+var fontsizeCode       = '';
+var linespacingCode    = '';
+var pageDimensionsCode = '';
+var marginsCode        = '';
 
-var refrescos = 0;
+var fps = 0;
 
 setInterval( function(){
-    //console.log( refrescos + ' fps' );
-    refrescos = 0;
+    //console.log( fps + ' fps' );
+    fps = 0;
 }, 1000 );
 
 var activeRealTime = function(){
@@ -471,17 +494,18 @@ var createNode = function(){
 
 };
 
-var createPage = function( pageInfo, marginInfo ){
+var createPage = function( pageInfo, marginInfo, backgroundColor ){
 
     var page = newPage();
 
     // Definimos los atibutos
-    page.width        = pageInfo.width;
-    page.height       = pageInfo.height;
-    page.marginTop    = marginInfo.top;
-    page.marginRight  = marginInfo.right;
-    page.marginBottom = marginInfo.bottom;
-    page.marginLeft   = marginInfo.left;
+    page.width           = pageInfo.width;
+    page.height          = pageInfo.height;
+    page.marginTop       = marginInfo.top;
+    page.marginRight     = marginInfo.right;
+    page.marginBottom    = marginInfo.bottom;
+    page.marginLeft      = marginInfo.left;
+    page.backgroundColor = backgroundColor || DEFAULT_PAGE_BACKGROUNDCOLOR;
 
     // Creamos el párrafo inicial
     page.paragraphList.push( createParagraph( page ) );
@@ -586,7 +610,7 @@ var drawPages = function(){
 
         ctx.beginPath();
         ctx.rect( 0.5, pageHeight, page.width, page.height );
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = page.backgroundColor;
         ctx.fill();
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#cacaca';
@@ -1444,7 +1468,7 @@ var handleArrowLeft = function(){
             currentNodeCharId === 1 &&
             !currentLine.nodeList[ currentNodeId - 1 ].blocked
         )
-        
+
     ){
 
         var page, paragraph, line, lineChar, node, nodeChar;
@@ -2735,13 +2759,14 @@ var newPage = function(){
     
     return {
 
-        height        : 0,
-        marginBottom  : 0,
-        marginLeft    : 0,
-        marginRight   : 0,
-        marginTop     : 0,
-        paragraphList : [],
-        width         : 0
+        height          : 0,
+        marginBottom    : 0,
+        marginLeft      : 0,
+        marginRight     : 0,
+        marginTop       : 0,
+        paragraphList   : [],
+        width           : 0,
+        backgroundColor : DEFAULT_PAGE_BACKGROUNDCOLOR
 
     };
 
@@ -3309,7 +3334,9 @@ var realocatePage = function( id ){
                 right  : page.marginRight,
                 bottom : page.marginBottom,
                 left   : page.marginLeft
-            }
+            },
+
+            page.backgroundColor
 
         );
 
@@ -3877,6 +3904,24 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     
 };
 
+var setPagesStyle = function( key, value ){
+
+    for( var i = 0; i < pageList.length; i++ ){
+        setPageStyle( pageList[ i ], key, value );
+    }
+
+};
+
+var setPageStyle = function( page, key, value ){
+
+    if( key === 'pageBackgroundColor' ){
+        page.backgroundColor = value;
+    }
+
+    updatePages();
+
+};
+
 var setRange = function( start, end, force ){
 
     // To Do -> Podemos pasarle las coordenadas para evitar cálculos
@@ -4309,7 +4354,28 @@ var start = function(){
     input.focus();
 
     if( !currentOpenFile ){
-        pageList.push( createPage( PAGE_A4, MARGIN_NORMAL ) );
+
+        pageList.push(
+
+            createPage(
+
+                {
+                    width : PAGEDIMENSIONS['A4'].width * CENTIMETER,
+                    height : PAGEDIMENSIONS['A4'].height * CENTIMETER
+                },
+
+                {
+
+                    top    : MARGIN['Normal'].top * CENTIMETER,
+                    right  : MARGIN['Normal'].right * CENTIMETER,
+                    bottom : MARGIN['Normal'].bottom * CENTIMETER,
+                    left   : MARGIN['Normal'].left * CENTIMETER
+
+                }
+
+            )
+
+        );
         
         var paragraph = pageList[ 0 ].paragraphList[ 0 ];
         var line      = pageList[ 0 ].paragraphList[ 0 ].lineList[ 0 ];
@@ -4344,7 +4410,7 @@ var updateBlink = function(){
         return;
     }
 
-    refrescos++;
+    fps++;
 
     if( !blinkEnabled ){
 
@@ -4405,7 +4471,7 @@ var updateBlink = function(){
             );
 
             // Texto del nombre
-            ctxSel.fillStyle = '#fff';
+            ctxSel.fillStyle = '#ffffff';
 
             ctxSel.fillText(
 
@@ -4424,7 +4490,7 @@ var updateBlink = function(){
             debugTime('cursor on');
 
             blinkCurrent     = newCurrent;
-            ctxSel.fillStyle = '#000';
+            ctxSel.fillStyle = '#000000';
 
             ctxSel.fillRect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ), 1, currentNode.height );
 
@@ -5196,10 +5262,23 @@ selections
 
 });
 
+toolsMenu
+.on( 'click', 'li:not(.active)', function(){
+
+    $(this).siblings('.active').removeClass('active');
+    $(this).addClass('active');
+    toolsLine.find('article')
+        .removeClass('active')
+        .eq( $(this).index() )
+            .addClass('active');
+
+});
+
 toolsLine
 .on( 'click', '.tool-button', function(){
 
     input.focus();
+    console.log( $(this).attr('data-tool'), $(this).attr('data-tool-value') );
     buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
     updateToolsLineStatus(); // To Do -> Quizás pueda optimizarse y aplicarse solo a los estilos que lo necesiten
 
@@ -5278,6 +5357,56 @@ toolsLine
 
     toolsList.find('[data-value="' + $(this).attr('data-value') + '"]').addClass('active');
 
+})
+
+.on( 'click', '.tool-button-page-dimensions', function(){
+
+    if( !pageDimensionsCode ){
+
+        for( var i in PAGEDIMENSIONS ){
+            pageDimensionsCode += '<li data-value="' + PAGEDIMENSIONS[ i ].width + '-' + PAGEDIMENSIONS[ i ].height + '"><i></i><span>' + i + '</span><span class="small">' + PAGEDIMENSIONS[ i ].width + 'cm x ' + PAGEDIMENSIONS[ i ].height + 'cm</span></li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-page-dimensions')
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
+
+        })
+        .html( pageDimensionsCode );
+
+    toolsList.find('[data-value="' + parseFloat( ( currentPage.width / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.height / CENTIMETER ).toFixed( 2 ) ) + '"]').addClass('active');
+
+})
+
+.on( 'click', '.tool-button-page-margins', function(){
+
+    if( !marginsCode ){
+
+        for( var i in MARGIN ){
+            marginsCode += '<li data-value="' + MARGIN[ i ].top + '-' + MARGIN[ i ].left + '-' + MARGIN[ i ].top + '-' + MARGIN[ i ].left + '"><i></i><span>' + i + '</span><span class="small"><span class="small-half">Top: ' + MARGIN[ i ].top + 'cm</span><span class="small-half">Bottom: ' + MARGIN[ i ].bottom + 'cm</span></span><span class="small"><span class="small-half">Left: ' + MARGIN[ i ].left + 'cm</span><span class="small-half">Right: ' + MARGIN[ i ].right + 'cm</span></li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-page-dimensions')
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
+
+        })
+        .html( marginsCode );
+
+    toolsList.find('[data-value="' + parseFloat( ( currentPage.marginTop / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.marginRight / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.marginBottom / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.marginRight / CENTIMETER ).toFixed( 2 ) ) + '"]').addClass('active');
+    
 });
 
 toolsList.on( 'click', 'li', function(){

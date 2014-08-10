@@ -12,18 +12,18 @@
     float: left;
 }
 
-.toolbar-menus{
+.toolbar-menu{
     height: 30px;
     width: 100%;
     float: left;
     border-bottom: 1px solid #cacaca;
 }
 
-.toolbar-menus ul{
+.toolbar-menu ul{
     padding: 4px 0 0 7px;
 }
 
-.toolbar-menus li{
+.toolbar-menu li{
     float: left;
     font-size: 13px;
     color: #666;
@@ -32,7 +32,7 @@
     border : 1px solid transparent;
 }
 
-.toolbar-menus li.active{
+.toolbar-menu li.active{
     background-color: #f5f5f5;
     box-shadow: inset 0 1px rgba(255,255,255,.5);
     border: solid 1px #cacaca;
@@ -45,6 +45,14 @@
     float: left;
     background: #f5f5f5;
     border-bottom: 1px solid #cacaca;
+}
+
+.tools-group{
+    display: none;
+}
+
+.tools-group.active{
+    display: block;
 }
 
 .tool{
@@ -87,7 +95,6 @@
 }
 
 .tool-button, .tool-list-button{
-    width: 24px;
     height: 24px;
     border-radius: 3px;
     border: 1px solid transparent;
@@ -110,8 +117,8 @@
 
 .tool-button i, .tool-list-button i{
     background: url('@static/sprite.png') 0 0;
-    background-size: 155px 17px;
-    display: block;
+    background-size: 234px 18px;
+    display: inline-block;
 }
 
 .tool-button-bold i{
@@ -205,6 +212,57 @@
     background-position: -141px 0;
 }
 
+.tool-button-page-orientation{
+    margin-right: 6px;
+}
+
+.tool-button-page-orientation i{
+    margin: 3px 2px 3px 3px;
+    width: 19px;
+    height: 18px;
+    background-position: -155px 0;
+}
+
+.tool-button-page-orientation.vertical i{
+    margin: 3px 2px;
+    width: 20px;
+    height: 18px;
+    background-position: -174px 0;
+}
+
+.tool-button-page-dimensions i{
+    margin: 3px 5px 3px 4px;
+    width: 15px;
+    height: 18px;
+    background-position: -194px 0;
+}
+
+.tool-button-page-margins i{
+    margin: 5px 6px 4px;
+    width: 12px;
+    height: 15px;
+    background-position: -209px 0;
+}
+
+.tool-button-page-color i{
+    margin: 4px 5px 4px 6px;
+    width: 13px;
+    height: 16px;
+    background-position: -221px 0;
+}
+
+.tool .arrow{
+    background: none;
+    margin: 0 4px 0 -3px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #919191;
+    height: 0;
+    vertical-align: 9px;
+    width: 0;
+    display: inline-block;
+}
+
 .toolbar-list{
     position: absolute;
     z-index: 1;
@@ -212,6 +270,7 @@
     max-height: 450px;
     display: none;
     width: auto;
+    overflow: auto;
 }
 
 .toolbar-list li{
@@ -222,6 +281,20 @@
     width: 10px;
     height: 10px;
     margin-right: 5px;
+    display: inline-block;
+}
+
+.toolbar-list .small{
+    font-size: 12px;
+    color: #848484;
+    display: block;
+    height: 20px;
+    line-height: 12px;
+    margin-left: 15px;
+}
+
+.toolbar-list .small-half{
+    width: 95px;
     display: inline-block;
 }
 
