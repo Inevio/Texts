@@ -61,7 +61,6 @@ var PAGEDIMENSIONS = {
 
 // DOM variables
 var win            = $(this);
-var header         = $('.wz-ui-header');
 var saveButton     = $('.option-save');
 var toolsMenu      = $('.toolbar-menu');
 var toolsLine      = $('.tools-line');
@@ -89,14 +88,12 @@ var pageList = [];
 
 // Realtime variables
 var realtime      = null;
-var usersActive   = {};
 var usersPosition = {};
 var usersEditing  = {};
 
 // Waiting variables
 var waitingCheckLetter      = false;
 var waitingCheckLetterInput = false;
-var waitingCursorUpdate     = false;
 var waitingPageUpdate       = false;
 var waitingRangeUpdate      = false;
 var waitingRuleLeftUpdate   = false;
@@ -117,7 +114,6 @@ var verticalKeysPosition = 0;
 
 // Scroll variables
 var scrollTop    = 0;
-var scrollLeft   = 0;
 var maxScrollTop = 0;
 
 // Current variables
@@ -1899,13 +1895,7 @@ var handleBackspaceNormal = function(){
         currentNode.string   = currentNode.string.slice( 0, currentNodeCharId - 1 ).concat( currentNode.string.slice( currentNodeCharId ) );
         currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId - 1 );
 
-        setCanvasTextStyle( currentNode.style );
-
-        for( i = currentNodeCharId; i <= currentNode.string.length; i++ ){
-            currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
-        }
-
-        currentNode.width = currentNode.charList.slice( -1 )[ 0 ] || 0;
+        measureNode( currentParagraph, currentLine, currentLineId, currentLineCharId - 1, currentNode, currentNodeId, currentNodeCharId - 1 );
 
         currentLineCharId--;
         currentNodeCharId--;
@@ -2417,13 +2407,8 @@ var handleEnter = function(){
 
         }
 
-        setCanvasTextStyle( newNode.style );
+        measureNode( newParagraph, newLine, 0, 0, newNode, 0, 0 );
 
-        for( i = 1; i <= newNode.string.length; i++ ){
-            newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-        }
-
-        newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
         newLine.totalChars += newNode.string.length;
 
         // Eliminamos el contenido del nodo actual y actualizamos su tamaño
@@ -2546,8 +2531,6 @@ var handleEnter = function(){
 
 var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar ){
 
-    var i;
-
     node.string   = node.string.slice( 0, nodeChar ) + newChar + node.string.slice( nodeChar );
     node.charList = node.charList.slice( 0, nodeChar );
 
@@ -2557,7 +2540,8 @@ var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, l
     nodeChar++;
     lineChar++;
 
-    var realocation = realocateLine( lineId, lineChar ); // To Do -> Actualizar el realocateLine para que pueda funcionar en cualquier párrafo, no solo el que tiene el foco
+    /*var realocation = */
+    realocateLine( lineId, lineChar ); // To Do -> Actualizar el realocateLine para que pueda funcionar en cualquier párrafo, no solo el que tiene el foco
 
     /*
     if( realocation > 0 ){
@@ -2621,12 +2605,10 @@ var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, l
 
 };
 
-var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar ){
+var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar ){
 
     var i, maxSize, movedLines;
-    var newPageId      = 0;
     var newParagraph   = createParagraph( page );
-    var newParagraphId = paragraphId + 1;
     var newLine        = newParagraph.lineList[ 0 ];
     var newNode        = newLine.nodeList[ 0 ];
 
@@ -3611,8 +3593,7 @@ var realocatePage = function( id ){
 
 var realocatePageInverse = function( id ){
 
-    var page     = pageList[ id ];
-    var prevPage = pageList[ id + 1 ];
+    var page = pageList[ id ];
 
     // Si no hay párrafos en la página la eliminamos (salvo la primera que no puede eliminarse)
     if( id && !page.paragraphList.length ){
@@ -3663,7 +3644,7 @@ var realTimeMessage = function( info, data ){
 
     console.log( 'El usuario', info.sender, ' está editando', data );
 
-    var i, stop, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar, elements;
+    var page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar, elements;
 
     if( data.cmd === CMD_NEWCHAR ){
 
@@ -3754,9 +3735,9 @@ var realTimeUserConnect = function( info ){
     
 };
 
-var removeRangeLines = function( includeLimits, start, end, callback ){
+var removeRangeLines = function( includeLimits, start, end ){
 
-    var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoopId, nodeLoopId, finalPage, finalParagraph, fakeEndLineId, j, k, m;
+    var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoopId, finalPage, finalParagraph, j, k, m;
 
     lineLoopId      = start.lineId;
     paragraphLoopId = start.paragraphId;
@@ -4407,13 +4388,8 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            setCanvasTextStyle( currentRangeStart.node.style );
+            measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, 0, currentRangeStart.node, currentRangeStart.nodeId, 0 );
 
-            for( i = 1; i <= currentRangeStart.node.string.length; i++ ){
-                currentRangeStart.node.charList.push( ctx.measureText( currentRangeStart.node.string.slice( 0, i ) ).width );
-            }
-
-            currentRangeStart.node.width    = currentRangeStart.node.charList[ i - 2 ] || 0;
             currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
             currentRangeStart.node          = currentRangeStart.line.nodeList[ currentRangeEnd.nodeId ];
 
@@ -5099,7 +5075,7 @@ input.on( 'keydown', function(e){
 
 });
 
-input.on( 'keypress', function(e){
+input.on( 'keypress', function(){
     
     if( waitingCheckLetter && !waitingCheckLetterInput ){
 
