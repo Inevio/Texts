@@ -4687,7 +4687,9 @@ saveButton.on( 'click', function(){
 
 input.on( 'keydown', function(e){
 
-    if( e.key && e.key.length === 1 ){
+    if( e.ctrlKey || e.metaKey ){
+        return;
+    }else if( e.key && e.key.length === 1 ){
 
         handleChar( e.key );
         updatePages();
