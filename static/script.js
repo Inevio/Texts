@@ -18,7 +18,7 @@ var CMD_NEWCHAR = 1;
 var CMD_STYLE_MARGIN = 2;
 var CMD_STYLE_LISTBULLET = 3;
 var DEBUG = false;
-var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff'
+var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var GAP = 20;
@@ -237,127 +237,9 @@ var activeRealTime = function(){
 
     realtime = currentOpenFile.realtime();
 
-    realtime.connect(function( error, firstConnection){
-
-        // To Do -> Error
-        console.log( error, 'connected', 'firstConnection', firstConnection );
-        console.log( 1 );
-        realtime.getUserList( true, function( error, list ){
-
-            console.log( 2 );
-
-            // To Do -> Error
-            for( var i in list ){
-                usersEditing[ list[ i ].id ] = list[ i ];
-            }
-    
-            console.log( usersEditing );
-            console.log( error, list );
-
-        });
-
-        if( !realtime ){
-            return;
-        }
-
-        realtime.send({
-
-            cmd : CMD_POSITION,
-            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-        });
-        
-    });
-
-    realtime.on( 'message', function( info, data ){
-
-        if( info.selfClient ){
-            return;
-        }
-
-        console.log( 'El usuario', info.sender, ' está editando', data );
-
-        var page, paragraph, line, node;
-
-        if( data.cmd === CMD_NEWCHAR ){
-
-            page      = pageList[ data.data[ 0 ] ];
-            paragraph = page.paragraphList[ data.data[ 1 ] ];
-            line      = paragraph.lineList[ data.data[ 2 ] ];
-            node      = line.nodeList[ data.data[ 3 ] ];
-
-            handleRemoteChar( data.data[ 0 ], page, data.data[ 1 ], paragraph, data.data[ 2 ], line, data.data[ 3 ], node, data.data[ 4 ], data.data[ 5 ] );
-
-        }else if( data.cmd === CMD_STYLE_LISTBULLET ){
-
-            page      = pageList[ data.data[ 0 ] ];
-            paragraph = page.paragraphList[ data.data[ 1 ] ];
-
-            setParagraphStyle( data.data[ 0 ], page, data.data[ 1 ], paragraph, 'listBullet', null, true );
-
-        }
-
-        updateRemoteUserPosition( info.sender, data.pos );
-
-        /*
-        if( data.cmd === 'enableEditionMode' ){
-
-            //usersPosition[ info.sender ] = data.cell.x + '-' + data.cell.y;
-            usersEditing[ data.cell.x + '-' + data.cell.y ] = info.sender;
-
-            draw();
-
-        }else if( data.cmd === 'disableEditionMode' ){
-
-            if( data.cell.value ){
-                cells[ data.cell.x + '-' + data.cell.y ] = data.cell.value;
-            }else{
-                delete cells[ data.cell.x + '-' + data.cell.y ];
-            }
-
-            delete usersEditing[ data.cell.x + '-' + data.cell.y ];
-
-            draw();
-
-        }
-        */
-
-        console.log( 'Editando ', usersEditing );
-
-    });
-
-    realtime.on( 'userConnect', function( info ){
-
-        if( info.selfUser ){
-            return;
-        }
-
-        console.log( info );
-
-        wz.user( info.sender, function( error, user ){
-
-            console.log( arguments );
-
-            // To Do -> Error
-
-            usersEditing[ info.sender ] = user;
-
-            console.log( usersEditing );
-
-        });
-
-        if( !realtime ){
-            return;
-        }
-
-        realtime.send({
-
-            cmd : CMD_POSITION,
-            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-        });
-        
-    });
+    realtime.connect( realTimeConnect );
+    realtime.on( 'message', realTimeMessage );
+    realtime.on( 'userConnect', realTimeUserConnect );
 
 };
 
@@ -1148,6 +1030,91 @@ var getCommonStyles = function( start, end ){
 
         node      : style,
         paragraph : paragraphStyle
+
+    };
+
+};
+
+var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphChar ){
+
+    var i, stop, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar;
+
+    i      = 0;
+    pageId = 0;
+    stop   = false;
+
+    while( !stop ){
+
+        if( i + pageList[ pageId ].paragraphList.length >= remoteParagraphId ){
+            
+            stop        = true;
+            paragraphId = remoteParagraphId - i;
+            break;
+
+        }
+
+        i      += pageList[ pageId ].paragraphList.length;
+        pageId += 1;
+
+    }
+
+    page      = pageList[ pageId ];
+    paragraph = page.paragraphList[ paragraphId ];
+    i         = 0;
+    lineId    = 0;
+    nodeChar  = remoteParagraphChar;
+    stop      = false;
+
+    while( !stop ){
+
+        if( i + paragraph.lineList[ lineId ].totalChars >= nodeChar ){
+
+            nodeChar -= i;
+            stop      = true;
+            break;
+
+        }
+
+        i      += paragraph.lineList[ lineId ].totalChars;
+        lineId += 1;
+
+    }
+
+    line     = paragraph.lineList[ lineId ];
+    lineChar = i;
+    i        = 0;
+    nodeId   = 0;
+    stop     = true;
+
+    while( !stop ){
+
+        if( i + line.nodeList[ nodeId ].string.length >= nodeChar ){
+
+            nodeChar -= i;
+            stop      = true;
+            break;
+
+        }
+
+        i      += line.nodeList[ nodeId ].string.length;
+        nodeId += 1;
+
+    }
+
+    node = line.nodeList[ nodeId ];
+
+    return {
+
+        pageId      : pageId,
+        page        : page,
+        paragraphId : paragraphId,
+        paragraph   : paragraph,
+        lineId      : lineId,
+        line        : line,
+        lineChar    : lineChar,
+        nodeId      : nodeId,
+        node        : node,
+        nodeChar    : nodeChar
 
     };
 
@@ -2203,13 +2170,7 @@ var handleCharNormal = function( newChar ){
     currentNode.string   = currentNode.string.slice( 0, currentNodeCharId ) + newChar + currentNode.string.slice( currentNodeCharId );
     currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
 
-    setCanvasTextStyle( currentNode.style );
-
-    for( i = currentNodeCharId + 1; i <= currentNode.string.length; i++ ){
-        currentNode.charList.push( ctx.measureText( currentNode.string.slice( 0, i ) ).width );
-    }
-
-    currentNode.width = currentNode.charList[ currentNode.charList.length - 1 ];
+    measureNode( currentParagraph, currentLine, currentLineId, currentLineCharId, currentNode, currentNodeId, currentNodeCharId );
 
     currentLine.totalChars++;
     currentLineCharId++;
@@ -2272,10 +2233,21 @@ var handleCharNormal = function( newChar ){
         return;
     }
 
+    var paragraphId = currentParagraphId;
+    var charId      = currentLineCharId - 1;
+
+    for( i = 0; i < currentPageId; i++ ){
+        paragraphId += pageList[ i ].paragraphList.length;
+    }
+
+    for( i = 0; i < currentLineId; i++ ){
+        charId += currentParagraph.lineList[ i ].totalChars;
+    }
+
     realtime.send({
         
         cmd  : CMD_NEWCHAR,
-        data : [ currentPageId, currentParagraphId, currentLineId, currentNodeId, currentNodeCharId - 1, newChar ],
+        data : [ paragraphId, charId, newChar ],
         pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
     });
@@ -2540,12 +2512,80 @@ var handleEnter = function(){
 
 };
 
-var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, line, nodeId, node, nodeChar, newChar ){
+var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar ){
 
-    node.string = node.string.slice( 0, nodeChar ) + newChar + node.string.slice( nodeChar );
+    var i;
+
+    node.string   = node.string.slice( 0, nodeChar ) + newChar + node.string.slice( nodeChar );
+    node.charList = node.charList.slice( 0, nodeChar );
+
+    measureNode( paragraph, line, lineId, lineChar, node, nodeId, nodeChar );
+
+    line.totalChars++;
+    nodeChar++;
+    lineChar++;
+
+    var realocation = realocateLine( lineId, lineChar ); // To Do -> Actualizar el realocateLine para que pueda funcionar en cualquier párrafo, no solo el que tiene el foco
+
+    /*
+    if( realocation > 0 ){
+
+        lineId++;
+
+        line          = paragraph.lineList[ lineId ];
+        lineChar      = realocation;
+        newNode       = getNodeInPosition( line, lineChar );
+        nodeId        = newNode.nodeId;
+        node          = line.nodeList[ nodeId ];
+        nodeChar      = newNode.nodeChar;
+        temporalStyle = null;
+
+        positionAbsoluteY += line.height * paragraph.spacing;
+
+        // Reiniciamos la posición horizontal
+        positionAbsoluteX  = 0;
+        positionAbsoluteX += currentPage.marginLeft;
+        positionAbsoluteX += getLineIndentationLeftOffset( lineId, paragraph );
+        positionAbsoluteX += getLineOffset( line, paragraph );
+
+        for( i = 0; i < nodeId; i++ ){
+            positionAbsoluteX += line.nodeList[ i ].width;
+        }
+
+        positionAbsoluteX += node.charList[ nodeChar - 1 ];
+
+    }else if( temporalStyle ){
+
+        setCursor( currentPageId, paragraphId, lineId, lineChar, nodeId, nodeChar, true );
+        
+        temporalStyle = null;
+
+    }else{
+
+        // Reiniciamos la posición horizontal
+        // To Do -> Quizás pueda optimizarse
+        positionAbsoluteX  = 0;
+        positionAbsoluteX += currentPage.marginLeft;
+        positionAbsoluteX += getLineIndentationLeftOffset( lineId, paragraph );
+        positionAbsoluteX += getLineOffset( line, paragraph );
+
+        for( i = 0; i < nodeId; i++ ){
+            positionAbsoluteX += line.nodeList[ i ].width;
+        }
+
+        positionAbsoluteX += node.charList[ nodeChar - 1 ];
+
+    }
+    */
+
+    /*
+    node.string     = node.string.slice( 0, nodeChar ) + newChar + node.string.slice( nodeChar );
+    line.totalChars = line.totalChars + 1;
 
     measureNode( paragraph, line, lineId, null, node, nodeId, nodeChar );
+    */
 
+    console.log( 'waitingPageUpdate', waitingPageUpdate );
     updatePages();
 
 };
@@ -3382,6 +3422,129 @@ var realocatePageInverse = function( id ){
     }
 
     // To Do -> Realocate de líneas
+    
+};
+
+var realTimeConnect = function( error, firstConnection){
+
+    // To Do -> Error
+    console.log( error, 'connected', 'firstConnection', firstConnection );
+    console.log( 1 );
+    realtime.getUserList( true, function( error, list ){
+
+        console.log( 2 );
+
+        // To Do -> Error
+        for( var i in list ){
+            usersEditing[ list[ i ].id ] = list[ i ];
+        }
+
+        console.log( usersEditing );
+        console.log( error, list );
+
+    });
+
+    if( !realtime ){
+        return;
+    }
+
+    realtime.send({
+
+        cmd : CMD_POSITION,
+        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
+
+};
+
+var realTimeMessage = function( info, data ){
+
+    if( info.selfClient ){
+        return;
+    }
+
+    console.log( 'El usuario', info.sender, ' está editando', data );
+
+    var i, stop, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar;
+
+    if( data.cmd === CMD_NEWCHAR ){
+
+        console.log('CMD_NEWCHAR');
+
+        var elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+
+        handleRemoteChar( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar, data.data[ 2 ] );
+
+    }else if( data.cmd === CMD_STYLE_LISTBULLET ){
+
+        console.log('CMD_STYLE_LISTBULLET');
+
+        page      = pageList[ data.data[ 0 ] ];
+        paragraph = page.paragraphList[ data.data[ 1 ] ];
+
+        setParagraphStyle( data.data[ 0 ], page, data.data[ 1 ], paragraph, 'listBullet', null, true );
+
+    }
+
+    updateRemoteUserPosition( info.sender, data.pos );
+
+    /*
+    if( data.cmd === 'enableEditionMode' ){
+
+        //usersPosition[ info.sender ] = data.cell.x + '-' + data.cell.y;
+        usersEditing[ data.cell.x + '-' + data.cell.y ] = info.sender;
+
+        draw();
+
+    }else if( data.cmd === 'disableEditionMode' ){
+
+        if( data.cell.value ){
+            cells[ data.cell.x + '-' + data.cell.y ] = data.cell.value;
+        }else{
+            delete cells[ data.cell.x + '-' + data.cell.y ];
+        }
+
+        delete usersEditing[ data.cell.x + '-' + data.cell.y ];
+
+        draw();
+
+    }
+    */
+
+    console.log( 'Editando ', usersEditing );
+
+};
+
+var realTimeUserConnect = function( info ){
+
+    if( info.selfUser ){
+        return;
+    }
+
+    console.log( info );
+
+    wz.user( info.sender, function( error, user ){
+
+        console.log( arguments );
+
+        // To Do -> Error
+
+        usersEditing[ info.sender ] = user;
+
+        console.log( usersEditing );
+
+    });
+
+    if( !realtime ){
+        return;
+    }
+
+    realtime.send({
+
+        cmd : CMD_POSITION,
+        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
     
 };
 
