@@ -15,8 +15,9 @@ var ALIGN_JUSTIFY = 3;
 var CENTIMETER = 37.795275591;
 var CMD_POSITION = 0;
 var CMD_NEWCHAR = 1;
-var CMD_STYLE_MARGIN = 2;
-var CMD_STYLE_LISTBULLET = 3;
+var CMD_ENTER = 2;
+var CMD_STYLE_MARGIN = 3;
+var CMD_STYLE_LISTBULLET = 4;
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
@@ -1062,14 +1063,14 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     paragraph = page.paragraphList[ paragraphId ];
     i         = 0;
     lineId    = 0;
-    nodeChar  = remoteParagraphChar;
+    lineChar  = remoteParagraphChar;
     stop      = false;
 
     while( !stop ){
 
-        if( i + paragraph.lineList[ lineId ].totalChars >= nodeChar ){
+        if( i + paragraph.lineList[ lineId ].totalChars >= lineChar ){
 
-            nodeChar -= i;
+            lineChar -= i;
             stop      = true;
             break;
 
@@ -1081,9 +1082,9 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     }
 
     line     = paragraph.lineList[ lineId ];
-    lineChar = i;
     i        = 0;
     nodeId   = 0;
+    nodeChar = lineChar;
     stop     = true;
 
     while( !stop ){
@@ -1102,6 +1103,8 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     }
 
     node = line.nodeList[ nodeId ];
+
+    console.log( 'remoteElements', pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
 
     return {
 
@@ -2233,6 +2236,7 @@ var handleCharNormal = function( newChar ){
         return;
     }
 
+    // To Do -> Basarse en las posiciones originales, no el las nuevas
     var paragraphId = currentParagraphId;
     var charId      = currentLineCharId - 1;
 
@@ -2348,13 +2352,17 @@ var handleEnter = function(){
 
     // To Do -> Comprobar que entra en la página
 
-    var i, maxSize;
-    var newPageId      = 0;
-    var newParagraph   = createParagraph( currentPage );
-    var newParagraphId = currentParagraphId + 1;
-    var newLine        = newParagraph.lineList[ 0 ];
-    var newNode        = newLine.nodeList[ 0 ];
-    var movedLines;
+    var i, maxSize, movedLines;
+    var newPageId           = 0;
+    var newParagraph        = createParagraph( currentPage );
+    var newParagraphId      = currentParagraphId + 1;
+    var newLine             = newParagraph.lineList[ 0 ];
+    var newNode             = newLine.nodeList[ 0 ];
+    var originalPageId      = currentPageId;
+    var originalParagraph   = currentParagraph;
+    var originalParagraphId = currentParagraphId;
+    var originalLineId      = currentLineId;
+    var originalLineChar    = currentLineCharId;
 
     // Heredamos las propiedades del párrafo
     newParagraph.align                   = currentParagraph.align;
@@ -2510,6 +2518,30 @@ var handleEnter = function(){
     realocateLineInverse( 0, 0 );
     resetBlink();
 
+    if( !realtime ){
+        return;
+    }
+
+    // To Do -> Basarse en las posiciones originales, no el las nuevas
+    var paragraphId = originalParagraphId;
+    var charId      = originalLineChar;
+
+    for( i = 0; i < originalPageId; i++ ){
+        paragraphId += pageList[ i ].paragraphList.length;
+    }
+
+    for( i = 0; i < originalLineId; i++ ){
+        charId += originalParagraph.lineList[ i ].totalChars;
+    }
+
+    realtime.send({
+        
+        cmd  : CMD_ENTER,
+        data : [ paragraphId, charId ],
+        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
+
 };
 
 var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar ){
@@ -2585,7 +2617,173 @@ var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, l
     measureNode( paragraph, line, lineId, null, node, nodeId, nodeChar );
     */
 
-    console.log( 'waitingPageUpdate', waitingPageUpdate );
+    updatePages();
+
+};
+
+var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar ){
+
+    var i, maxSize, movedLines;
+    var newPageId      = 0;
+    var newParagraph   = createParagraph( page );
+    var newParagraphId = paragraphId + 1;
+    var newLine        = newParagraph.lineList[ 0 ];
+    var newNode        = newLine.nodeList[ 0 ];
+
+    // Heredamos las propiedades del párrafo
+    newParagraph.align                   = paragraph.align;
+    newParagraph.indentationLeft         = paragraph.indentationLeft;
+    newParagraph.indentationRight        = paragraph.indentationRight;
+    newParagraph.indentationSpecialType  = paragraph.indentationSpecialType;
+    newParagraph.indentationSpecialValue = paragraph.indentationSpecialValue;
+    newParagraph.spacing                 = paragraph.spacing;
+    newParagraph.width                   = paragraph.width;
+
+    // To Do -> A tener en cuenta con el siguiente paso ( herencia de altura de la linea ), quizás el primer nodo pase a tener un tamaño diferente que el de la linea actual
+    // Si es una lista lo clonamos
+    if( paragraph.listMode === LIST_BULLET){
+
+        newLine.nodeList.unshift( $.extend( true, {}, paragraph.lineList[ 0 ].nodeList[ 0 ] ) );
+
+        newParagraph.listMode = paragraph.listMode;
+        newLine.tabList       = [ 1 ]; // To Do -> Herencia de tabs
+        newLine.totalChars    = newLine.nodeList[ 0 ].string.length;
+
+    }else if( paragraph.listMode === LIST_NUMBER){
+
+        newLine.nodeList.unshift( $.extend( true, {}, paragraph.lineList[ 0 ].nodeList[ 0 ] ) );
+
+        newParagraph.listMode        = paragraph.listMode;
+        newLine.nodeList[ 0 ].string = ( parseInt( newLine.nodeList[ 0 ].string, 10 ) + 1 ) + '.' + '\t';
+        newLine.tabList              = [ newLine.nodeList[ 0 ].string.indexOf('\t') ]; // To Do -> Herencia de tabs
+        newLine.totalChars           = newLine.nodeList[ 0 ].string.length;
+
+        measureNode( newParagraph, newLine, 0, 0, newLine.nodeList[ 0 ], 0, 0 );
+
+    }
+
+    // Partimos la línea si no estamos al principio de ella
+    if( lineChar ){
+
+        // Obtenemos las líneas a mover y el texto
+        movedLines = paragraph.lineList.slice( lineId + 1 );
+
+        // Clonamos el nodo actual
+        newNode.string = node.string.slice( nodeChar );
+        newNode.style  = $.extend( {}, node.style );
+        newNode.height = node.height;
+
+        if( lineChar === line.totalChars ){
+
+            for( i in temporalStyle ){
+                setNodeStyle( paragraph, line, newNode, i, temporalStyle[ i ] );
+            }
+
+            temporalStyle = null;
+
+        }
+
+        setCanvasTextStyle( newNode.style );
+
+        for( i = 1; i <= newNode.string.length; i++ ){
+            newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+        }
+
+        newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
+        newLine.totalChars += newNode.string.length;
+
+        // Eliminamos el contenido del nodo actual y actualizamos su tamaño
+        node.string     = node.string.slice( 0, nodeChar );
+        node.charList   = node.charList.slice( 0, nodeChar );
+        node.width      = node.charList[ node.charList.length - 1 ];
+        line.totalChars = line.totalChars - newNode.string.length;
+
+        // Movemos los nodos siguientes
+        newLine.nodeList     = newLine.nodeList.concat( line.nodeList.slice( nodeId + 1 ) );
+        line.nodeList = line.nodeList.slice( 0, nodeId + 1 );
+
+        // Actualizamos las alturas de las líneas
+        maxSize = 0;
+
+        for( i = 0; i < newLine.nodeList.length; i++ ){
+
+            if( newLine.nodeList[ i ].height > maxSize ){
+                maxSize = newLine.nodeList[ i ].height;
+            }
+
+        }
+
+        newParagraph.height = maxSize * newParagraph.spacing;
+        newLine.height      = maxSize;
+
+        maxSize = 0;
+        
+        for( i = 0; i < line.nodeList.length; i++ ){
+
+            if( line.nodeList[ i ].height > maxSize ){
+                maxSize = line.nodeList[ i ].height;
+            }
+
+        }
+
+        paragraph.height -= line.height * paragraph.spacing;
+        paragraph.height += maxSize * paragraph.spacing;
+        line.height       = maxSize;
+
+        // Movemos las líneas siguientes
+        newParagraph.lineList     = newParagraph.lineList.concat( paragraph.lineList.slice( lineId + 1 ) );
+        paragraph.lineList = paragraph.lineList.slice( 0, lineId + 1 );
+
+        // Insertamos el párrafo en su posición
+        page.paragraphList = page.paragraphList.slice( 0, paragraphId + 1 ).concat( newParagraph ).concat( page.paragraphList.slice( paragraphId + 1 ) );
+
+    // Si estamos al principio de la línea pero no en la primera linea del párrafo
+    }else if( lineId ){
+
+        movedLines                = paragraph.lineList.slice( lineId );
+        newParagraph.lineList     = movedLines;
+        paragraph.lineList = paragraph.lineList.slice( 0, lineId );
+        page.paragraphList = page.paragraphList.slice( 0, paragraphId + 1 ).concat( newParagraph ).concat( page.paragraphList.slice( paragraphId + 1 ) );
+
+    // Al principio del párrafo
+    }else{
+
+        movedLines          = [];
+        newNode.style       = $.extend( {}, node.style );
+        newNode.height      = node.height;
+        newLine.height      = node.height;
+        newParagraph.height = node.height * newParagraph.spacing;
+
+        // Insertamos el párrafo en su posición
+        page.paragraphList = page.paragraphList.slice( 0, paragraphId ).concat( newParagraph ).concat( page.paragraphList.slice( paragraphId ) );
+
+    }
+
+    // Actualizamos las alturas del párrafo de origen y destino
+    for( i = 0; i < movedLines.length; i++ ){
+
+        paragraph.height    -= movedLines[ i ].height * paragraph.spacing;
+        newParagraph.height += movedLines[ i ].height * paragraph.spacing;
+
+    }
+
+    /*
+    var lastLineInPage = page.paragraphList.length - 2 === paragraphId && paragraph.lineList.length - 1 === lineId;
+    var realocation    = realocatePage( pageId );
+    */
+    realocatePage( pageId );
+
+    /*
+    if( realocation && lastLineInPage ){
+
+        newPageId      = realocation.pageId;
+        newParagraphId = realocation.paragraphId;
+
+    }else{
+        newPageId = pageId;
+    }
+    */
+
     updatePages();
 
 };
@@ -3465,15 +3663,23 @@ var realTimeMessage = function( info, data ){
 
     console.log( 'El usuario', info.sender, ' está editando', data );
 
-    var i, stop, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar;
+    var i, stop, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar, elements;
 
     if( data.cmd === CMD_NEWCHAR ){
 
         console.log('CMD_NEWCHAR');
 
-        var elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
 
         handleRemoteChar( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar, data.data[ 2 ] );
+
+    }else if( data.cmd === CMD_ENTER ){
+
+        console.log('CMD_ENTER');
+
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+
+        handleRemoteEnter( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar );
 
     }else if( data.cmd === CMD_STYLE_LISTBULLET ){
 
