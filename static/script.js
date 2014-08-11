@@ -212,11 +212,23 @@ var buttonAction = {
     },
 
     listBullet : function(){
-        setSelectedParagraphsStyle('listBullet');
+
+        if( $( '.tool-button-list-unsorted', toolsLine ).hasClass('active') ){
+            setSelectedParagraphsStyle('listNone');
+        }else{
+            setSelectedParagraphsStyle('listBullet');
+        }
+
     },
 
     listNumber : function(){
-        setSelectedParagraphsStyle('listNumber');
+        
+        if( $( '.tool-button-list-unsorted', toolsLine ).hasClass('active') ){
+            setSelectedParagraphsStyle('listNone');
+        }else{
+            setSelectedParagraphsStyle('listBullet');
+        }
+
     },
 
     pageBackgroundColor : function( value ){
@@ -1014,8 +1026,9 @@ var getCommonStyles = function( start, end ){
     var styleCounter   = Object.keys( style ).length;
     var paragraphStyle = {
 
-        align   : start.paragraph.align,
-        spacing : start.paragraph.spacing
+        align    : start.paragraph.align,
+        spacing  : start.paragraph.spacing,
+        listMode : start.paragraph.listMode
 
     };
 
@@ -1028,6 +1041,10 @@ var getCommonStyles = function( start, end ){
 
         if( paragraphStyle.spacing !== paragraph.spacing ){
             paragraphStyle.spacing = -1;
+        }
+
+        if( paragraphStyle.listMode !== paragraph.listMode ){
+            paragraphStyle.listMode = LIST_NONE;
         }
 
         var node;
@@ -3936,6 +3953,10 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
     }else if( key === 'listBullet' || key === 'listNumber' ){
 
+        if( paragraph.listMode ){
+            return;
+        }
+
         value = 0.63 * CENTIMETER;
 
         var newNode = createNode( paragraph.lineList[ 0 ] );
@@ -3992,18 +4013,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             realocateLine( i, 0 );
         }
 
-        if( !stopPropagation && realtime ){
-
-            realtime.send({
-
-                cmd  : CMD_STYLE_LISTBULLET,
-                data : [ pageId, paragraphId ],
-                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-            });
-
-        }
-
+        // To Do -> Aquí se está dando por supuesto que se está en la primera línea, que no se va a alterar el número ni posición de los nodos... Arreglarlo para que sea universal
         if( currentRangeStart ){
 
             currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
@@ -4021,6 +4031,81 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         }
 
+        if( !stopPropagation && realtime ){
+
+            realtime.send({
+
+                cmd  : CMD_STYLE_LISTBULLET,
+                data : [ pageId, paragraphId ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
+        }
+
+    }else if( key === 'listNone' ){
+
+        if( !paragraph.listMode ){
+            return;
+        }
+
+        value                               = -0.63 * CENTIMETER;
+        paragraph.listMode                  = LIST_NONE;
+        paragraph.indentationSpecialType    = INDENTATION_NONE;
+        paragraph.indentationSpecialValue   = 0;
+        paragraph.lineList[ 0 ].tabList     = []; // To Do -> Conservar el resto de tabuladores
+        paragraph.lineList[ 0 ].totalChars -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+
+        // Eliminamos el bullet
+        paragraph.lineList[ 0 ].nodeList.shift();
+        // To Do -> Medir de nuevo los nodos por si tienen tabuladores
+
+        setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value );
+
+        /*
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            paragraph.lineList[ i ].width -= value;
+        }
+
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            realocateLine( i, 0 );
+        }
+        */
+
+        console.table( paragraph.lineList[ i ] );
+
+        // To Do -> Aquí se está dando por supuesto que se está en la primera línea, que no se va a alterar el número ni posición de los nodos... Arreglarlo para que sea universal
+        if( currentRangeStart ){
+
+            currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
+            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.lineChar = currentRangeStart.lineChar + newNode.string.length;
+            currentRangeEnd.nodeId     = currentRangeEnd.nodeId + 1;
+            currentRangeEnd.node       = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.lineChar   = currentRangeEnd.lineChar + newNode.string.length;
+
+        }else{
+
+            currentNodeId     = currentNodeId + 1;
+            currentNode       = currentLine.nodeList[ currentNodeId ];
+            currentLineCharId = currentLineCharId + newNode.string.length;
+
+        }
+
+        /*
+        if( !stopPropagation && realtime ){
+
+            realtime.send({
+
+                cmd  : CMD_STYLE_LISTBULLET,
+                data : [ pageId, paragraphId ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
+        }
+        */
+    
     }else if( key == 'spacing' ){
 
         var prev = paragraph['spacing'];
@@ -4949,8 +5034,9 @@ var updateToolsLineStatus = function(){
         nodeStyles      = currentNode.style;
         paragraphStyles = {
 
-            align   : currentParagraph.align,
-            spacing : currentParagraph.spacing
+            align    : currentParagraph.align,
+            spacing  : currentParagraph.spacing,
+            listMode : currentParagraph.listMode
 
         };
 
@@ -5010,28 +5096,25 @@ var updateToolsLineStatus = function(){
     }
 
     // Estilos de párrafos
-    if( paragraphStyles.align === 0 ){
+    if( paragraphStyles.align === ALIGN_LEFT ){
+
         $( '.tool-button-left', toolsLine ).addClass('active');
-    }else{
-        $( '.tool-button-left', toolsLine ).removeClass('active');
-    }
+        $( '.tool-button-center, .tool-button-right, .tool-button-justify', toolsLine ).removeClass('active');
 
-    if( paragraphStyles.align === 1 ){
+    }else if( paragraphStyles.align === ALIGN_CENTER ){
+        
         $( '.tool-button-center', toolsLine ).addClass('active');
-    }else{
-        $( '.tool-button-center', toolsLine ).removeClass('active');
-    }
+        $( '.tool-button-left, .tool-button-right, .tool-button-justify', toolsLine ).removeClass('active');
 
-    if( paragraphStyles.align === 2 ){
+    }else if( paragraphStyles.align === ALIGN_RIGHT ){
+        
         $( '.tool-button-right', toolsLine ).addClass('active');
-    }else{
-        $( '.tool-button-right', toolsLine ).removeClass('active');
-    }
+        $( '.tool-button-left, .tool-button-center, .tool-button-justify', toolsLine ).removeClass('active');
 
-    if( paragraphStyles.align === 3 ){
+    }else if( paragraphStyles.align === ALIGN_JUSTIFY ){
+        
         $( '.tool-button-justify', toolsLine ).addClass('active');
-    }else{
-        $( '.tool-button-justify', toolsLine ).removeClass('active');
+        $( '.tool-button-left, .tool-button-center, .tool-button-right', toolsLine ).removeClass('active');
 
     }
 
@@ -5039,6 +5122,20 @@ var updateToolsLineStatus = function(){
         $( '.tool-button-line-spacing', toolsLine ).attr( 'data-value', paragraphStyles.spacing );
     }else{
         $( '.tool-button-line-spacing', toolsLine ).removeAttr('data-value');
+    }
+
+    if( paragraphStyles.listMode === LIST_NONE ){
+        $( '.tool-button-list-unsorted, .tool-button-list-sorted', toolsLine ).removeClass('active');
+    }else if( paragraphStyles.listMode === LIST_BULLET ){
+
+        $( '.tool-button-list-unsorted', toolsLine ).addClass('active');
+        $( '.tool-button-list-sorted', toolsLine ).removeClass('active');
+
+    } if( paragraphStyles.listMode === LIST_NUMBER ){
+
+        $( '.tool-button-list-unsorted', toolsLine ).removeClass('active');
+        $( '.tool-button-list-sorted', toolsLine ).addClass('active');
+
     }
 
 };
