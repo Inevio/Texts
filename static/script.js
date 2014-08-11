@@ -15,9 +15,10 @@ var ALIGN_JUSTIFY = 3;
 var CENTIMETER = 37.795275591;
 var CMD_POSITION = 0;
 var CMD_NEWCHAR = 1;
-var CMD_ENTER = 2;
-var CMD_STYLE_MARGIN = 3;
-var CMD_STYLE_LISTBULLET = 4;
+var CMD_BACKSPACE = 3;
+var CMD_ENTER = 4;
+var CMD_STYLE_MARGIN = 5;
+var CMD_STYLE_LISTBULLET = 6;
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
@@ -1811,7 +1812,12 @@ var handleBackspaceNormal = function(){
         return;
     }
 
-    var nodePosition, updateTools;
+    var nodePosition, updateTools, i;
+    var originalPageId      = currentPageId;
+    var originalParagraph   = currentParagraph;
+    var originalParagraphId = currentParagraphId;
+    var originalLineId      = currentLineId;
+    var originalLineChar    = currentLineCharId;
 
     // Principio de línea
     if( !currentLineCharId ){
@@ -1940,8 +1946,6 @@ var handleBackspaceNormal = function(){
 
     }else{
 
-        var i;
-
         currentNode.string   = currentNode.string.slice( 0, currentNodeCharId - 1 ).concat( currentNode.string.slice( currentNodeCharId ) );
         currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId - 1 );
 
@@ -1996,6 +2000,30 @@ var handleBackspaceNormal = function(){
     if( updateTools ){
         updateToolsLineStatus();
     }
+
+    if( !realtime ){
+        return;
+    }
+
+    // To Do -> Basarse en las posiciones originales, no el las nuevas
+    var paragraphId = originalParagraphId;
+    var charId      = originalLineChar;
+
+    for( i = 0; i < originalPageId; i++ ){
+        paragraphId += pageList[ i ].paragraphList.length;
+    }
+
+    for( i = 0; i < originalLineId; i++ ){
+        charId += originalParagraph.lineList[ i ].totalChars;
+    }
+
+    realtime.send({
+        
+        cmd  : CMD_BACKSPACE,
+        data : [ paragraphId, charId ],
+        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
 
 };
 
@@ -2579,6 +2607,112 @@ var handleEnter = function(){
 
 };
 
+var handleRemoteBackspace = function(  pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar  ){
+
+    // Principio del documento
+    if( !pageId && !paragraphId && !lineId && !lineChar ){
+        console.log( 'principio del documento, se ignora' );
+        return;
+    }
+
+    var nodePosition, i;
+
+    // Principio de línea
+    if( !lineChar ){
+
+        // La línea es la primera del párrafo
+        if( lineId === 0 ){
+
+            // To Do -> Saltos entre distintas páginas
+
+            // Si hay contenido fusionamos los párrafos
+            var prevParagraph   = page.paragraphList[ paragraphId - 1 ];
+            var mergeParagraphs = line.totalChars > 0;
+            var newPageId       = pageId;
+            var mergePreLastLine;
+
+            if( mergeParagraphs ){
+
+                mergePreLastLine        = prevParagraph.lineList.length - 1;
+                prevParagraph.lineList  = prevParagraph.lineList.concat( paragraph.lineList );
+                prevParagraph.height   += paragraph.height;
+
+            }
+
+            page.paragraphList = page.paragraphList.slice( 0, paragraphId ).concat( page.paragraphList.slice( paragraphId + 1 ) );
+
+            if( mergeParagraphs ){
+                mergeParagraphs = realocateLineInverse( mergePreLastLine + 1, lineChar );
+            }
+
+            realocatePageInverse( newPageId );
+
+        }else{
+
+            var prevLine = paragraph.lineList[ lineId - 1 ];
+            var prevNode = prevLine.nodeList.slice( -1 )[ 0 ];
+            var original = prevLine.totalChars - 1;
+
+            prevNode.string      = prevNode.string.slice( 0, -1 );
+            prevNode.charList    = prevNode.charList.slice( 0, -1 );
+            prevNode.width       = prevNode.charList.slice( -1 )[ 0 ];
+            prevLine.totalChars += line.totalChars - 1;
+            prevLine.nodeList    = prevLine.nodeList.concat( line.nodeList );
+            paragraph.lineList   = paragraph.lineList.slice( 0, lineId ).concat( paragraph.lineList.slice( lineId + 1 ) );
+            paragraph.height    -= line.height * paragraph.spacing;
+            paragraph.height    -= prevLine.height * paragraph.spacing;
+
+            // Actualizamos las alturas de las líneas
+            var maxSize = 0;
+
+            for( i = 0; i < prevLine.nodeList.length; i++ ){
+
+                if( prevLine.nodeList[ i ].height > maxSize ){
+                    maxSize = prevLine.nodeList[ i ].height;
+                }
+
+            }
+
+            prevLine.height   = maxSize;
+            paragraph.height += maxSize * paragraph.spacing; // To Do -> Estamos seguros de que esto es correcto?
+
+        }
+
+    }else{
+
+        node.string   = node.string.slice( 0, nodeChar - 1 ).concat( node.string.slice( nodeChar ) );
+        node.charList = node.charList.slice( 0, nodeChar - 1 );
+
+        measureNode( paragraph, line, lineId, lineChar - 1, node, nodeId, nodeChar - 1 );
+
+        lineChar--;
+        line.totalChars--;
+
+        // Realocamos el contenido
+        var realocation = realocateLineInverse( lineId, lineChar );
+
+        // Se ha producido una realocation inversa
+        if( realocation.realocation && realocation.lineChar > 0 ){
+            return;
+        }
+
+        // El nodo se queda vacío y hay más nodos en la línea
+        if( !node.string.length && line.nodeList.length > 1 ){
+
+            line.nodeList = line.nodeList.slice( 0, nodeId ).concat( line.nodeList.slice( nodeId + 1 ) );
+
+        // El nodo se queda vacío y no hay más nodos en la línea
+        }else if( lineId && !node.string.length && line.nodeList.length === 1 ){
+
+            paragraph.lineList = paragraph.lineList.slice( 0, lineId ).concat( paragraph.lineList.slice( lineId + 1 ) );
+            paragraph.height   = paragraph.height - ( line.height * paragraph.spacing );
+
+        }
+
+    }
+
+};
+
 var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar ){
 
     node.string   = node.string.slice( 0, nodeChar ) + newChar + node.string.slice( nodeChar );
@@ -2650,8 +2784,6 @@ var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, l
 
     measureNode( paragraph, line, lineId, null, node, nodeId, nodeChar );
     */
-
-    updatePages();
 
 };
 
@@ -2815,8 +2947,6 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
         newPageId = pageId;
     }
     */
-
-    updatePages();
 
 };
 
@@ -3704,6 +3834,16 @@ var realTimeMessage = function( info, data ){
         elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
 
         handleRemoteChar( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar, data.data[ 2 ] );
+        updatePages();
+
+    }else if( data.cmd === CMD_BACKSPACE ){
+
+        console.log('CMD_BACKSPACE');
+
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+
+        handleRemoteBackspace( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar, data.data[ 2 ] );
+        updatePages();
 
     }else if( data.cmd === CMD_ENTER ){
 
@@ -3712,6 +3852,7 @@ var realTimeMessage = function( info, data ){
         elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
 
         handleRemoteEnter( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar );
+        updatePages();
 
     }else if( data.cmd === CMD_STYLE_LISTBULLET ){
 
