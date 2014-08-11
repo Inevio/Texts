@@ -137,6 +137,7 @@ var currentRangeStartHash = null;
 var currentRangeEndHash   = null;
 var currentMultipleHash   = null;
 var temporalStyle         = null;
+var toolsListEnabled      = false;
 
 // Button actions
 var buttonAction = {
@@ -4075,6 +4076,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         console.table( paragraph.lineList[ i ] );
 
         // To Do -> Aquí se está dando por supuesto que se está en la primera línea, que no se va a alterar el número ni posición de los nodos... Arreglarlo para que sea universal
+        /*
         if( currentRangeStart ){
 
             currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
@@ -4091,6 +4093,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             currentLineCharId = currentLineCharId + newNode.string.length;
 
         }
+        */
 
         /*
         if( !stopPropagation && realtime ){
@@ -5141,12 +5144,41 @@ var updateToolsLineStatus = function(){
 };
 
 // Events
-win.on( 'app-param', function( e, params ){
+win
+.on( 'mousedown', function(){
+
+    if( !toolsListEnabled ){
+        return;
+    }
+
+    toolsListEnabled = false;
+
+    input.focus();
+    toolsList.css( 'display', 'none' );
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
+
+})
+
+.on( 'app-param', function( e, params ){
 
     // To Do -> Comprobar que params no va vacio
     if( params && params.command === 'openFile' ){
         openFile( params.data );
     }
+
+})
+
+.key( 'esc', function( e ){
+
+    if( !toolsListEnabled ){
+        return;
+    }
+
+    toolsListEnabled = false;
+
+    input.focus();
+    toolsList.css( 'display', 'none' );
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
 
 });
 
@@ -5766,6 +5798,8 @@ toolsLine
 
 .on( 'click', '.tool-fontfamily', function(){
 
+    toolsListEnabled = true;
+
     if( !fontfamilyCode ){
 
         for( var i = 0; i < FONTFAMILY.length; i++ ){
@@ -5790,6 +5824,8 @@ toolsLine
 })
 
 .on( 'click', '.tool-fontsize', function(){
+
+    toolsListEnabled = true;
 
     if( !fontsizeCode ){
 
@@ -5816,6 +5852,8 @@ toolsLine
 
 .on( 'click', '.tool-button-line-spacing', function(){
 
+    toolsListEnabled = true;
+
     if( !linespacingCode ){
 
         for( var i = 0; i < LINESPACING.length; i++ ){
@@ -5840,6 +5878,8 @@ toolsLine
 })
 
 .on( 'click', '.tool-button-page-dimensions', function(){
+
+    toolsListEnabled = true;
 
     if( !pageDimensionsCode ){
 
@@ -5866,6 +5906,8 @@ toolsLine
 
 .on( 'click', '.tool-button-page-margins', function(){
 
+    toolsListEnabled = true;
+
     if( !marginsCode ){
 
         for( var i in MARGIN ){
@@ -5889,7 +5931,14 @@ toolsLine
     
 });
 
-toolsList.on( 'click', 'li', function(){
+toolsList
+.on( 'mousedown', function( e ){
+    e.stopPropagation();
+})
+
+.on( 'click', 'li', function(){
+
+    toolsListEnabled = false;
 
     input.focus();
     toolsList.css( 'display', 'none' );
