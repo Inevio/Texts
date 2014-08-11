@@ -169,6 +169,20 @@ var buttonAction = {
 
     },
 
+    underline : function(){
+
+        if(
+            ( currentRangeStart && currentRangeStart.node.style['text-decoration-underline'] ) ||
+            currentNode.style['text-decoration-underline'] ||
+            checkTemporalStyle('text-decoration-underline')
+        ){
+            setSelectedNodeStyle( 'text-decoration-underline' );
+        }else{
+            setSelectedNodeStyle( 'text-decoration-underline', true );
+        }
+
+    },
+
     color : function( value ){
         setSelectedNodeStyle( 'color', value );
     },
@@ -469,7 +483,7 @@ var drawPages = function(){
     var pageHeight = 0.5;
     var wHeritage  = 0;
     var hHeritage  = 0;
-    var i, j, k, m;
+    var i, j, k, m, startX, startY, endX, endY, underlineHeight;
 
     checkCanvasPagesSize();
 
@@ -515,18 +529,36 @@ var drawPages = function(){
 
                         node          = line.nodeList[ k ];
                         ctx.fillStyle = node.style.color;
+                        startX        = parseInt( page.marginLeft + getLineIndentationLeftOffset( j, paragraph ) + wHeritage, 10 );
+                        startY        = parseInt( pageHeight + page.marginTop + line.height + hHeritage, 10 );
 
                         setCanvasTextStyle( node.style );
-
-                        ctx.fillText(
-
-                            node.string,
-                            page.marginLeft + getLineIndentationLeftOffset( j, paragraph ) + wHeritage,
-                            pageHeight + page.marginTop + line.height + hHeritage
-
-                        );
+                        ctx.fillText( node.string, startX, startY );
 
                         wHeritage += node.width;
+
+                        if( !node.style['text-decoration-underline'] ){
+                            continue;
+                        }
+
+                        underlineHeight = parseInt( node.height, 10 ) / 15;
+
+                        if(underlineHeight < 1){
+                            underlineHeight = 1;
+                        }
+
+                        startY = startY + underlineHeight;
+                        endX   = startX + node.width;
+                        endY   = startY;
+
+                        ctx.beginPath();
+                        
+                        ctx.strokeStyle = node.style.color;
+                        ctx.lineWidth   = underlineHeight;
+                        
+                        ctx.moveTo( parseInt( startX, 10 ), parseInt( startY, 10 ) + 0.5 );
+                        ctx.lineTo( parseInt( endX, 10 ), parseInt( endY, 10 ) + 0.5 );
+                        ctx.stroke();
 
                     }
 
@@ -3148,6 +3180,7 @@ var processUnprocessedFile = function( data ){
             setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
             setNodeStyle( paragraph, line, node, 'font-style', data.paragraphList[ i ].nodeList[ j ].style['font-style'] );
             setNodeStyle( paragraph, line, node, 'font-weight', data.paragraphList[ i ].nodeList[ j ].style['font-weight'] );
+            setNodeStyle( paragraph, line, node, 'text-decoration-underline', data.paragraphList[ i ].nodeList[ j ].style['text-decoration-underline'] );
             setNodeStyle( paragraph, line, node, 'font-size', data.paragraphList[ i ].nodeList[ j ].style['font-size'] );
 
             measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
@@ -5629,7 +5662,6 @@ toolsLine
 .on( 'click', '.tool-button', function(){
 
     input.focus();
-    console.log( $(this).attr('data-tool'), $(this).attr('data-tool-value') );
     buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
     updateToolsLineStatus(); // To Do -> Quizás pueda optimizarse y aplicarse solo a los estilos que lo necesiten
 
