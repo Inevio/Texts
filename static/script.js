@@ -4061,7 +4061,7 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
 
 var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, value, stopPropagation ){
 
-    var i, charInParagraphStart, charInParagraphEnd;
+    var i;
 
     if( key === 'indentationLeftAdd' ){
 
@@ -4097,30 +4097,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         if( paragraph.listMode ){
             return;
-        }
-
-        if( currentRangeStart ){
-
-            charInParagraphStart = currentRangeStart.nodeChar;
-
-            for( i = 0; i < currentLineId; i++ ){
-                charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
-            }
-
-            charInParagraphEnd = currentRangeEnd.nodeChar;
-
-            for( i = 0; i < currentLineId; i++ ){
-                charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
-            }
-
-        }else{
-
-            charInParagraphStart = currentLineCharId;
-
-            for( i = 0; i < currentLineId; i++ ){
-                charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
-            }
-
         }
 
         value = 0.63 * CENTIMETER;
@@ -4166,9 +4142,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         paragraph.indentationSpecialValue   = value;
         paragraph.lineList[ 0 ].tabList     = [ newNode.string.indexOf('\t') ]; // To Do -> Conservar el resto de tabuladores
         paragraph.lineList[ 0 ].totalChars += newNode.string.length;
-        charInParagraphStart               += newNode.string.length;
-        charInParagraphEnd                 += newNode.string.length; // To Do -> No estoy de acuerdo con esto, la longitud del nodo del párrafo final puede ser diferente
-
+        
         setNodeStyle( paragraph, paragraph.lineList[ 0 ], newNode, 'font-size', paragraph.lineList[ 0 ].nodeList[ 1 ].style['font-size'] );
 
         measureNode( paragraph, paragraph.lineList[ 0 ], 0, 0, newNode, 0, 0 );
@@ -4179,105 +4153,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
             realocateLine( i, 0 );
-        }
-
-        if( currentRangeStart ){
-
-            currentRangeStart.lineId = 0;
-
-            while( true ){
-
-                if( currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart     -= currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars;
-                currentRangeStart.lineId += 1;
-
-            }
-
-            currentRangeStart.line     = currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ];
-            currentRangeStart.lineChar = charInParagraphStart;
-            currentRangeStart.nodeId   = 0;
-
-            while( true ){
-
-                if( currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart     -= currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length;
-                currentRangeStart.nodeId += 1;
-
-            }
-
-            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.nodeChar = charInParagraphStart;
-
-            currentRangeEnd.lineId = 0;
-
-            while( true ){
-
-                if( currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars >= charInParagraphEnd ){
-                    break;
-                }
-
-                charInParagraphEnd     -= currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars;
-                currentRangeEnd.lineId += 1;
-
-            }
-
-            currentRangeEnd.line     = currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ];
-            currentRangeEnd.lineChar = charInParagraphEnd;
-            currentRangeEnd.nodeId   = 0;
-
-            while( true ){
-
-                if( currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length >= charInParagraphEnd ){
-                    break;
-                }
-
-                charInParagraphEnd     -= currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length;
-                currentRangeEnd.nodeId += 1;
-
-            }
-
-            currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
-            currentRangeEnd.nodeChar = charInParagraphEnd;
-
-        }else{
-
-            currentLineId = 0;
-
-            while( true ){
-
-                if( currentParagraph.lineList[ currentLineId ].totalChars >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart -= currentParagraph.lineList[ currentLineId ].totalChars;
-                currentLineId        += 1;
-
-            }
-
-            currentLine       = currentParagraph.lineList[ currentLineId ];
-            currentLineCharId = charInParagraphStart;
-            currentNodeId     = 0;
-
-            while( true ){
-
-                if( currentLine.nodeList[ currentNodeId ].string.length >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart -= currentLine.nodeList[ currentNodeId ].string.length;
-                currentNodeId        += 1;
-
-            }
-
-            currentNode       = currentLine.nodeList[ currentNodeId ];
-            currentNodeCharId = charInParagraphStart;
-
         }
 
         if( !stopPropagation && realtime ){
@@ -4298,143 +4173,18 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             return;
         }
 
-        if( currentRangeStart ){
-
-            charInParagraphStart = currentRangeStart.nodeChar;
-
-            for( i = 0; i < currentLineId; i++ ){
-                charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
-            }
-
-            charInParagraphEnd = currentRangeEnd.nodeChar;
-
-            for( i = 0; i < currentLineId; i++ ){
-                charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
-            }
-
-        }else{
-
-            charInParagraphStart = currentLineCharId;
-
-            for( i = 0; i < currentLineId; i++ ){
-                charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
-            }
-
-        }
-
         value                               = paragraph.indentationLeft * -1;
         paragraph.listMode                  = LIST_NONE;
         paragraph.indentationSpecialType    = INDENTATION_NONE;
         paragraph.indentationSpecialValue   = 0;
         paragraph.lineList[ 0 ].tabList     = []; // To Do -> Conservar el resto de tabuladores
         paragraph.lineList[ 0 ].totalChars -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
-        charInParagraphStart               -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
-        charInParagraphEnd                 -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length; // To Do -> No estoy de acuerdo con esto, la longitud del nodo del párrafo final puede ser diferente
-
+        
         // Eliminamos el bullet
         paragraph.lineList[ 0 ].nodeList.shift();
         // To Do -> Medir de nuevo los nodos por si tienen tabuladores
 
         setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value, true );
-
-        if( currentRangeStart ){
-
-            currentRangeStart.lineId = 0;
-
-            while( true ){
-
-                if( currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart     -= currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars;
-                currentRangeStart.lineId += 1;
-
-            }
-
-            currentRangeStart.line     = currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ];
-            currentRangeStart.lineChar = charInParagraphStart;
-            currentRangeStart.nodeId   = 0;
-
-            while( true ){
-
-                if( currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart     -= currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length;
-                currentRangeStart.nodeId += 1;
-
-            }
-
-            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.nodeChar = charInParagraphStart;
-
-            currentRangeEnd.lineId = 0;
-
-            while( true ){
-
-                if( currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars >= charInParagraphEnd ){
-                    break;
-                }
-
-                charInParagraphEnd     -= currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars;
-                currentRangeEnd.lineId += 1;
-
-            }
-
-            currentRangeEnd.line     = currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ];
-            currentRangeEnd.lineChar = charInParagraphEnd;
-            currentRangeEnd.nodeId   = 0;
-
-            while( true ){
-
-                if( currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length >= charInParagraphEnd ){
-                    break;
-                }
-
-                charInParagraphEnd     -= currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length;
-                currentRangeEnd.nodeId += 1;
-
-            }
-
-            currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
-            currentRangeEnd.nodeChar = charInParagraphEnd;
-
-        }else{
-
-            currentLineId = 0;
-
-            while( true ){
-
-                if( currentParagraph.lineList[ currentLineId ].totalChars >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart -= currentParagraph.lineList[ currentLineId ].totalChars;
-                currentLineId        += 1;
-
-            }
-
-            currentLine       = currentParagraph.lineList[ currentLineId ];
-            currentLineCharId = charInParagraphStart;
-            currentNodeId     = 0;
-
-            while( true ){
-
-                if( currentLine.nodeList[ currentNodeId ].string.length >= charInParagraphStart ){
-                    break;
-                }
-
-                charInParagraphStart -= currentLine.nodeList[ currentNodeId ].string.length;
-                currentNodeId        += 1;
-
-            }
-
-            currentNode       = currentLine.nodeList[ currentNodeId ];
-            currentNodeCharId = charInParagraphStart;
-
-        }
 
         /*
         if( !stopPropagation && realtime ){
@@ -4474,13 +4224,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
     }
 
     updatePages();
-
-    if( paragraph === currentParagraph && !currentRangeStart && !stopPropagation ){
-
-        setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
-        resetBlink();
-
-    }
 
 };
 
@@ -5148,10 +4891,220 @@ var setSelectedNodeStyle = function( key, value ){
 
 var setSelectedParagraphsStyle = function( key, value ){
 
+    var i, charInParagraphStart, charInParagraphEnd, listModeParagraphStart, listModeParagraphEnd, requestStartCheck, requestEndCheck, firstNodeLengthStart, firstNodeLengthEnd;
+
     if( currentRangeStart ){
+
+        // Calculamos las posiciones de inicio
+        listModeParagraphStart = currentRangeStart.paragraph.listMode;
+        charInParagraphStart   = currentRangeStart.nodeChar;
+
+        for( i = 0; i < currentRangeStart.lineId; i++ ){
+            charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
+        }
+
+        listModeParagraphEnd = currentRangeEnd.paragraph.listMode;
+        charInParagraphEnd   = currentRangeEnd.nodeChar;
+
+        for( i = 0; i < currentRangeEnd.lineId; i++ ){
+            charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
+        }
+
+        if( key === 'listNone' ){
+
+            if( listModeParagraphStart ){
+                firstNodeLengthStart = currentRangeStart.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+            }
+
+            if( listModeParagraphEnd ){
+                firstNodeLengthEnd = 0; //currentRangeEnd.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+            }
+
+        }
+
+        // Aplicamos el estilo
         setRangeParagraphStyle( key, value );
+
+        // Calculamos las correcciones
+        if( key === 'listBullet' || key === 'listNumber' ){
+
+            if( !listModeParagraphStart ){
+
+                requestStartCheck     = true;
+                charInParagraphStart += currentRangeStart.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+
+            }
+
+            if( !listModeParagraphEnd ){
+
+                requestEndCheck     = true;
+                charInParagraphEnd += currentRangeEnd.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+
+            }
+            
+        }else if( key === 'listNone' ){
+            
+            if( listModeParagraphStart ){
+
+                requestStartCheck     = true;
+                charInParagraphStart -= firstNodeLengthStart;
+
+            }
+
+            if( listModeParagraphEnd ){
+
+                requestEndCheck     = true;
+                charInParagraphEnd -= firstNodeLengthEnd;
+
+            }
+
+        }
+
+        // Arreglamos el rango
+        if( requestStartCheck ){
+
+            currentRangeStart.lineId = 0;
+
+            while( true ){
+
+                if( currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart     -= currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars;
+                currentRangeStart.lineId += 1;
+
+            }
+
+            currentRangeStart.line     = currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ];
+            currentRangeStart.lineChar = charInParagraphStart;
+            currentRangeStart.nodeId   = 0;
+
+            while( true ){
+
+                if( currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length > charInParagraphStart ){
+                    break;
+                }
+
+                if( currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length === charInParagraphStart ){
+                    currentRangeStart.nodeId += 1;
+                    charInParagraphStart      = 0;
+                    break;
+                }
+
+                charInParagraphStart     -= currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length;
+                currentRangeStart.nodeId += 1;
+
+            }
+
+            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.nodeChar = charInParagraphStart;
+
+        }
+
+        if( requestEndCheck ){
+
+            currentRangeEnd.lineId = 0;
+
+            while( true ){
+
+                if( currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars >= charInParagraphEnd ){
+                    break;
+                }
+
+                charInParagraphEnd     -= currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars;
+                currentRangeEnd.lineId += 1;
+
+            }
+
+            currentRangeEnd.line     = currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ];
+            currentRangeEnd.lineChar = charInParagraphEnd;
+            currentRangeEnd.nodeId   = 0;
+
+            while( true ){
+
+                if( currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length >= charInParagraphEnd ){
+                    break;
+                }
+
+                charInParagraphEnd     -= currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length;
+                currentRangeEnd.nodeId += 1;
+
+            }
+
+            currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.nodeChar = charInParagraphEnd;
+
+        }
+
     }else{
+
+        // Calculamos las posiciones de inicio
+        listModeParagraphStart = currentParagraph.listMode;
+        charInParagraphStart   = currentLineCharId;
+
+        for( i = 0; i < currentLineId; i++ ){
+            charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
+        }
+
+        if( key === 'listNone' && listModeParagraphStart ){
+            firstNodeLengthStart = currentParagraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+        }
+
+        // Aplicamos el estilo
         setParagraphStyle( currentPageId, currentPage, currentParagraphId, currentParagraph, key, value );
+
+        // Calculamos las correcciones
+        if( ( key === 'listBullet' || key === 'listNumber' ) && !listModeParagraphStart ){
+
+            requestStartCheck     = true;
+            charInParagraphStart += currentParagraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+
+        }else if( key === 'listNone' && listModeParagraphStart ){
+            
+            requestStartCheck     = true;
+            charInParagraphStart -= firstNodeLengthStart;
+
+        }
+
+        if( requestStartCheck ){
+
+            currentLineId = 0;
+
+            while( true ){
+
+                if( currentParagraph.lineList[ currentLineId ].totalChars >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart -= currentParagraph.lineList[ currentLineId ].totalChars;
+                currentLineId        += 1;
+
+            }
+
+            currentLine       = currentParagraph.lineList[ currentLineId ];
+            currentLineCharId = charInParagraphStart;
+            currentNodeId     = 0;
+
+            while( true ){
+
+                if( currentLine.nodeList[ currentNodeId ].string.length >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart -= currentLine.nodeList[ currentNodeId ].string.length;
+                currentNodeId        += 1;
+
+            }
+
+            currentNode       = currentLine.nodeList[ currentNodeId ];
+            currentNodeCharId = charInParagraphStart;
+
+        }
+
+        setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+        resetBlink();
+
     }
 
 };
