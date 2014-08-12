@@ -225,10 +225,10 @@ var buttonAction = {
 
     listNumber : function(){
         
-        if( $( '.tool-button-list-unsorted', toolsLine ).hasClass('active') ){
+        if( $( '.tool-button-list-sorted', toolsLine ).hasClass('active') ){
             setSelectedParagraphsStyle('listNone');
         }else{
-            setSelectedParagraphsStyle('listBullet');
+            setSelectedParagraphsStyle('listNumber');
         }
 
     },
@@ -4130,14 +4130,14 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         }else{
 
-            paragraph.listMode = LIST_BULLET;
-            newNode.string     = String.fromCharCode( 8226 ) + '\t';
+            paragraph.listMode           = LIST_BULLET;
+            newNode.string               = String.fromCharCode( 8226 ) + '\t';
+            newNode.style['font-family'] = 'Webdings'; // To Do -> No usar webdings
 
         }
 
         newNode.blocked                     = true;
         newNode.style.color                 = '#000000';
-        newNode.style['font-family']        = 'Webdings'; // To Do -> No usar webdings
         paragraph.indentationSpecialType    = INDENTATION_HANGING;
         paragraph.indentationSpecialValue   = value;
         paragraph.lineList[ 0 ].tabList     = [ newNode.string.indexOf('\t') ]; // To Do -> Conservar el resto de tabuladores
