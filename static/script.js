@@ -4099,6 +4099,32 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             return;
         }
 
+        var charInParagraphStart, charInParagraphEnd;
+
+        if( currentRangeStart ){
+
+            charInParagraphStart = currentRangeStart.nodeChar;
+
+            for( i = 0; i < currentLineId; i++ ){
+                charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
+            }
+
+            charInParagraphEnd = currentRangeEnd.nodeChar;
+
+            for( i = 0; i < currentLineId; i++ ){
+                charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
+            }
+
+        }else{
+
+            charInParagraphStart = currentLineCharId;
+
+            for( i = 0; i < currentLineId; i++ ){
+                charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
+            }
+
+        }
+
         value = 0.63 * CENTIMETER;
 
         var newNode = createNode( paragraph.lineList[ 0 ] );
@@ -4142,6 +4168,8 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         paragraph.indentationSpecialValue   = value;
         paragraph.lineList[ 0 ].tabList     = [ newNode.string.indexOf('\t') ]; // To Do -> Conservar el resto de tabuladores
         paragraph.lineList[ 0 ].totalChars += newNode.string.length;
+        charInParagraphStart               += newNode.string.length;
+        charInParagraphEnd                 += newNode.string.length; // To Do -> No estoy de acuerdo con esto, la longitud del nodo del párrafo final puede ser diferente
 
         setNodeStyle( paragraph, paragraph.lineList[ 0 ], newNode, 'font-size', paragraph.lineList[ 0 ].nodeList[ 1 ].style['font-size'] );
 
@@ -4158,18 +4186,100 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         // To Do -> Aquí se está dando por supuesto que se está en la primera línea, que no se va a alterar el número ni posición de los nodos... Arreglarlo para que sea universal
         if( currentRangeStart ){
 
-            currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
+            currentRangeStart.lineId = 0;
+
+            while( true ){
+
+                if( currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart     -= currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars;
+                currentRangeStart.lineId += 1;
+
+            }
+
+            currentRangeStart.line     = currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ];
+            currentRangeStart.lineChar = charInParagraphStart;
+            currentRangeStart.nodeId   = 0;
+
+            while( true ){
+
+                if( currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart     -= currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length;
+                currentRangeStart.nodeId += 1;
+
+            }
+
             currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.lineChar = currentRangeStart.lineChar + newNode.string.length;
-            currentRangeEnd.nodeId     = currentRangeEnd.nodeId + 1;
-            currentRangeEnd.node       = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
-            currentRangeEnd.lineChar   = currentRangeEnd.lineChar + newNode.string.length;
+            currentRangeStart.nodeChar = charInParagraphStart;
+
+            currentRangeEnd.lineId = 0;
+
+            while( true ){
+
+                if( currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars >= charInParagraphEnd ){
+                    break;
+                }
+
+                charInParagraphEnd     -= currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars;
+                currentRangeEnd.lineId += 1;
+
+            }
+
+            currentRangeEnd.line     = currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ];
+            currentRangeEnd.lineChar = charInParagraphEnd;
+            currentRangeEnd.nodeId   = 0;
+
+            while( true ){
+
+                if( currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length >= charInParagraphEnd ){
+                    break;
+                }
+
+                charInParagraphEnd     -= currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length;
+                currentRangeEnd.nodeId += 1;
+
+            }
+
+            currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.nodeChar = charInParagraphEnd;
 
         }else{
 
-            currentNodeId     = currentNodeId + 1;
+            currentLineId = 0;
+
+            while( true ){
+
+                if( currentParagraph.lineList[ currentLineId ].totalChars >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart -= currentParagraph.lineList[ currentLineId ].totalChars;
+                currentLineId        += 1;
+
+            }
+
+            currentLine       = currentParagraph.lineList[ currentLineId ];
+            currentLineCharId = charInParagraphStart;
+            currentNodeId     = 0;
+
+            while( true ){
+
+                if( currentLine.nodeList[ currentNodeId ].string.length >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart -= currentLine.nodeList[ currentNodeId ].string.length;
+                currentNodeId        += 1;
+
+            }
+
             currentNode       = currentLine.nodeList[ currentNodeId ];
-            currentLineCharId = currentLineCharId + newNode.string.length;
+            currentNodeCharId = charInParagraphStart;
 
         }
 
