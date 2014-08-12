@@ -4061,7 +4061,7 @@ var setNodeStyle = function( paragraph, line, node, key, value ){
 
 var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, value, stopPropagation ){
 
-    var i;
+    var i, charInParagraphStart, charInParagraphEnd;
 
     if( key === 'indentationLeftAdd' ){
 
@@ -4098,8 +4098,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         if( paragraph.listMode ){
             return;
         }
-
-        var charInParagraphStart, charInParagraphEnd;
 
         if( currentRangeStart ){
 
@@ -4183,7 +4181,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             realocateLine( i, 0 );
         }
 
-        // To Do -> Aquí se está dando por supuesto que se está en la primera línea, que no se va a alterar el número ni posición de los nodos... Arreglarlo para que sea universal
         if( currentRangeStart ){
 
             currentRangeStart.lineId = 0;
@@ -4301,50 +4298,143 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             return;
         }
 
+        if( currentRangeStart ){
+
+            charInParagraphStart = currentRangeStart.nodeChar;
+
+            for( i = 0; i < currentLineId; i++ ){
+                charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
+            }
+
+            charInParagraphEnd = currentRangeEnd.nodeChar;
+
+            for( i = 0; i < currentLineId; i++ ){
+                charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
+            }
+
+        }else{
+
+            charInParagraphStart = currentLineCharId;
+
+            for( i = 0; i < currentLineId; i++ ){
+                charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
+            }
+
+        }
+
         value                               = paragraph.indentationLeft * -1;
         paragraph.listMode                  = LIST_NONE;
         paragraph.indentationSpecialType    = INDENTATION_NONE;
         paragraph.indentationSpecialValue   = 0;
         paragraph.lineList[ 0 ].tabList     = []; // To Do -> Conservar el resto de tabuladores
         paragraph.lineList[ 0 ].totalChars -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+        charInParagraphStart               -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
+        charInParagraphEnd                 -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length; // To Do -> No estoy de acuerdo con esto, la longitud del nodo del párrafo final puede ser diferente
 
         // Eliminamos el bullet
         paragraph.lineList[ 0 ].nodeList.shift();
         // To Do -> Medir de nuevo los nodos por si tienen tabuladores
 
-        setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value );
+        setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value, true );
 
-        /*
-        for( i = 0; i < paragraph.lineList.length; i++ ){
-            paragraph.lineList[ i ].width -= value;
-        }
-
-        for( i = 0; i < paragraph.lineList.length; i++ ){
-            realocateLine( i, 0 );
-        }
-        */
-
-        console.table( paragraph.lineList[ i ] );
-
-        // To Do -> Aquí se está dando por supuesto que se está en la primera línea, que no se va a alterar el número ni posición de los nodos... Arreglarlo para que sea universal
-        /*
         if( currentRangeStart ){
 
-            currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
+            currentRangeStart.lineId = 0;
+
+            while( true ){
+
+                if( currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart     -= currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ].totalChars;
+                currentRangeStart.lineId += 1;
+
+            }
+
+            currentRangeStart.line     = currentRangeStart.paragraph.lineList[ currentRangeStart.lineId ];
+            currentRangeStart.lineChar = charInParagraphStart;
+            currentRangeStart.nodeId   = 0;
+
+            while( true ){
+
+                if( currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart     -= currentRangeStart.line.nodeList[ currentRangeStart.nodeId ].string.length;
+                currentRangeStart.nodeId += 1;
+
+            }
+
             currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.lineChar = currentRangeStart.lineChar + newNode.string.length;
-            currentRangeEnd.nodeId     = currentRangeEnd.nodeId + 1;
-            currentRangeEnd.node       = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
-            currentRangeEnd.lineChar   = currentRangeEnd.lineChar + newNode.string.length;
+            currentRangeStart.nodeChar = charInParagraphStart;
+
+            currentRangeEnd.lineId = 0;
+
+            while( true ){
+
+                if( currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars >= charInParagraphEnd ){
+                    break;
+                }
+
+                charInParagraphEnd     -= currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ].totalChars;
+                currentRangeEnd.lineId += 1;
+
+            }
+
+            currentRangeEnd.line     = currentRangeEnd.paragraph.lineList[ currentRangeEnd.lineId ];
+            currentRangeEnd.lineChar = charInParagraphEnd;
+            currentRangeEnd.nodeId   = 0;
+
+            while( true ){
+
+                if( currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length >= charInParagraphEnd ){
+                    break;
+                }
+
+                charInParagraphEnd     -= currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ].string.length;
+                currentRangeEnd.nodeId += 1;
+
+            }
+
+            currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.nodeChar = charInParagraphEnd;
 
         }else{
 
-            currentNodeId     = currentNodeId + 1;
+            currentLineId = 0;
+
+            while( true ){
+
+                if( currentParagraph.lineList[ currentLineId ].totalChars >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart -= currentParagraph.lineList[ currentLineId ].totalChars;
+                currentLineId        += 1;
+
+            }
+
+            currentLine       = currentParagraph.lineList[ currentLineId ];
+            currentLineCharId = charInParagraphStart;
+            currentNodeId     = 0;
+
+            while( true ){
+
+                if( currentLine.nodeList[ currentNodeId ].string.length >= charInParagraphStart ){
+                    break;
+                }
+
+                charInParagraphStart -= currentLine.nodeList[ currentNodeId ].string.length;
+                currentNodeId        += 1;
+
+            }
+
             currentNode       = currentLine.nodeList[ currentNodeId ];
-            currentLineCharId = currentLineCharId + newNode.string.length;
+            currentNodeCharId = charInParagraphStart;
 
         }
-        */
 
         /*
         if( !stopPropagation && realtime ){
@@ -4385,7 +4475,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
     updatePages();
 
-    if( paragraph === currentParagraph && !currentRangeStart ){
+    if( paragraph === currentParagraph && !currentRangeStart && !stopPropagation ){
 
         setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
         resetBlink();
