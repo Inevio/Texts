@@ -4301,7 +4301,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             return;
         }
 
-        value                               = -0.63 * CENTIMETER;
+        value                               = paragraph.indentationLeft * -1;
         paragraph.listMode                  = LIST_NONE;
         paragraph.indentationSpecialType    = INDENTATION_NONE;
         paragraph.indentationSpecialValue   = 0;
