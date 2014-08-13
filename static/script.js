@@ -234,7 +234,6 @@ var buttonAction = {
     },
 
     pageBackgroundColor : function( value ){
-        console.log( 'pageBackgroundColor', value );
         setPagesStyle( 'pageBackgroundColor', value );
     }
 
@@ -1085,20 +1084,16 @@ var getCommonStyles = function( start, end ){
 
 var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphChar ){
 
-    var i, stop, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar;
+    var i, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar;
 
     i      = 0;
     pageId = 0;
-    stop   = false;
 
-    while( !stop ){
+    while( true ){
 
         if( i + pageList[ pageId ].paragraphList.length >= remoteParagraphId ){
-            
-            stop        = true;
             paragraphId = remoteParagraphId - i;
             break;
-
         }
 
         i      += pageList[ pageId ].paragraphList.length;
@@ -1113,14 +1108,11 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     lineChar  = remoteParagraphChar;
     stop      = false;
 
-    while( !stop ){
+    while( true ){
 
         if( i + paragraph.lineList[ lineId ].totalChars >= lineChar ){
-
             lineChar -= i;
-            stop      = true;
             break;
-
         }
 
         i      += paragraph.lineList[ lineId ].totalChars;
@@ -1132,15 +1124,13 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     i        = 0;
     nodeId   = 0;
     nodeChar = lineChar;
-    stop     = true;
 
-    while( !stop ){
+    while( true ){
 
         if( i + line.nodeList[ nodeId ].string.length >= nodeChar ){
-
             nodeChar -= i;
-            stop      = true;
             break;
+        }
 
         }
 
@@ -1150,8 +1140,6 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     }
 
     node = line.nodeList[ nodeId ];
-
-    console.log( 'remoteElements', pageId, paragraphId, lineId, lineChar, nodeId, nodeChar );
 
     return {
 
@@ -4897,14 +4885,14 @@ var setSelectedParagraphsStyle = function( key, value ){
 
         // Calculamos las posiciones de inicio
         listModeParagraphStart = currentRangeStart.paragraph.listMode;
-        charInParagraphStart   = currentRangeStart.nodeChar;
+        charInParagraphStart   = currentRangeStart.lineChar;
 
         for( i = 0; i < currentRangeStart.lineId; i++ ){
             charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
         }
 
         listModeParagraphEnd = currentRangeEnd.paragraph.listMode;
-        charInParagraphEnd   = currentRangeEnd.nodeChar;
+        charInParagraphEnd   = currentRangeEnd.lineChar;
 
         for( i = 0; i < currentRangeEnd.lineId; i++ ){
             charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
