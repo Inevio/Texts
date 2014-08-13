@@ -17,8 +17,12 @@ var CMD_POSITION = 0;
 var CMD_NEWCHAR = 1;
 var CMD_BACKSPACE = 3;
 var CMD_ENTER = 4;
-var CMD_STYLE_MARGIN = 5;
-var CMD_STYLE_LISTBULLET = 6;
+var CMD_NODE_STYLE = 5;
+var CMD_RANGE_NODE_STYLE = 6;
+/*
+var CMD_STYLE_MARGIN = 7;
+var CMD_STYLE_LISTBULLET = 8;
+*/
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
@@ -1106,7 +1110,6 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     i         = 0;
     lineId    = 0;
     lineChar  = remoteParagraphChar;
-    stop      = false;
 
     while( true ){
 
@@ -1132,7 +1135,15 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
             break;
         }
 
+        /*
+        if( i + line.nodeList[ nodeId ].string.length === nodeChar ){
+            
+            nodeId   += 1;
+            nodeChar  = 0;
+            break;
+        
         }
+        */
 
         i      += line.nodeList[ nodeId ].string.length;
         nodeId += 1;
@@ -3842,41 +3853,63 @@ var realTimeMessage = function( info, data ){
         handleRemoteEnter( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar );
         updatePages();
 
-    }else if( data.cmd === CMD_STYLE_LISTBULLET ){
+    }else if( data.cmd === CMD_NODE_STYLE ){
 
-        console.log('CMD_STYLE_LISTBULLET');
+        console.log('CMD_NODE_STYLE');
 
-        page      = pageList[ data.data[ 0 ] ];
-        paragraph = page.paragraphList[ data.data[ 1 ] ];
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
 
-        setParagraphStyle( data.data[ 0 ], page, data.data[ 1 ], paragraph, 'listBullet', null, true );
+        console.log( elements );
+
+        // Aplicamos el estilo
+        setNodeStyle(
+
+            elements.paragraph,
+            elements.line,
+            elements.node,
+            data.data[ 2 ],
+            data.data[ 3 ]
+
+        );
+        updatePages();
+
+    }else if( data.cmd === CMD_RANGE_NODE_STYLE ){
+
+        console.log('CMD_RANGE_NODE_STYLE');
+
+        console.log( data.data[ 0 ], data.data[ 1 ] );
+
+        console.log(
+            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).lineId,
+            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).lineChar,
+            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).nodeId,
+            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).nodeChar
+        );
+
+        console.log( data.data[ 2 ], data.data[ 3 ] );
+
+        console.log(
+            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).lineId,
+            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).lineChar,
+            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).nodeId,
+            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).nodeChar
+        );
+
+        // Aplicamos el estilo
+        setRangeNodeStyle(
+
+            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ),
+            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ),
+            data.data[ 4 ],
+            data.data[ 5 ],
+            true
+
+        );
+        updatePages();
 
     }
 
     updateRemoteUserPosition( info.sender, data.pos );
-
-    /*
-    if( data.cmd === 'enableEditionMode' ){
-
-        //usersPosition[ info.sender ] = data.cell.x + '-' + data.cell.y;
-        usersEditing[ data.cell.x + '-' + data.cell.y ] = info.sender;
-
-        draw();
-
-    }else if( data.cmd === 'disableEditionMode' ){
-
-        if( data.cell.value ){
-            cells[ data.cell.x + '-' + data.cell.y ] = data.cell.value;
-        }else{
-            delete cells[ data.cell.x + '-' + data.cell.y ];
-        }
-
-        delete usersEditing[ data.cell.x + '-' + data.cell.y ];
-
-        draw();
-
-    }
-    */
 
     console.log( 'Editando ', usersEditing );
 
@@ -4006,6 +4039,8 @@ var saveDocument = function(){
 };
 
 var setNodeStyle = function( paragraph, line, node, key, value ){
+
+    console.log( paragraph, line, node, key, value );
 
     if( value ){
         node.style[ key ] = value;
@@ -4143,18 +4178,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             realocateLine( i, 0 );
         }
 
-        if( !stopPropagation && realtime ){
-
-            realtime.send({
-
-                cmd  : CMD_STYLE_LISTBULLET,
-                data : [ pageId, paragraphId ],
-                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-            });
-
-        }
-
     }else if( key === 'listNone' ){
 
         if( !paragraph.listMode ){
@@ -4173,20 +4196,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         // To Do -> Medir de nuevo los nodos por si tienen tabuladores
 
         setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value, true );
-
-        /*
-        if( !stopPropagation && realtime ){
-
-            realtime.send({
-
-                cmd  : CMD_STYLE_LISTBULLET,
-                data : [ pageId, paragraphId ],
-                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-            });
-
-        }
-        */
     
     }else if( key == 'spacing' ){
 
@@ -4535,25 +4544,25 @@ var setRange = function( start, end, force ){
 
 };
 
-var setRangeNodeStyle = function( key, value, propagated ){
+var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated ){
 
     var i, j, newNode, endNode, newPositions;
 
     // Mismo nodo
     if(
-        currentRangeStart.pageId === currentRangeEnd.pageId &&
-        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
-        currentRangeStart.lineId === currentRangeEnd.lineId &&
-        currentRangeStart.nodeId === currentRangeEnd.nodeId
+        rangeStart.pageId === rangeEnd.pageId &&
+        rangeStart.paragraphId === rangeEnd.paragraphId &&
+        rangeStart.lineId === rangeEnd.lineId &&
+        rangeStart.nodeId === rangeEnd.nodeId
     ){
 
         // Si es todo el nodo
-        if( currentRangeStart.nodeChar === 0 && currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
+        if( rangeStart.nodeChar === 0 && rangeEnd.nodeChar === rangeEnd.node.string.length ){
 
-            newNode          = currentRangeStart.node;
+            newNode          = rangeStart.node;
             newNode.charList = [];
 
-            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4563,16 +4572,16 @@ var setRangeNodeStyle = function( key, value, propagated ){
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
         // Si comienza por el principio del nodo
-        }else if( currentRangeStart.nodeChar === 0 ){
+        }else if( rangeStart.nodeChar === 0 ){
 
-            newNode                         = createNode( currentRangeStart.line );
-            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
-            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
-            newNode.height                  = currentRangeStart.node.height;
-            currentRangeStart.node.string   = currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
-            currentRangeStart.node.charList = [];
+            newNode                  = createNode( rangeStart.line );
+            newNode.string           = rangeStart.node.string.slice( rangeStart.nodeChar, rangeEnd.nodeChar );
+            newNode.style            = $.extend( {}, rangeStart.node.style );
+            newNode.height           = rangeStart.node.height;
+            rangeStart.node.string   = rangeStart.node.string.slice( rangeEnd.nodeChar );
+            rangeStart.node.charList = [];
 
-            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4581,28 +4590,26 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, 0, currentRangeStart.node, currentRangeStart.nodeId, 0 );
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, 0, rangeStart.node, rangeStart.nodeId, 0 );
 
-            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId ) );
-            currentRangeStart.node          = currentRangeStart.line.nodeList[ currentRangeEnd.nodeId ];
-
-            newPositions = getNodeInPosition( currentRangeEnd.line, currentRangeEnd.lineChar );
-
-            currentRangeEnd.nodeId   = newPositions.nodeId;
-            currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
-            currentRangeEnd.nodeChar = newPositions.nodeChar;
+            rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId ).concat( newNode ).concat( rangeStart.line.nodeList.slice( rangeStart.nodeId ) );
+            rangeStart.node          = rangeStart.line.nodeList[ rangeEnd.nodeId ];
+            newPositions             = getNodeInPosition( rangeEnd.line, rangeEnd.lineChar );
+            rangeEnd.nodeId          = newPositions.nodeId;
+            rangeEnd.node            = rangeEnd.line.nodeList[ rangeEnd.nodeId ];
+            rangeEnd.nodeChar        = newPositions.nodeChar;
 
         // Si termina por el final del nodo
-        }else if( currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
+        }else if( rangeEnd.nodeChar === rangeEnd.node.string.length ){
             
-            newNode                         = createNode( currentRangeStart.line );
-            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
-            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
-            newNode.height                  = currentRangeStart.node.height;
-            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
-            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
+            newNode                  = createNode( rangeStart.line );
+            newNode.string           = rangeStart.node.string.slice( rangeStart.nodeChar );
+            newNode.style            = $.extend( {}, rangeStart.node.style );
+            newNode.height           = rangeStart.node.height;
+            rangeStart.node.string   = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
+            rangeStart.node.charList = rangeStart.node.charList.slice( 0, rangeStart.nodeChar );
 
-            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4611,30 +4618,30 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.string.length - 1 ] || 0;
-            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.concat( newNode );
-            currentNode                     = currentRangeStart.line.nodeList[ currentNodeId ];
+            rangeStart.node.width    = rangeStart.node.charList[ rangeStart.node.string.length - 1 ] || 0;
+            rangeStart.line.nodeList = rangeStart.line.nodeList.concat( newNode );
+            currentNode                     = rangeStart.line.nodeList[ currentNodeId ];
 
-            currentRangeStart.nodeId   = currentRangeStart.nodeId + 1;
-            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.nodeChar = 0;
+            rangeStart.nodeId   = rangeStart.nodeId + 1;
+            rangeStart.node     = rangeStart.line.nodeList[ rangeStart.nodeId ];
+            rangeStart.nodeChar = 0;
 
         // El resto de casos
         }else{
 
-            newNode                         = createNode( currentRangeStart.line );
-            endNode                         = createNode( currentRangeStart.line );
-            newNode.string                  = currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
-            newNode.style                   = $.extend( {}, currentRangeStart.node.style );
-            newNode.height                  = currentRangeStart.node.height;
-            endNode.string                  = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
-            endNode.style                   = $.extend( {}, currentRangeEnd.node.style );
-            endNode.height                  = currentRangeEnd.node.height;
-            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
-            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0 , currentRangeStart.nodeChar );
-            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.node.charList.length - 1 ];
+            newNode                  = createNode( rangeStart.line );
+            endNode                  = createNode( rangeStart.line );
+            newNode.string           = rangeStart.node.string.slice( rangeStart.nodeChar, rangeEnd.nodeChar );
+            newNode.style            = $.extend( {}, rangeStart.node.style );
+            newNode.height           = rangeStart.node.height;
+            endNode.string           = rangeEnd.node.string.slice( rangeEnd.nodeChar );
+            endNode.style            = $.extend( {}, rangeEnd.node.style );
+            endNode.height           = rangeEnd.node.height;
+            rangeStart.node.string   = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
+            rangeStart.node.charList = rangeStart.node.charList.slice( 0 , rangeStart.nodeChar );
+            rangeStart.node.width    = rangeStart.node.charList[ rangeStart.node.charList.length - 1 ];
 
-            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4649,39 +4656,39 @@ var setRangeNodeStyle = function( key, value, propagated ){
                 endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
             }
 
-            endNode.width                   = endNode.charList[ i - 2 ] || 0;
-            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
-            currentNode                     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            endNode.width            = endNode.charList[ i - 2 ] || 0;
+            rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( rangeStart.line.nodeList.slice( rangeStart.nodeId + 1 ) );
+            currentNode              = rangeStart.line.nodeList[ rangeStart.nodeId ];
 
-            var newPositionsStart = getNodeInPosition( currentRangeStart.line, currentRangeStart.lineChar );
-            var newPositionsEnd   = getNodeInPosition( currentRangeEnd.line, currentRangeEnd.lineChar );
+            var newPositionsStart = getNodeInPosition( rangeStart.line, rangeStart.lineChar );
+            var newPositionsEnd   = getNodeInPosition( rangeEnd.line, rangeEnd.lineChar );
 
-            currentRangeStart.nodeId   = newPositionsStart.nodeId;
-            currentRangeStart.node     = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.nodeChar = newPositionsStart.nodeChar;
-            currentRangeEnd.nodeId     = newPositionsEnd.nodeId;
-            currentRangeEnd.node       = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
-            currentRangeEnd.nodeChar   = newPositionsEnd.nodeChar;
+            rangeStart.nodeId   = newPositionsStart.nodeId;
+            rangeStart.node     = rangeStart.line.nodeList[ rangeStart.nodeId ];
+            rangeStart.nodeChar = newPositionsStart.nodeChar;
+            rangeEnd.nodeId     = newPositionsEnd.nodeId;
+            rangeEnd.node       = rangeEnd.line.nodeList[ rangeEnd.nodeId ];
+            rangeEnd.nodeChar   = newPositionsEnd.nodeChar;
 
         }
 
     // Varios nodos, misma linea
     }else if(
 
-        currentRangeStart.pageId === currentRangeEnd.pageId &&
-        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
-        currentRangeStart.lineId === currentRangeEnd.lineId
+        rangeStart.pageId === rangeEnd.pageId &&
+        rangeStart.paragraphId === rangeEnd.paragraphId &&
+        rangeStart.lineId === rangeEnd.lineId
 
     ){
 
         // Tratamiento del primer nodo
         // Comprobamos si es una selección completa del nodo
-        if( currentRangeStart.nodeChar === 0 ){
+        if( rangeStart.nodeChar === 0 ){
 
-            newNode          = currentRangeStart.node;
+            newNode          = rangeStart.node;
             newNode.charList = [];
 
-            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4693,12 +4700,12 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Es parcial
         }else{
             
-            newNode        = createNode( currentRangeStart.line );
-            newNode.string = currentRangeStart.node.string.slice( currentRangeStart.nodeChar );
-            newNode.style  = $.extend( {}, currentRangeStart.node.style );
-            newNode.height = currentRangeStart.node.height;
+            newNode        = createNode( rangeStart.line );
+            newNode.string = rangeStart.node.string.slice( rangeStart.nodeChar );
+            newNode.style  = $.extend( {}, rangeStart.node.style );
+            newNode.height = rangeStart.node.height;
 
-            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4707,24 +4714,24 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            currentRangeStart.node.string   = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
-            currentRangeStart.node.charList = currentRangeStart.node.charList.slice( 0, currentRangeStart.nodeChar );
-            currentRangeStart.node.width    = currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ];
-            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 ).concat( newNode ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
-            currentRangeStart.nodeId        = currentRangeStart.nodeId + 1;
-            currentRangeStart.nodeChar      = 0;
-            currentRangeStart.node          = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeEnd.nodeId          = currentRangeEnd.nodeId + 1;
+            rangeStart.node.string   = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
+            rangeStart.node.charList = rangeStart.node.charList.slice( 0, rangeStart.nodeChar );
+            rangeStart.node.width    = rangeStart.node.charList[ rangeStart.nodeChar - 1 ];
+            rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId + 1 ).concat( newNode ).concat( rangeStart.line.nodeList.slice( rangeStart.nodeId + 1 ) );
+            rangeStart.nodeId        = rangeStart.nodeId + 1;
+            rangeStart.nodeChar      = 0;
+            rangeStart.node          = rangeStart.line.nodeList[ rangeStart.nodeId ];
+            rangeEnd.nodeId          = rangeEnd.nodeId + 1;
 
         }
 
         // Nodos intermedios
-        for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+        for( i = rangeStart.nodeId + 1; i < rangeEnd.nodeId; i++ ){
 
-            newNode          = currentRangeStart.line.nodeList[ i ];
+            newNode          = rangeStart.line.nodeList[ i ];
             newNode.charList = [];
 
-            setNodeStyle( currentRangeStart.paragraph, currentRangeStart.line, newNode, key, value );
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( j = 1; j <= newNode.string.length; j++ ){
@@ -4737,12 +4744,12 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
         // Tratamiento del último nodo
         // Comprobamos si es una selección completa del nodo
-        if( currentRangeEnd.nodeChar === currentRangeEnd.node.string.length ){
+        if( rangeEnd.nodeChar === rangeEnd.node.string.length ){
 
-            newNode          = currentRangeEnd.node;
+            newNode          = rangeEnd.node;
             newNode.charList = [];
 
-            setNodeStyle( currentRangeEnd.paragraph, currentRangeEnd.line, newNode, key, value );
+            setNodeStyle( rangeEnd.paragraph, rangeEnd.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4754,12 +4761,12 @@ var setRangeNodeStyle = function( key, value, propagated ){
         // Es parcial
         }else{
             
-            newNode        = createNode( currentRangeEnd.line );
-            newNode.string = currentRangeEnd.node.string.slice( 0, currentRangeEnd.nodeChar );
-            newNode.style  = $.extend( {}, currentRangeEnd.node.style );
-            newNode.height = currentRangeEnd.node.height;
+            newNode        = createNode( rangeEnd.line );
+            newNode.string = rangeEnd.node.string.slice( 0, rangeEnd.nodeChar );
+            newNode.style  = $.extend( {}, rangeEnd.node.style );
+            newNode.height = rangeEnd.node.height;
 
-            setNodeStyle( currentRangeEnd.paragraph, currentRangeEnd.line, newNode, key, value );
+            setNodeStyle( rangeEnd.paragraph, rangeEnd.line, newNode, key, value );
             setCanvasTextStyle( newNode.style );
 
             for( i = 1; i <= newNode.string.length; i++ ){
@@ -4768,18 +4775,18 @@ var setRangeNodeStyle = function( key, value, propagated ){
 
             newNode.width = newNode.charList[ i - 2 ] || 0;
 
-            currentRangeEnd.node.string   = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
-            currentRangeEnd.node.charList = [];
+            rangeEnd.node.string   = rangeEnd.node.string.slice( rangeEnd.nodeChar );
+            rangeEnd.node.charList = [];
 
-            setCanvasTextStyle( currentRangeEnd.node.style );
+            setCanvasTextStyle( rangeEnd.node.style );
 
-            for( i = 1; i <= currentRangeEnd.node.string.length; i++ ){
-                currentRangeEnd.node.charList.push( ctx.measureText( currentRangeEnd.node.string.slice( 0, i ) ).width );
+            for( i = 1; i <= rangeEnd.node.string.length; i++ ){
+                rangeEnd.node.charList.push( ctx.measureText( rangeEnd.node.string.slice( 0, i ) ).width );
             }
 
-            currentRangeEnd.node.width    = currentRangeEnd.node.charList[ i - 2 ] || 0;
-            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( 0, currentRangeEnd.nodeId ).concat( newNode ).concat( currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId ) );
-            currentRangeEnd.node          = newNode;
+            rangeEnd.node.width    = rangeEnd.node.charList[ i - 2 ] || 0;
+            rangeEnd.line.nodeList = rangeEnd.line.nodeList.slice( 0, rangeEnd.nodeId ).concat( newNode ).concat( rangeEnd.line.nodeList.slice( rangeEnd.nodeId ) );
+            rangeEnd.node          = newNode;
 
         }
 
@@ -4789,20 +4796,21 @@ var setRangeNodeStyle = function( key, value, propagated ){
         var originalRangeStart, originalRangeEnd;
 
         // Aplicamos el estilo a la línea inicial
-        originalRangeStart       = currentRangeStart;
-        originalRangeEnd         = currentRangeEnd;
-        currentRangeEnd          = $.extend( {}, currentRangeStart );
-        currentRangeEnd.lineChar = currentRangeEnd.line.totalChars;
-        currentRangeEnd.nodeId   = currentRangeEnd.line.nodeList.length - 1;
-        currentRangeEnd.node     = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
-        currentRangeEnd.nodeChar = currentRangeEnd.node.string.length;
+        originalRangeStart = rangeStart;
+        originalRangeEnd   = rangeEnd;
+        rangeEnd           = $.extend( {}, rangeStart );
+        rangeEnd.lineChar  = rangeEnd.line.totalChars;
+        rangeEnd.nodeId    = rangeEnd.line.nodeList.length - 1;
+        rangeEnd.node      = rangeEnd.line.nodeList[ rangeEnd.nodeId ];
+        rangeEnd.nodeChar  = rangeEnd.node.string.length;
 
-        setRangeNodeStyle( key, value, true );
+        // To Do -> Ahora que se pasan como argumentos los rangos podemos ahorrarnos el modificar los rangos originales
+        setRangeNodeStyle( rangeStart, rangeEnd, key, value, true );
 
-        currentRangeEnd = originalRangeEnd;
+        rangeEnd = originalRangeEnd;
 
         // Aplicamos el estilo a nodos intermedios
-        mapRangeLines( false, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
+        mapRangeLines( false, rangeStart, rangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
             var newNode, i, j;
 
@@ -4825,15 +4833,16 @@ var setRangeNodeStyle = function( key, value, propagated ){
         });
 
         // Aplicamos el estilo a la línea final
-        currentRangeStart          = $.extend( {}, currentRangeEnd );
-        currentRangeStart.lineChar = 0;
-        currentRangeStart.nodeId   = 0;
-        currentRangeStart.node     = currentRangeStart.line.nodeList[ 0 ];
-        currentRangeStart.nodeChar = 0;
+        rangeStart          = $.extend( {}, rangeEnd );
+        rangeStart.lineChar = 0;
+        rangeStart.nodeId   = 0;
+        rangeStart.node     = rangeStart.line.nodeList[ 0 ];
+        rangeStart.nodeChar = 0;
 
-        setRangeNodeStyle( key, value, true );
+        // To Do -> Ahora que pasamos los rangos como argumentos podemos ahorrarnos copiar y modificar los rangos original
+        setRangeNodeStyle( rangeStart, rangeEnd, key, value, true );
 
-        currentRangeStart = originalRangeStart;
+        rangeStart = originalRangeStart;
 
     }
 
@@ -4843,7 +4852,7 @@ var setRangeNodeStyle = function( key, value, propagated ){
         currentNode = currentLine.nodeList[ currentNodeId ]; // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
 
         updatePages();
-        setRange( currentRangeStart, currentRangeEnd, true );
+        setRange( rangeStart, rangeEnd, true );
 
     }
 
@@ -4862,13 +4871,64 @@ var setRangeParagraphStyle = function( key, value ){
 
 var setSelectedNodeStyle = function( key, value ){
 
+    var i, charInParagraphStart, charInParagraphEnd, listModeParagraphStart, listModeParagraphEnd, requestStartCheck, requestEndCheck, firstNodeLengthStart, firstNodeLengthEnd;
+
     // Selección normal
     if( currentRangeStart ){
-        setRangeNodeStyle( key, value );
+
+        // Calculamos las posiciones de inicio
+        listModeParagraphStart = currentRangeStart.paragraph.listMode;
+        charInParagraphStart   = currentRangeStart.lineChar;
+
+        for( i = 0; i < currentRangeStart.lineId; i++ ){
+            charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
+        }
+
+        listModeParagraphEnd = currentRangeEnd.paragraph.listMode;
+        charInParagraphEnd   = currentRangeEnd.lineChar;
+
+        for( i = 0; i < currentRangeEnd.lineId; i++ ){
+            charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
+        }
+
+        // Aplicamos el estilo
+        setRangeNodeStyle( currentRangeStart, currentRangeEnd, key, value );
+
+        // Enviamos
+        if( realtime ){
+
+            realtime.send({
+                
+                cmd  : CMD_RANGE_NODE_STYLE,
+                data : [ listModeParagraphStart, charInParagraphStart, listModeParagraphEnd, charInParagraphEnd, key, value ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
+        }
 
     // Principio de un párrafo vacío
     }else if( currentLineId === 0 && currentLine.totalChars === 0 ){
+
+        // Calculamos las posiciones de inicio
+        listModeParagraphStart = currentParagraph.listMode;
+        charInParagraphStart   = currentLineCharId;
+
+        for( i = 0; i < currentLineId; i++ ){
+            charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
+        }
+
+        // Aplicamos el estilo
         setNodeStyle( currentParagraph, currentLine, currentNode, key, value );
+
+        // Enviamos
+        realtime.send({
+            
+            cmd  : CMD_NODE_STYLE,
+            data : [ listModeParagraphStart, charInParagraphStart, key, value ],
+            pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+        });
 
     // Falso mononodo, acumulado de estilos
     }else{
