@@ -19,10 +19,8 @@ var CMD_BACKSPACE = 3;
 var CMD_ENTER = 4;
 var CMD_NODE_STYLE = 5;
 var CMD_RANGE_NODE_STYLE = 6;
-/*
-var CMD_STYLE_MARGIN = 7;
-var CMD_STYLE_LISTBULLET = 8;
-*/
+var CMD_PARAGRAPH_STYLE = 7;
+var CMD_RANGE_PARAGRAPH_STYLE = 8;
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
@@ -3875,26 +3873,6 @@ var realTimeMessage = function( info, data ){
 
     }else if( data.cmd === CMD_RANGE_NODE_STYLE ){
 
-        console.log('CMD_RANGE_NODE_STYLE');
-
-        console.log( data.data[ 0 ], data.data[ 1 ] );
-
-        console.log(
-            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).lineId,
-            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).lineChar,
-            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).nodeId,
-            getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ).nodeChar
-        );
-
-        console.log( data.data[ 2 ], data.data[ 3 ] );
-
-        console.log(
-            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).lineId,
-            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).lineChar,
-            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).nodeId,
-            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ).nodeChar
-        );
-
         // Aplicamos el estilo
         setRangeNodeStyle(
 
@@ -3905,6 +3883,28 @@ var realTimeMessage = function( info, data ){
             true
 
         );
+        updatePages();
+
+    }else if( data.cmd === CMD_PARAGRAPH_STYLE ){
+
+        console.log( data.data[ 0 ], data.data[ 1 ] );
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], 0 );
+
+        // Aplicamos el estilo
+        setParagraphStyle( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, data.data[ 1 ], data.data[ 2 ] );
+        updatePages();
+
+    }else if( data.cmd === CMD_RANGE_PARAGRAPH_STYLE ){
+
+        for( var i = data.data[ 0 ]; i <= data.data[ 1 ]; i++ ){
+
+            elements = getElementsByRemoteParagraph( i, 0 );
+
+            // Aplicamos el estilo
+            setParagraphStyle( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, data.data[ 2 ], data.data[ 3 ] );
+
+        }
+
         updatePages();
 
     }
@@ -4922,13 +4922,17 @@ var setSelectedNodeStyle = function( key, value ){
         setNodeStyle( currentParagraph, currentLine, currentNode, key, value );
 
         // Enviamos
-        realtime.send({
-            
-            cmd  : CMD_NODE_STYLE,
-            data : [ listModeParagraphStart, charInParagraphStart, key, value ],
-            pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        if( realtime ){
 
-        });
+            realtime.send({
+                
+                cmd  : CMD_NODE_STYLE,
+                data : [ listModeParagraphStart, charInParagraphStart, key, value ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
+        }
 
     // Falso mononodo, acumulado de estilos
     }else{
@@ -4939,13 +4943,18 @@ var setSelectedNodeStyle = function( key, value ){
 
 var setSelectedParagraphsStyle = function( key, value ){
 
-    var i, charInParagraphStart, charInParagraphEnd, listModeParagraphStart, listModeParagraphEnd, requestStartCheck, requestEndCheck, firstNodeLengthStart, firstNodeLengthEnd;
+    var i, paragraphIdStart, paragraphIdEnd, charInParagraphStart, charInParagraphEnd, listModeParagraphStart, listModeParagraphEnd, requestStartCheck, requestEndCheck, firstNodeLengthStart, firstNodeLengthEnd;
 
     if( currentRangeStart ){
 
         // Calculamos las posiciones de inicio
         listModeParagraphStart = currentRangeStart.paragraph.listMode;
         charInParagraphStart   = currentRangeStart.lineChar;
+        paragraphIdStart       = currentRangeStart.paragraphId;
+
+        for( i = 0; i < currentRangeStart.pageId; i++ ){
+            paragraphIdStart += pageList[ i ].paragraphList.length;
+        }
 
         for( i = 0; i < currentRangeStart.lineId; i++ ){
             charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
@@ -4953,6 +4962,11 @@ var setSelectedParagraphsStyle = function( key, value ){
 
         listModeParagraphEnd = currentRangeEnd.paragraph.listMode;
         charInParagraphEnd   = currentRangeEnd.lineChar;
+        paragraphIdEnd       = currentRangeEnd.paragraphId;
+
+        for( i = 0; i < currentRangeEnd.pageId; i++ ){
+            paragraphIdStart += pageList[ i ].paragraphList.length;
+        }
 
         for( i = 0; i < currentRangeEnd.lineId; i++ ){
             charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
@@ -4972,6 +4986,19 @@ var setSelectedParagraphsStyle = function( key, value ){
 
         // Aplicamos el estilo
         setRangeParagraphStyle( key, value );
+
+        // Enviamos
+        if( realtime ){
+
+            realtime.send({
+                
+                cmd  : CMD_RANGE_PARAGRAPH_STYLE,
+                data : [ paragraphIdStart, paragraphIdEnd, key, value ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
+        }
 
         // Calculamos las correcciones
         if( key === 'listBullet' || key === 'listNumber' ){
@@ -5090,6 +5117,11 @@ var setSelectedParagraphsStyle = function( key, value ){
         // Calculamos las posiciones de inicio
         listModeParagraphStart = currentParagraph.listMode;
         charInParagraphStart   = currentLineCharId;
+        paragraphIdStart       = currentParagraphId;
+
+        for( i = 0; i < currentPageId; i++ ){
+            paragraphIdStart += pageList[ i ].paragraphList.length;
+        }
 
         for( i = 0; i < currentLineId; i++ ){
             charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
@@ -5101,6 +5133,19 @@ var setSelectedParagraphsStyle = function( key, value ){
 
         // Aplicamos el estilo
         setParagraphStyle( currentPageId, currentPage, currentParagraphId, currentParagraph, key, value );
+
+        // Enviamos
+        if( realtime ){
+
+            realtime.send({
+                
+                cmd  : CMD_PARAGRAPH_STYLE,
+                data : [ paragraphIdStart, key, value ],
+                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+            });
+
+        }
 
         // Calculamos las correcciones
         if( ( key === 'listBullet' || key === 'listNumber' ) && !listModeParagraphStart ){
