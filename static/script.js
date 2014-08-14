@@ -15,12 +15,14 @@ var ALIGN_JUSTIFY = 3;
 var CENTIMETER = 37.795275591;
 var CMD_POSITION = 0;
 var CMD_NEWCHAR = 1;
+var CMD_RANGE_NEWCHAR = 2;
 var CMD_BACKSPACE = 3;
-var CMD_ENTER = 4;
-var CMD_NODE_STYLE = 5;
-var CMD_RANGE_NODE_STYLE = 6;
-var CMD_PARAGRAPH_STYLE = 7;
-var CMD_RANGE_PARAGRAPH_STYLE = 8;
+var CMD_RANGE_BACKSPACE = 4;
+var CMD_ENTER = 5;
+var CMD_NODE_STYLE = 6;
+var CMD_RANGE_NODE_STYLE = 7;
+var CMD_PARAGRAPH_STYLE = 8;
+var CMD_RANGE_PARAGRAPH_STYLE = 9;
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
@@ -2027,6 +2029,26 @@ var handleBackspaceNormal = function(){
 var handleBackspaceSelection = function(){
 
     var i;
+    var paragraphIdStart     = currentRangeStart.paragraphId;
+    var charInParagraphStart = currentRangeStart.lineChar;
+    var paragraphIdEnd       = currentRangeEnd.paragraphId;
+    var charInParagraphEnd   = currentRangeEnd.lineChar;
+
+    for( i = 0; i < currentRangeStart.pageId; i++ ){
+        paragraphIdStart += pageList[ i ].paragraphList.length;
+    }
+
+    for( i = 0; i < currentRangeStart.lineId; i++ ){
+        charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
+    }
+
+    for( i = 0; i < currentRangeEnd.pageId; i++ ){
+        paragraphIdEnd += pageList[ i ].paragraphList.length;
+    }
+
+    for( i = 0; i < currentRangeEnd.lineId; i++ ){
+        charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
+    }
 
     // Si está en el mismo nodo
     if(
@@ -2125,6 +2147,14 @@ var handleBackspaceSelection = function(){
     setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar, true );
     realocateLineInverse( currentLineId, currentLineCharId );
     resetBlink();
+
+    realtime.send({
+        
+        cmd  : CMD_RANGE_BACKSPACE,
+        data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd ],
+        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
 
 };
 
@@ -2604,7 +2634,7 @@ var handleEnter = function(){
 
 };
 
-var handleRemoteBackspace = function(  pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, newChar  ){
+var handleRemoteBackspace = function(  pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar  ){
 
     // Principio del documento
     if( !pageId && !paragraphId && !lineId && !lineChar ){
@@ -2705,6 +2735,106 @@ var handleRemoteBackspace = function(  pageId, page, paragraphId, paragraph, lin
             paragraph.height   = paragraph.height - ( line.height * paragraph.spacing );
 
         }
+
+    }
+
+};
+
+var handleRemoteBackspaceSelection = function( rangeStart, rangeEnd ){
+
+    var i;
+
+    // Si está en el mismo nodo
+    if(
+        rangeStart.pageId === rangeEnd.pageId &&
+        rangeStart.paragraphId === rangeEnd.paragraphId &&
+        rangeStart.lineId === rangeEnd.lineId &&
+        rangeStart.nodeId === rangeEnd.nodeId
+    ){
+
+        rangeStart.line.totalChars -= rangeStart.node.string.length;
+        rangeStart.node.string      = rangeStart.node.string.slice( 0, rangeStart.nodeChar ) + rangeStart.node.string.slice( rangeEnd.nodeChar );
+        rangeStart.line.totalChars += rangeStart.node.string.length;
+        
+        measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, rangeStart.nodeChar );
+        
+    // Si está en la misma línea pero en distintos nodos
+    }else if(
+        rangeStart.pageId === rangeEnd.pageId &&
+        rangeStart.paragraphId === rangeEnd.paragraphId &&
+        rangeStart.lineId === rangeEnd.lineId
+    ){
+
+        // Nodo inicial
+        rangeStart.line.totalChars -= rangeStart.node.string.length;
+        rangeStart.node.string      = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
+        rangeStart.line.totalChars += rangeStart.node.string.length;
+
+        measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, rangeStart.nodeChar );
+
+        // Eliminado de nodos intermedios
+        for( i = rangeStart.nodeId + 1; i < rangeEnd.nodeId; i++ ){
+            rangeStart.line.totalChars -= rangeStart.line.nodeList[ i ].string.length;
+        }
+
+        rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId + 1 ).concat( rangeEnd.line.nodeList.slice( rangeEnd.nodeId ) );
+
+        // Nodo final
+        rangeEnd.line.totalChars -= rangeEnd.node.string.length;
+        rangeEnd.node.string      = rangeEnd.node.string.slice( rangeEnd.nodeChar );
+        rangeEnd.line.totalChars += rangeEnd.node.string.length;
+
+        measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, rangeEnd.node, rangeEnd.nodeId, rangeEnd.nodeChar );
+        
+    // Si están en varias líneas
+    }else{
+
+        // Línea inicial
+        // Nodo inicial
+        rangeStart.line.totalChars -= rangeStart.node.string.length;
+        rangeStart.node.string      = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
+        rangeStart.line.totalChars += rangeStart.node.string.length;
+
+        measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, rangeStart.nodeChar );
+
+        // Eliminamos los nodos siguientes de la línea
+        for( i = rangeStart.nodeId + 1; i < rangeStart.line.nodeList.length; i++ ){
+            rangeStart.line.totalChars -= rangeStart.line.nodeList[ i ].string.length;
+        }
+
+        // Si el nodo no se queda vacío
+        if( rangeStart.node.string.length ){
+            rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId + 1 );
+        }else{
+
+            rangeStart.line.nodeList  = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId );
+            rangeStart.nodeId         = rangeStart.nodeId - 1; // To Do -> Y si el nodoId es 0? -> Y si se selecciona el párrafo entero?
+            rangeStart.node           = rangeStart.line.nodeList[ rangeStart.nodeId ];
+            rangeStart.nodeChar       = rangeStart.node.string.length;
+
+        }
+
+        // Líneas intermedias
+        removeRangeLines( false, rangeStart, rangeEnd );
+
+        // Línea final
+        // Eliminamos los primeros nodes de la línea
+        for( i = 0; i < rangeEnd.nodeId; i++ ){
+            rangeEnd.line.totalChars -= rangeEnd.line.nodeList[ i ].string.length;
+        }
+
+        rangeEnd.line.totalChars -= rangeEnd.node.string.length;
+        rangeEnd.node.string      = rangeEnd.node.string.slice( rangeEnd.nodeChar );
+        rangeEnd.line.totalChars += rangeEnd.node.string.length;
+
+        // Si el nodo no se queda vacío
+        if( rangeEnd.node.string.length ){
+            rangeEnd.line.nodeList = rangeEnd.line.nodeList.slice( rangeEnd.nodeId );
+        }else{
+            rangeEnd.line.nodeList = rangeEnd.line.nodeList.slice( rangeEnd.nodeId + 1 ); // To Do -> Estamos seguros de que esto es correcto?
+        }
+
+        measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, rangeEnd.node, rangeEnd.nodeId, 0 );
 
     }
 
@@ -3839,7 +3969,14 @@ var realTimeMessage = function( info, data ){
 
         elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
 
-        handleRemoteBackspace( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar, data.data[ 2 ] );
+        handleRemoteBackspace( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar );
+        updatePages();
+
+    }else if( data.cmd === CMD_RANGE_BACKSPACE ){
+
+        console.log('CMD_RANGE_BACKSPACE');
+
+        handleRemoteBackspaceSelection( getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ), getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ) );
         updatePages();
 
     }else if( data.cmd === CMD_ENTER ){
