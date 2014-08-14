@@ -2356,6 +2356,26 @@ var handleCharNormal = function( newChar ){
 var handleCharSelection = function( newChar ){
 
     var i;
+    var paragraphIdStart     = currentRangeStart.paragraphId;
+    var charInParagraphStart = currentRangeStart.lineChar;
+    var paragraphIdEnd       = currentRangeEnd.paragraphId;
+    var charInParagraphEnd   = currentRangeEnd.lineChar;
+
+    for( i = 0; i < currentRangeStart.pageId; i++ ){
+        paragraphIdStart += pageList[ i ].paragraphList.length;
+    }
+
+    for( i = 0; i < currentRangeStart.lineId; i++ ){
+        charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
+    }
+
+    for( i = 0; i < currentRangeEnd.pageId; i++ ){
+        paragraphIdEnd += pageList[ i ].paragraphList.length;
+    }
+
+    for( i = 0; i < currentRangeEnd.lineId; i++ ){
+        charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
+    }
 
     // Si está en el mismo nodo
     if(
@@ -2438,6 +2458,14 @@ var handleCharSelection = function( newChar ){
     setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar + 1, currentRangeStart.nodeId, currentRangeStart.nodeChar + 1, true );
     realocateLineInverse( currentLineId, currentLineCharId );
     resetBlink();
+
+    realtime.send({
+        
+        cmd  : CMD_RANGE_NEWCHAR,
+        data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd, newChar ],
+        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
 
 };
 
@@ -2911,6 +2939,90 @@ var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, l
 
     measureNode( paragraph, line, lineId, null, node, nodeId, nodeChar );
     */
+
+};
+
+var handleRemoteCharSelection = function( rangeStart, rangeEnd, newChar ){
+
+    var i;
+
+    // Si está en el mismo nodo
+    if(
+        rangeStart.pageId === rangeEnd.pageId &&
+        rangeStart.paragraphId === rangeEnd.paragraphId &&
+        rangeStart.lineId === rangeEnd.lineId &&
+        rangeStart.nodeId === rangeEnd.nodeId
+    ){
+
+        rangeStart.line.totalChars -= rangeStart.node.string.length;
+        rangeStart.node.string      = rangeStart.node.string.slice( 0, rangeStart.nodeChar ) + newChar + rangeStart.node.string.slice( rangeEnd.nodeChar );
+        rangeStart.line.totalChars += rangeStart.node.string.length;
+        
+        measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, rangeStart.nodeChar );
+        
+    // Si está en la misma línea pero en distintos nodos
+    }else if(
+        rangeStart.pageId === rangeEnd.pageId &&
+        rangeStart.paragraphId === rangeEnd.paragraphId &&
+        rangeStart.lineId === rangeEnd.lineId
+    ){
+
+        // Nodo inicial
+        rangeStart.line.totalChars -= rangeStart.node.string.length;
+        rangeStart.node.string      = rangeStart.node.string.slice( 0, rangeStart.nodeChar ) + newChar;
+        rangeStart.line.totalChars += rangeStart.node.string.length;
+
+        measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, rangeStart.nodeChar );
+
+        // Eliminado de nodos intermedios
+        for( i = rangeStart.nodeId + 1; i < rangeEnd.nodeId; i++ ){
+            rangeStart.line.totalChars -= rangeStart.line.nodeList[ i ].string.length;
+        }
+
+        rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId + 1 ).concat( rangeEnd.line.nodeList.slice( rangeEnd.nodeId ) );
+
+        // Nodo final
+        rangeEnd.line.totalChars -= rangeEnd.node.string.length;
+        rangeEnd.node.string      = rangeEnd.node.string.slice( rangeEnd.nodeChar );
+        rangeEnd.line.totalChars += rangeEnd.node.string.length;
+
+        measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, rangeEnd.node, rangeEnd.nodeId, rangeEnd.nodeChar );
+        
+    // Si están en varias líneas
+    }else{
+
+        // Línea inicial
+        // Nodo inicial
+        rangeStart.line.totalChars -= rangeStart.node.string.length;
+        rangeStart.node.string      = rangeStart.node.string.slice( 0, rangeStart.nodeChar ) + newChar;
+        rangeStart.line.totalChars += rangeStart.node.string.length;
+
+        measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, rangeStart.nodeChar );
+
+        // Eliminamos los nodos siguientes de la línea
+        for( i = rangeStart.nodeId + 1; i < rangeStart.line.nodeList.length; i++ ){
+            rangeStart.line.totalChars -= rangeStart.line.nodeList[ i ].string.length;
+        }
+
+        rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId + 1 );
+
+        // Líneas intermedias
+        removeRangeLines( false, rangeStart, rangeEnd );
+
+        // Línea final
+        // Eliminamos los primeros nodes de la línea
+        for( i = 0; i < rangeEnd.nodeId; i++ ){
+            rangeEnd.line.totalChars -= rangeEnd.line.nodeList[ i ].string.length;
+        }
+
+        rangeEnd.line.totalChars -= rangeEnd.node.string.length;
+        rangeEnd.node.string      = rangeEnd.node.string.slice( rangeEnd.nodeChar );
+        rangeEnd.line.totalChars += rangeEnd.node.string.length;
+        rangeEnd.line.nodeList    = rangeEnd.line.nodeList.slice( rangeEnd.nodeId );
+
+        measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, rangeEnd.node, rangeEnd.nodeId, 0 );
+
+    }
 
 };
 
@@ -3961,6 +4073,13 @@ var realTimeMessage = function( info, data ){
         elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
 
         handleRemoteChar( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar, data.data[ 2 ] );
+        updatePages();
+
+    }else if( data.cmd === CMD_RANGE_NEWCHAR ){
+
+        console.log('CMD_RANGE_NEWCHAR');
+
+        handleRemoteCharSelection( getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ), getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ), data.data[ 4 ] );
         updatePages();
 
     }else if( data.cmd === CMD_BACKSPACE ){
