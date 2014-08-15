@@ -3606,7 +3606,7 @@ var realocateLine = function( id, lineChar ){
         return counter;
     }
 
-    var words, wordsToMove, newLine, newNode, stop, i, j, k, heritage, created;
+    var words, wordsToMove, newLine, newNode, stop, i, j, k, heritage, created, nodesToMove;
 
     // Nos hacemos con la nueva línea, si no existe la creamos
     if( !currentParagraph.lineList[ id + 1 ] ){
@@ -3646,7 +3646,6 @@ var realocateLine = function( id, lineChar ){
             // Comprobamos si el último nodo de la palabra actual es distinto del de las otras
             k = words[ i ].nodeList.slice( -1 )[ 0 ];
 
-            var nodesToMove;
             var charsMoved;
 
             // Si es distinto el movimiento es más sencillo
@@ -3713,6 +3712,47 @@ var realocateLine = function( id, lineChar ){
         if( stop ){
             break;
         }
+
+    }
+
+    // Si no hay palabras enteras partimos la palabra actual
+    if( !wordsToMove ){
+
+        heritage = 0;
+
+        for( i = 0; i < line.nodeList.length; i++ ){
+
+            if( heritage + line.nodeList[ i ].width > line.width ){
+                break;
+            }
+
+            heritage += line.nodeList[ i ].width;
+
+        }
+
+        nodesToMove = line.nodeList[ i ];
+
+        for( j = 0; j < nodesToMove.charList.length; j++ ){
+
+            if( heritage + nodesToMove.charList[ j ] > line.width ){
+                break;
+            }
+            
+        }
+
+        heritage += nodesToMove.charList[ j ];
+
+        newNode               = createNode( line );
+        newNode.style         = $.extend( {}, nodesToMove.style );
+        newNode.height        = nodesToMove.height;
+        newNode.string        = nodesToMove.string.slice( j );
+        nodesToMove.string    = nodesToMove.string.slice( 0, j );
+        nodesToMove.charList  = nodesToMove.charList.slice( 0, j );
+        line.totalChars      -= newNode.string.length;
+        newLine.totalChars   += newNode.string.length;
+
+        measureNode( currentParagraph, line, 0, 0, newNode, 0, 0 );
+        newLine.nodeList.unshift( newNode );
 
     }
 
