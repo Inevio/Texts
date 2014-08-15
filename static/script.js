@@ -65,28 +65,30 @@ var PAGEDIMENSIONS = {
 };
 
 // DOM variables
-var win            = $(this);
-var saveButton     = $('.option-save');
-var toolsMenu      = $('.toolbar-menu');
-var toolsLine      = $('.tools-line');
-var toolsList      = $('.toolbar-list');
-var pages          = $('.pages');
-var selections     = $('.selections');
-var ruleLeft       = $('.rule-left');
-var ruleTop        = $('.rule-top');
-var marginTopDown  = $('.ruler-arrow-down');
-var marginTopUp    = $('.ruler-arrow-up');
-var marginTopBox   = $('.ruler-box');
-var input          = $('.input');
-var testZone       = $('.test-zone');
-var canvasPages    = pages[ 0 ];
-var canvasSelect   = selections[ 0 ];
-var canvasRuleLeft = ruleLeft[ 0 ];
-var canvasRuleTop  = ruleTop[ 0 ];
-var ctx            = canvasPages.getContext('2d');
-var ctxSel         = canvasSelect.getContext('2d');
-var ctxRuleLeft    = canvasRuleLeft.getContext('2d');
-var ctxRuleTop     = canvasRuleTop.getContext('2d');
+var win             = $(this);
+var saveButton      = $('.option-save');
+var toolsMenu       = $('.toolbar-menu');
+var toolsLine       = $('.tools-line');
+var toolsList       = $('.toolbar-list');
+var toolsColor      = $('.toolbar-color-picker');
+var toolsColorColor = $('.tool-button-color .color');
+var pages           = $('.pages');
+var selections      = $('.selections');
+var ruleLeft        = $('.rule-left');
+var ruleTop         = $('.rule-top');
+var marginTopDown   = $('.ruler-arrow-down');
+var marginTopUp     = $('.ruler-arrow-up');
+var marginTopBox    = $('.ruler-box');
+var input           = $('.input');
+var testZone        = $('.test-zone');
+var canvasPages     = pages[ 0 ];
+var canvasSelect    = selections[ 0 ];
+var canvasRuleLeft  = ruleLeft[ 0 ];
+var canvasRuleTop   = ruleTop[ 0 ];
+var ctx             = canvasPages.getContext('2d');
+var ctxSel          = canvasSelect.getContext('2d');
+var ctxRuleLeft     = canvasRuleLeft.getContext('2d');
+var ctxRuleTop      = canvasRuleTop.getContext('2d');
 
 // Node variables
 var pageList = [];
@@ -143,6 +145,7 @@ var currentRangeEndHash   = null;
 var currentMultipleHash   = null;
 var temporalStyle         = null;
 var toolsListEnabled      = false;
+var toolsColorEnabled     = false;
 
 // Button actions
 var buttonAction = {
@@ -3430,6 +3433,29 @@ var newParagraph = function(){
 
 };
 
+var normalizeColor = function( color ){
+
+    if( !color ){
+        return '#000000';
+    }
+
+    if( color.indexOf('#') > -1 ){
+        return color;
+    }
+
+    color = color.match(/(\d+)/g) || [ 0, 0, 0 ];
+
+    for( var i in color ){
+
+        color[ i ] = parseInt( color[ i ], 10 ).toString( 16 );
+        color[ i ] = color[ i ].length === 1 ? '0' + color[ i ] : color[ i ];
+
+    }
+
+    return '#' + color.join('');
+
+};
+
 var normalizeLine = function( line ){
 
     if( line.nodeList.length === 1 ){
@@ -4408,8 +4434,6 @@ var saveDocument = function(){
 };
 
 var setNodeStyle = function( paragraph, line, node, key, value ){
-
-    console.log( paragraph, line, node, key, value );
 
     if( value ){
         node.style[ key ] = value;
@@ -5903,14 +5927,16 @@ var updateToolsLineStatus = function(){
 win
 .on( 'mousedown', function(){
 
-    if( !toolsListEnabled ){
+    if( !toolsListEnabled && !toolsColorEnabled ){
         return;
     }
 
     toolsListEnabled = false;
+    toolsColorEnabled = false;
 
     input.focus();
     toolsList.css( 'display', 'none' );
+    toolsColor.css( 'display', 'none' );
     toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
 
 })
@@ -5926,14 +5952,16 @@ win
 
 .key( 'esc', function( e ){
 
-    if( !toolsListEnabled ){
+    if( !toolsListEnabled && !toolsColorEnabled ){
         return;
     }
 
-    toolsListEnabled = false;
+    toolsListEnabled  = false;
+    toolsColorEnabled = false;
 
     input.focus();
     toolsList.css( 'display', 'none' );
+    toolsColor.css( 'display', 'none' );
     toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
 
 });
@@ -6606,6 +6634,29 @@ toolsLine
 
 })
 
+.on( 'click', '.tool-button-color', function(){
+
+    toolsColorEnabled = true;
+
+    toolsColor.css({
+
+        top     : $(this).position().top + $(this).outerHeight(),
+        left    : $(this).position().left,
+        display : 'block'
+
+    });
+
+})
+
+.on( 'click', '.tool-button-color .color', function( e ){
+
+    e.stopPropagation();
+    input.focus();
+    buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
+
+
+})
+
 .on( 'click', '.tool-button-line-spacing', function(){
 
     toolsListEnabled = true;
@@ -6714,6 +6765,24 @@ toolsList
 
     toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
     updateToolsLineStatus();
+
+});
+
+toolsColor
+.on( 'mousedown', function( e ){
+    e.stopPropagation();
+})
+
+.on( 'click', 'td', function(){
+
+    toolsColorEnabled = false;
+
+    toolsColor.css( 'display', 'none' );
+
+    toolsColorColor
+        .attr( 'data-tool-value', normalizeColor( $(this).css('background-color') ) )
+        .css( 'background-color', $(this).css('background-color') )
+        .click();
 
 });
 
