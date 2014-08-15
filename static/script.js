@@ -3742,6 +3742,10 @@ var realocateLine = function( id, lineChar ){
 
         heritage += nodesToMove.charList[ j ];
 
+        // To Do -> Pueden darse casos en los que sea mejor mover un nodo entero
+        // To Do -> Pueden darse casos en los que un nodo se quede vacío
+        // To Do -> Actualizar las alturas de las lineas
+
         newNode               = createNode( line );
         newNode.style         = $.extend( {}, nodesToMove.style );
         newNode.height        = nodesToMove.height;
@@ -3842,8 +3846,77 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     }
 
+    // Si no hay palabras separadas comprobamos si debe entrar parte de la siguiente línea porque se ha partido la palabra
     if( !wordsToMove.length ){
+
+        // Si la palabra no está rota
+        if(
+            lineWords.slice( -1 )[ 0 ].string.indexOf(' ') !== -1 &&
+            nextLine.nodeList[ 0 ].string[ 0 ] !== ' '
+        ){
+            return counter;
+        }
+
+        var nodeId   = null;
+        var charId   = null;
+        var heritage = 0;
+
+        for( i = 0; i < nextLine.nodeList.length; i++ ){
+            
+            if( nextLine.nodeList[ i ].width + currentWidth >= line.width ){
+                nodeId = i;
+                break;
+            }
+
+            heritage += nextLine.nodeList[ i ].width;
+
+        }
+
+        // To Do -> Seguro que esto hace falta?
+        if( nodeId === null ){
+            return counter;
+        }
+
+        for( i = 0; i < nextLine.nodeList[ nodeId ].charList.length; i++ ){
+            
+            if( heritage + nextLine.nodeList[ nodeId ].charList[ i ] + currentWidth > line.width ){
+                charId = i - 1;
+                break;
+            }
+
+            if( heritage + nextLine.nodeList[ nodeId ].charList[ i ] + currentWidth === line.width ){
+                charId = i;
+                break;
+            }
+
+        }
+
+        if( charId === null || charId === -1 ){
+            return counter;
+        }
+
+        // To Do -> Pueden darse casos en los que sea mejor mover un nodo entero
+        // To Do -> Pueden darse casos en los que un nodo se quede vacío
+        // To Do -> Pueden darse casos en los que haya que mover un conjunto de nodos
+        // To Do -> Actualizar las alturas de las lineas
+
+        var nodeToMove = nextLine.nodeList[ nodeId ];
+
+        newNode              = createNode( line );
+        newNode.style        = $.extend( {}, nodeToMove.style );
+        newNode.height       = nodeToMove.height;
+        newNode.string       = nodeToMove.string.slice( 0, charId + 1 );
+        nodeToMove.string    = nodeToMove.string.slice( charId + 1 );
+        line.totalChars     += newNode.string.length;
+        newLine.totalChars  -= newNode.string.length;
+
+        measureNode( currentParagraph, line, 0, 0, newNode, 0, 0 );
+        measureNode( currentParagraph, nextLine, 0, 0, nodeToMove, 0, 0 );
+
+        line.nodeList.push( newNode );
+        
         return counter;
+
     }
 
     counter.realocation = true;
