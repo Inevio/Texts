@@ -964,7 +964,7 @@
                     wz.banner()
                         .title( 'weeText - ' + structure.name )
                         .text( structure.name + ' ' + lang.fileSaved )
-                        .icon( 'https://static.weezeel.com/app/7/floppy.png' )
+                        .icon( 'https://static.inevio.com/app/7/floppy.png' )
                         .render();
 
                     wz.tool.secureCallback( callback )();
@@ -1016,7 +1016,7 @@
                 wz.banner()
                     .title( 'weeText - ' + structure.name )
                     .text( structure.name + ' ' + lang.fileSaved )
-                    .icon( 'https://static.weezeel.com/app/7/floppy.png' )
+                    .icon( 'https://static.inevio.com/app/7/floppy.png' )
                     .render();
 
                 wz.tool.secureCallback( callback )();
