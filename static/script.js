@@ -381,13 +381,13 @@ var createDocument = function(){
 
         defaultPage : {
 
-            height       : pageList[ 0 ].height,
-            width        : pageList[ 0 ].width,
+            height       : pageList[ 0 ].height / CENTIMETER,
+            width        : pageList[ 0 ].width / CENTIMETER,
             orientation  : pageList[ 0 ].orientation,
-            marginTop    : pageList[ 0 ].marginTop,
-            marginLeft   : pageList[ 0 ].marginLeft,
-            marginBottom : pageList[ 0 ].marginBottom,
-            marginRight  : pageList[ 0 ].marginRight
+            marginTop    : pageList[ 0 ].marginTop / CENTIMETER,
+            marginLeft   : pageList[ 0 ].marginLeft / CENTIMETER,
+            marginBottom : pageList[ 0 ].marginBottom / CENTIMETER,
+            marginRight  : pageList[ 0 ].marginRight / CENTIMETER
 
         },
 
@@ -437,14 +437,18 @@ var createDocument = function(){
 
                     currentParagraph.nodeList.push({
 
-                        string                      : line.nodeList[ nodeId ].string,
-                        blocked                     : line.nodeList[ nodeId ].blocked,
-                        color                       : line.nodeList[ nodeId ].style.color,
-                        'font-family'               : line.nodeList[ nodeId ].style['font-family'],
-                        'font-style'                : line.nodeList[ nodeId ].style['font-style'],
-                        'font-weight'               : line.nodeList[ nodeId ].style['font-weight'],
-                        'text-decoration-underline' : line.nodeList[ nodeId ].style['text-decoration-underline'],
-                        'font-size'                 : line.nodeList[ nodeId ].style['font-size']
+                        string  : line.nodeList[ nodeId ].string,
+                        blocked : line.nodeList[ nodeId ].blocked,
+                        style   : {
+
+                            color                       : line.nodeList[ nodeId ].style.color,
+                            'font-family'               : line.nodeList[ nodeId ].style['font-family'],
+                            'font-style'                : line.nodeList[ nodeId ].style['font-style'],
+                            'font-weight'               : line.nodeList[ nodeId ].style['font-weight'],
+                            'text-decoration-underline' : line.nodeList[ nodeId ].style['text-decoration-underline'],
+                            'font-size'                 : line.nodeList[ nodeId ].style['font-size']
+
+                        }
 
                     });
 
