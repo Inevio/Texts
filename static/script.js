@@ -65,30 +65,32 @@ var PAGEDIMENSIONS = {
 };
 
 // DOM variables
-var win             = $(this);
-var saveButton      = $('.option-save');
-var toolsMenu       = $('.toolbar-menu');
-var toolsLine       = $('.tools-line');
-var toolsList       = $('.toolbar-list');
-var toolsColor      = $('.toolbar-color-picker');
-var toolsColorColor = $('.tool-button-color .color');
-var pages           = $('.pages');
-var selections      = $('.selections');
-var ruleLeft        = $('.rule-left');
-var ruleTop         = $('.rule-top');
-var marginTopDown   = $('.ruler-arrow-down');
-var marginTopUp     = $('.ruler-arrow-up');
-var marginTopBox    = $('.ruler-box');
-var input           = $('.input');
-var testZone        = $('.test-zone');
-var canvasPages     = pages[ 0 ];
-var canvasSelect    = selections[ 0 ];
-var canvasRuleLeft  = ruleLeft[ 0 ];
-var canvasRuleTop   = ruleTop[ 0 ];
-var ctx             = canvasPages.getContext('2d');
-var ctxSel          = canvasSelect.getContext('2d');
-var ctxRuleLeft     = canvasRuleLeft.getContext('2d');
-var ctxRuleTop      = canvasRuleTop.getContext('2d');
+var win                 = $(this);
+var saveButton          = $('.option-save');
+var toolsMenu           = $('.toolbar-menu');
+var toolsLine           = $('.tools-line');
+var toolsListContainer  = $('.toolbar-list-container');
+var toolsList           = $('.toolbar-list');
+var toolsColorContainer = $('.toolbar-color-picker-container');
+var toolsColor          = $('.toolbar-color-picker');
+var toolsColorColor     = $('.tool-button-color .color');
+var pages               = $('.pages');
+var selections          = $('.selections');
+var ruleLeft            = $('.rule-left');
+var ruleTop             = $('.rule-top');
+var marginTopDown       = $('.ruler-arrow-down');
+var marginTopUp         = $('.ruler-arrow-up');
+var marginTopBox        = $('.ruler-box');
+var input               = $('.input');
+var testZone            = $('.test-zone');
+var canvasPages         = pages[ 0 ];
+var canvasSelect        = selections[ 0 ];
+var canvasRuleLeft      = ruleLeft[ 0 ];
+var canvasRuleTop       = ruleTop[ 0 ];
+var ctx                 = canvasPages.getContext('2d');
+var ctxSel              = canvasSelect.getContext('2d');
+var ctxRuleLeft         = canvasRuleLeft.getContext('2d');
+var ctxRuleTop          = canvasRuleTop.getContext('2d');
 
 // Node variables
 var pageList = [];
@@ -238,10 +240,6 @@ var buttonAction = {
             setSelectedParagraphsStyle('listNumber');
         }
 
-    },
-
-    pageBackgroundColor : function( value ){
-        setPagesStyle( 'pageBackgroundColor', value );
     }
 
 };
@@ -5935,9 +5933,10 @@ win
     toolsColorEnabled = false;
 
     input.focus();
-    toolsList.css( 'display', 'none' );
-    toolsColor.css( 'display', 'none' );
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
+    toolsListContainer.css( 'display', 'none' );
+    toolsColorContainer.css( 'display', 'none' );
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-page-dimensions active-page-margins');
+    toolsColor.removeClass('active-color active-page-color');
 
 })
 
@@ -5960,9 +5959,10 @@ win
     toolsColorEnabled = false;
 
     input.focus();
-    toolsList.css( 'display', 'none' );
-    toolsColor.css( 'display', 'none' );
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
+    toolsListContainer.css( 'display', 'none' );
+    toolsColorContainer.css( 'display', 'none' );
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-page-dimensions active-page-margins');
+    toolsColor.removeClass('active-color active-page-color');
 
 });
 
@@ -6594,14 +6594,16 @@ toolsLine
 
     toolsList
         .addClass('active-fontfamily')
+        .html( fontfamilyCode );
+
+    toolsListContainer
         .css({
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
             display : 'block'
 
-        })
-        .html( fontfamilyCode );
+        });
 
     toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
 
@@ -6621,14 +6623,16 @@ toolsLine
 
     toolsList
         .addClass('active-fontsize')
+        .html( fontsizeCode );
+        
+    toolsListContainer
         .css({
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
             display : 'block'
 
-        })
-        .html( fontsizeCode );
+        });
 
     toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
 
@@ -6638,13 +6642,15 @@ toolsLine
 
     toolsColorEnabled = true;
 
-    toolsColor.css({
+    toolsColorContainer
+        .css({
 
-        top     : $(this).position().top + $(this).outerHeight(),
-        left    : $(this).position().left,
-        display : 'block'
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
 
-    });
+        })
+        .addClass('active-color');
 
 })
 
@@ -6654,6 +6660,22 @@ toolsLine
     input.focus();
     buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
 
+
+})
+
+.on( 'click', '.tool-button-page-color', function(){
+
+    toolsColorEnabled = true;
+
+    toolsColorContainer
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
+
+        })
+        .addClass('active-page-color');
 
 })
 
@@ -6671,14 +6693,16 @@ toolsLine
 
     toolsList
         .addClass('active-linespacing')
+        .html( linespacingCode );
+
+    toolsListContainer
         .css({
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
             display : 'block'
 
-        })
-        .html( linespacingCode );
+        });
 
     toolsList.find('[data-value="' + $(this).attr('data-value') + '"]').addClass('active');
 
@@ -6698,14 +6722,16 @@ toolsLine
 
     toolsList
         .addClass('active-page-dimensions')
+        .html( pageDimensionsCode );
+
+    toolsListContainer
         .css({
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
             display : 'block'
 
-        })
-        .html( pageDimensionsCode );
+        });
 
     toolsList.find('[data-value="' + parseFloat( ( currentPage.width / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.height / CENTIMETER ).toFixed( 2 ) ) + '"]').addClass('active');
 
@@ -6724,15 +6750,17 @@ toolsLine
     }
 
     toolsList
-        .addClass('active-page-dimensions')
+        .addClass('active-page-margins')
+        .html( marginsCode );
+
+    toolsListContainer
         .css({
 
             top     : $(this).position().top + $(this).outerHeight(),
             left    : $(this).position().left,
             display : 'block'
 
-        })
-        .html( marginsCode );
+        });
 
     toolsList.find('[data-value="' + parseFloat( ( currentPage.marginTop / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.marginRight / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.marginBottom / CENTIMETER ).toFixed( 2 ) ) + '-' + parseFloat( ( currentPage.marginRight / CENTIMETER ).toFixed( 2 ) ) + '"]').addClass('active');
     
@@ -6748,7 +6776,7 @@ toolsList
     toolsListEnabled = false;
 
     input.focus();
-    toolsList.css( 'display', 'none' );
+    toolsListContainer.css( 'display', 'none' );
 
     // Modo Tipografía
     if( toolsList.hasClass('active-fontfamily') ){
@@ -6763,7 +6791,7 @@ toolsList
         setSelectedParagraphsStyle( 'spacing', parseFloat( $(this).text() ) );
     }
 
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing');
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-page-dimensions active-page-margins');
     updateToolsLineStatus();
 
 });
@@ -6777,12 +6805,24 @@ toolsColor
 
     toolsColorEnabled = false;
 
-    toolsColor.css( 'display', 'none' );
+    if( toolsColor.hasClass('active-color') ){
 
-    toolsColorColor
-        .attr( 'data-tool-value', normalizeColor( $(this).css('background-color') ) )
-        .css( 'background-color', $(this).css('background-color') )
-        .click();
+        toolsColorContainer.css( 'display', 'none' );
+        toolsColor.removeClass('active-color');
+
+        toolsColorColor
+            .attr( 'data-tool-value', normalizeColor( $(this).css('background-color') ) )
+            .css( 'background-color', $(this).css('background-color') )
+            .click();
+
+    }else if( toolsColor.hasClass('active-page-color') ){
+
+        toolsColorContainer.css( 'display', 'none' );
+        toolsColor.removeClass('active-page-color');
+
+        setPagesStyle( 'pageBackgroundColor', normalizeColor( $(this).css('background-color') ) );
+
+    }
 
 });
 
