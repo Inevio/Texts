@@ -31,6 +31,9 @@ var GAP = 20;
 var INDENTATION_NONE = 0;
 var INDENTATION_FIRSTLINE = 1;
 var INDENTATION_HANGING = 2;
+var INFO_DESCRIPTION = 'Inevio Texts File';
+var INFO_GENERATOR = 'Inevio Texts';
+var INFO_VERSION = 1;
 var LIST_NONE = 0;
 var LIST_BULLET = 1;
 var LIST_NUMBER = 2;
@@ -364,12 +367,100 @@ var compareNodeStyles = function( first, second ){
 
 var createDocument = function(){
 
-    var name = Math.random();
-
+    var pageId, page, paragraphId, paragraph, currentParagraph, lineId, line, nodeId;
+    var name = ( new Date() ).toString();
     var file = {
+
+         info : {
+
+            description : INFO_DESCRIPTION,
+            generator   : INFO_GENERATOR,
+            version     : INFO_VERSION
+
+        },
+
+        defaultPage : {
+
+            height       : pageList[ 0 ].height,
+            width        : pageList[ 0 ].width,
+            orientation  : pageList[ 0 ].orientation,
+            marginTop    : pageList[ 0 ].marginTop,
+            marginLeft   : pageList[ 0 ].marginLeft,
+            marginBottom : pageList[ 0 ].marginBottom,
+            marginRight  : pageList[ 0 ].marginRight
+
+        },
+
+        paragraphList : []
+
     };
 
-    wz.fs.create( name, 'application/inevio-texts', 'root', JSON.stringify( pageList ), function( error, structure ){
+    for( pageId = 0; pageId < pageList.length; pageId++ ){
+
+        page = pageList[ pageId ];
+
+        for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
+
+            paragraph        = page.paragraphList[ paragraphId ];
+            currentParagraph = {
+
+                align    : paragraph.align,
+                nodeList : []
+
+            };
+
+            if( paragraph.spacing ){
+                currentParagraph.spacing = paragraph.spacing;
+            }
+
+            if( paragraph.listMode ){
+                currentParagraph.listMode = paragraph.listMode;
+            }
+
+            if( paragraph.indentationSpecialType ){
+                currentParagraph.indentationSpecialType = paragraph.indentationSpecialType;
+            }
+
+            if( paragraph.indentationSpecialValue ){
+                currentParagraph.indentationSpecialValue = paragraph.indentationSpecialValue / CENTIMETER;
+            }
+            
+            if( paragraph.indentationLeft ){
+                currentParagraph.indentationLeft = paragraph.indentationLeft / CENTIMETER;
+            }
+
+            for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
+
+                line = paragraph.lineList[ lineId ];
+
+                for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
+
+                    currentParagraph.nodeList.push({
+
+                        string                      : line.nodeList[ nodeId ].string,
+                        blocked                     : line.nodeList[ nodeId ].blocked,
+                        color                       : line.nodeList[ nodeId ].style.color,
+                        'font-family'               : line.nodeList[ nodeId ].style['font-family'],
+                        'font-style'                : line.nodeList[ nodeId ].style['font-style'],
+                        'font-weight'               : line.nodeList[ nodeId ].style['font-weight'],
+                        'text-decoration-underline' : line.nodeList[ nodeId ].style['text-decoration-underline'],
+                        'font-size'                 : line.nodeList[ nodeId ].style['font-size']
+
+                    });
+
+                }
+
+                normalizeLine( currentParagraph );
+
+                file.paragraphList.push( currentParagraph );
+
+            }
+
+        }
+
+    }
+
+    wz.fs.create( name, 'application/inevio-texts', 'root', JSON.stringify( file ), function( error, structure ){
 
         if( error ){
             alert( error );
@@ -3593,7 +3684,7 @@ var processFile = function( data ){
             // To Do -> Importar estilos
 
             node         = createNode( line );
-            node.string  = data.paragraphList[ i ].nodeList[ j ].text;
+            node.string  = data.paragraphList[ i ].nodeList[ j ].string;
             node.blocked = !!data.paragraphList[ i ].nodeList[ j ].blocked;
 
             setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style.color );
