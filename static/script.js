@@ -366,7 +366,10 @@ var createDocument = function(){
 
     var name = Math.random();
 
-    wz.fs.create( name, 'application/texts', 'root', JSON.stringify( pageList ), function( error, structure ){
+    var file = {
+    };
+
+    wz.fs.create( name, 'application/inevio-texts', 'root', JSON.stringify( pageList ), function( error, structure ){
 
         if( error ){
             alert( error );
@@ -3484,26 +3487,27 @@ var openFile = function( structure ){
 
     // To Do -> Error
 
-    if( structure.mime === 'application/texts' ){
+    if( structure.mime === 'application/inevio-texts' ){
 
         structure.read( function( error, data ){
 
             // Asociamos todos los datos del fichero con sus variables correspondientes
             currentOpenFile = structure;
-            pageList        = wz.tool.decodeJSON( data );
+
+            processFile( data );
 
             start();
 
         });
 
-    }else if( structure.formats['inevio-texts-unprocessed'] ){
+    }else if( structure.formats['inevio-texts'] ){
 
-        structure.formats['inevio-texts-unprocessed'].read( function( error, data ){
+        structure.formats['inevio-texts'].read( function( error, data ){
 
             // Asociamos todos los datos del fichero con sus variables correspondientes
             currentOpenFile = structure;
 
-            processUnprocessedFile( data );
+            processFile( data );
 
             start();
 
@@ -3515,9 +3519,14 @@ var openFile = function( structure ){
     
 };
 
-var processUnprocessedFile = function( data ){
+var processFile = function( data ){
 
-    data = JSON.parse( data );
+    data = wz.tool.decodeJSON( data );
+
+    if( !data ){
+        alert( 'FILE FORMAT NOT RECOGNIZED' );
+        return;
+    }
 
     //console.log( JSON.stringify( data, null, 4 ) );
 
@@ -3528,15 +3537,15 @@ var processUnprocessedFile = function( data ){
     var page = createPage(
 
         {
-            width  : data.page.width * CENTIMETER,
-            height : data.page.height * CENTIMETER
+            width  : data.defaultPage.width * CENTIMETER,
+            height : data.defaultPage.height * CENTIMETER
         },
 
         {
-            top    : data.page.marginTop * CENTIMETER,
-            right  : data.page.marginRight * CENTIMETER,
-            bottom : data.page.marginBottom * CENTIMETER,
-            left   : data.page.marginLeft * CENTIMETER
+            top    : data.defaultPage.marginTop * CENTIMETER,
+            right  : data.defaultPage.marginRight * CENTIMETER,
+            bottom : data.defaultPage.marginBottom * CENTIMETER,
+            left   : data.defaultPage.marginLeft * CENTIMETER
         }
 
     );
