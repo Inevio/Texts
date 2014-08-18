@@ -6068,6 +6068,20 @@ win
     toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-page-dimensions active-page-margins');
     toolsColor.removeClass('active-color active-page-color');
 
+})
+
+.on( 'click', '.wz-ui-header, .toolbar', function(e){
+
+    if( $(e.target).closest('.wz-view-minimize, .wz-view-close').length ){
+        return;
+    }
+
+    input.focus();
+
+})
+
+.on( 'ui-view-restore', function(){
+    input.focus();
 });
 
 win.parent().on( 'wz-dragend', function(){
