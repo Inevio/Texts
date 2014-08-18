@@ -6753,8 +6753,9 @@ toolsLine
             left    : $(this).position().left,
             display : 'block'
 
-        })
-        .addClass('active-color');
+        });
+
+    toolsColor.addClass('active-color');
 
 })
 
@@ -6778,8 +6779,9 @@ toolsLine
             left    : $(this).position().left,
             display : 'block'
 
-        })
-        .addClass('active-page-color');
+        });
+
+    toolsColor.addClass('active-page-color');
 
 })
 
