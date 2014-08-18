@@ -6135,7 +6135,10 @@ input.on( 'keypress', function(){
 
             if( input[ 0 ].value ){
 
-                handleChar( input[ 0 ].value );
+                for( var i = 0; i < input[ 0 ].value.length; i++ ){
+                    handleChar( input[ 0 ].value[ i ] );
+                }
+                
                 updatePages();
 
             }
