@@ -3817,7 +3817,7 @@ var processFile = function( data ){
     
 };
 
-var realocateLine = function( id, lineChar ){
+var realocateLine = function( id, lineChar, dontPropagate ){
 
     var line    = currentParagraph.lineList[ id ];
     var counter = 0;
@@ -4008,7 +4008,10 @@ var realocateLine = function( id, lineChar ){
     counter = lineChar - line.totalChars;
 
     normalizeLine( newLine );
-    realocateLine( id + 1, 0 );
+
+    if( !dontPropagate ){
+        realocateLine( id + 1, 0 );
+    }
 
     return counter;
 
@@ -5432,6 +5435,12 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated )
         rangeStart = originalRangeStart;
 
     }
+
+    /*
+    mapRangeLines( true, rangeStart, rangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
+        console.log( lineId, realocateLine( lineId, 0, true ) );
+    });
+    */
 
     // To Do -> Tocaría hacer un realocateLine por aquí y tal
     if( !propagated ){
