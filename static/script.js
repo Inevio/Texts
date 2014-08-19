@@ -86,6 +86,7 @@ var marginTopUp         = $('.ruler-arrow-up');
 var marginTopBox        = $('.ruler-box');
 var input               = $('.input');
 var testZone            = $('.test-zone');
+var viewTitle           = $('.document-title');
 var canvasPages         = pages[ 0 ];
 var canvasSelect        = selections[ 0 ];
 var canvasRuleLeft      = ruleLeft[ 0 ];
@@ -368,7 +369,7 @@ var compareNodeStyles = function( first, second ){
 var createDocument = function(){
 
     var pageId, page, paragraphId, paragraph, currentParagraph, lineId, line, nodeId;
-    var name = ( new Date() ).toString();
+
     var file = {
 
          info : {
@@ -464,17 +465,37 @@ var createDocument = function(){
 
     }
 
-    wz.fs.create( name, 'application/inevio-texts', 'root', JSON.stringify( file ), function( error, structure ){
+    var name     = 'New Document';
+    var counter  = 0;
+    var callback = function( error, structure ){
 
-        if( error ){
+        if( error && error !== 'FILE NAME EXISTS ALREADY' ){
             alert( error );
             return;
         }
 
+        if( error && error === 'FILE NAME EXISTS ALREADY' ){
+
+            counter += 1;
+
+            createFile( name + ' (' + counter + ')' + '.texts', file, callback );
+
+            return;
+
+        }
+
         currentOpenFile = structure;
 
-    });
+        setViewTitle( currentOpenFile.name );
 
+    };
+
+    createFile( name + '.texts', file, callback );
+
+};
+
+var createFile = function( name, data, callback ){
+    wz.fs.create( name, 'application/inevio-texts', 'root', JSON.stringify( data ), callback );
 };
 
 var createLine = function( id, paragraph ){
@@ -3589,6 +3610,8 @@ var openFile = function( structure ){
             // Asociamos todos los datos del fichero con sus variables correspondientes
             currentOpenFile = structure;
 
+            setViewTitle( currentOpenFile.name );
+
             processFile( data );
 
             start();
@@ -3601,6 +3624,8 @@ var openFile = function( structure ){
 
             // Asociamos todos los datos del fichero con sus variables correspondientes
             currentOpenFile = structure;
+
+            setViewTitle( currentOpenFile.name );
 
             processFile( data );
 
@@ -5697,6 +5722,16 @@ var setSelectedParagraphsStyle = function( key, value ){
 
 };
 
+var setViewTitle = function( name ){
+
+    if( !name ){
+        name = 'New Document';
+    }
+
+    viewTitle.text( name + ' - Texts' );
+
+};
+
 var start = function(){
 
     input.focus();
@@ -5732,6 +5767,8 @@ var start = function(){
         setNodeStyle( paragraph, line, node, 'font-size', 12 );
         setNodeStyle( paragraph, line, node, 'font-family', 'Cambria' );
         setNodeStyle( paragraph, line, node, 'color', '#000000' );
+
+        setViewTitle();
 
     }
 

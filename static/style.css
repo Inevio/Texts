@@ -6,6 +6,37 @@
     float: left;
 }
 
+.wz-view-menu-group{
+    padding: 7px 8px 9px;
+}
+
+.wz-view-menu-group.right{
+    padding: 10px 20px 6px;
+}
+
+.option-save{
+    padding: 6px 7px 9px 8px;
+    width: 11px;
+    height: 11px;
+    display: inline-block;
+}
+
+.option-save i{
+    height: 11px;
+    width: 11px;
+    background: url('@static/sprite.png') -245px 0;
+    background-size: 256px 18px;
+    display: inline-block;
+}
+
+.document-title{
+    font-family: Lato;
+    font-size: 13px;
+    color: #666;
+    margin: 15px 0 0 20px;
+    display: inline-block;
+}
+
 .toolbar{
     height: 67px;
     width: 900px;
@@ -117,7 +148,7 @@
 
 .tool-button i, .tool-list-button i{
     background: url('@static/sprite.png') 0 0;
-    background-size: 245px 18px;
+    background-size: 256px 18px;
     display: inline-block;
 }
 
@@ -282,7 +313,7 @@
     height: 10px;
     background: #f00;
     background: url('@static/sprite.png') -234px 0;
-    background-size: 245px 18px;
+    background-size: 256px 18px;
 }
 
 .toolbar-list{
@@ -361,7 +392,7 @@
     height: 10px;
     background: #f00;
     background: url('@static/sprite.png') -234px 0;
-    background-size: 245px 18px;
+    background-size: 256px 18px;
 }
 
 .toolbar-color-picker{
