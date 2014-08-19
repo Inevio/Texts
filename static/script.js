@@ -1197,8 +1197,26 @@ var getCommonStyles = function( start, end ){
         }
 
         var node;
+        var i     = 0;
+        var limit = line.nodeList.length;
 
-        for( var i = 0; i < line.nodeList.length; i++ ){
+        if(
+            start.pageId === pageId &&
+            start.paragraphId === paragraphId &&
+            start.lineId === lineId
+        ){
+            i = start.nodeId;
+        }
+
+        if(
+            end.pageId === pageId &&
+            end.paragraphId === paragraphId &&
+            end.lineId === lineId
+        ){
+            limit = end.nodeId + 1;
+        }
+
+        for( ; i < limit; i++ ){
 
             node = line.nodeList[ i ];
 
@@ -6697,6 +6715,62 @@ selections
 
             lineChar = line.totalChars;
             nodeId   = line.nodeList.length - 1;
+            node     = line.nodeList[ nodeId ];
+            nodeChar = node.string.length;
+
+        }
+
+    }
+
+    if( nodeChar === 0 ){
+
+        if( nodeId === 0 ){
+
+            if( lineId === 0 ){
+
+                if( paragraphId === 0 ){
+
+                    if( pageId !== 0 ){
+
+                        pageId      = pageId - 1;
+                        page        = pageList[ pageId ];
+                        paragraphId = page.paragraphList.length - 1;
+                        paragraph   = page.paragraphList[ paragraphId ];
+                        lineId      = paragraph.lineList.length - 1;
+                        line        = paragraph.lineList[ lineId ];
+                        lineChar    = line.totalChars;
+                        nodeId      = line.nodeList.length - 1;
+                        node        = line.nodeList[ nodeId ];
+                        nodeChar    = node.string.length;
+                    }
+
+                }else{
+
+                    paragraphId = paragraphId - 1;
+                    paragraph   = page.paragraphList[ paragraphId ];
+                    lineId      = paragraph.lineList.length - 1;
+                    line        = paragraph.lineList[ lineId ];
+                    lineChar    = line.totalChars;
+                    nodeId      = line.nodeList.length - 1;
+                    node        = line.nodeList[ nodeId ];
+                    nodeChar    = node.string.length;
+       
+                }
+
+            }else{
+
+                lineId   = lineId - 1;
+                line     = paragraph.lineList[ lineId ];
+                lineChar = line.totalChars;
+                nodeId   = line.nodeList.length - 1;
+                node     = line.nodeList[ nodeId ];
+                nodeChar = node.string.length;
+
+            }
+
+        }else{
+
+            nodeId   = nodeId - 1;
             node     = line.nodeList[ nodeId ];
             nodeChar = node.string.length;
 
