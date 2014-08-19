@@ -368,7 +368,7 @@ var compareNodeStyles = function( first, second ){
 
 var createDocument = function(){
 
-    var pageId, page, paragraphId, paragraph, currentParagraph, lineId, line, nodeId;
+    var name, pageId, page, paragraphId, paragraph, currentParagraph, lineId, line, nodeId;
 
     var file = {
 
@@ -455,17 +455,22 @@ var createDocument = function(){
 
                 }
 
-                normalizeLine( currentParagraph );
-
-                file.paragraphList.push( currentParagraph );
-
             }
+
+            normalizePlainParagraph( currentParagraph );
+
+            file.paragraphList.push( currentParagraph );
 
         }
 
     }
 
-    var name     = 'New Document';
+    if( currentOpenFile ){
+        name = currentOpenFile.name.replace( /.docx$/i, '' );
+    }else{
+        name = 'New Document';
+    }
+
     var counter  = 0;
     var callback = function( error, structure ){
 
@@ -3599,6 +3604,31 @@ var normalizeLine = function( line ){
 
 };
 
+var normalizePlainParagraph = function( paragraph ){
+
+    if( paragraph.nodeList.length === 1 ){
+        return;
+    }
+
+    var comparation;
+
+    for( var i = 1; i < paragraph.nodeList.length; ){
+
+        comparation = compareNodeStyles( paragraph.nodeList[ i - 1 ], paragraph.nodeList[ i ] );
+
+        if( comparation ){
+
+            paragraph.nodeList[ i - 1 ].string += paragraph.nodeList[ i ].string;
+            paragraph.nodeList                  = paragraph.nodeList.slice( 0, i).concat( paragraph.nodeList.slice( i + 1 ) );
+
+        }else{
+            i++;
+        }
+
+    }
+
+};
+
 var openFile = function( structure ){
 
     // To Do -> Error
@@ -5786,7 +5816,7 @@ var start = function(){
 };
 
 var trimRight = function( string ){
-    return string.replace(/\s+$/g,'');
+    return string.replace( /\s+$/g, '' );
 };
 
 var updateBlink = function(){
@@ -6127,7 +6157,7 @@ win.parent().on( 'wz-dragend', function(){
 
 saveButton.on( 'click', function(){
     
-    if( currentOpenFile ){
+    if( currentOpenFile && currentOpenFile.mime === 'application/inevio-texts' ){
         saveDocument();
     }else{
         createDocument();
