@@ -2018,7 +2018,7 @@ var handleBackspaceNormal = function(){
 
             if( mergeParagraphs ){
 
-                mergeParagraphs = realocateLineInverse( mergePreLastLine + 1, currentLineCharId );
+                mergeParagraphs = realocateLineInverse( currentParagraph, mergePreLastLine + 1, currentLineCharId );
 
                 if( mergeParagraphs.realocation && mergeParagraphs.lineChar > 0 ){
 
@@ -2085,7 +2085,7 @@ var handleBackspaceNormal = function(){
             currentLineId            = currentLineId - 1;
             currentLine              = currentParagraph.lineList[ currentLineId ];
 
-            var realocate = realocateLine( currentLineId, original );
+            var realocate = realocateLine( currentPageId, currentParagraph, currentLineId, original );
             
             if( realocate >= 0 ){
 
@@ -2117,7 +2117,7 @@ var handleBackspaceNormal = function(){
         currentLine.totalChars--;
 
         // Realocamos el contenido
-        var realocation = realocateLineInverse( currentLineId, currentLineCharId );
+        var realocation = realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
 
         // Se ha producido una realocation inversa
         if( realocation.realocation && realocation.lineChar > 0 ){
@@ -2307,7 +2307,7 @@ var handleBackspaceSelection = function(){
     }
 
     setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar, true );
-    realocateLineInverse( currentLineId, currentLineCharId );
+    realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
     realtime.send({
@@ -2358,7 +2358,7 @@ var handleDelNormal = function(){
     }
 
     setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
-    realocateLineInverse( currentLineId, currentLineCharId );
+    realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
 };
@@ -2436,7 +2436,7 @@ var handleCharNormal = function( newChar ){
     currentLineCharId++;
     currentNodeCharId++;
 
-    var realocation = realocateLine( currentLineId, currentLineCharId );
+    var realocation = realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId );
 
     if( realocation > 0 ){
 
@@ -2618,7 +2618,7 @@ var handleCharSelection = function( newChar ){
     }
 
     setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar + 1, currentRangeStart.nodeId, currentRangeStart.nodeChar + 1, true );
-    realocateLineInverse( currentLineId, currentLineCharId );
+    realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
     realtime.send({
@@ -2795,7 +2795,7 @@ var handleEnter = function(){
 
     // Posicionamos el cursor
     setCursor( newPageId, newParagraphId, 0, 0, 0, 0 );
-    realocateLineInverse( 0, 0 );
+    realocateLineInverse( newParagraph, 0, 0 );
     resetBlink();
 
     if( !realtime ){
@@ -2859,7 +2859,7 @@ var handleRemoteBackspace = function(  pageId, page, paragraphId, paragraph, lin
             page.paragraphList = page.paragraphList.slice( 0, paragraphId ).concat( page.paragraphList.slice( paragraphId + 1 ) );
 
             if( mergeParagraphs ){
-                mergeParagraphs = realocateLineInverse( mergePreLastLine + 1, lineChar );
+                mergeParagraphs = realocateLineInverse( paragraph, mergePreLastLine + 1, lineChar );
             }
 
             realocatePageInverse( newPageId );
@@ -2906,7 +2906,7 @@ var handleRemoteBackspace = function(  pageId, page, paragraphId, paragraph, lin
         line.totalChars--;
 
         // Realocamos el contenido
-        var realocation = realocateLineInverse( lineId, lineChar );
+        var realocation = realocateLineInverse( paragraph, lineId, lineChar );
 
         // Se ha producido una realocation inversa
         if( realocation.realocation && realocation.lineChar > 0 ){
@@ -3042,7 +3042,7 @@ var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, l
     lineChar++;
 
     /*var realocation = */
-    realocateLine( lineId, lineChar ); // To Do -> Actualizar el realocateLine para que pueda funcionar en cualquier párrafo, no solo el que tiene el foco
+    realocateLine( pageId, paragraph, lineId, lineChar ); // To Do -> Actualizar el realocateLine para que pueda funcionar en cualquier párrafo, no solo el que tiene el foco
 
     /*
     if( realocation > 0 ){
@@ -3809,7 +3809,7 @@ var processFile = function( data ){
         for( j = 0; j < pageList[ i ].paragraphList.length; j++ ){
 
             setCursor( i, j, 0, 0, 0, 0, true );
-            realocateLine( 0, 0 );
+            realocateLine( i, pageList[ i ].paragraphList[ j ], 0, 0 );
 
         }
 
@@ -3817,9 +3817,9 @@ var processFile = function( data ){
     
 };
 
-var realocateLine = function( id, lineChar, dontPropagate ){
+var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate ){
 
-    var line    = currentParagraph.lineList[ id ];
+    var line    = paragraph.lineList[ lineId ];
     var counter = 0;
 
     if( !line || getNodesWidth( line ) <= line.width ){
@@ -3829,17 +3829,17 @@ var realocateLine = function( id, lineChar, dontPropagate ){
     var words, wordsToMove, newLine, newNode, stop, i, j, k, heritage, created, nodesToMove;
 
     // Nos hacemos con la nueva línea, si no existe la creamos
-    if( !currentParagraph.lineList[ id + 1 ] ){
+    if( !paragraph.lineList[ lineId + 1 ] ){
 
-        created                   = true;
-        newLine                   = createLine( id + 1, currentParagraph );
-        newLine.nodeList          = [];
-        currentParagraph.lineList = currentParagraph.lineList.slice( 0, id + 1 ).concat( newLine ).concat( currentParagraph.lineList.slice( id + 1 ) );
+        created            = true;
+        newLine            = createLine( lineId + 1, paragraph );
+        newLine.nodeList   = [];
+        paragraph.lineList = paragraph.lineList.slice( 0, lineId + 1 ).concat( newLine ).concat( paragraph.lineList.slice( lineId + 1 ) );
 
     }else{
 
         created = false;
-        newLine = currentParagraph.lineList[ id + 1 ];
+        newLine = paragraph.lineList[ lineId + 1 ];
 
     }
 
@@ -3904,7 +3904,7 @@ var realocateLine = function( id, lineChar, dontPropagate ){
                 line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string    = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].string.slice( 0, wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
                 line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].charList  = line.nodeList[ wordsToMove[ 0 ].nodeList[ 0 ] ].charList.slice( 0, wordsToMove[ 0 ].offset[ 0 ][ 0 ] );
 
-                measureNode( currentParagraph, line, 0, 0, newNode, 0, 0 );
+                measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
 
                 nodesToMove = line.nodeList.slice( wordsToMove[ 0 ].nodeList[ 0 ] + 1 );
                 charsMoved  = 0;
@@ -3975,7 +3975,7 @@ var realocateLine = function( id, lineChar, dontPropagate ){
         line.totalChars      -= newNode.string.length;
         newLine.totalChars   += newNode.string.length;
 
-        measureNode( currentParagraph, line, 0, 0, newNode, 0, 0 );
+        measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
         newLine.nodeList.unshift( newNode );
 
     }
@@ -3992,16 +3992,16 @@ var realocateLine = function( id, lineChar, dontPropagate ){
 
     if( created ){
 
-        currentParagraph.height += maxSize * currentParagraph.spacing;
-        newLine.height           = maxSize;
+        paragraph.height += maxSize * paragraph.spacing;
+        newLine.height    = maxSize;
 
-        realocatePage( currentPageId );
+        realocatePage( pageId );
 
     }else{
 
-        currentParagraph.height -= newLine.height * currentParagraph.spacing;
-        currentParagraph.height += maxSize * currentParagraph.spacing;
-        newLine.height           = maxSize;
+        paragraph.height -= newLine.height * paragraph.spacing;
+        paragraph.height += maxSize * paragraph.spacing;
+        newLine.height    = maxSize;
 
     }
 
@@ -4010,16 +4010,16 @@ var realocateLine = function( id, lineChar, dontPropagate ){
     normalizeLine( newLine );
 
     if( !dontPropagate ){
-        realocateLine( id + 1, 0 );
+        realocateLine( pageId, paragraph, lineId + 1, 0 );
     }
 
     return counter;
 
 };
 
-var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
+var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate ){
 
-    var line    = currentParagraph.lineList[ id ];
+    var line    = paragraph.lineList[ id ];
     var counter = { realocation : false, lineChar : 0 };
     var i, j, newNode, maxSize;
 
@@ -4038,15 +4038,15 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
     // To Do -> Comprobar si modified char alguna vez coge el valor 0
     if( !dontPropagate && id > 0 && lineWords[ 0 ].string.length >= modifiedChar ){
 
-        var totalChars = currentParagraph.lineList[ id - 1 ].totalChars;
+        var totalChars = paragraph.lineList[ id - 1 ].totalChars;
 
-        counter          = realocateLineInverse( id - 1, 0, true );
-        counter.lineChar = totalChars + currentLineCharId;
+        counter          = realocateLineInverse( paragraph, id - 1, 0, true );
+        counter.lineChar = totalChars + currentLineCharId; // To Do -> Quizás alguna vez deba ser sin currentLineCharId sino que debería llevar un valor concreto. Comprobar
 
     }
 
     // Comprobamos si la palabra de la siguiente línea puede entrar en la línea actual
-    var nextLine = currentParagraph.lineList[ id + 1 ];
+    var nextLine = paragraph.lineList[ id + 1 ];
 
     if( !nextLine ){
         return counter;
@@ -4133,8 +4133,8 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
         line.totalChars     += newNode.string.length;
         newLine.totalChars  -= newNode.string.length;
 
-        measureNode( currentParagraph, line, 0, 0, newNode, 0, 0 );
-        measureNode( currentParagraph, nextLine, 0, 0, nodeToMove, 0, 0 );
+        measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
+        measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
 
         line.nodeList.push( newNode );
         
@@ -4215,9 +4215,9 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     if( maxSize !== line.height ){
 
-        currentParagraph.height -= line.height * currentParagraph.spacing;
-        currentParagraph.height += maxSize * currentParagraph.spacing;
-        line.height              = maxSize;
+        paragraph.height -= line.height * paragraph.spacing;
+        paragraph.height += maxSize * paragraph.spacing;
+        line.height       = maxSize;
 
     }
 
@@ -4233,21 +4233,21 @@ var realocateLineInverse = function( id, modifiedChar, dontPropagate ){
 
     if( maxSize !== nextLine.height ){
 
-        currentParagraph.height -= nextLine.height * currentParagraph.spacing;
-        currentParagraph.height += maxSize * currentParagraph.spacing;
-        nextLine.height          = maxSize;
+        paragraph.height -= nextLine.height * paragraph.spacing;
+        paragraph.height += maxSize * paragraph.spacing;
+        nextLine.height   = maxSize;
         
     }
 
     if( !nextLine.totalChars ){
 
-        currentParagraph.lineList  = currentParagraph.lineList.slice( 0, id + 1 ).concat( currentParagraph.lineList.slice( id + 2 ) );
-        currentParagraph.height   -= nextLine.height * currentParagraph.spacing;
+        paragraph.lineList  = paragraph.lineList.slice( 0, id + 1 ).concat( paragraph.lineList.slice( id + 2 ) );
+        paragraph.height   -= nextLine.height * paragraph.spacing;
 
     }
 
     if( !dontPropagate ){
-        realocateLineInverse( id + 1, 0 );
+        realocateLineInverse( paragraph, id + 1, 0 );
     }
 
     normalizeLine( line );
@@ -4694,13 +4694,13 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         if( value >= 0 ){
 
             for( i = 0; i < paragraph.lineList.length; i++ ){
-                realocateLine( i, 0 );
+                realocateLine( pageId, paragraph, i, 0 );
             }
 
         }else{
 
             for( i = 0; i < paragraph.lineList.length; i++ ){
-                realocateLineInverse( i, 0 );
+                realocateLineInverse( paragraph, i, 0 );
 
             }
 
@@ -4765,7 +4765,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         }
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
-            realocateLine( i, 0 );
+            realocateLine( pageId, paragraph, i, 0 );
         }
 
     }else if( key === 'listNone' ){
