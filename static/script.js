@@ -48,6 +48,14 @@ var MARGIN = {
     'Office 2003 Default' : { top : 2.54, left : 3.17, bottom : 2.54, right : 3.17 }
 
 };
+var MOUSE_NORMAL = 0;
+var MOUSE_TEXT = 1;
+var MOUSE_STATUS = [
+
+    { add : 'normal', remove : 'text' },
+    { add : 'text',   remove : 'normal' }
+
+];
 var PAGEDIMENSIONS = {
 
     'US Letter'          : { width : 21.59, height : 27.94 },
@@ -149,9 +157,11 @@ var currentRangeEnd       = null;
 var currentRangeStartHash = null;
 var currentRangeEndHash   = null;
 var currentMultipleHash   = null;
+var currentMouse          = MOUSE_NORMAL;
 var temporalStyle         = null;
 var toolsListEnabled      = false;
 var toolsColorEnabled     = false;
+
 
 // Button actions
 var buttonAction = {
@@ -6544,6 +6554,7 @@ selections
 
 })
 
+// Controlador de drag
 .on( 'mousemove', function(e){
 
     if( !selectionEnabled ){
@@ -6713,6 +6724,80 @@ selections
         }
 
     );
+
+})
+
+// Controlador de mouse
+.on( 'mousemove', function(e){
+
+    var offset   = selections.offset();
+    var posX     = e.pageX - offset.left;
+    var posY     = e.pageY - offset.top;
+    var heritage = 0;
+
+    for( var pageId = 0; pageId < pageList.length; pageId++ ){
+
+        if( pageList[ pageId ].height + heritage - scrollTop >= posY ){
+            break;
+        }
+
+        if( pageList[ pageId ].height + GAP + heritage - scrollTop >= posY ){
+            pageId = null;
+            break;
+        }
+
+        heritage += pageList[ pageId ].height + GAP;
+
+    }
+
+    var page = pageList[ pageId ];
+
+    if( !page || pageId === null ){
+
+        if( currentMouse !== MOUSE_NORMAL ){
+
+            selections
+                .addClass( MOUSE_STATUS[ MOUSE_NORMAL ].add )
+                .removeClass( MOUSE_STATUS[ MOUSE_NORMAL ].remove );
+
+            currentMouse = MOUSE_NORMAL;
+
+        }
+
+        return;
+
+    }
+
+    if(
+        posX <= page.marginLeft ||
+        posX >  page.width - page.marginRight ||
+        pageList[ pageId ].marginTop + heritage - scrollTop >= posY ||
+        pageList[ pageId ].height - pageList[ pageId ].marginBottom + heritage - scrollTop < posY
+    ){
+
+        if( currentMouse !== MOUSE_NORMAL ){
+
+            selections
+                .addClass( MOUSE_STATUS[ MOUSE_NORMAL ].add )
+                .removeClass( MOUSE_STATUS[ MOUSE_NORMAL ].remove );
+
+            currentMouse = MOUSE_NORMAL;
+
+        }
+
+        return;
+
+    }
+
+    if( currentMouse !== MOUSE_TEXT ){
+
+        selections
+            .addClass( MOUSE_STATUS[ MOUSE_TEXT ].add )
+            .removeClass( MOUSE_STATUS[ MOUSE_TEXT ].remove );
+
+        currentMouse = MOUSE_TEXT;
+
+    }
 
 })
 
