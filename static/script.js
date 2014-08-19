@@ -5436,14 +5436,20 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated )
 
     }
 
-    /*
-    mapRangeLines( true, rangeStart, rangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
-        console.log( lineId, realocateLine( lineId, 0, true ) );
-    });
-    */
-
-    // To Do -> Tocaría hacer un realocateLine por aquí y tal
     if( !propagated ){
+
+        // To Do -> Esto se puede hacer más óptimo, recolocar todo un párrafo no parece muy óptimo en la mayor parte de los casos
+        mapRangeParagraphs( rangeStart, rangeEnd, function( pageId, page, paragraphId, paragraph ){
+
+            for( var i = 0; i < paragraph.lineList.length; i++ ){
+                realocateLine( pageId, paragraph, i, 0 );
+            }
+
+            for( var j = 0; j < paragraph.lineList.length; j++ ){
+                realocateLineInverse( paragraph, j, 0 );
+            }
+
+        });
 
         currentNode = currentLine.nodeList[ currentNodeId ]; // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
 
@@ -5467,21 +5473,29 @@ var setRangeParagraphStyle = function( key, value ){
 
 var setSelectedNodeStyle = function( key, value ){
 
-    var i, charInParagraphStart, charInParagraphEnd, listModeParagraphStart, listModeParagraphEnd, requestStartCheck, requestEndCheck, firstNodeLengthStart, firstNodeLengthEnd;
+    var i, charInParagraphStart, charInParagraphEnd, paragraphIdStart, paragraphIdEnd, requestStartCheck, requestEndCheck, firstNodeLengthStart, firstNodeLengthEnd;
 
     // Selección normal
     if( currentRangeStart ){
 
         // Calculamos las posiciones de inicio
-        listModeParagraphStart = currentRangeStart.paragraph.listMode;
-        charInParagraphStart   = currentRangeStart.lineChar;
+        paragraphIdStart     = currentRangeStart.paragraphId;
+        charInParagraphStart = currentRangeStart.lineChar;
+
+        for( i = 0; i < currentRangeStart.pageId; i++ ){
+            paragraphIdStart += pageList[ i ].paragraphList.length;
+        }
 
         for( i = 0; i < currentRangeStart.lineId; i++ ){
             charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
         }
 
-        listModeParagraphEnd = currentRangeEnd.paragraph.listMode;
-        charInParagraphEnd   = currentRangeEnd.lineChar;
+        paragraphIdEnd     = currentRangeEnd.paragraphId;
+        charInParagraphEnd = currentRangeEnd.lineChar;
+
+        for( i = 0; i < currentRangeEnd.pageId; i++ ){
+            paragraphIdEnd += pageList[ i ].paragraphList.length;
+        }
 
         for( i = 0; i < currentRangeEnd.lineId; i++ ){
             charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
@@ -5490,13 +5504,19 @@ var setSelectedNodeStyle = function( key, value ){
         // Aplicamos el estilo
         setRangeNodeStyle( currentRangeStart, currentRangeEnd, key, value );
 
+        // Resignamos el rango correctamente
+        // To Do -> Quizás deberíamos delegarlo al setRangeNodeStyle
+
+        currentRangeStart = getElementsByRemoteParagraph( paragraphIdStart, charInParagraphStart );
+        currentRangeEnd   = getElementsByRemoteParagraph( paragraphIdEnd, charInParagraphEnd );
+
         // Enviamos
         if( realtime ){
 
             realtime.send({
                 
                 cmd  : CMD_RANGE_NODE_STYLE,
-                data : [ listModeParagraphStart, charInParagraphStart, listModeParagraphEnd, charInParagraphEnd, key, value ],
+                data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd, key, value ],
                 pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
             });
@@ -5507,8 +5527,12 @@ var setSelectedNodeStyle = function( key, value ){
     }else if( currentLineId === 0 && currentLine.totalChars === 0 ){
 
         // Calculamos las posiciones de inicio
-        listModeParagraphStart = currentParagraph.listMode;
-        charInParagraphStart   = currentLineCharId;
+        paragraphIdStart     = currentParagraphId;
+        charInParagraphStart = currentLineCharId;
+
+        for( i = 0; i < currentPageId; i++ ){
+            paragraphIdStart += pageList[ i ].paragraphList.length;
+        }
 
         for( i = 0; i < currentLineId; i++ ){
             charInParagraphStart += currentParagraph.lineList[ i ].totalChars;
@@ -5523,7 +5547,7 @@ var setSelectedNodeStyle = function( key, value ){
             realtime.send({
                 
                 cmd  : CMD_NODE_STYLE,
-                data : [ listModeParagraphStart, charInParagraphStart, key, value ],
+                data : [ paragraphIdStart, charInParagraphStart, key, value ],
                 pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
             });
