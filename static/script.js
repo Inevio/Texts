@@ -368,102 +368,8 @@ var compareNodeStyles = function( first, second ){
 
 var createDocument = function(){
 
-    var name, pageId, page, paragraphId, paragraph, currentParagraph, lineId, line, nodeId;
-
-    var file = {
-
-         info : {
-
-            description : INFO_DESCRIPTION,
-            generator   : INFO_GENERATOR,
-            version     : INFO_VERSION
-
-        },
-
-        defaultPage : {
-
-            height       : pageList[ 0 ].height / CENTIMETER,
-            width        : pageList[ 0 ].width / CENTIMETER,
-            orientation  : pageList[ 0 ].orientation,
-            marginTop    : pageList[ 0 ].marginTop / CENTIMETER,
-            marginLeft   : pageList[ 0 ].marginLeft / CENTIMETER,
-            marginBottom : pageList[ 0 ].marginBottom / CENTIMETER,
-            marginRight  : pageList[ 0 ].marginRight / CENTIMETER
-
-        },
-
-        paragraphList : []
-
-    };
-
-    for( pageId = 0; pageId < pageList.length; pageId++ ){
-
-        page = pageList[ pageId ];
-
-        for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
-
-            paragraph        = page.paragraphList[ paragraphId ];
-            currentParagraph = {
-
-                align    : paragraph.align,
-                nodeList : []
-
-            };
-
-            if( paragraph.spacing ){
-                currentParagraph.spacing = paragraph.spacing;
-            }
-
-            if( paragraph.listMode ){
-                currentParagraph.listMode = paragraph.listMode;
-            }
-
-            if( paragraph.indentationSpecialType ){
-                currentParagraph.indentationSpecialType = paragraph.indentationSpecialType;
-            }
-
-            if( paragraph.indentationSpecialValue ){
-                currentParagraph.indentationSpecialValue = paragraph.indentationSpecialValue / CENTIMETER;
-            }
-            
-            if( paragraph.indentationLeft ){
-                currentParagraph.indentationLeft = paragraph.indentationLeft / CENTIMETER;
-            }
-
-            for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
-
-                line = paragraph.lineList[ lineId ];
-
-                for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
-
-                    currentParagraph.nodeList.push({
-
-                        string  : line.nodeList[ nodeId ].string,
-                        blocked : line.nodeList[ nodeId ].blocked,
-                        style   : {
-
-                            color                       : line.nodeList[ nodeId ].style.color,
-                            'font-family'               : line.nodeList[ nodeId ].style['font-family'],
-                            'font-style'                : line.nodeList[ nodeId ].style['font-style'],
-                            'font-weight'               : line.nodeList[ nodeId ].style['font-weight'],
-                            'text-decoration-underline' : line.nodeList[ nodeId ].style['text-decoration-underline'],
-                            'font-size'                 : line.nodeList[ nodeId ].style['font-size']
-
-                        }
-
-                    });
-
-                }
-
-            }
-
-            normalizePlainParagraph( currentParagraph );
-
-            file.paragraphList.push( currentParagraph );
-
-        }
-
-    }
+    var file = generateDocument();
+    var name;
 
     if( currentOpenFile ){
         name = currentOpenFile.name.replace( /.docx$/i, '' );
@@ -1129,6 +1035,109 @@ var drawRuleTop = function(){
     ctxRuleTop.lineWidth = 1;
     ctxRuleTop.strokeStyle = '#cacaca';
     ctxRuleTop.stroke();
+
+};
+
+var generateDocument = function(){
+
+    var pageId, page, paragraphId, paragraph, currentParagraph, lineId, line, nodeId;
+
+    var file = {
+
+        info : {
+
+            description : INFO_DESCRIPTION,
+            generator   : INFO_GENERATOR,
+            version     : INFO_VERSION
+
+        },
+
+        defaultPage : {
+
+            height       : pageList[ 0 ].height / CENTIMETER,
+            width        : pageList[ 0 ].width / CENTIMETER,
+            orientation  : pageList[ 0 ].orientation,
+            marginTop    : pageList[ 0 ].marginTop / CENTIMETER,
+            marginLeft   : pageList[ 0 ].marginLeft / CENTIMETER,
+            marginBottom : pageList[ 0 ].marginBottom / CENTIMETER,
+            marginRight  : pageList[ 0 ].marginRight / CENTIMETER
+
+        },
+
+        paragraphList : []
+
+    };
+
+    for( pageId = 0; pageId < pageList.length; pageId++ ){
+
+        page = pageList[ pageId ];
+
+        for( paragraphId = 0; paragraphId < page.paragraphList.length; paragraphId++ ){
+
+            paragraph        = page.paragraphList[ paragraphId ];
+            currentParagraph = {
+
+                align    : paragraph.align,
+                nodeList : []
+
+            };
+
+            if( paragraph.spacing ){
+                currentParagraph.spacing = paragraph.spacing;
+            }
+
+            if( paragraph.listMode ){
+                currentParagraph.listMode = paragraph.listMode;
+            }
+
+            if( paragraph.indentationSpecialType ){
+                currentParagraph.indentationSpecialType = paragraph.indentationSpecialType;
+            }
+
+            if( paragraph.indentationSpecialValue ){
+                currentParagraph.indentationSpecialValue = paragraph.indentationSpecialValue / CENTIMETER;
+            }
+            
+            if( paragraph.indentationLeft ){
+                currentParagraph.indentationLeft = paragraph.indentationLeft / CENTIMETER;
+            }
+
+            for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
+
+                line = paragraph.lineList[ lineId ];
+
+                for( nodeId = 0; nodeId < line.nodeList.length; nodeId++ ){
+
+                    currentParagraph.nodeList.push({
+
+                        string  : line.nodeList[ nodeId ].string,
+                        blocked : line.nodeList[ nodeId ].blocked,
+                        style   : {
+
+                            color                       : line.nodeList[ nodeId ].style.color,
+                            'font-family'               : line.nodeList[ nodeId ].style['font-family'],
+                            'font-style'                : line.nodeList[ nodeId ].style['font-style'],
+                            'font-weight'               : line.nodeList[ nodeId ].style['font-weight'],
+                            'text-decoration-underline' : line.nodeList[ nodeId ].style['text-decoration-underline'],
+                            'font-size'                 : line.nodeList[ nodeId ].style['font-size']
+
+                        }
+
+                    });
+
+                }
+
+            }
+
+            normalizePlainParagraph( currentParagraph );
+
+            file.paragraphList.push( currentParagraph );
+
+        }
+
+    }
+
+    return file;
 
 };
 
@@ -4579,7 +4588,7 @@ var resetBlink = function(){
 
 var saveDocument = function(){
 
-    currentOpenFile.write( JSON.stringify( pageList ), function( error ){
+    currentOpenFile.write( JSON.stringify( generateDocument() ), function( error ){
 
         if( error ){
             alert( 'Error: ' + error );
