@@ -3918,28 +3918,10 @@ var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate
     // Nos hacemos con la nueva línea, si no existe la creamos
     if( !paragraph.lineList[ lineId + 1 ] ){
 
-        /*
-        if( paragraph.split && paragraph.split !== PARAGRAPH_SPLIT_END ){
-
-            created    = false;
-            /*
-            pageId    += 1;
-            paragraph  = pageList[ pageId ].paragraphList[ 0 ];
-            lineId     = 0;
-            *//*
-            newLine    = pageList[ pageId + 1 ].paragraphList[ 0 ].lineList[ lineId ];
-
-        }else{
-        */
-
-            created            = true;
-            newLine            = createLine( lineId + 1, paragraph );
-            newLine.nodeList   = [];
-            paragraph.lineList = paragraph.lineList.slice( 0, lineId + 1 ).concat( newLine ).concat( paragraph.lineList.slice( lineId + 1 ) );
-
-        /*
-        }
-        */
+        created            = true;
+        newLine            = createLine( lineId + 1, paragraph );
+        newLine.nodeList   = [];
+        paragraph.lineList = paragraph.lineList.slice( 0, lineId + 1 ).concat( newLine ).concat( paragraph.lineList.slice( lineId + 1 ) );
 
     }else{
 
@@ -5614,7 +5596,7 @@ var setRangeParagraphStyle = function( key, value ){
 
 var setSelectedNodeStyle = function( key, value ){
 
-    var i, charInParagraphStart, charInParagraphEnd, paragraphIdStart, paragraphIdEnd, requestStartCheck, requestEndCheck, firstNodeLengthStart, firstNodeLengthEnd;
+    var i, charInParagraphStart, charInParagraphEnd, paragraphIdStart, paragraphIdEnd;
 
     // Selección normal
     if( currentRangeStart ){
