@@ -74,6 +74,10 @@ var PAGEDIMENSIONS = {
     'Super B/A3'         : { width : 33.02, height : 48.25 }
 
 };
+var PARAGRAPH_SPLIT_NONE = 0;
+var PARAGRAPH_SPLIT_START = 1;
+var PARAGRAPH_SPLIT_MIDDLE = 2;
+var PARAGRAPH_SPLIT_END = 3;
 
 // DOM variables
 var win                 = $(this);
@@ -865,7 +869,6 @@ var drawRuleLeft = function(){
 
     // Comprobamos si deben dibujarse los márgenes de la página actual
     if( scrollTop > top + currentPage.height ){
-        console.log('no hay nada que renderizar');
         return;
     }
 
@@ -2442,7 +2445,23 @@ var handleCharNormal = function( newChar ){
 
         currentLineId++;
 
-        currentLine       = currentParagraph.lineList[ currentLineId ];
+        currentLine = currentParagraph.lineList[ currentLineId ];
+
+        var forceCursor = false;
+
+        if( !currentLine ){
+
+            forceCursor         = true;
+            currentPageId      += 1;
+            currentPage         =  pageList[ currentPageId ];
+            currentParagraphId  = 0;
+            currentParagraph    = currentPage.paragraphList[ currentParagraphId ];
+            currentLineId       = 0;
+            currentLine         = currentParagraph.lineList[ currentLineId ];
+
+            // To Do -> Cambiar el cursor con un setCursor
+        }
+
         currentLineCharId = realocation;
         newNode           = getNodeInPosition( currentLine, currentLineCharId );
         currentNodeId     = newNode.nodeId;
@@ -2450,19 +2469,25 @@ var handleCharNormal = function( newChar ){
         currentNodeCharId = newNode.nodeChar;
         temporalStyle     = null;
 
-        positionAbsoluteY += currentLine.height * currentParagraph.spacing;
+        if( forceCursor ){
+            setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+        }else{
 
-        // Reiniciamos la posición horizontal
-        positionAbsoluteX  = 0;
-        positionAbsoluteX += currentPage.marginLeft;
-        positionAbsoluteX += getLineIndentationLeftOffset( currentLineId, currentParagraph );
-        positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
+            positionAbsoluteY += currentLine.height * currentParagraph.spacing;
 
-        for( i = 0; i < currentNodeId; i++ ){
-            positionAbsoluteX += currentLine.nodeList[ i ].width;
+            // Reiniciamos la posición horizontal
+            positionAbsoluteX  = 0;
+            positionAbsoluteX += currentPage.marginLeft;
+            positionAbsoluteX += getLineIndentationLeftOffset( currentLineId, currentParagraph );
+            positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
+
+            for( i = 0; i < currentNodeId; i++ ){
+                positionAbsoluteX += currentLine.nodeList[ i ].width;
+            }
+
+            positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
+
         }
-
-        positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
     }else if( temporalStyle ){
 
@@ -3527,6 +3552,67 @@ var mergeNodes = function( first, second ){
 
 };
 
+var mergeParagraphs = function( pageId, page, firstId, secondId ){
+    
+    var firstParagraph  = page.paragraphList[ firstId ];
+    var secondParagraph = page.paragraphList[ secondId ];
+
+    var newNodeList = [];
+    var maxHeight   = 0;
+    var totalChars  = 0;
+    var i, j, line;
+
+    // To Do -> Esto puede optimizarse mucho, estamos aplanando los dos párrafos enteros para luego recolocarlos en uno solo
+    for( i = 0; i < firstParagraph.lineList.length; i++ ){
+
+        line = firstParagraph.lineList[ i ];
+
+        for( j = 0; j < line.nodeList.length; j++ ){
+
+            newNodeList.push( line.nodeList[ j ] );
+
+            totalChars += line.nodeList[ j ].string.length;
+
+        }
+
+        if( line.height > maxHeight ){
+            maxHeight = line.height;
+        }
+
+    }
+
+    for( i = 0; i < secondParagraph.lineList.length; i++ ){
+
+        line = secondParagraph.lineList[ i ];
+
+        for( j = 0; j < line.nodeList.length; j++ ){
+
+            newNodeList.push( line.nodeList[ j ] );
+
+            totalChars += line.nodeList[ j ].string.length;
+
+        }
+
+        if( line.height > maxHeight ){
+            maxHeight = line.height;
+        }
+
+    }
+
+    secondParagraph.height   = maxHeight * secondParagraph.spacing;
+    line                     = secondParagraph.lineList[ 0 ];
+    secondParagraph.lineList = [ line ];
+    line.height              = maxHeight;
+    line.totalChars          = totalChars;
+    line.nodeList            = newNodeList;
+    page.paragraphList       = page.paragraphList.slice( 0, firstId ).concat( page.paragraphList.slice( secondId ) );
+    
+    realocateLine( pageId, secondParagraph, 0, 0 );
+
+    // To Do -> Quizás habría que hacer un realocate a la inversa de la página
+
+};
+
 var newLine = function(){
 
     return {
@@ -3586,7 +3672,8 @@ var newParagraph = function(){
         lineList                : [],
         listMode                : LIST_NONE,
         spacing                 : 1,
-        width                   : 0
+        width                   : 0,
+        split                   : 0
 
     };
 
@@ -3831,10 +3918,28 @@ var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate
     // Nos hacemos con la nueva línea, si no existe la creamos
     if( !paragraph.lineList[ lineId + 1 ] ){
 
-        created            = true;
-        newLine            = createLine( lineId + 1, paragraph );
-        newLine.nodeList   = [];
-        paragraph.lineList = paragraph.lineList.slice( 0, lineId + 1 ).concat( newLine ).concat( paragraph.lineList.slice( lineId + 1 ) );
+        /*
+        if( paragraph.split && paragraph.split !== PARAGRAPH_SPLIT_END ){
+
+            created    = false;
+            /*
+            pageId    += 1;
+            paragraph  = pageList[ pageId ].paragraphList[ 0 ];
+            lineId     = 0;
+            *//*
+            newLine    = pageList[ pageId + 1 ].paragraphList[ 0 ].lineList[ lineId ];
+
+        }else{
+        */
+
+            created            = true;
+            newLine            = createLine( lineId + 1, paragraph );
+            newLine.nodeList   = [];
+            paragraph.lineList = paragraph.lineList.slice( 0, lineId + 1 ).concat( newLine ).concat( paragraph.lineList.slice( lineId + 1 ) );
+
+        /*
+        }
+        */
 
     }else{
 
@@ -4286,9 +4391,11 @@ var realocatePage = function( id ){
     // Comprobamos en que línea supera el tamaño
     for( lineId = 0; lineId < paragraph.lineList.length; lineId++ ){
 
-        if( page.height < height + paragraph.lineList[ lineId ].height ){
+        if( page.height < height + ( paragraph.lineList[ lineId ].height * paragraph.spacing ) ){
             break;
         }
+
+        height += paragraph.lineList[ lineId ].height * paragraph.spacing;
 
     }
 
@@ -4339,6 +4446,43 @@ var realocatePage = function( id ){
     // Si la línea es distinta de 0 el movimiento requiere partir párrafos
     }else{
 
+        var previouslySliced = !!paragraph.split;
+
+        if( paragraph.split ){
+
+            if( paragraph.split === PARAGRAPH_SPLIT_END ){
+                paragraph.split = PARAGRAPH_SPLIT_MIDDLE;
+            }
+
+        }else{
+            paragraph.split = PARAGRAPH_SPLIT_START;
+        }
+
+        var newParagraph = $.extend( {}, paragraph );
+
+        height = 0;
+
+        for( var i = lineId; i < paragraph.lineList.length; i++ ){
+            height += paragraph.lineList[ i ].height * paragraph.spacing;
+        }
+
+        newParagraph.height    = height;
+        newParagraph.lineList  = paragraph.lineList.slice( lineId );
+        paragraph.height      -= height;
+        paragraph.lineList     = paragraph.lineList.slice( 0, lineId );
+
+        if( newPage.paragraphList[ 0 ].split ){
+            newParagraph.split = PARAGRAPH_SPLIT_MIDDLE;
+        }else{
+            newParagraph.split = PARAGRAPH_SPLIT_END;
+        }
+        
+        newPage.paragraphList.unshift( newParagraph );
+
+        if( previouslySliced ){
+            mergeParagraphs( id + 1, newPage, 0, 1 );
+        }
+
     }
 
     realocatePage( id + 1 );
@@ -4363,19 +4507,16 @@ var realocatePageInverse = function( id ){
 var realTimeConnect = function( error, firstConnection){
 
     // To Do -> Error
-    console.log( error, 'connected', 'firstConnection', firstConnection );
-    console.log( 1 );
+    //console.log( error, 'connected', 'firstConnection', firstConnection );
     realtime.getUserList( true, function( error, list ){
-
-        console.log( 2 );
 
         // To Do -> Error
         for( var i in list ){
             usersEditing[ list[ i ].id ] = list[ i ];
         }
 
-        console.log( usersEditing );
-        console.log( error, list );
+        //console.log( usersEditing );
+        //console.log( error, list );
 
     });
 
