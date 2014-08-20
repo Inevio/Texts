@@ -806,7 +806,7 @@
 
 .rule-left{
     width: 15px;
-    height: 476px;
+    height: 458px;
     float: left;
     padding: 0 11px 0 8px;
     background: #ebebeb;
@@ -814,7 +814,7 @@
 
 .editor{
     width: 866px;
-    height: 476px;
+    height: 458px;
     float: left;
     position: relative;
 }
@@ -856,4 +856,24 @@
     left: 0;
     */
     z-index: -1;
+}
+
+.loading{
+    display: none;
+    position: absolute;
+    top: -51px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    width: 300px;
+    height: 14px;
+    border: 1px solid #cacaca;
+    border-radius: 3px;
+    background: #fff;
+    padding: 15px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
 }

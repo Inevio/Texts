@@ -99,6 +99,7 @@ var marginTopBox        = $('.ruler-box');
 var input               = $('.input');
 var testZone            = $('.test-zone');
 var viewTitle           = $('.document-title');
+var loading             = $('.loading');
 var canvasPages         = pages[ 0 ];
 var canvasSelect        = selections[ 0 ];
 var canvasRuleLeft      = ruleLeft[ 0 ];
@@ -6002,6 +6003,8 @@ var start = function(){
     updateToolsLineStatus();
     activeRealTime();
 
+    loading.css( 'display', 'none' );
+
     marginTopDown.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     marginTopUp.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     marginTopBox.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
@@ -6304,7 +6307,7 @@ win
 
 })
 
-.on( 'app-param', function( e, params ){
+.on( 'ui-view-ready', function(){
 
     // To Do -> Comprobar que params no va vacio
     if( params && params.command === 'openFile' ){
@@ -7344,4 +7347,10 @@ toolsColor
 // Start
 if( !params ){
     start();
+}else{
+
+    loading
+        .css( 'display', 'block' )
+        .text('Loading file...');
+
 }
