@@ -13,16 +13,19 @@ var ALIGN_CENTER = 1;
 var ALIGN_RIGHT = 2;
 var ALIGN_JUSTIFY = 3;
 var CENTIMETER = 37.795275591;
-var CMD_POSITION = 0;
-var CMD_NEWCHAR = 1;
-var CMD_RANGE_NEWCHAR = 2;
-var CMD_BACKSPACE = 3;
-var CMD_RANGE_BACKSPACE = 4;
-var CMD_ENTER = 5;
-var CMD_NODE_STYLE = 6;
-var CMD_RANGE_NODE_STYLE = 7;
-var CMD_PARAGRAPH_STYLE = 8;
-var CMD_RANGE_PARAGRAPH_STYLE = 9;
+var CMD_SYNC = 0;
+var CMD_DOCUMENT = 1;
+var CMD_DOCUMENT_READY = 2;
+var CMD_POSITION = 3;
+var CMD_NEWCHAR = 4;
+var CMD_RANGE_NEWCHAR = 5;
+var CMD_BACKSPACE = 6;
+var CMD_RANGE_BACKSPACE = 7;
+var CMD_ENTER = 8;
+var CMD_NODE_STYLE = 9;
+var CMD_RANGE_NODE_STYLE = 10;
+var CMD_PARAGRAPH_STYLE = 11;
+var CMD_RANGE_PARAGRAPH_STYLE = 12;
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
@@ -166,7 +169,6 @@ var currentMouse          = MOUSE_NORMAL;
 var temporalStyle         = null;
 var toolsListEnabled      = false;
 var toolsColorEnabled     = false;
-
 
 // Button actions
 var buttonAction = {
@@ -3067,66 +3069,7 @@ var handleRemoteChar = function( pageId, page, paragraphId, paragraph, lineId, l
     nodeChar++;
     lineChar++;
 
-    /*var realocation = */
-    realocateLine( pageId, paragraph, lineId, lineChar ); // To Do -> Actualizar el realocateLine para que pueda funcionar en cualquier párrafo, no solo el que tiene el foco
-
-    /*
-    if( realocation > 0 ){
-
-        lineId++;
-
-        line          = paragraph.lineList[ lineId ];
-        lineChar      = realocation;
-        newNode       = getNodeInPosition( line, lineChar );
-        nodeId        = newNode.nodeId;
-        node          = line.nodeList[ nodeId ];
-        nodeChar      = newNode.nodeChar;
-        temporalStyle = null;
-
-        positionAbsoluteY += line.height * paragraph.spacing;
-
-        // Reiniciamos la posición horizontal
-        positionAbsoluteX  = 0;
-        positionAbsoluteX += currentPage.marginLeft;
-        positionAbsoluteX += getLineIndentationLeftOffset( lineId, paragraph );
-        positionAbsoluteX += getLineOffset( line, paragraph );
-
-        for( i = 0; i < nodeId; i++ ){
-            positionAbsoluteX += line.nodeList[ i ].width;
-        }
-
-        positionAbsoluteX += node.charList[ nodeChar - 1 ];
-
-    }else if( temporalStyle ){
-
-        setCursor( currentPageId, paragraphId, lineId, lineChar, nodeId, nodeChar, true );
-        
-        temporalStyle = null;
-
-    }else{
-
-        // Reiniciamos la posición horizontal
-        // To Do -> Quizás pueda optimizarse
-        positionAbsoluteX  = 0;
-        positionAbsoluteX += currentPage.marginLeft;
-        positionAbsoluteX += getLineIndentationLeftOffset( lineId, paragraph );
-        positionAbsoluteX += getLineOffset( line, paragraph );
-
-        for( i = 0; i < nodeId; i++ ){
-            positionAbsoluteX += line.nodeList[ i ].width;
-        }
-
-        positionAbsoluteX += node.charList[ nodeChar - 1 ];
-
-    }
-    */
-
-    /*
-    node.string     = node.string.slice( 0, nodeChar ) + newChar + node.string.slice( nodeChar );
-    line.totalChars = line.totalChars + 1;
-
-    measureNode( paragraph, line, lineId, null, node, nodeId, nodeChar );
-    */
+    realocateLine( pageId, paragraph, lineId, lineChar );
 
 };
 
@@ -3374,6 +3317,15 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
         newPageId = pageId;
     }
     */
+
+};
+
+var hideDocument = function(){
+    
+    pages.css( 'display', 'none' );
+    selections.css( 'display', 'none' );
+    ruleTop.css( 'display', 'none' );
+    ruleLeft.css( 'display', 'none' );
 
 };
 
@@ -3715,7 +3667,7 @@ var normalizeLine = function( line ){
 
         comparation = compareNodeStyles( line.nodeList[ i - 1 ], line.nodeList[ i ] );
 
-        if( comparation ){
+        if( comparation && !line.nodeList[ i - 1 ].blocked && !line.nodeList[ i ].blocked ){
             
             mergeNodes( line.nodeList[ i - 1 ], line.nodeList[ i ] );
             
@@ -3741,7 +3693,7 @@ var normalizePlainParagraph = function( paragraph ){
 
         comparation = compareNodeStyles( paragraph.nodeList[ i - 1 ], paragraph.nodeList[ i ] );
 
-        if( comparation ){
+        if( comparation && !paragraph.nodeList[ i - 1 ].blocked && !paragraph.nodeList[ i ].blocked ){
 
             paragraph.nodeList[ i - 1 ].string += paragraph.nodeList[ i ].string;
             paragraph.nodeList                  = paragraph.nodeList.slice( 0, i).concat( paragraph.nodeList.slice( i + 1 ) );
@@ -3794,9 +3746,11 @@ var openFile = function( structure ){
     
 };
 
-var processFile = function( data ){
+var processFile = function( data, noDecode ){
 
-    data = wz.tool.decodeJSON( data );
+    if( !noDecode ){
+        data = wz.tool.decodeJSON( data );
+    }
 
     if( !data ){
         alert( 'FILE FORMAT NOT RECOGNIZED' );
@@ -3825,6 +3779,7 @@ var processFile = function( data ){
 
     );
 
+    pageList           = [];
     page.paragraphList = [];
 
     for( i = 0; i < data.paragraphList.length; i++ ){
@@ -3895,6 +3850,8 @@ var processFile = function( data ){
     for( i = 0; i < pageList.length; i++ ){
 
         for( j = 0; j < pageList[ i ].paragraphList.length; j++ ){
+
+            console.log( i, j, pageList[ i ].paragraphList[ j ] );
 
             setCursor( i, j, 0, 0, 0, 0, true );
             realocateLine( i, pageList[ i ].paragraphList[ j ], 0, 0 );
@@ -4526,7 +4483,40 @@ var realTimeMessage = function( info, data ){
 
     var page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar, elements;
 
-    if( data.cmd === CMD_NEWCHAR ){
+    if( data.cmd === CMD_SYNC ){
+        
+        console.log( 'CMD_SYNC' );
+        
+        hideDocument();
+        
+        loading
+            .css( 'display', 'block' )
+            .text( 'Joining to the document...');
+
+    }else if( data.cmd === CMD_DOCUMENT ){
+
+        console.log( 'CMD_DOCUMENT' );
+
+        processFile( data.data, true );
+        setCursor( 0, 0, 0, 0, 0, 0, true );
+        loading.css( 'display', 'none' );
+        showDocument();
+
+        realtime.send({
+
+            cmd : CMD_DOCUMENT_READY,
+            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+        });
+
+    }else if( data.cmd === CMD_DOCUMENT_READY ){
+
+        console.log( 'CMD_DOCUMENT_READY' );
+
+        loading.css( 'display', 'none' );
+        showDocument();
+
+    }else if( data.cmd === CMD_NEWCHAR ){
 
         console.log('CMD_NEWCHAR');
 
@@ -4596,6 +4586,7 @@ var realTimeMessage = function( info, data ){
             getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ),
             data.data[ 4 ],
             data.data[ 5 ],
+            true,
             true
 
         );
@@ -4625,7 +4616,9 @@ var realTimeMessage = function( info, data ){
 
     }
 
-    updateRemoteUserPosition( info.sender, data.pos );
+    if( data.pos ){
+        updateRemoteUserPosition( info.sender, data.pos );
+    }
 
     console.log( 'Editando ', usersEditing );
 
@@ -4639,9 +4632,14 @@ var realTimeUserConnect = function( info ){
 
     console.log( info );
 
+    loading.css( 'display', 'block' ).text('A user is joining to the document...');
+    hideDocument();
+
     wz.user( info.sender, function( error, user ){
 
         console.log( arguments );
+
+        loading.css( 'display', 'block' ).text( user.name + ' is joining to the document...' );
 
         // To Do -> Error
 
@@ -4657,8 +4655,15 @@ var realTimeUserConnect = function( info ){
 
     realtime.send({
 
-        cmd : CMD_POSITION,
+        cmd : CMD_SYNC,
         pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
+
+    realtime.send({
+
+        cmd  : CMD_DOCUMENT,
+        data : generateDocument()
 
     });
     
@@ -5016,6 +5021,9 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         currentNode = currentLine.nodeList[ node ];
     }
 
+    console.log( page, paragraph, line, lineChar, node, nodeChar );
+    console.log( currentLine.nodeList, currentNode );
+
     // Si intentamos posicionarnos en un nodo bloqueado nos vamos al siguiente
     if( currentNode.blocked ){
 
@@ -5258,7 +5266,7 @@ var setRange = function( start, end, force ){
 
 };
 
-var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated ){
+var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, realocate ){
 
     var i, j, newNode, endNode, newPositions;
 
@@ -5560,8 +5568,8 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated )
 
     }
 
-    if( !propagated ){
-
+    if( !propagated || realocate ){
+        
         // To Do -> Esto se puede hacer más óptimo, recolocar todo un párrafo no parece muy óptimo en la mayor parte de los casos
         mapRangeParagraphs( rangeStart, rangeEnd, function( pageId, page, paragraphId, paragraph ){
 
@@ -5574,6 +5582,10 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated )
             }
 
         });
+
+    }
+
+    if( !propagated ){
 
         currentNode = currentLine.nodeList[ currentNodeId ]; // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
 
@@ -5953,6 +5965,15 @@ var setViewTitle = function( name ){
     }
 
     viewTitle.text( name + ' - Texts' );
+
+};
+
+var showDocument = function(){
+    
+    pages.css( 'display', 'block' );
+    selections.css( 'display', 'block' );
+    ruleTop.css( 'display', 'block' );
+    ruleLeft.css( 'display', 'block' );
 
 };
 

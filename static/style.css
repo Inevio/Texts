@@ -1,4 +1,8 @@
 
+.wz-view{
+    background: #ebebeb;
+}
+
 .wz-ui-header{
     box-shadow: none;
     position: static;
