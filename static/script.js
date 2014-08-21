@@ -4469,9 +4469,73 @@ var realocatePageInverse = function( id ){
     // Si no hay párrafos en la página la eliminamos (salvo la primera que no puede eliminarse)
     if( id && !page.paragraphList.length ){
         pageList = pageList.slice( 0, id ).concat( pageList.slice( id + 1 ) );
+        return;
     }
 
-    // To Do -> Realocate de líneas
+    var i, nextPage, nextParagraph;
+    var heightUsed = 0;
+
+    for( i = 0; i < page.paragraphList.length; i++ ){
+        heightUsed += page.paragraphList[ i ].height;
+    }
+
+    nextPage = pageList[ id + 1 ];
+
+    if( !nextPage ){
+        return;
+    }
+
+    nextParagraph = nextPage.paragraphList[ 0 ];
+
+    // Si no entra la siguiente línea, paramos
+    if( page.height - page.marginTop - page.marginBottom - heightUsed < nextParagraph.lineList[ 0 ].height ){
+        return;
+    }
+
+    var prevParagraph = page.paragraphList.slice( -1 )[ 0 ];
+    var newParagraph  = $.extend( {}, nextParagraph );
+
+    nextParagraph.lineList  = nextParagraph.lineList.slice( 1 );
+    newParagraph.lineList   = newParagraph.lineList.slice( 0, 1 );
+    newParagraph.height     = newParagraph.lineList[ 0 ].height;
+    nextParagraph.height   -= newParagraph.height;
+
+    page.paragraphList.push( newParagraph );
+
+    // Si hemos partido un párrafo en dos
+    if( nextParagraph.lineList.length ){
+
+        if( prevParagraph.split === PARAGRAPH_SPLIT_START || prevParagraph.split === PARAGRAPH_SPLIT_MIDDLE ){
+            newParagraph.split = PARAGRAPH_SPLIT_MIDDLE;
+        }else{
+            newParagraph.split =  PARAGRAPH_SPLIT_START;
+        }
+        
+    }else{
+
+        // To Do -> Esto podría optimizarse, estamos duplicando un párrafo que se podría mover entero
+        if( newParagraph.split === PARAGRAPH_SPLIT_END ){
+            newParagraph.split = PARAGRAPH_SPLIT_END;
+        }else if( prevParagraph.slipt === PARAGRAPH_SPLIT_START || prevParagraph.split === PARAGRAPH_SPLIT_MIDDLE ){
+            newParagraph.split = PARAGRAPH_SPLIT_MIDDLE;
+        }
+
+        nextPage.paragraphList = nextPage.paragraphList.slice( 1 );
+
+    }
+
+    if( newParagraph.split && newParagraph.split !== PARAGRAPH_SPLIT_START && prevParagraph.split && prevParagraph.split !== PARAGRAPH_SPLIT_END ){
+
+        mergeParagraphs( id, page, page.paragraphList.length - 2, page.paragraphList.length - 1 );
+
+        newParagraph.split = prevParagraph.split;
+
+    }
+
+    realocatePageInverse( id + 1 );
+
+    // To Do -> Esto se puede optimizar mucho, estamos llamando recursivamente a esta función para comprobar si entran líneas siguientes. Ya tenemos parte de los cálculos hechos así que se pueden evitar hacer de nuevo
+    realocatePageInverse( id );
     
 };
 
