@@ -3559,6 +3559,10 @@ var mergeParagraphs = function( pageId, page, firstId, secondId ){
     line.totalChars          = totalChars;
     line.nodeList            = newNodeList;
     page.paragraphList       = page.paragraphList.slice( 0, firstId ).concat( page.paragraphList.slice( secondId ) );
+
+    if( firstParagraph.split === PARAGRAPH_SPLIT_START && secondParagraph.split === PARAGRAPH_SPLIT_END ){
+        secondParagraph.split = PARAGRAPH_SPLIT_NONE;
+    }
     
     realocateLine( pageId, secondParagraph, 0, 0 );
 
@@ -3850,8 +3854,6 @@ var processFile = function( data, noDecode ){
     for( i = 0; i < pageList.length; i++ ){
 
         for( j = 0; j < pageList[ i ].paragraphList.length; j++ ){
-
-            console.log( i, j, pageList[ i ].paragraphList[ j ] );
 
             setCursor( i, j, 0, 0, 0, 0, true );
             realocateLine( i, pageList[ i ].paragraphList[ j ], 0, 0 );
@@ -4301,8 +4303,9 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
 };
 
-var realocatePage = function( id ){
+var realocatePage = function( id, propagated ){
 
+    var i;
     var page        = pageList[ id ];
     var height      = page.marginTop + page.marginBottom;
     var overflow    = false;
@@ -4321,7 +4324,24 @@ var realocatePage = function( id ){
     }
 
     if( !overflow ){
+
+        if( propagated ){
+
+            // Fusionamos los párrafos que sean necesarios
+            for( i = 1; i < page.paragraphList.length; ){
+                
+                if( page.paragraphList[ i - 1 ].split && page.paragraphList[ i ].split ){
+                    mergeParagraphs( id + 1, page, i - 1, i );
+                }else{
+                    i++;
+                }
+
+            }
+
+        }
+
         return;
+
     }
 
     var paragraph = page.paragraphList[ paragraphId ];
@@ -4402,7 +4422,7 @@ var realocatePage = function( id ){
 
         height = 0;
 
-        for( var i = lineId; i < paragraph.lineList.length; i++ ){
+        for( i = lineId; i < paragraph.lineList.length; i++ ){
             height += paragraph.lineList[ i ].height * paragraph.spacing;
         }
 
@@ -4425,7 +4445,18 @@ var realocatePage = function( id ){
 
     }
 
-    realocatePage( id + 1 );
+    // Fusionamos los párrafos que sean necesarios
+    for( i = 1; i < newPage.paragraphList.length; ){
+        
+        if( newPage.paragraphList[ i - 1 ].split && newPage.paragraphList[ i ].split ){
+            mergeParagraphs( id + 1, newPage, i - 1, i );
+        }else{
+            i++;
+        }
+
+    }
+
+    realocatePage( id + 1, true );
 
     return result;
 
@@ -5020,9 +5051,6 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     if( force || currentPageId !== page || currentParagraphId !== paragraph || currentLineId !== line || currentNodeId !== node ){
         currentNode = currentLine.nodeList[ node ];
     }
-
-    console.log( page, paragraph, line, lineChar, node, nodeChar );
-    console.log( currentLine.nodeList, currentNode );
 
     // Si intentamos posicionarnos en un nodo bloqueado nos vamos al siguiente
     if( currentNode.blocked ){
