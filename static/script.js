@@ -1185,7 +1185,13 @@ var getCommonStyles = function( start, end ){
         return {
             
             node      : start.node.style,
-            paragraph : start.paragraph.align
+            paragraph : {
+
+                align    : start.paragraph.align,
+                spacing  : start.paragraph.spacing,
+                listMode : start.paragraph.listMode
+
+            }
 
         };
 
