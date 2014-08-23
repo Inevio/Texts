@@ -2738,13 +2738,17 @@ var handleCharSelection = function( newChar ){
     realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
-    realtime.send({
-        
-        cmd  : CMD_RANGE_NEWCHAR,
-        data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd, newChar ],
-        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+    if( realtime ){
 
-    });
+        realtime.send({
+        
+            cmd  : CMD_RANGE_NEWCHAR,
+            data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd, newChar ],
+            pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+        });
+
+    }
 
 };
 
@@ -4520,7 +4524,7 @@ var realocatePage = function( id, propagated ){
         paragraph.height      -= height;
         paragraph.lineList     = paragraph.lineList.slice( 0, lineId );
 
-        if( newPage.paragraphList[ 0 ].split ){
+        if( newPage.paragraphList[ 0 ] && newPage.paragraphList[ 0 ].split ){
             newParagraph.split = PARAGRAPH_SPLIT_MIDDLE;
         }else{
             newParagraph.split = PARAGRAPH_SPLIT_END;
