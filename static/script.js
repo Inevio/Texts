@@ -6452,6 +6452,24 @@ var updateToolsLineStatus = function(){
 
     }
 
+    if( temporalStyle ){
+
+        if( checkTemporalStyle( 'text-decoration-underline', true ) ){
+            $( '.tool-button-underline', toolsLine ).addClass('active');
+        }else{
+            $( '.tool-button-underline', toolsLine ).removeClass('active');
+        }
+
+    }else{
+
+        if( nodeStyles['text-decoration-underline'] ){
+            $( '.tool-button-underline', toolsLine ).addClass('active');
+        }else{
+            $( '.tool-button-underline', toolsLine ).removeClass('active');
+        }
+
+    }
+
     // Estilos de párrafos
     if( paragraphStyles.align === ALIGN_LEFT ){
 
