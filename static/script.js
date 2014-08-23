@@ -2577,6 +2577,8 @@ var handleCharNormal = function( newChar ){
 
             positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
 
+            calculateScroll();
+
         }
 
     }else if( temporalStyle ){
