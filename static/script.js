@@ -2263,6 +2263,68 @@ var handleBackspaceSelection = function(){
     // Si están en varias líneas
     }else{
 
+        // Líneas intermedias
+        removeRangeLines( false, currentRangeStart, currentRangeEnd );
+        
+        // Calculamos los nuevos id's del párrafo y linea final
+        if(
+            currentRangeStart.pageId === currentRangeEnd.pageId &&
+            currentRangeStart.paragraphId === currentRangeEnd.paragraphId
+        ){
+            currentRangeEnd.lineId = currentRangeStart.lineId + 1;
+        }else{
+
+            currentRangeEnd.lineId = 0;
+
+            if( currentRangeStart.pageId === currentRangeEnd.pageId ){
+                currentRangeEnd.paragraphId = currentRangeStart.paragraphId + 1;
+            }else{
+                currentRangeEnd.paragraphId = 0;
+            }
+
+        }
+
+        // Línea final
+        // Eliminamos los primeros nodes de la línea
+        for( i = 0; i < currentRangeEnd.nodeId; i++ ){
+            currentRangeEnd.line.totalChars -= currentRangeEnd.line.nodeList[ i ].string.length;
+        }
+
+        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
+        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
+        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
+
+        // Si el nodo no se queda vacío
+        if( currentRangeEnd.node.string.length ){
+            measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, 0 );
+
+            // To Do -> Quizás haya que arreglar el lineChar y nodeChar
+
+        // Si el nodo se queda vacio pero hay nodos después
+        }else if( currentRangeEnd.line.nodeList[ currentRangeEnd.line.nodeId + 1 ] ){
+
+            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId + 1 );
+            currentRangeStart.nodeId         = currentRangeStart.nodeId + 1;
+            currentRangeStart.node           = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.nodeChar       = 0;
+
+        // Si el nodo se queda vacio y no hay más nodos en la linea
+        }else{
+            currentRangeEnd.paragraph.lineList = currentRangeEnd.paragraph.lineList.slice( currentRangeEnd.lineId + 1 );
+        }
+
+        // Borramos los párrafos que sean necesarios
+        // Si el rango empieza y termina en el mismo párrafo
+        if(
+            (
+                currentRangeStart.pageId !== currentRangeEnd.pageId ||
+                currentRangeStart.paragraphId !== currentRangeEnd.paragraphId
+            ) &&
+            !currentRangeEnd.paragraph.lineList.length
+        ){
+            currentRangeEnd.page.paragraphList = currentRangeEnd.page.paragraphList.slice( 0, currentRangeEnd.paragraphId ).concat( currentRangeEnd.page.paragraphList.slice( currentRangeEnd.paragraphId + 1 ) );
+        }
+
         // Línea inicial
         // Nodo inicial
         currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
@@ -2279,36 +2341,47 @@ var handleBackspaceSelection = function(){
         // Si el nodo no se queda vacío
         if( currentRangeStart.node.string.length ){
             currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
-        }else{
+
+            // To Do -> Quizás haya que arreglar el lineChar y nodeChar
+
+        // Si se ha quedado vacío pero hay más nodos antes
+        }else if( currentRangeStart.nodeId > 0 ){
 
             currentRangeStart.line.nodeList  = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId );
-            currentRangeStart.nodeId         = currentRangeStart.nodeId - 1; // To Do -> Y si el nodoId es 0? -> Y si se selecciona el párrafo entero?
+            currentRangeStart.nodeId         = currentRangeStart.nodeId - 1;
             currentRangeStart.node           = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
             currentRangeStart.nodeChar       = currentRangeStart.node.string.length;
 
-        }
-
-        // Líneas intermedias
-        removeRangeLines( false, currentRangeStart, currentRangeEnd );
-
-        // Línea final
-        // Eliminamos los primeros nodes de la línea
-        for( i = 0; i < currentRangeEnd.nodeId; i++ ){
-            currentRangeEnd.line.totalChars -= currentRangeEnd.line.nodeList[ i ].string.length;
-        }
-
-        currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
-        currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
-        currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
-
-        // Si el nodo no se queda vacío
-        if( currentRangeEnd.node.string.length ){
-            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId );
+        // Si se ha quedado vacío y era el primer nodo de la línea
         }else{
-            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId + 1 ); // To Do -> Estamos seguros de que esto es correcto?
+            currentRangeStart.paragraph.lineList = currentRangeStart.paragraph.lineList.slice( 0, currentRangeStart.lineId );
         }
 
-        measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, 0 );
+        // Borramos los párrafos que sean necesarios
+        // Si el rango empieza y termina en el mismo párrafo
+        if(
+            currentRangeStart.pageId === currentRangeEnd.pageId &&
+            currentRangeStart.paragraphId === currentRangeEnd.paragraphId
+        ){
+
+            if( !currentRangeStart.paragraph.lineList.length ){
+                currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
+            }
+
+            // To Do -> Quizás haya que cambiar las coordenadas
+        }else{
+
+            if( !currentRangeStart.paragraph.lineList.length ){
+                currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
+            }
+
+        }
+
+        realocatePageInverse( currentRangeStart.pageId );
+
+        if( !pageList[ currentRangeStart.pageId ].paragraphList[ currentRangeStart.paragraphId ] ){
+            currentRangeStart.paragraphId = currentRangeStart.paragraphId - 1;
+        }
 
     }
 
