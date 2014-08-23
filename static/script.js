@@ -6580,7 +6580,8 @@ input.on( 'keydown', function(e){
         updatePages();
 
         waitingCheckLetter = false;
-        input[ 0 ].value   = '';
+
+        e.preventDefault();
 
     }else if( e.which === 8 ){
 
