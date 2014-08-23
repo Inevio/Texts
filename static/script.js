@@ -309,6 +309,20 @@ var addTemporalStyle = function( key, value ){
 
 };
 
+var calculateScroll = function(){
+
+    if( positionAbsoluteY < scrollTop ){
+        scrollTop = positionAbsoluteY - GAP;
+        return true;
+    }
+
+    if( ( scrollTop + canvasPages.height ) < positionAbsoluteY + currentLine.height ){
+        scrollTop = positionAbsoluteY + currentLine.height + GAP - canvasPages.height;
+        return true;
+    }
+
+};
+
 var checkCanvasPagesSize = function(){
     
     canvasPages.width  = pages.width();
@@ -5338,6 +5352,13 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     currentLineCharId  = lineChar;
     currentNodeId      = node;
     currentNodeCharId  = nodeChar;
+
+    if( calculateScroll() ){
+
+        updatePages();
+        updateRuleLeft();
+        
+    }
 
     resetBlink();
     
