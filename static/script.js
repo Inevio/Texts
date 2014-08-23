@@ -1,5 +1,6 @@
 /*global $:true */
 /*global wz:true*/
+/*global lang:true*/
 /*global alert:true*/
 /*global params:true*/
 /*global console:true*/
@@ -430,6 +431,8 @@ var createDocument = function(){
 
         setViewTitle( currentOpenFile.name );
 
+        displaySaveSuccessFully();
+
     };
 
     createFile( name + '.texts', file, callback );
@@ -549,6 +552,16 @@ var debugTimeEnd = function( name ){
         console.timeEnd( name );
     }
     
+};
+
+var displaySaveSuccessFully = function(){
+
+    wz.banner()
+        .setTitle( 'Texts - ' + currentOpenFile.name )
+        .setText( currentOpenFile.name + ' ' + lang.fileSaved )
+        .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
+        .render();
+
 };
 
 var drawPages = function(){
@@ -4948,6 +4961,8 @@ var saveDocument = function(){
             alert( 'Error: ' + error );
             return;
         }
+
+        displaySaveSuccessFully();
 
     });
 
