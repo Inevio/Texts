@@ -86,6 +86,7 @@ var PARAGRAPH_SPLIT_END = 3;
 // DOM variables
 var win                 = $(this);
 var saveButton          = $('.option-save');
+var moreButton          = $('.option-more');
 var toolsMenu           = $('.toolbar-menu');
 var toolsLine           = $('.tools-line');
 var toolsListContainer  = $('.toolbar-list-container');
@@ -6657,6 +6658,27 @@ saveButton.on( 'click', function(){
     }else{
         createDocument();
     }
+
+});
+
+moreButton.on( 'click', function(){
+
+    var name = currentOpenFile.name.replace( /.docx|.texts$/i, '' );
+
+    wz.tool.textsDocumentToPdf( name + '.pdf', 'root', generateDocument(), function( error ){
+
+        if( error ){
+            alert( error );
+            return;
+        }
+
+        wz.banner()
+            .setTitle( 'Texts - ' + currentOpenFile.name )
+            .setText( currentOpenFile.name + ' ' + lang.fileSaved )
+            .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
+            .render();
+
+    });
 
 });
 
