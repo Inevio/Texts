@@ -322,6 +322,11 @@ var calculateScroll = function(){
         return true;
     }
 
+    if( scrollTop > maxScrollTop ){
+        scrollTop = maxScrollTop;
+        return true;
+    }
+
 };
 
 var checkCanvasPagesSize = function(){
@@ -2025,13 +2030,21 @@ var handleBackspaceNormal = function(){
         // La línea es la primera del párrafo
         if( currentLineId === 0 ){
 
-            // To Do -> Saltos entre distintas páginas
-
             // Si hay contenido fusionamos los párrafos
-            var prevParagraph   = currentPage.paragraphList[ currentParagraphId - 1 ];
-            var mergeParagraphs = currentLine.totalChars > 0;
-            var pageId          = currentPageId;
+            var prevParagraph;
+            var mergeParagraphs;
+            var pageId;
             var mergePreLastLine;
+
+            // El párrafo es el primero de la página
+            if( currentParagraphId === 0 ){
+                prevParagraph = pageList[ currentPageId - 1 ].paragraphList[ pageList[ currentPageId - 1 ].paragraphList.length - 1 ];
+            }else{
+                prevParagraph = currentPage.paragraphList[ currentParagraphId - 1 ];
+            }
+
+            mergeParagraphs = currentLine.totalChars > 0;
+            pageId          = currentPageId;
 
             if( mergeParagraphs ){
 
@@ -2050,6 +2063,8 @@ var handleBackspaceNormal = function(){
                 currentPageId      = currentPageId - 1;
                 currentPage        = pageList[ currentPageId ];
                 currentParagraphId = currentPage.paragraphList.length - 1;
+
+                updateRuleLeft();
                 
             }
 
@@ -4601,15 +4616,24 @@ var realocatePage = function( id, propagated ){
 
 var realocatePageInverse = function( id ){
 
+    var i;
     var page = pageList[ id ];
 
     // Si no hay párrafos en la página la eliminamos (salvo la primera que no puede eliminarse)
     if( id && !page.paragraphList.length ){
-        pageList = pageList.slice( 0, id ).concat( pageList.slice( id + 1 ) );
+
+        pageList     = pageList.slice( 0, id ).concat( pageList.slice( id + 1 ) );
+        maxScrollTop = GAP - canvasPages.height;
+
+        for( i = 0; i < pageList.length; i++ ){
+            maxScrollTop += Math.round( pageList[ i ].height ) + GAP;
+        }
+
         return;
+
     }
 
-    var i, nextPage, nextParagraph;
+    var nextPage, nextParagraph;
     var heightUsed = 0;
 
     for( i = 0; i < page.paragraphList.length; i++ ){
@@ -5406,12 +5430,10 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
     currentNodeCharId  = nodeChar;
 
     if( calculateScroll() ){
-
         updatePages();
-        updateRuleLeft();
-        
     }
 
+    updateRuleLeft(); // To Do -> Esto no debería ejecutarse todas las veces, solo aquellas en las que haga falta
     resetBlink();
     
 };
