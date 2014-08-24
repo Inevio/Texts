@@ -2071,12 +2071,21 @@ var handleBackspaceNormal = function(){
 
                 }else{
 
+                    /*
                     currentLineId     = currentParagraph.lineList.length - 1;
                     currentLine       = currentParagraph.lineList[ currentLineId ];
                     currentLineCharId = currentLine.totalChars;
                     currentNodeId     = currentLine.nodeList.length - 1;
                     currentNode       = currentLine.nodeList[ currentNodeId ];
                     currentNodeCharId = currentNode.string.length;
+                    */
+
+                    //currentLineId     = currentParagraph.lineList.length - 1;
+                    currentLine       = currentParagraph.lineList[ currentLineId ];
+                    //currentLineCharId = currentLine.totalChars;
+                    //currentNodeId     = currentLine.nodeList.length - 1;
+                    currentNode       = currentLine.nodeList[ currentNodeId ];
+                    //currentNodeCharId = currentNode.string.length;
 
                 }
 
@@ -4241,7 +4250,8 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
         var nodeId   = null;
         var charId   = null;
-        var heritage = 0;
+        
+        heritage = 0;
 
         for( i = 0; i < nextLine.nodeList.length; i++ ){
             
@@ -4408,6 +4418,21 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     if( !dontPropagate ){
         realocateLineInverse( paragraph, id + 1, 0 );
     }
+
+    // To Do -> Esto es un fixeo no muy óptimo, no se están actualizando bien las alturas de los párrafos. Hacerlo más optimo.
+    //          Para emular el error necesitamos 1 párrafo de varias lineas, una linea en blanco, 1 párrafo de varias lineas,
+    //          una linea en blanco y 1 párrafo de varias lineas.
+    //          Nos vamos al principio del segundo párrafo con contenido y borramos. Volvemos a borrar. Si intentamos seleccionar
+    //          el segundo párrafo vacio no se pondrá el cursor en posición correcta porque el primer párrafo ahora no tendrá la
+    //          altura adecuada.
+
+    var height = 0;
+
+    for( i = 0; i < paragraph.lineList.length; i++ ){
+        height += paragraph.lineList[ i ].height;
+    }
+
+    paragraph.height = height;
 
     normalizeLine( line );
 
