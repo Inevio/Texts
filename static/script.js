@@ -318,7 +318,7 @@ var calculateScroll = function(){
         return true;
     }
 
-    if( ( scrollTop + canvasPages.height ) < positionAbsoluteY + currentLine.height ){
+    if( ( scrollTop + canvasPages.height - ( GAP / 2 ) ) < positionAbsoluteY + currentLine.height ){
         scrollTop = positionAbsoluteY + currentLine.height + GAP - canvasPages.height;
         return true;
     }
