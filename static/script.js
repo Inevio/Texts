@@ -6225,7 +6225,7 @@ var setViewTitle = function( name ){
         name = 'New Document';
     }
 
-    viewTitle.text( name + ' - Texts' );
+    viewTitle.text( name );
 
 };
 
