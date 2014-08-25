@@ -105,6 +105,8 @@ var input               = $('.input');
 var testZone            = $('.test-zone');
 var viewTitle           = $('.document-title');
 var loading             = $('.loading');
+var scrollV             = $('.scroll-vertical');
+var scrollVItem         = $('.scroll-vertical-seeker');
 var canvasPages         = pages[ 0 ];
 var canvasSelect        = selections[ 0 ];
 var canvasRuleLeft      = ruleLeft[ 0 ];
@@ -314,17 +316,17 @@ var addTemporalStyle = function( key, value ){
 var calculateScroll = function(){
 
     if( positionAbsoluteY < scrollTop ){
-        scrollTop = positionAbsoluteY - GAP;
+        updateScroll( positionAbsoluteY - GAP );
         return true;
     }
 
     if( ( scrollTop + canvasPages.height - ( GAP / 2 ) ) < positionAbsoluteY + currentLine.height ){
-        scrollTop = positionAbsoluteY + currentLine.height + GAP - canvasPages.height;
+        updateScroll( positionAbsoluteY + currentLine.height + GAP - canvasPages.height );
         return true;
     }
 
     if( scrollTop > maxScrollTop ){
-        scrollTop = maxScrollTop;
+        scrollTop( maxScrollTop );
         return true;
     }
 
@@ -675,7 +677,7 @@ var drawPages = function(){
         if( m + 1 < pageList.length ){
             maxScrollTop += Math.round( page.height ) + GAP;
         }else if( canvasPages.height < page.height ){
-            maxScrollTop += page.height - canvasPages.height + ( GAP * 2 );
+            maxScrollTop += page.height - canvasPages.height + /*(*/ GAP /** 2 )*/;
         }
 
     }
@@ -6278,9 +6280,8 @@ var start = function(){
 
     }
 
-    scrollTop = 0;
-    
     setCursor( 0, 0, 0, 0, 0, 0 );
+    updateScroll( 0 );
     updateRuleLeft();
     drawRuleTop();
     updatePages();
@@ -6448,6 +6449,27 @@ var updateRuleLeft = function(){
     waitingRuleLeftUpdate = true;
 
     requestAnimationFrame( drawRuleLeft );
+
+};
+
+var updateScroll = function( value, noUpdateScrollBar ){
+    
+    scrollTop = value;
+
+    updatePages();
+    updateRuleLeft();
+
+    if( currentRangeStart ){
+        updateRange();
+    }else{
+        resetBlink();
+    }
+
+    if( noUpdateScrollBar ){
+        return;
+    }
+
+    scrollVItem.css( 'y', parseInt( ( scrollV.height() - scrollVItem.outerHeight() ) * ( scrollTop / maxScrollTop ), 10 ) );
 
 };
 
@@ -7371,28 +7393,22 @@ selections
     }
 
     var originalScrollTop = scrollTop;
+    var newScroll         = scrollTop;
 
     // El plugin de mousewheel está ya normalizado, anteriormete teníamos un factor de correción de x30
-    scrollTop -= y;
+    newScroll -= y;
 
-    if( scrollTop < 0 ){
-        scrollTop = 0;
-    }else if( scrollTop > maxScrollTop ){
-        scrollTop = maxScrollTop;
+    if( newScroll < 0 ){
+        newScroll = 0;
+    }else if( newScroll > maxScrollTop ){
+        newScroll = maxScrollTop;
     }
 
-    if( originalScrollTop === scrollTop ){
+    if( originalScrollTop === newScroll ){
         return;
     }
 
-    updatePages();
-    updateRuleLeft();
-
-    if( currentRangeStart ){
-        updateRange();
-    }else{
-        resetBlink();
-    }
+    updateScroll( newScroll );
 
 });
 
@@ -7683,6 +7699,15 @@ toolsColor
         setPagesStyle( 'pageBackgroundColor', normalizeColor( $(this).css('background-color') ) );
 
     }
+
+});
+
+scrollV
+.on( 'wz-dragmove', function( e, x, y ){
+
+    e.stopPropagation();
+
+    updateScroll( parseInt( maxScrollTop * y, 10 ), true );
 
 });
 

@@ -829,14 +829,14 @@
 }
 
 .editor{
-    width: 866px;
+    width: 851px;
     height: 458px;
     float: left;
     position: relative;
 }
 
 .pages{
-    width: 866px;
+    width: 851px;
     height: 458px;
     position: absolute;
     top: 0;
@@ -845,7 +845,7 @@
 }
 
 .selections{
-    width: 866px;
+    width: 851px;
     height: 458px;
     position: absolute;
     top: 0;
@@ -892,4 +892,21 @@
     color: #666;
     font-size: 14px;
     box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+.scroll-vertical{
+    background: #fff;
+    padding: 1px;
+    width: 12px;
+    border-top: 1px solid #cacaca;
+    border-left: 1px solid #cacaca;
+    height: 455px;
+    float: left;
+}
+
+.scroll-vertical-seeker{
+    width: 10px;
+    height: 52px;
+    background-color: #bcbcbc;
+    border: solid 1px #a8a8a8;
 }
