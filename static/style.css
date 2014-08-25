@@ -29,7 +29,7 @@
     height: 11px;
     width: 11px;
     background: url('@static/sprite.png') -245px 0;
-    background-size: 256px 18px;
+    background-size: 269px 18px;
     display: inline-block;
 }
 
@@ -152,7 +152,7 @@
 
 .tool-button i, .tool-list-button i{
     background: url('@static/sprite.png') 0 0;
-    background-size: 256px 18px;
+    background-size: 269px 18px;
     display: inline-block;
 }
 
@@ -317,7 +317,7 @@
     height: 10px;
     background: #f00;
     background: url('@static/sprite.png') -234px 0;
-    background-size: 256px 18px;
+    background-size: 269px 18px;
 }
 
 .toolbar-list{
@@ -339,6 +339,10 @@
 
 .active-linespacing{
     width: 70px;
+}
+
+.active-moreoptions{
+    width: 125px;
 }
 
 .active-page-dimensions{
@@ -378,6 +382,14 @@
     background: #f00;
 }
 
+.toolbar-list i.pdf{
+    height: 16px;
+    width: 13px;
+    background: url('@static/sprite.png') -256px 0;
+    background-size: 269px 18px;
+    vertical-align: sub;
+}
+
 .toolbar-color-picker-container{
     position: fixed;
     z-index: 1;
@@ -396,7 +408,7 @@
     height: 10px;
     background: #f00;
     background: url('@static/sprite.png') -234px 0;
-    background-size: 256px 18px;
+    background-size: 269px 18px;
 }
 
 .toolbar-color-picker{

@@ -6604,7 +6604,7 @@ win
     input.focus();
     toolsListContainer.css( 'display', 'none' );
     toolsColorContainer.css( 'display', 'none' );
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-page-dimensions active-page-margins');
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-moreoptions active-page-dimensions active-page-margins');
     toolsColor.removeClass('active-color active-page-color');
 
 })
@@ -6630,7 +6630,7 @@ win
     input.focus();
     toolsListContainer.css( 'display', 'none' );
     toolsColorContainer.css( 'display', 'none' );
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-page-dimensions active-page-margins');
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-moreoptions active-page-dimensions active-page-margins');
     toolsColor.removeClass('active-color active-page-color');
 
 })
@@ -6665,22 +6665,20 @@ saveButton.on( 'click', function(){
 
 moreButton.on( 'click', function(){
 
-    var name = currentOpenFile.name.replace( /.docx|.texts$/i, '' );
+    toolsList
+        .addClass('active-moreoptions')
+        .html(
+            '<li><i class="pdf"></i>Export as PDF</li>'
+        );
 
-    wz.tool.textsDocumentToPdf( name + '.pdf', 'root', generateDocument(), function( error ){
+    toolsListContainer
+        .css({
 
-        if( error ){
-            alert( error );
-            return;
-        }
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
 
-        wz.banner()
-            .setTitle( 'Texts - ' + currentOpenFile.name )
-            .setText( currentOpenFile.name + ' ' + lang.fileSaved )
-            .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
-            .render();
-
-    });
+        });
 
 });
 
@@ -7630,9 +7628,30 @@ toolsList
     // Modo Interlineado
     }else if( toolsList.hasClass('active-linespacing') ){
         setSelectedParagraphsStyle( 'spacing', parseFloat( $(this).text() ) );
+
+    // Modo más opciones
+    }else if( toolsList.hasClass('active-moreoptions') ){
+        
+        var name = currentOpenFile.name.replace( /.docx|.texts$/i, '' );
+
+        wz.tool.textsDocumentToPdf( name + '.pdf', 'root', generateDocument(), function( error ){
+
+            if( error ){
+                alert( error );
+                return;
+            }
+
+            wz.banner()
+                .setTitle( 'Texts - ' + currentOpenFile.name )
+                .setText( currentOpenFile.name + ' ' + lang.fileSaved )
+                .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
+                .render();
+
+        });
+
     }
 
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-page-dimensions active-page-margins');
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-moreoptions active-page-dimensions active-page-margins');
     updateToolsLineStatus();
 
 });
