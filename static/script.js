@@ -6643,7 +6643,7 @@ win
 
 })
 
-.on( 'ui-view-restore', function(){
+.on( 'ui-view-restore ui-view-focus', function(){
     input.focus();
 });
 
