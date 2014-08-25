@@ -6278,6 +6278,8 @@ var start = function(){
 
     }
 
+    scrollTop = 0;
+    
     setCursor( 0, 0, 0, 0, 0, 0 );
     updateRuleLeft();
     drawRuleTop();
