@@ -6687,6 +6687,8 @@ saveButton.on( 'click', function(){
 
 moreButton.on( 'click', function(){
 
+    toolsListEnabled = true;
+
     toolsList
         .addClass('active-moreoptions')
         .html(
