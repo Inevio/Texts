@@ -6,7 +6,7 @@
 .wz-ui-header{
     box-shadow: none;
     position: static;
-    width: 900px;
+    width: 860px;
     float: left;
 }
 
@@ -43,7 +43,7 @@
 
 .toolbar{
     height: 67px;
-    width: 900px;
+    width: 860px;
     float: left;
 }
 
@@ -76,7 +76,7 @@
 .tools-line{
     height: 25px;
     padding: 5px 7px;
-    width: 886px;
+    width: 846px;
     float: left;
     background: #f5f5f5;
     border-bottom: 1px solid #cacaca;
@@ -776,7 +776,7 @@
 }
 
 .ruler-top{
-    width: 866px;
+    width: 826px;
     height: 15px;
     float: left;
     padding: 8px 0 11px 34px;
@@ -829,14 +829,14 @@
 }
 
 .editor{
-    width: 851px;
+    width: 811px;
     height: 458px;
     float: left;
     position: relative;
 }
 
 .pages{
-    width: 851px;
+    width: 811px;
     height: 458px;
     position: absolute;
     top: 0;
@@ -845,7 +845,7 @@
 }
 
 .selections{
-    width: 851px;
+    width: 811px;
     height: 458px;
     position: absolute;
     top: 0;
