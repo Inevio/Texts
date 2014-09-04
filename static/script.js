@@ -7650,9 +7650,15 @@ toolsList
     // Modo más opciones
     }else if( toolsList.hasClass('active-moreoptions') ){
         
-        var name = currentOpenFile.name.replace( /.docx|.texts$/i, '' );
+        var name = ( currentOpenFile ? currentOpenFile.name.replace( /.docx|.texts$/i, '' ) : 'New document' ) + '.pdf';
 
-        wz.tool.textsDocumentToPdf( name + '.pdf', 'root', generateDocument(), function( error ){
+        wz.banner()
+                .setTitle( 'Texts - Exporting PDF...' )
+                .setText( name + ' is being exported' )
+                .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
+                .render();
+
+        wz.tool.textsDocumentToPdf( name, 'root', generateDocument(), function( error ){
 
             if( error ){
                 alert( error );
@@ -7660,8 +7666,8 @@ toolsList
             }
 
             wz.banner()
-                .setTitle( 'Texts - ' + currentOpenFile.name )
-                .setText( currentOpenFile.name + ' ' + lang.fileSaved )
+                .setTitle( 'Texts - ' + name )
+                .setText( name + ' ' + lang.fileSaved )
                 .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
                 .render();
 
