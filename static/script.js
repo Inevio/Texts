@@ -326,7 +326,7 @@ var calculateScroll = function(){
     }
 
     if( scrollTop > maxScrollTop ){
-        scrollTop( maxScrollTop );
+        updateScroll( maxScrollTop );
         return true;
     }
 
