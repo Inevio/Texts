@@ -115,6 +115,15 @@ var ctx                 = canvasPages.getContext('2d');
 var ctxSel              = canvasSelect.getContext('2d');
 var ctxRuleLeft         = canvasRuleLeft.getContext('2d');
 var ctxRuleTop          = canvasRuleTop.getContext('2d');
+var backingStoreRatio   = ctx.webkitBackingStorePixelRatio ||
+                          ctx.mozBackingStorePixelRatio ||
+                          ctx.msBackingStorePixelRatio ||
+                          ctx.oBackingStorePixelRatio ||
+                          ctx.backingStorePixelRatio || 1;
+var pixelRatio          = wz.tool.devicePixelRatio() / backingStoreRatio;
+var activeHiRes         = wz.tool.devicePixelRatio() !== backingStoreRatio;
+
+console.log( pixelRatio );
 
 // Node variables
 var pageList = [];
@@ -333,30 +342,98 @@ var calculateScroll = function(){
 };
 
 var checkCanvasPagesSize = function(){
-    
-    canvasPages.width  = pages.width();
-    canvasPages.height = pages.height();
+
+    if( activeHiRes ){
+
+        var oldWidth  = pages.width();
+        var oldHeight = pages.height();
+
+        canvasPages.width  = oldWidth * pixelRatio;
+        canvasPages.height = oldHeight * pixelRatio;
+
+        canvasPages.style.width  = oldWidth + 'px';
+        canvasPages.style.height = oldHeight + 'px';
+
+        ctx.scale( pixelRatio, pixelRatio );
+
+    }else{
+
+        canvasPages.width  = pages.width();
+        canvasPages.height = pages.height();
+
+    }
 
 };
 
 var checkCanvasSelectSize = function(){
 
-    canvasSelect.width  = selections.width();
-    canvasSelect.height = selections.height();
+    if( activeHiRes ){
+
+        var oldWidth  = selections.width();
+        var oldHeight = selections.height();
+
+        canvasSelect.width  = oldWidth * pixelRatio;
+        canvasSelect.height = oldHeight * pixelRatio;
+
+        canvasSelect.style.width  = oldWidth + 'px';
+        canvasSelect.style.height = oldHeight + 'px';
+
+        ctxSel.scale( pixelRatio, pixelRatio );
+
+    }else{
+
+        canvasSelect.width  = selections.width();
+        canvasSelect.height = selections.height();
+
+    }
 
 };
 
 var checkCanvasRuleLeftSize = function(){
 
-    canvasRuleLeft.width  = ruleLeft.width();
-    canvasRuleLeft.height = ruleLeft.height();
+    if( activeHiRes ){
+
+        var oldWidth  = ruleLeft.width();
+        var oldHeight = ruleLeft.height();
+
+        canvasRuleLeft.width  = oldWidth * pixelRatio;
+        canvasRuleLeft.height = oldHeight * pixelRatio;
+
+        canvasRuleLeft.style.width  = oldWidth + 'px';
+        canvasRuleLeft.style.height = oldHeight + 'px';
+
+        ctxRuleLeft.scale( pixelRatio, pixelRatio );
+
+    }else{
+
+        canvasRuleLeft.width  = ruleLeft.width();
+        canvasRuleLeft.height = ruleLeft.height();
+
+    }
 
 };
 
 var checkCanvasRuleTopSize = function(){
 
-    canvasRuleTop.width  = ruleTop.width();
-    canvasRuleTop.height = ruleTop.height();
+    if( activeHiRes ){
+
+        var oldWidth  = ruleTop.width();
+        var oldHeight = ruleTop.height();
+
+        canvasRuleTop.width  = oldWidth * pixelRatio;
+        canvasRuleTop.height = oldHeight * pixelRatio;
+
+        canvasRuleTop.style.width  = oldWidth + 'px';
+        canvasRuleTop.style.height = oldHeight + 'px';
+
+        ctxRuleTop.scale( pixelRatio, pixelRatio );
+
+    }else{
+
+        canvasRuleTop.width  = ruleTop.width();
+        canvasRuleTop.height = ruleTop.height();
+
+    }
 
 };
 
