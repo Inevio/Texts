@@ -102,6 +102,7 @@ var marginTopDown       = $('.ruler-arrow-down');
 var marginTopUp         = $('.ruler-arrow-up');
 var marginTopBox        = $('.ruler-box');
 var input               = $('.input');
+var textarea            = $('.textarea');
 var testZone            = $('.test-zone');
 var viewTitle           = $('.document-title');
 var loading             = $('.loading');
@@ -6746,6 +6747,15 @@ win
 
 .on( 'ui-view-restore ui-view-focus', function(){
     input.focus();
+})
+
+.key( 'ctrl+c, cmd+c', function(){
+    textarea.val('ctrl+c, cmd+c').select();
+    console.log(currentRangeStart, currentRangeEnd);
+})
+
+wz.system.on( 'copy', function( e, clipboard ){
+    console.log( e, clipboard );
 });
 
 win.parent().on( 'wz-dragend', function(){
@@ -7488,6 +7498,16 @@ selections
     }
 
     updateScroll( newScroll );
+
+})
+
+.on( 'contextmenu', function(){
+
+    wz.menu()
+        .addOption( lang.copy, function(){})
+        .addOption( lang.cut, function(){})
+        .addOption( lang.paste, function(){})
+        .render();
 
 });
 

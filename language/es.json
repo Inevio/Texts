@@ -1,6 +1,10 @@
 
 {
 
-    "fileSaved" : "ha sido guardado"
+    "fileSaved" : "ha sido guardado",
+
+    "copy" : "Copiar",
+	"cut" : "Cortar",
+	"paste" : "Pegar"
 	
 }

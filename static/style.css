@@ -856,7 +856,7 @@
     cursor: text;
 }
 
-.input{
+.input, .textarea{
     position: absolute;
     /*
     top: 0;
