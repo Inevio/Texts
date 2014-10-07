@@ -462,6 +462,58 @@ var clearTemporalStyle = function(){
 
 };
 
+var clipboardCopy = function( e ){
+
+    var text = '';
+
+    // Misma línea
+    if(
+        currentRangeStart.pageId === currentRangeEnd.pageId &&
+        currentRangeStart.paragraphId === currentRangeEnd.paragraphId &&
+        currentRangeStart.lineId === currentRangeEnd.lineId
+    ){
+
+        for( var i = currentRangeStart.nodeId; i <= currentRangeEnd.nodeId; i++ ){
+            text += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+        }
+
+    }else{
+
+        var paragraphHash = currentRangeStart.pageId + '-' + currentRangeStart.paragraphId;
+
+        for( var i = currentRangeStart.nodeId; i < currentRangeStart.line.nodeList.length; i++ ){
+            text += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+        }
+
+        mapRangeLines( false, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
+
+            if( pageId + '-' + paragraphId !== paragraphHash ){
+
+                text          += '\n';
+                paragraphHash  = pageId + '-' + paragraphId;
+
+            }
+            
+            for( var i = 0; i < line.nodeList.length; i++ ){
+                text += nodeToSpan( line.nodeList[ i ] );
+            }
+
+        });
+
+        if( currentRangeEnd.pageId + '-' + currentRangeEnd.paragraphId !== paragraphHash ){
+            text += '\n';
+        }
+
+        for( var i = 0; i <= currentRangeEnd.nodeId; i++ ){
+            text += nodeToSpan( currentRangeEnd.line.nodeList[ i ] );
+        }
+
+    }
+
+    console.log( text );
+
+};
+
 var compareNodeStyles = function( first, second ){
 
     var firstStyle  = $.extend( {}, first.style );
@@ -3853,6 +3905,19 @@ var newParagraph = function(){
 
 };
 
+var nodeToSpan = function( node ){
+
+    var res = '';
+
+    res += '<span style="';
+    res += '">';
+    res += node.string;
+    res += '</span>';
+
+    return res;
+    
+};
+
 var normalizeColor = function( color ){
 
     if( !color ){
@@ -6866,6 +6931,10 @@ input.on( 'keypress', function(){
 selections
 .on( 'mousedown', function(e){
 
+    if( e.button === 2 ){
+        return;
+    }
+
     verticalKeysEnabled = false;
 
     selectionEnabled = true;
@@ -7501,10 +7570,26 @@ selections
 
 })
 
-.on( 'contextmenu', function(){
+.on( 'contextmenu', function( e ){
+
+    var hasClipboard = /*window.clipboardData ||*/ e.originalEvent.clipboardData;
 
     wz.menu()
-        .addOption( lang.copy, function(){})
+        .addOption( lang.copy, function(e){
+
+            if( hasClipboard ){
+                clipboardCopy( e );
+            }else{
+
+                wz.dialog()
+                    .setTitle( lang.unsupportedCopy )
+                    .setText( lang.unsupportedCopyDescription )
+                    .setButton( 0, lang.accept )
+                    .render();
+
+            }
+
+        })
         .addOption( lang.cut, function(){})
         .addOption( lang.paste, function(){})
         .render();

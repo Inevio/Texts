@@ -5,6 +5,10 @@
 
     "copy" : "Copiar",
 	"cut" : "Cortar",
-	"paste" : "Pegar"
+	"paste" : "Pegar",
+	"accept" : "Accept",
+
+	"unsupportedCopy" : "Tu navegador no soporta esta función",
+	"unsupportedCopyDescription" : "Por favor, usa Ctrl+C para copiar"
 	
 }
