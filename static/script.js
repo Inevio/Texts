@@ -464,7 +464,17 @@ var clearTemporalStyle = function(){
 
 var clipboardCopy = function( e ){
 
-    var text = '';
+    var res = {
+
+        'text/plain' : '',
+        'text/html'  : ''
+
+    };
+
+    // Si no hay selección
+    if( !currentRangeStart || !currentRangeEnd ){
+        return res;
+    }
 
     // Misma línea
     if(
@@ -474,7 +484,10 @@ var clipboardCopy = function( e ){
     ){
 
         for( var i = currentRangeStart.nodeId; i <= currentRangeEnd.nodeId; i++ ){
-            text += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+
+            res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
+            res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+
         }
 
     }else{
@@ -482,35 +495,48 @@ var clipboardCopy = function( e ){
         var paragraphHash = currentRangeStart.pageId + '-' + currentRangeStart.paragraphId;
 
         for( var i = currentRangeStart.nodeId; i < currentRangeStart.line.nodeList.length; i++ ){
-            text += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+            
+            res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
+            res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+
         }
 
         mapRangeLines( false, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
             if( pageId + '-' + paragraphId !== paragraphHash ){
 
-                text          += '\n';
-                paragraphHash  = pageId + '-' + paragraphId;
+                res['text/plain'] += '\n';
+                res['text/html']  += '\n';
+                paragraphHash      = pageId + '-' + paragraphId;
 
             }
             
             for( var i = 0; i < line.nodeList.length; i++ ){
-                text += nodeToSpan( line.nodeList[ i ] );
+
+                res['text/plain'] += line.nodeList[ i ].string;
+                res['text/html']  += nodeToSpan( line.nodeList[ i ] );
+
             }
 
         });
 
         if( currentRangeEnd.pageId + '-' + currentRangeEnd.paragraphId !== paragraphHash ){
-            text += '\n';
+            
+            res['text/plain'] += '\n';
+            res['text/html']  += '\n';
+
         }
 
         for( var i = 0; i <= currentRangeEnd.nodeId; i++ ){
-            text += nodeToSpan( currentRangeEnd.line.nodeList[ i ] );
+
+            res['text/plain'] += currentRangeEnd.line.nodeList[ i ].string;
+            res['text/html']  += nodeToSpan( currentRangeEnd.line.nodeList[ i ] );
+
         }
 
     }
 
-    console.log( text );
+    return res;
 
 };
 
@@ -3906,16 +3932,39 @@ var newParagraph = function(){
 };
 
 var nodeToSpan = function( node ){
+    return '<span style="' + nodeToSpanStyle( node.style ) + '">' + node.string + '</span>';
+};
+
+var nodeToSpanStyle = function( style ){
 
     var res = '';
 
-    res += '<span style="';
-    res += '">';
-    res += node.string;
-    res += '</span>';
+    if( style.color ){
+        res += 'color:' + style.color + ';';
+    }
+
+    if( style['font-family'] ){
+        res += 'font-family:' + style['font-family'] + ';';
+    }
+
+    if( style['font-size'] ){
+        res += 'font-size:' + style['font-size'] + ';';
+    }
+
+    if( style['font-style'] ){
+        res += 'font-style:' + style['font-style'] + ';';
+    }
+
+    if( style['font-weight'] ){
+        res += 'font-weight:' + style['font-weight'] + ';';
+    }
+
+    if( style['text-decoration-underline'] ){
+        res += 'text-decoration:underline;';
+    }
 
     return res;
-    
+
 };
 
 var normalizeColor = function( color ){
@@ -6815,12 +6864,11 @@ win
 })
 
 .key( 'ctrl+c, cmd+c', function(){
-    textarea.val('ctrl+c, cmd+c').select();
-    console.log(currentRangeStart, currentRangeEnd);
+    textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento copy
 })
 
-wz.system.on( 'copy', function( e, clipboard ){
-    console.log( e, clipboard );
+wz.system.on( 'copy', function( copy ){
+    copy( clipboardCopy() );
 });
 
 win.parent().on( 'wz-dragend', function(){
