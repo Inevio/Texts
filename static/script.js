@@ -2649,7 +2649,7 @@ var handleDelNormal = function(){
         console.log('to do');
     }else{
 
-        currentNode.string      = currentNode.string.slice( 0, currentNodeCharId - 1 ) + currentNode.string.slice( currentNodeCharId );
+        currentNode.string      = currentNode.string.slice( 0, currentNodeCharId ) + currentNode.string.slice( currentNodeCharId + 1 );
         currentLine.totalChars -= 1;
 
         measureNode( currentParagraph, currentLine, currentLineId, currentLineCharId, currentNode, currentNodeId, currentNodeCharId );
