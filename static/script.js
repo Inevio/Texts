@@ -2605,6 +2605,10 @@ var handleBackspaceSelection = function(){
     realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
+    if( !realtime ){
+        return;
+    }
+
     realtime.send({
         
         cmd  : CMD_RANGE_BACKSPACE,
@@ -2940,17 +2944,17 @@ var handleCharSelection = function( newChar ){
     realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
-    if( realtime ){
-
-        realtime.send({
-        
-            cmd  : CMD_RANGE_NEWCHAR,
-            data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd, newChar ],
-            pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-        });
-
+    if( !realtime ){
+        return;
     }
+
+    realtime.send({
+    
+        cmd  : CMD_RANGE_NEWCHAR,
+        data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd, newChar ],
+        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+
+    });
 
 };
 
@@ -7158,16 +7162,16 @@ selections
 
         };
 
-        if( !realtime ){
-            return;
-        }
-
-        realtime.send({
-
-            cmd : CMD_POSITION,
-            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        if( realtime ){
             
-        });
+            realtime.send({
+
+                cmd : CMD_POSITION,
+                pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+                
+            });
+
+        }
 
     // Click que coincide con los clicks previos y corresponde a seleccionar la palabra
     }else if( clickCounter === 2 || clickCounter === 4 ){
