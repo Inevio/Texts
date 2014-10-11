@@ -2631,6 +2631,8 @@ var handleDel = function(){
 
 var handleDelNormal = function(){
 
+    console.log( 'handleDelNormal' );
+
     verticalKeysEnabled = false;
 
     // Final del documento
@@ -2646,7 +2648,30 @@ var handleDelNormal = function(){
 
     // Final del nodo
     if( currentNodeCharId === currentNode.string.length ){
+
+        // Final de línea
+        if( currentNodeId === currentLine.nodeList.length - 1 ){
+
+            // Final de párrafo
+            if( currentLineId === currentParagraph.lineList.length - 1 ){
+
+                // Final de la página
+                if( currentParagraphId === currentPage.paragraphList.length - 1 ){
+                
+                }else{
+
+                }
+
+            }else{
+
+            }
+
+        }else{
+
+        }
+
         console.log('to do');
+
     }else{
 
         currentNode.string      = currentNode.string.slice( 0, currentNodeCharId ) + currentNode.string.slice( currentNodeCharId + 1 );
