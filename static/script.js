@@ -739,7 +739,7 @@ var drawPages = function(){
     var pageHeight = 0.5;
     var wHeritage  = 0;
     var hHeritage  = 0;
-    var i, j, k, m, startX, startY, endX, endY, underlineHeight;
+    var i, j, k, m, l, startX, startY, endX, endY, underlineHeight, tracks, trackHeritage, trackChars;
 
     checkCanvasPagesSize();
 
@@ -765,22 +765,23 @@ var drawPages = function(){
         ctx.strokeStyle = '#cacaca';
         ctx.stroke();
 
-        // Draw the lines
+        // Draw the paragraphs
         for( i = 0; i < page.paragraphList.length; i++ ){
 
             paragraph = page.paragraphList[ i ];
 
+            // Draw the lines
             for( j = 0; j < paragraph.lineList.length; j++ ){
 
                 // To Do -> Gaps
                 // To Do -> Altura de línea
                 line = paragraph.lineList[ j ];
 
-                // To Do -> Optimizar, evitar que se renderice una línea vacía if( line.totalChars ){
                 if( line.totalChars ){
 
                     wHeritage = getLineOffset( line, paragraph );
 
+                    // Draw the nodes
                     for( k = 0; k < line.nodeList.length; k++ ){
 
                         node          = line.nodeList[ k ];
@@ -789,9 +790,33 @@ var drawPages = function(){
                         startY        = parseInt( pageHeight + page.marginTop + line.height + hHeritage, 10 );
 
                         setCanvasTextStyle( node.style );
-                        ctx.fillText( node.string, startX, startY );
 
-                        wHeritage += node.width;
+                        if(
+                            paragraph.align !== ALIGN_JUSTIFY ||
+                            j === paragraph.lineList.length - 1
+                        ){
+                            ctx.fillText( node.string, startX, startY );
+                        }else{
+
+                            tracks        = node.string.split(/(\s+)/g);
+                            trackHeritage = 0;
+                            trackChars    = 0;
+
+                            for( l = 0; l < tracks.length; l++ ){
+
+                                if( tracks[ l ][ 0 ] === ' ' ){
+                                    trackHeritage = node.justifyCharList[ trackChars + tracks[ l ].length - 1 ];
+                                }else if( tracks[ l ] ){
+                                    ctx.fillText( tracks[ l ], startX + trackHeritage, startY );
+                                }
+
+                                trackChars += tracks[ l ].length;
+
+                            }
+
+                        }
+
+                        wHeritage += node.justifyWidth || node.width;
 
                         if( !node.style['text-decoration-underline'] ){
                             continue;
@@ -807,6 +832,7 @@ var drawPages = function(){
                         endX   = startX + node.width;
                         endY   = startY;
 
+
                         ctx.beginPath();
                         
                         ctx.strokeStyle = node.style.color;
@@ -818,7 +844,6 @@ var drawPages = function(){
 
                     }
 
-                //}
                 }
 
                 hHeritage += line.height * paragraph.spacing;
@@ -1564,11 +1589,11 @@ var getLineIndentationLeftOffset = function( id, paragraph ){
 
 var getLineOffset = function( line, paragraph ){
     
-    if( !paragraph.align ){
+    if( paragraph.align === ALIGN_LEFT || paragraph.align === ALIGN_JUSTIFY ){
         return 0;
-    }else if( paragraph.align === 1 ){
+    }else if( paragraph.align === ALIGN_CENTER ){
         return ( line.width - getLineTextTrimmedWidth( line ) ) / 2;
-    }else if( paragraph.align === 2 ){
+    }else if( paragraph.align === ALIGN_RIGHT ){
         return line.width - getLineTextTrimmedWidth( line );
     }
     
@@ -2762,6 +2787,8 @@ var handleCharNormal = function( newChar ){
 
     var realocation = realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId );
 
+    measureLineJustify( currentParagraph, currentLine, currentLineId );
+
     if( realocation > 0 ){
 
         currentLineId++;
@@ -3746,6 +3773,75 @@ var mapRangeParagraphs = function( start, end, callback ){
         }
 
         paragraphLoopId = 0;
+
+    }
+
+};
+
+var measureLineJustify = function( paragraph, line, lineId ){
+
+    if(
+        lineId === 0 &&
+        paragraph.lineList.length === 1
+    ){
+        return;
+    }
+
+    if(
+        paragraph.align !== ALIGN_JUSTIFY ||
+        lineId === paragraph.lineList.length - 1
+    ){
+        return;
+    }
+
+    var words     = getWordsMetrics( line );
+    var text      = '';
+    var textWidth = 0;
+    var wordId;
+
+    for( wordId = 0; wordId < words.length; wordId++ ){
+
+        text += words[ wordId ].string;
+
+        if( wordId !== words.length - 1 ){
+            textWidth += words[ wordId ].width;
+        }else{
+            textWidth += words[ wordId ].widthTrim;
+        }
+
+    }
+
+    // Limpiamos la línea
+    text = text.replace( /\s+$/, '' );
+
+    var spaces      = text.split(' ').length - 1;
+    var increment   = ( line.width - textWidth ) / spaces;
+    var nodes       = line.nodeList.length;
+    var nodeId      = 0;
+    var wHeritage   = 0;
+    var charId      = 0;
+    var node, justifyCharList;
+
+    console.log( spaces, increment );
+
+    for( nodeId = 0; nodeId < nodes; nodeId++ ){
+
+        wHeritage       = 0;
+        node            = line.nodeList[ nodeId ];
+        justifyCharList = [];
+
+        for( charId = 0; charId < node.string.length; charId++ ){
+
+            if( node.string[ charId ] === ' ' ){
+                wHeritage += increment;
+            }
+
+            justifyCharList.push( node.charList[ charId ] + wHeritage );
+
+        }
+
+        node.justifyCharList = justifyCharList;
+        node.justifyWidth    = justifyCharList.slice( -1 )[ 0 ];
 
     }
 
