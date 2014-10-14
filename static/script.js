@@ -910,7 +910,11 @@ var drawRange = function(){
         startWidth += currentRangeStart.line.nodeList[ i ].width;
     }
 
-    startWidth += currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0;
+    if( currentRangeStart.node.justifyCharList ){
+        startWidth += currentRangeStart.node.justifyCharList[ currentRangeStart.nodeChar - 1 ] || 0;
+    }else{
+        startWidth += currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0;
+    }
 
     // Procedimiento de coloreado
     var width  = 0;
@@ -930,16 +934,36 @@ var drawRange = function(){
 
         // Si el nodo inicial es el mismo que el final
         if( currentRangeStart.nodeId === currentRangeEnd.nodeId ){
-            width = currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
+
+            if( currentRangeEnd.node.justifyCharList ){
+                width = currentRangeEnd.node.justifyCharList[ currentRangeEnd.nodeChar - 1 ] - ( currentRangeStart.node.justifyCharList[ currentRangeStart.nodeChar - 1 ] || 0 );
+            }else{
+                width = currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
+            }
+            
         }else{
 
-            width += currentRangeStart.node.width - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
-            
-            for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
-                width += currentRangeStart.line.nodeList[ i ].width;
-            }
+            if( currentRangeStart.node.justifyCharList ){
 
-            width += currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] || 0;
+                width += currentRangeStart.node.justifyWidth - ( currentRangeStart.node.justifyCharList[ currentRangeStart.nodeChar - 1 ] || 0 );
+            
+                for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+                    width += currentRangeStart.line.nodeList[ i ].justifyWidth;
+                }
+
+                width += currentRangeEnd.node.justifyCharList[ currentRangeEnd.nodeChar - 1 ] || 0;
+
+            }else{
+
+                width += currentRangeStart.node.width - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
+            
+                for( i = currentRangeStart.nodeId + 1; i < currentRangeEnd.nodeId; i++ ){
+                    width += currentRangeStart.line.nodeList[ i ].width;
+                }
+
+                width += currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] || 0;
+
+            }
             
         }
 
@@ -5721,11 +5745,17 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
 
         // Posicion dentro de la linea
         for( i = 0; i < node; i++ ){
-            positionAbsoluteX += currentLine.nodeList[ i ].width;
+            positionAbsoluteX += currentLine.nodeList[ i ].justifyWidth || currentLine.nodeList[ i ].width;
         }
 
         if( nodeChar > 0 ){
-            positionAbsoluteX += currentNode.charList[ nodeChar - 1 ];
+
+            if( currentNode.justifyCharList ){
+                positionAbsoluteX += currentNode.justifyCharList[ nodeChar - 1 ];
+            }else{
+                positionAbsoluteX += currentNode.charList[ nodeChar - 1 ];   
+            }
+            
         }
 
     }
@@ -7113,7 +7143,7 @@ selections
     selectionEnabled = true;
     e.preventDefault();
 
-    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar;
+    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, charList;
     var offset = selections.offset();
     var posX   = e.pageX - offset.left;
     var posY   = e.pageY - offset.top;
@@ -7222,7 +7252,9 @@ selections
 
                 for( nodeChar = 0; nodeChar < node.string.length; ){
 
-                    if( node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                    charList = node.justifyCharList || node.charList;
+
+                    if( charList[ nodeChar ] - ( ( charList[ nodeChar ] - ( charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
                         break;
                     }
 
