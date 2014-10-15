@@ -330,8 +330,8 @@ var calculateScroll = function(){
         return true;
     }
 
-    if( ( scrollTop + canvasPages.height - ( GAP / 2 ) ) < positionAbsoluteY + currentLine.height ){
-        updateScroll( positionAbsoluteY + currentLine.height + GAP - canvasPages.height );
+    if( ( scrollTop + ( canvasPages.height / pixelRatio ) - ( GAP / 2 ) ) < positionAbsoluteY + currentLine.height ){
+        updateScroll( positionAbsoluteY + currentLine.height + GAP - ( canvasPages.height / pixelRatio ) );
         return true;
     }
 
@@ -857,8 +857,8 @@ var drawPages = function(){
 
         if( m + 1 < pageList.length ){
             maxScrollTop += Math.round( page.height ) + GAP;
-        }else if( canvasPages.height < page.height ){
-            maxScrollTop += page.height - canvasPages.height + /*(*/ GAP /** 2 )*/;
+        }else if( ( canvasPages.height / pixelRatio ) < page.height ){
+            maxScrollTop += page.height - ( canvasPages.height / pixelRatio ) + /*(*/ GAP /** 2 )*/;
         }
 
     }
@@ -4943,7 +4943,7 @@ var realocatePageInverse = function( id ){
     if( id && !page.paragraphList.length ){
 
         pageList     = pageList.slice( 0, id ).concat( pageList.slice( id + 1 ) );
-        maxScrollTop = GAP - canvasPages.height;
+        maxScrollTop = GAP - ( canvasPages.height / pixelRatio );
 
         for( i = 0; i < pageList.length; i++ ){
             maxScrollTop += Math.round( pageList[ i ].height ) + GAP;
@@ -7719,7 +7719,7 @@ selections
 
 .on( 'mousewheel', function( e, delta, x, y ){
 
-    if( currentDocumentHeight <= canvasPages.height ){
+    if( currentDocumentHeight <= ( canvasPages.height / pixelRatio ) ){
         return;
     }
 
