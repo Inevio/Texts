@@ -3846,8 +3846,6 @@ var measureLineJustify = function( paragraph, line, lineId ){
     var charId      = 0;
     var node, justifyCharList;
 
-    console.log( spaces, increment );
-
     for( nodeId = 0; nodeId < nodes; nodeId++ ){
 
         wHeritage       = 0;
@@ -4539,6 +4537,8 @@ var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate
     if( !dontPropagate ){
         realocateLine( pageId, paragraph, lineId + 1, 0 );
     }
+
+    measureLineJustify( paragraph, line, lineId );
 
     return counter;
 
