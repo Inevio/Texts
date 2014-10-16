@@ -3901,14 +3901,14 @@ var measureLineJustify = function( paragraph, line, lineId ){
     }
 
     // Limpiamos la línea
-    text = text.replace( /\s+$/, '' );
-
-    var spaces      = text.split(' ').length - 1;
+    var textTrimmed = text.replace( /\s+$/, '' );
+    var spaces      = textTrimmed.split(' ').length - 1;
     var increment   = ( line.width - textWidth ) / spaces;
     var nodes       = line.nodeList.length;
     var nodeId      = 0;
     var wHeritage   = 0;
     var charId      = 0;
+    var totalCharId = 0;
     var node, justifyCharList;
 
     for( nodeId = 0; nodeId < nodes; nodeId++ ){
@@ -3919,11 +3919,13 @@ var measureLineJustify = function( paragraph, line, lineId ){
 
         for( charId = 0; charId < node.string.length; charId++ ){
 
-            if( node.string[ charId ] === ' ' ){
+            if( node.string[ charId ] === ' ' && totalCharId < textTrimmed.length ){
                 wHeritage += increment;
             }
 
             justifyCharList.push( node.charList[ charId ] + wHeritage );
+
+            totalCharId++;
 
         }
 
