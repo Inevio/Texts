@@ -5576,6 +5576,46 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         }
 
+    }else if( key === 'align' ){
+
+        // Si aplicamos la misma alineacion a un parrafo se ignora el cambio
+        if( paragraph[ key ] !== value ){
+
+            // Si el párrafo estaba justificado, desjustificamos su contenido
+            if( paragraph[ key ] === ALIGN_JUSTIFY ){
+
+                var j, line, node;
+
+                for( i = 0; i < paragraph.lineList.length; i++ ){
+
+                    line = paragraph.lineList[ i ];
+
+                    for( j = 0; j < line.nodeList.length; j++ ){
+
+                        node = line.nodeList[ j ];
+
+                        delete node.justifyCharList;
+                        delete node.justifyWidth;
+
+                    }
+
+                }
+
+            }
+
+            paragraph[ key ] = value;
+
+            // Si hemos justificado el párrafo, justificamos su contenido
+            if( value === ALIGN_JUSTIFY ){
+
+                for( i = 0; i < paragraph.lineList.length; i++ ){
+                    measureLineJustify( paragraph, paragraph.lineList[ i ], i );
+                }
+
+            }
+
+        }
+        
     }else{
         paragraph[ key ] = value;
     }
