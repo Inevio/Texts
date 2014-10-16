@@ -38,6 +38,13 @@ var INDENTATION_HANGING = 2;
 var INFO_DESCRIPTION = 'Inevio Texts File';
 var INFO_GENERATOR = 'Inevio Texts';
 var INFO_VERSION = 1;
+var KEY_BACKSPACE = 8;
+var KEY_ENTER = 13;
+var KEY_ARROW_LEFT = 37;
+var KEY_ARROW_UP = 38;
+var KEY_ARROW_RIGHT = 39;
+var KEY_ARROW_DOWN = 40;
+var KEY_DEL = 46;
 var LIST_NONE = 0;
 var LIST_BULLET = 1;
 var LIST_NUMBER = 2;
@@ -1802,9 +1809,14 @@ var handleArrowDown = function(){
     // Si no estaba activado el modo de teclas verticales lo activamos
     if( !verticalKeysEnabled ){
         
-        verticalKeysEnabled   = true;
-        verticalKeysPosition  = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        if( currentNode.justifyCharList ){
+            verticalKeysPosition = currentNode.justifyCharList[ currentNodeCharId - 1 ] || 0;
+        }else{
+            verticalKeysPosition = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        }
+
         verticalKeysPosition += getLineIndentationLeftOffset( currentLineId, currentParagraph );
+        verticalKeysEnabled   = true;
 
         for( i = 0; i < currentNodeId; i++ ){
             verticalKeysPosition += currentLine.nodeList[ i ].width;
@@ -1830,7 +1842,7 @@ var handleArrowDown = function(){
         }
 
         nodeId   = i;
-        charList = nodeList[ i ].charList;
+        charList = nodeList[ i ].justifyCharList || nodeList[ i ].charList;
         nodeChar = 0;
 
         for( j = 0; j < charList.length; j++ ){
@@ -1963,8 +1975,19 @@ var handleArrowLeft = function(){
 
     }else{
 
-        var prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
-        var next = currentNode.charList[ currentNodeCharId - 1 ];
+        var prev, next;
+
+        if( currentNode.justifyCharList ){
+
+            prev = currentNode.justifyCharList[ currentNodeCharId - 2 ] || 0;
+            next = currentNode.justifyCharList[ currentNodeCharId - 1 ];
+
+        }else{
+
+            prev = currentNode.charList[ currentNodeCharId - 2 ] || 0;
+            next = currentNode.charList[ currentNodeCharId - 1 ];
+
+        }
 
         positionAbsoluteX += prev - next;
         currentLineCharId--;
@@ -2065,8 +2088,19 @@ var handleArrowRight = function(){
 
     }else{
 
-        var prev = currentNode.charList[ currentNodeCharId - 1 ] || 0;
-        var next = currentNode.charList[ currentNodeCharId ];
+        var prev, next;
+
+        if( currentNode.justifyCharList ){
+
+            prev = currentNode.justifyCharList[ currentNodeCharId - 1 ] || 0;
+            next = currentNode.justifyCharList[ currentNodeCharId ];
+
+        }else{
+
+            prev = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+            next = currentNode.charList[ currentNodeCharId ];
+
+        }
 
         positionAbsoluteX += next - prev;
 
@@ -2131,9 +2165,14 @@ var handleArrowUp = function(){
     // Si no estaba activado el modo de teclas verticales lo activamos
     if( !verticalKeysEnabled ){
         
-        verticalKeysEnabled   = true;
-        verticalKeysPosition  = currentNode.charList[ currentNodeCharId - 1 ] || 0;
+        if( currentNode.justifyCharList ){
+            verticalKeysPosition = currentNode.justifyCharList[ currentNodeCharId - 1 ] || 0;
+        }else{
+            verticalKeysPosition = currentNode.charList[ currentNodeCharId - 1 ] || 0;    
+        }
+        
         verticalKeysPosition += getLineIndentationLeftOffset( currentLineId, currentParagraph );
+        verticalKeysEnabled   = true;
 
         for( i = 0; i < currentNodeId; i++ ){
             verticalKeysPosition += currentLine.nodeList[ i ].width;
@@ -2159,7 +2198,7 @@ var handleArrowUp = function(){
         }
 
         nodeId   = i;
-        charList = nodeList[ i ].charList;
+        charList = nodeList[ i ].justifyCharList || nodeList[ i ].charList;
         nodeChar = 0;
 
         for( j = 0; j < charList.length; j++ ){
@@ -7074,25 +7113,25 @@ input.on( 'keydown', function(e){
 
         e.preventDefault();
 
-    }else if( e.which === 8 ){
+    }else if( e.which === KEY_BACKSPACE ){
 
         handleBackspace();
         updatePages();
 
-    }else if( e.which === 13 ){
+    }else if( e.which === KEY_ENTER ){
 
         handleEnter();
         updatePages();
 
-    }else if( e.which === 37 ){
+    }else if( e.which === KEY_ARROW_LEFT ){
         handleArrowLeft();
-    }else if( e.which === 38 ){
+    }else if( e.which === KEY_ARROW_UP ){
         handleArrowUp();
-    }else if( e.which === 39 ){
+    }else if( e.which === KEY_ARROW_RIGHT ){
         handleArrowRight();
-    }else if( e.which === 40 ){
+    }else if( e.which === KEY_ARROW_DOWN ){
         handleArrowDown();
-    }else if( e.which === 46 ){
+    }else if( e.which === KEY_DEL ){
 
         handleDel();
         updatePages();
