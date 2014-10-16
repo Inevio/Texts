@@ -914,7 +914,7 @@ var drawRange = function(){
 
     // Calculamos la posición del caracter
     for( i = 0; i < currentRangeStart.nodeId; i++ ){
-        startWidth += currentRangeStart.line.nodeList[ i ].width;
+        startWidth += currentRangeStart.line.nodeList[ i ].justifyWidth || currentRangeStart.line.nodeList[ i ].width;
     }
 
     if( currentRangeStart.node.justifyCharList ){
@@ -996,10 +996,14 @@ var drawRange = function(){
         ctxSel.fillStyle   = '#7EBE30';
 
         // Coloreamos la linea del principio de forma parcial
-        width = currentRangeStart.node.width - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
+        if( currentRangeStart.node.justifyCharList ){
+            width = currentRangeStart.node.justifyWidth - ( currentRangeStart.node.justifyCharList[ currentRangeStart.nodeChar - 1 ] || 0 );
+        }else{
+            width = currentRangeStart.node.width - ( currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0 );
+        }
             
         for( i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
-            width += currentRangeStart.line.nodeList[ i ].width;
+            width += currentRangeStart.line.nodeList[ i ].justifyWidth || currentRangeStart.line.nodeList[ i ].width;
         }
 
         ctxSel.beginPath();
@@ -1044,7 +1048,7 @@ var drawRange = function(){
 
             // Obtenemos el tamaño de rectangulo a colorear
             for( var n = 0; n < line.nodeList.length; n++ ){
-                width += line.nodeList[ n ].width;
+                width += line.nodeList[ n ].justifyWidth || line.nodeList[ n ].width;
             }
 
             // Coloreamos la línea
@@ -1077,11 +1081,15 @@ var drawRange = function(){
         offset = currentRangeEnd.page.marginLeft + getLineIndentationLeftOffset( currentRangeEnd.lineId, currentRangeEnd.paragraph ) + getLineOffset( currentRangeEnd.line, currentRangeEnd.paragraph );
 
         for( i = 0; i < currentRangeEnd.nodeId; i++ ){
-            width += currentRangeEnd.line.nodeList[ i ].width;
+            width += currentRangeEnd.line.nodeList[ i ].justifyWidth || currentRangeEnd.line.nodeList[ i ].width;
         }
 
         // To Do -> Que debe pasar si es se coge el fallback 0?
-        width += currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] || 0;
+        if( currentRangeEnd.node.justifyCharList ){
+            width += currentRangeEnd.node.justifyCharList[ currentRangeEnd.nodeChar - 1 ] || 0;
+        }else{
+            width += currentRangeEnd.node.charList[ currentRangeEnd.nodeChar - 1 ] || 0;
+        }
 
         ctxSel.beginPath();
         ctxSel.rect(
@@ -7647,16 +7655,24 @@ selections
         for( nodeId = 0; nodeId < line.nodeList.length; ){
 
             // El caracter está en el nodo
-            if( width <= posX && line.nodeList[ nodeId ].width + width >= posX ){
+            if( width <= posX && ( line.nodeList[ nodeId ].justifyWidth || line.nodeList[ nodeId ].width ) + width >= posX ){
 
                 node = line.nodeList[ nodeId ];
 
                 for( nodeChar = 0; nodeChar < node.string.length; ){
                     
-                    if(
-                        node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX
-                    ){
-                        break;
+                    if( node.justifyCharList ){
+
+                        if( node.justifyCharList[ nodeChar ] - ( ( node.justifyCharList[ nodeChar ] - ( node.justifyCharList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                            break;
+                        }
+
+                    }else{
+
+                        if( node.charList[ nodeChar ] - ( ( node.charList[ nodeChar ] - ( node.charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                            break;
+                        }
+
                     }
 
                     nodeChar++;
@@ -7669,7 +7685,7 @@ selections
             }
 
             lineChar += line.nodeList[ nodeId ].string.length;
-            width    += line.nodeList[ nodeId ].width;
+            width    += line.nodeList[ nodeId ].justifyWidth || line.nodeList[ nodeId ].width;
             nodeId   += 1;
 
         }
