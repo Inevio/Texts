@@ -2396,6 +2396,8 @@ var handleBackspaceNormal = function(){
             currentLine              = currentParagraph.lineList[ currentLineId ];
 
             var realocate = realocateLine( currentPageId, currentParagraph, currentLineId, original );
+
+            measureLineJustify( currentParagraph, currentLine, currentLineId );
             
             if( realocate >= 0 ){
 
@@ -2428,6 +2430,8 @@ var handleBackspaceNormal = function(){
 
         // Realocamos el contenido
         var realocation = realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
+
+        measureLineJustify( currentParagraph, currentLine, currentLineId );
 
         // Se ha producido una realocation inversa
         if( realocation.realocation && realocation.lineChar > 0 ){
@@ -3847,7 +3851,21 @@ var measureLineJustify = function( paragraph, line, lineId ){
         lineId === 0 &&
         paragraph.lineList.length === 1
     ){
+
+        // To Do -> Comprobar en que casos hace falta esto y optimizarlo para que se use solo en esos, no siempre
+        if( paragraph.align === ALIGN_JUSTIFY ){
+
+            for( var i = 0; i < line.nodeList.length; i++ ){
+
+                delete line.nodeList[ i ].justifyCharList;
+                delete line.nodeList[ i ].justifyWidth;
+
+            }
+
+        }
+
         return;
+
     }
 
     if(
