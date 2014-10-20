@@ -2405,7 +2405,7 @@ var handleBackspaceNormal = function(){
 
             var realocate = realocateLine( currentPageId, currentParagraph, currentLineId, original );
 
-            measureLineJustify( currentParagraph, currentLine, currentLineId );
+            //measureLineJustify( currentParagraph, currentLine, currentLineId );
             
             if( realocate >= 0 ){
 
@@ -2439,7 +2439,7 @@ var handleBackspaceNormal = function(){
         // Realocamos el contenido
         var realocation = realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
 
-        measureLineJustify( currentParagraph, currentLine, currentLineId );
+        //measureLineJustify( currentParagraph, currentLine, currentLineId );
 
         // Se ha producido una realocation inversa
         if( realocation.realocation && realocation.lineChar > 0 ){
@@ -2731,8 +2731,6 @@ var handleDel = function(){
 
 var handleDelNormal = function(){
 
-    console.log( 'handleDelNormal' );
-
     verticalKeysEnabled = false;
 
     // Final del documento
@@ -2781,6 +2779,7 @@ var handleDelNormal = function(){
 
     }
 
+    //measureLineJustify( currentParagraph, currentLine, currentLineId );
     setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
     realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
@@ -2862,7 +2861,7 @@ var handleCharNormal = function( newChar ){
 
     var realocation = realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId );
 
-    measureLineJustify( currentParagraph, currentLine, currentLineId );
+    //measureLineJustify( currentParagraph, currentLine, currentLineId );
 
     if( realocation > 0 ){
 
@@ -4415,6 +4414,7 @@ var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate
     var counter = 0;
 
     if( !line || getNodesWidth( line ) <= line.width ){
+        measureLineJustify( paragraph, line, lineId );
         return counter;
     }
 
@@ -4861,6 +4861,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     paragraph.height = height;
 
     normalizeLine( line );
+    measureLineJustify( paragraph, line, id );
 
     return counter;
 
