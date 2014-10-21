@@ -2612,8 +2612,11 @@ var handleBackspaceSelection = function(){
             // To Do -> Quizás haya que cambiar las coordenadas
         }else{
 
+            // Si el párrafo se queda vacío
             if( !currentRangeStart.paragraph.lineList.length ){
                 currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
+            }else{
+                mergeParagraphs( currentRangeStart.pageId, currentRangeStart.page, currentRangeStart.paragraphId, currentRangeStart.paragraphId + 1 );
             }
 
         }
@@ -5283,7 +5286,9 @@ var removeRangeLines = function( includeLimits, start, end ){
 
             paragraphLoop.lineList = paragraphLoop.lineList.filter( function( line ){
 
-                paragraphLoop.height -= line.height * paragraphLoop.spacing;
+                if( !line.nodeList.length ){
+                    paragraphLoop.height -= line.height * paragraphLoop.spacing;
+                }
 
                 return line.nodeList.length;
 
