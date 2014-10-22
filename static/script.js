@@ -4416,7 +4416,11 @@ var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate
     var line    = paragraph.lineList[ lineId ];
     var counter = 0;
 
-    if( !line || getNodesWidth( line ) <= line.width ){
+    if( !line ){
+        return counter;
+    }
+
+    if( getNodesWidth( line ) <= line.width ){
         measureLineJustify( paragraph, line, lineId );
         return counter;
     }
