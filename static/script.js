@@ -3975,19 +3975,19 @@ var mergeParagraphs = function( pageId, page, firstId, secondId ){
 
     }
 
-    secondParagraph.height   = maxHeight * secondParagraph.spacing;
-    line                     = secondParagraph.lineList[ 0 ];
-    secondParagraph.lineList = [ line ];
-    line.height              = maxHeight;
-    line.totalChars          = totalChars;
-    line.nodeList            = newNodeList;
-    page.paragraphList       = page.paragraphList.slice( 0, firstId ).concat( page.paragraphList.slice( secondId ) );
+    firstParagraph.height   = maxHeight * firstParagraph.spacing;
+    line                    = firstParagraph.lineList[ 0 ];
+    firstParagraph.lineList = [ line ];
+    line.height             = maxHeight;
+    line.totalChars         = totalChars;
+    line.nodeList           = newNodeList;
+    page.paragraphList      = page.paragraphList.slice( 0, firstId + 1 ).concat( page.paragraphList.slice( secondId + 1 ) );
 
     if( firstParagraph.split === PARAGRAPH_SPLIT_START && secondParagraph.split === PARAGRAPH_SPLIT_END ){
-        secondParagraph.split = PARAGRAPH_SPLIT_NONE;
+        firstParagraph.split = PARAGRAPH_SPLIT_NONE;
     }
     
-    realocateLine( pageId, secondParagraph, 0, 0 );
+    realocateLine( pageId, firstParagraph, 0, 0 );
 
     // To Do -> Quizás habría que hacer un realocate a la inversa de la página
 
