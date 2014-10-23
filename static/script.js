@@ -4632,6 +4632,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     var lineWords = getWordsMetrics( line );
 
     if( !lineWords.length ){
+        measureLineJustify( paragraph, line, id );
         return counter;
     }
 
@@ -4650,6 +4651,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     var nextLine = paragraph.lineList[ id + 1 ];
 
     if( !nextLine ){
+        measureLineJustify( paragraph, line, id ); // To Do -> Hara falta aqui realmente?
         return counter;
     }
 
@@ -4678,6 +4680,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             lineWords.slice( -1 )[ 0 ].string.indexOf(' ') !== -1 &&
             nextLine.nodeList[ 0 ].string[ 0 ] !== ' '
         ){
+            measureLineJustify( paragraph, line, id );
             return counter;
         }
 
@@ -4699,6 +4702,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
         // To Do -> Seguro que esto hace falta?
         if( nodeId === null ){
+            measureLineJustify( paragraph, line, id );
             return counter;
         }
 
@@ -4717,6 +4721,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         }
 
         if( charId === null || charId === -1 ){
+            measureLineJustify( paragraph, line, id );
             return counter;
         }
 
@@ -4740,6 +4745,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
         line.nodeList.push( newNode );
         
+        measureLineJustify( paragraph, line, id );
         return counter;
 
     }
