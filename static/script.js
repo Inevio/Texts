@@ -2476,7 +2476,7 @@ var handleBackspaceNormal = function(){
     }
 
     // Definimos el cursor
-    setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+    setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true ); // To Do -> Seguramente pueda optimizarse sin necesidad de recalcular toda la nueva posición
     resetBlink();
     clearTemporalStyle();
 
@@ -2932,10 +2932,14 @@ var handleCharNormal = function( newChar ){
         positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
 
         for( i = 0; i < currentNodeId; i++ ){
-            positionAbsoluteX += currentLine.nodeList[ i ].width;
+            positionAbsoluteX += currentLine.nodeList[ i ].justifyWidth || currentLine.nodeList[ i ].width;
         }
 
-        positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
+        if( currentNode.justifyCharList ){
+            positionAbsoluteX += currentNode.justifyCharList[ currentNodeCharId - 1 ];
+        }else{
+            positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
+        }
 
     }
 
