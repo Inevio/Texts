@@ -5787,27 +5787,6 @@ var setRange = function( start, end, force ){
     // To Do -> Podemos pasarle las coordenadas para evitar cálculos
     // To Do -> Si no se le pueden pasar las coordenadas podemos utilizar los bucles para las dos alturas
 
-    // Arreglamos los límites
-    if(
-        start.node.string.length === start.nodeChar &&
-        start.nodeId + 1 < start.line.nodeList.length
-    ){
-        // To Do -> Cambio a otra línea si es necesario
-        start.nodeId   = start.nodeId + 1;
-        start.node     = start.line.nodeList[ start.nodeId ];
-        start.nodeChar = 0;
-    }
-
-    if(
-        end.nodeChar === 0 &&
-        end.nodeId > 0
-    ){
-        // To Do -> Cambio a otra línea si es necesario
-        end.nodeId   = end.nodeId - 1;
-        end.node     = end.line.nodeList[ end.nodeId ];
-        end.nodeChar = end.node.string.length;
-    }
-
     var startHash = [ start.pageId, start.paragraphId, start.lineId, start.lineChar ];
     var endHash   = [ end.pageId, end.paragraphId, end.lineId, end.lineChar ];
 
@@ -5830,6 +5809,68 @@ var setRange = function( start, end, force ){
         endHash   = tmp;
         tmp       = null;
 
+    }
+
+    // Arreglamos los límites
+    // Si está al final del nodo
+    if( start.node.string.length === start.nodeChar ){
+
+        // Si no es último nodo de la línea
+        if( start.nodeId + 1 < start.line.nodeList.length ){
+
+            start.nodeId   = start.nodeId + 1;
+            start.node     = start.line.nodeList[ start.nodeId ];
+            start.nodeChar = 0;
+
+        // Si no es la última línea del párrafo
+        }else if( start.lineId + 1 < start.paragraph.lineList.length ){
+
+            start.lineId   = start.lineId + 1;
+            start.line     = start.paragraph.lineList[ start.lineId ];
+            start.lineChar = 0;
+            start.nodeId   = 0;
+            start.node     = start.line.nodeList[ 0 ];
+            start.nodeChar = 0;
+            
+        // Si no es el último párrafo de la página
+        }else if( start.paragraphId + 1 < start.page.paragraphList.length ){
+
+            start.paragraphId = start.paragraphId + 1;
+            start.paragraph   = start.page.paragraphList[ start.paragraphId ];
+            start.lineId      = 0;
+            start.line        = start.paragraph.lineList[ 0 ];
+            start.lineChar    = 0;
+            start.nodeId      = 0;
+            start.node        = start.line.nodeList[ 0 ];
+            start.nodeChar    = 0;
+            
+        // Si no es la última página del documento
+        // To Do -> Comprobar en que casos ocurre esto y si es necesario hacer una condición o poner directamente un else
+        }else if( start.pageId + 1 < pageList.length ){
+
+            start.pageId      = start.pageId + 1;
+            start.page        = pageList[ start.pageId ];
+            start.paragraphId = 0;
+            start.paragraph   = start.paragraph.lineList[ 0 ];
+            start.lineId      = 0;
+            start.line        = start.paragraph.lineList[ 0 ];
+            start.lineChar    = 0;
+            start.nodeId      = 0;
+            start.node        = start.line.nodeList[ 0 ];
+            start.nodeChar    = 0;
+
+        }
+        
+    }
+
+    if(
+        end.nodeChar === 0 &&
+        end.nodeId > 0
+    ){
+        // To Do -> Cambio a otra línea si es necesario
+        end.nodeId   = end.nodeId - 1;
+        end.node     = end.line.nodeList[ end.nodeId ];
+        end.nodeChar = end.node.string.length;
     }
 
     if(
