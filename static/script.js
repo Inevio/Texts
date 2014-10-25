@@ -124,8 +124,6 @@ var backingStoreRatio   = ctx.webkitBackingStorePixelRatio ||
 var pixelRatio          = wz.tool.devicePixelRatio() / backingStoreRatio;
 var activeHiRes         = wz.tool.devicePixelRatio() !== backingStoreRatio;
 
-console.log( pixelRatio );
-
 // Node variables
 var pageList = [];
 
@@ -2595,7 +2593,7 @@ var handleBackspaceSelection = function(){
 
         // Si se ha quedado vacío y era el primer nodo de la línea
         }else{
-            currentRangeStart.paragraph.lineList = currentRangeStart.paragraph.lineList.slice( 0, currentRangeStart.lineId );
+            currentRangeStart.paragraph.lineList = currentRangeStart.paragraph.lineList.slice( 0, currentRangeStart.lineId || 1 );
         }
 
         // Borramos los párrafos que sean necesarios
@@ -2613,9 +2611,11 @@ var handleBackspaceSelection = function(){
         }else{
 
             // Si el párrafo se queda vacío
-            if( !currentRangeStart.paragraph.lineList.length ){
-                currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
+            if( !currentRangeStart.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length ){
+                console.log('parrafo vacio');
+                //currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
             }else{
+                console.log('parrafo con cosas');
                 mergeParagraphs( currentRangeStart.pageId, currentRangeStart.page, currentRangeStart.paragraphId, currentRangeStart.paragraphId + 1 );
             }
 
@@ -2623,6 +2623,7 @@ var handleBackspaceSelection = function(){
 
         realocatePageInverse( currentRangeStart.pageId );
 
+        // Si el párrafo no existe
         if( !pageList[ currentRangeStart.pageId ].paragraphList[ currentRangeStart.paragraphId ] ){
             currentRangeStart.paragraphId = currentRangeStart.paragraphId - 1;
         }
