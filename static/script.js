@@ -3897,9 +3897,8 @@ var measureLineJustify = function( paragraph, line, lineId ){
     var words     = getWordsMetrics( line );
     var text      = '';
     var textWidth = 0;
-    var wordId;
 
-    for( wordId = 0; wordId < words.length; wordId++ ){
+    for( var wordId = 0; wordId < words.length; wordId++ ){
 
         text += words[ wordId ].string;
 
@@ -3912,7 +3911,7 @@ var measureLineJustify = function( paragraph, line, lineId ){
     }
 
     // Limpiamos la línea
-    var textTrimmed = text.replace( /\s+$/, '' );
+    var textTrimmed = text.replace( / +$/, '' );
     var spaces      = textTrimmed.split(' ').length - 1;
     var increment   = ( line.width - textWidth ) / spaces;
     var nodes       = line.nodeList.length;
