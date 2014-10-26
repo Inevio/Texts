@@ -5584,7 +5584,11 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         measureNode( paragraph, paragraph.lineList[ 0 ], 0, 0, newNode, 0, 0 );
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
-            paragraph.lineList[ i ].width -= value;
+
+            if( i ){
+                paragraph.lineList[ i ].width -= value;
+            }
+
         }
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
