@@ -803,7 +803,7 @@ var drawPages = function(){
                             ctx.fillText( node.string, startX, startY );
                         }else{
 
-                            tracks        = node.string.split(/(\s+)/g);
+                            tracks        = node.string.split(/( +)/g);
                             trackHeritage = 0;
                             trackChars    = 0;
 
@@ -1708,19 +1708,19 @@ var getWordsMetrics = function( line ){
             nodeList[ i ].string[ 0 ] === ' '
         ){
 
-            tmp   = nodeList[ i ].string.split(/(\s+)/g);
+            tmp   = nodeList[ i ].string.split(/( +)/g);
             words = [ tmp[ 1 ] ];
 
             // Sino no solo hay espacio
             if( nodeList[ i ].string.length !== nodeList[ i ].string.split(' ').length - 1 ){
 
                 tmp   = nodeList[ i ].string.slice( tmp[ 1 ].length );
-                words = words.concat( tmp.match(/(\s*\S+\s*|\s+)/g) || [''] );
+                words = words.concat( tmp.match(/( *[\S*\t*]+ *| +)/g) || [''] );
 
             }
 
         }else{
-            words = nodeList[ i ].string.match(/(\s*\S+\s*|\s+)/g) || [''];
+            words = nodeList[ i ].string.match(/( *[\S*\t*]+ *| +)/g) || [''];
         }
 
         for( j = 0; j < words.length; j++ ){
@@ -6817,7 +6817,7 @@ var start = function(){
 };
 
 var trimRight = function( string ){
-    return string.replace( /\s+$/g, '' );
+    return string.replace( / +$/g, '' );
 };
 
 var updateBlink = function(){
