@@ -2611,7 +2611,10 @@ var handleBackspaceSelection = function(){
         }else{
 
             // Si el párrafo se queda vacío
-            if( currentRangeStart.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length ){
+            if(
+                currentRangeStart.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length &&
+                currentRangeEnd.paragraph.lineList.length
+            ){
                 // El caso contrario seria -> currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
                 mergeParagraphs( currentRangeStart.pageId, currentRangeStart.page, currentRangeStart.paragraphId, currentRangeStart.paragraphId + 1 );
             }
