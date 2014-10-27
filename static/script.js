@@ -1555,7 +1555,7 @@ var getCommonStyles = function( start, end ){
 
 };
 
-var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphChar ){
+var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphChar, isEnd ){
 
     var i, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar;
 
@@ -1620,6 +1620,72 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     }
 
     node = line.nodeList[ nodeId ];
+
+    // Fix range
+    // Si es el principio de un rango y está al final del nodo
+    if(
+        !isEnd,
+        node.string.length === nodeChar
+    ){
+
+        // Si no es último nodo de la línea
+        if( nodeId + 1 < line.nodeList.length ){
+
+            nodeId   = nodeId + 1;
+            node     = line.nodeList[ nodeId ];
+            nodeChar = 0;
+
+        // Si no es la última línea del párrafo
+        }else if( lineId + 1 < paragraph.lineList.length ){
+
+            lineId   = lineId + 1;
+            line     = paragraph.lineList[ lineId ];
+            lineChar = 0;
+            nodeId   = 0;
+            node     = line.nodeList[ 0 ];
+            nodeChar = 0;
+            
+        // Si no es el último párrafo de la página
+        }else if( paragraphId + 1 < page.paragraphList.length ){
+
+            paragraphId = paragraphId + 1;
+            paragraph   = page.paragraphList[ paragraphId ];
+            lineId      = 0;
+            line        = paragraph.lineList[ 0 ];
+            lineChar    = 0;
+            nodeId      = 0;
+            node        = line.nodeList[ 0 ];
+            nodeChar    = 0;
+            
+        // Si no es la última página del documento
+        // To Do -> Comprobar en que casos ocurre esto y si es necesario hacer una condición o poner directamente un else
+        }else if( pageId + 1 < pageList.length ){
+
+            pageId      = pageId + 1;
+            page        = pageList[ pageId ];
+            paragraphId = 0;
+            paragraph   = paragraph.lineList[ 0 ];
+            lineId      = 0;
+            line        = paragraph.lineList[ 0 ];
+            lineChar    = 0;
+            nodeId      = 0;
+            node        = line.nodeList[ 0 ];
+            nodeChar    = 0;
+
+        }
+        
+    }
+
+    if(
+        isEnd &&
+        nodeChar === 0 &&
+        nodeId > 0
+    ){
+        // To Do -> Cambio a otra línea si es necesario
+        nodeId   = nodeId - 1;
+        node     = line.nodeList[ nodeId ];
+        nodeChar = node.string.length;
+    }
 
     return {
 
@@ -5251,7 +5317,7 @@ var realTimeMessage = function( info, data ){
 
         console.log('CMD_NEWCHAR');
 
-        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ], true );
 
         handleRemoteChar( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar, data.data[ 2 ] );
         updatePages();
@@ -5260,14 +5326,14 @@ var realTimeMessage = function( info, data ){
 
         console.log('CMD_RANGE_NEWCHAR');
 
-        handleRemoteCharSelection( getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ), getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ), data.data[ 4 ] );
+        handleRemoteCharSelection( getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ), getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ], true ), data.data[ 4 ] );
         updatePages();
 
     }else if( data.cmd === CMD_BACKSPACE ){
 
         console.log('CMD_BACKSPACE');
 
-        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ], true );
 
         handleRemoteBackspace( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar );
         updatePages();
@@ -5276,14 +5342,14 @@ var realTimeMessage = function( info, data ){
 
         console.log('CMD_RANGE_BACKSPACE');
 
-        handleRemoteBackspaceSelection( getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ), getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ) );
+        handleRemoteBackspaceSelection( getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ), getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ], true ) );
         updatePages();
 
     }else if( data.cmd === CMD_ENTER ){
 
         console.log('CMD_ENTER');
 
-        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ], true );
 
         handleRemoteEnter( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar );
         updatePages();
@@ -5292,7 +5358,7 @@ var realTimeMessage = function( info, data ){
 
         console.log('CMD_NODE_STYLE');
 
-        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] );
+        elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ], true );
 
         console.log( elements );
 
@@ -5314,7 +5380,7 @@ var realTimeMessage = function( info, data ){
         setRangeNodeStyle(
 
             getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ] ),
-            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ] ),
+            getElementsByRemoteParagraph( data.data[ 2 ], data.data[ 3 ], true ),
             data.data[ 4 ],
             data.data[ 5 ],
             true,
@@ -6472,7 +6538,7 @@ var setSelectedNodeStyle = function( key, value ){
         // To Do -> Quizás deberíamos delegarlo al setRangeNodeStyle
 
         currentRangeStart = getElementsByRemoteParagraph( paragraphIdStart, charInParagraphStart );
-        currentRangeEnd   = getElementsByRemoteParagraph( paragraphIdEnd, charInParagraphEnd );
+        currentRangeEnd   = getElementsByRemoteParagraph( paragraphIdEnd, charInParagraphEnd, true );
 
         // Enviamos
         if( realtime ){
