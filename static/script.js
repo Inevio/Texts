@@ -488,10 +488,34 @@ var clipboardCopy = function( e ){
         currentRangeStart.lineId === currentRangeEnd.lineId
     ){
 
-        for( var i = currentRangeStart.nodeId; i <= currentRangeEnd.nodeId; i++ ){
+        // Mismo nodo
+        if( currentRangeStart.nodeId === currentRangeEnd.nodeId ){
 
-            res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
-            res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+            res['text/plain'] += currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+            res['text/html']  += nodeToSpan( currentRangeStart.node, currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+
+        }else{
+
+            for( var i = currentRangeStart.nodeId; i <= currentRangeEnd.nodeId; i++ ){
+
+                if( i === currentRangeStart.nodeId ){
+
+                    res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( currentRangeStart.nodeChar );
+                    res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], currentRangeStart.nodeChar );
+
+                }else if( i === currentRangeEnd.nodeId ){
+
+                    res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( 0, currentRangeEnd.nodeChar );
+                    res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], 0, currentRangeEnd.nodeChar );
+
+                }else{
+
+                    res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
+                    res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+
+                }
+
+            }
 
         }
 
@@ -501,8 +525,17 @@ var clipboardCopy = function( e ){
 
         for( var i = currentRangeStart.nodeId; i < currentRangeStart.line.nodeList.length; i++ ){
             
-            res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
-            res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+            if( i === currentRangeStart.nodeId ){
+
+                res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( currentRangeStart.nodeChar );
+                res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], currentRangeStart.nodeChar );
+
+            }else{
+
+                res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
+                res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+
+            }
 
         }
 
@@ -511,7 +544,7 @@ var clipboardCopy = function( e ){
             if( pageId + '-' + paragraphId !== paragraphHash ){
 
                 res['text/plain'] += '\n';
-                res['text/html']  += '\n';
+                res['text/html']  += '<br />\n';
                 paragraphHash      = pageId + '-' + paragraphId;
 
             }
@@ -528,14 +561,23 @@ var clipboardCopy = function( e ){
         if( currentRangeEnd.pageId + '-' + currentRangeEnd.paragraphId !== paragraphHash ){
             
             res['text/plain'] += '\n';
-            res['text/html']  += '\n';
+            res['text/html']  += '<br />\n';
 
         }
 
         for( var i = 0; i <= currentRangeEnd.nodeId; i++ ){
 
-            res['text/plain'] += currentRangeEnd.line.nodeList[ i ].string;
-            res['text/html']  += nodeToSpan( currentRangeEnd.line.nodeList[ i ] );
+            if( i === currentRangeEnd.nodeId ){
+
+                res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( 0, currentRangeEnd.nodeChar );
+                res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], 0, currentRangeEnd.nodeChar );
+
+            }else{
+
+                res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
+                res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+
+            }
 
         }
 
@@ -4155,8 +4197,8 @@ var newParagraph = function(){
 
 };
 
-var nodeToSpan = function( node ){
-    return '<span style="' + nodeToSpanStyle( node.style ) + '">' + node.string + '</span>';
+var nodeToSpan = function( node, start, end ){
+    return '<span style="' + nodeToSpanStyle( node.style ) + '">' + node.string.slice( start, end ) + '</span>';
 };
 
 var nodeToSpanStyle = function( style ){
