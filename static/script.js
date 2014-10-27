@@ -89,6 +89,7 @@ var PARAGRAPH_SPLIT_NONE = 0;
 var PARAGRAPH_SPLIT_START = 1;
 var PARAGRAPH_SPLIT_MIDDLE = 2;
 var PARAGRAPH_SPLIT_END = 3;
+var PASTE_FORMATS = [ 'text/html', 'text/plain' ];
 
 // DOM variables
 var win                 = $(this);
@@ -2971,9 +2972,9 @@ var handleCharNormal = function( newChar ){
 
     measureNode( currentParagraph, currentLine, currentLineId, currentLineCharId, currentNode, currentNodeId, currentNodeCharId );
 
-    currentLine.totalChars++;
-    currentLineCharId++;
-    currentNodeCharId++;
+    currentLine.totalChars += newChar.length;
+    currentLineCharId      += newChar.length;
+    currentNodeCharId      += newChar.length;
 
     var realocation = realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId );
 
@@ -3871,6 +3872,34 @@ var hideDocument = function(){
     selections.css( 'display', 'none' );
     ruleTop.css( 'display', 'none' );
     ruleLeft.css( 'display', 'none' );
+
+};
+
+var insertPlainText = function( text ){
+
+    text = text.replace( /\t/g, ' ' ); // To Do -> Soportar tabuladores
+    text = text.split('\n');
+
+    // Si no hay ningún salto de línea
+    for( var i = 0; i < text.length; i++ ){
+
+        // Si no es la primera línea
+        if( i ){
+            handleEnter();
+        }
+
+        // Si la línea no está vacía
+        if( text[ i ].length ){
+
+            if( currentRangeStart ){
+                handleCharSelection( text[ i ] );
+            }else{
+                handleCharNormal( text[ i ] );
+            }
+
+        }
+
+    }
 
 };
 
@@ -7306,8 +7335,44 @@ win
     textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento copy
 })
 
+.key( 'ctrl+v, cmd+v', function(){
+    textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento paste
+})
+
 wz.system.on( 'copy', function( copy ){
     copy( clipboardCopy() );
+});
+
+wz.system.on( 'paste', function( paste ){
+
+    var content = paste();
+    var type    = null;
+
+    for( var i = 0; i < PASTE_FORMATS.length; i++ ){
+
+        if( typeof content[ PASTE_FORMATS[ i ] ] !== 'undefined' ){
+
+            type    = PASTE_FORMATS[ i ];
+            content = content[ type ];
+
+            break;
+
+        }
+
+    }
+
+    if( !type ){
+        return;
+    }
+
+    if( type === 'text/html' ){
+
+    }else if( type === 'text/plain' ){
+        insertPlainText( content );
+    }
+
+    updatePages();
+
 });
 
 win.parent().on( 'wz-dragend', function(){
