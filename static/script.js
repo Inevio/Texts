@@ -7261,7 +7261,10 @@ win
 })
 
 wz.system.on( 'copy', function( copy ){
+    
     copy( clipboardCopy() );
+    input.focus();
+
 });
 
 wz.system.on( 'paste', function( paste ){
@@ -7293,6 +7296,7 @@ wz.system.on( 'paste', function( paste ){
     }
 
     updatePages();
+    input.focus();
 
 });
 
