@@ -2359,17 +2359,17 @@ var handleArrowUp = function(){
 
 };
 
-var handleBackspace = function(){
+var handleBackspace = function( dontSend ){
 
     if( currentRangeStart ){
-        handleBackspaceSelection();
+        handleBackspaceSelection( dontSend );
     }else{
-        handleBackspaceNormal();
+        handleBackspaceNormal( dontSend );
     }
 
 };
 
-var handleBackspaceNormal = function(){
+var handleBackspaceNormal = function( dontSend ){
 
     verticalKeysEnabled = false;
 
@@ -2591,7 +2591,7 @@ var handleBackspaceNormal = function(){
         updateToolsLineStatus();
     }
 
-    if( !realtime ){
+    if( !realtime || dontSend ){
         return;
     }
 
@@ -2617,7 +2617,7 @@ var handleBackspaceNormal = function(){
 
 };
 
-var handleBackspaceSelection = function(){
+var handleBackspaceSelection = function( dontSend ){
 
     var i;
     var paragraphIdStart     = currentRangeStart.paragraphId;
@@ -2822,7 +2822,7 @@ var handleBackspaceSelection = function(){
     realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
-    if( !realtime ){
+    if( !realtime || dontSend ){
         return;
     }
 
@@ -2836,17 +2836,17 @@ var handleBackspaceSelection = function(){
 
 };
 
-var handleDel = function(){
+var handleDel = function( dontSend ){
 
     if( currentRangeStart ){
-        handleBackspaceSelection();
+        handleBackspaceSelection( dontSend );
     }else{
-        handleDelNormal();
+        handleDelNormal( dontSend );
     }
 
 };
 
-var handleDelNormal = function(){
+var handleDelNormal = function( dontSend ){
 
     verticalKeysEnabled = false;
 
@@ -2901,19 +2901,21 @@ var handleDelNormal = function(){
     realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
+    // To Do -> Implementar colaborativo
+
 };
 
-var handleChar = function( newChar ){
+var handleChar = function( newChar, dontSend ){
 
     if( currentRangeStart ){
-        handleCharSelection( newChar );
+        handleCharSelection( newChar, dontSend );
     }else{
-        handleCharNormal( newChar );
+        handleCharNormal( newChar, dontSend );
     }
 
 };
 
-var handleCharNormal = function( newChar ){
+var handleCharNormal = function( newChar, dontSend ){
 
     verticalKeysEnabled = false;
 
@@ -3059,7 +3061,7 @@ var handleCharNormal = function( newChar ){
 
     resetBlink();
 
-    if( !realtime ){
+    if( !realtime || dontSend ){
         return;
     }
 
@@ -3085,7 +3087,7 @@ var handleCharNormal = function( newChar ){
 
 };
 
-var handleCharSelection = function( newChar ){
+var handleCharSelection = function( newChar, dontSend ){
 
     var i;
     var paragraphIdStart     = currentRangeStart.paragraphId;
@@ -3109,10 +3111,10 @@ var handleCharSelection = function( newChar ){
         charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
     }
 
-    handleBackspaceSelection();
-    handleChar( newChar );
+    handleBackspaceSelection( true );
+    handleChar( newChar, true );
 
-    if( !realtime ){
+    if( !realtime || dontSend ){
         return;
     }
 
@@ -3126,7 +3128,7 @@ var handleCharSelection = function( newChar ){
 
 };
 
-var handleEnter = function(){
+var handleEnter = function( dontSend ){
 
     verticalKeysEnabled = false;
 
@@ -3293,7 +3295,7 @@ var handleEnter = function(){
     realocateLineInverse( newParagraph, 0, 0 );
     resetBlink();
 
-    if( !realtime ){
+    if( !realtime || dontSend ){
         return;
     }
 
