@@ -3798,6 +3798,44 @@ var hideDocument = function(){
 
 };
 
+var insertHtmlText = function( text ){
+
+    text = removeHtmlComments( text );
+    text = removeHtmlPseudoXml( text );
+
+    var document = $('<div></div>').html( text );
+    var style    = document.find('style');
+
+    // Eliminamos tags inutiles
+    document.find('meta, link, xml').remove();
+
+    // Estilos
+    var styleParsed = [];
+
+    // Parseo de estilos
+    style.each( function(){
+        styleParsed = styleParsed.concat( parseHtmlStyle( $( this ).html() ) );
+    });
+
+    style.remove();
+
+    // Aplicado de estilos
+    for( var i = 0; i < styleParsed.length; i++ ){
+        document.find( styleParsed[ i ][ 0 ] ).css( styleParsed[ i ][ 1 ] );
+    }
+
+    // Borramos todas las clases
+    document.find('*').removeAttr('class');
+
+    // Aplanamos los párrafos
+    document.find('p').each( function(){
+        $(this).html( normalizeHtmlChildren( this, 0 ) );
+    });
+
+    console.log( document.html() );
+
+};
+
 var insertPlainText = function( text ){
 
     text = text.replace( /\t/g, ' ' ); // To Do -> Soportar tabuladores
@@ -4274,6 +4312,61 @@ var normalizeColor = function( color ){
 
 };
 
+var normalizeHtmlChildren = function( element, level ){
+
+    var children = $( element.childNodes );
+    var result   = $('<div></div>');
+
+    // Aplanamos
+    children.each( function(){
+
+        if( this.nodeType === 3 ){ // 3 es el tipo de nodo de un TextNode
+            result.append( $( element ).clone().empty().append( this ) );
+        }else if( $(this).children().length ){
+
+            var newChildren = $( normalizeHtmlChildren( this, level + 1 ) );
+            var that        = $(this);
+
+            newChildren.each( function(){
+
+                var newStyle = parseHtmlAttrStyle( that.attr( 'style' ) + ';' + $(this).attr( 'style' ) );
+
+                $(this).removeAttr('style').css( newStyle );
+
+            });
+
+            result.append( newChildren );
+
+        }else{
+            result.append( this );
+        }
+
+    });
+
+    // Si estamos en el nivel más bajo corregimos aquellos elementos que no sean spans
+    if( !level ){
+
+        result.find('b').each( function(){
+            $(this).replaceWith( $('<span></span>').attr( 'style', $(this).attr('style') ).css( 'font-weight', 'bold' ).html( $(this).html() ) );
+        });
+
+        result.find('i').each( function(){
+            $(this).replaceWith( $('<span></span>').attr( 'style', $(this).attr('style') ).css( 'font-style', 'italic' ).html( $(this).html() ) );
+        });
+
+        result.find('u').each( function(){
+            $(this).replaceWith( $('<span></span>').attr( 'style', $(this).attr('style') ).css( 'text-decoration', 'underline' ).html( $(this).html() ) );
+        });
+
+        result = result.html().replace( /\n/ig, ' ' );
+        result = result.replace( /&nbsp; /ig, ' ' );
+
+    }
+
+    return result;
+
+};
+
 var normalizeLine = function( line ){
 
     if( line.nodeList.length === 1 ){
@@ -4363,6 +4456,134 @@ var openFile = function( structure ){
         alert( 'FILE FORMAT NOT RECOGNIZED' );
     }
     
+};
+
+var parseHtmlLineStyle = function( text ){
+
+    // Separamos nombres de las reglas del contenido de las reglas
+    text = text.replace( '}', '' ).split('{');
+
+    // Hacemos una limpieza de la línea
+    text = text.filter( function( part ){
+        return part !== null && part.length;
+    });
+
+    // Hacemos un trim de las partes
+    text = text.map( function( part ){
+        return $.trim( part );
+    });
+
+    // Si termina en punto una regla debe eliminarse
+    if( text[ 0 ].slice( -1 ) === '.' ){
+
+        text[ 0 ] = text[ 0 ].slice( 0, -1 );
+        text[ 1 ] = {};
+
+        return text;
+
+    }
+
+    // Arreglamos los importants
+    text[ 1 ] = text[ 1 ].replace( '! important', '!important' );
+
+    // Separamos el estilo en reglas
+    text[ 1 ] = text[ 1 ].split(';');
+
+    // Eliminamos los strings vacíos
+    text[ 1 ] = text[ 1 ].filter( function( part ){
+        return part !== null && part.length;
+    });
+
+    // Parseamos las reglas
+    text[ 1 ] = text[ 1 ].map( function( rule ){
+
+        rule = $.trim( rule );
+        rule = rule.split(':');
+
+        rule[ 0 ] = $.trim( rule[ 0 ] );
+        rule[ 1 ] = $.trim( rule[ 1 ] );
+
+        return rule;
+
+    });
+
+    // Convertimos el array a un objeto CSS
+    var result = {};
+
+    for( var i in text[ 1 ] ){
+        result[ text[ 1 ][ i ][ 0 ] ] = text[ 1 ][ i ][ 1 ];
+    }
+
+    text[ 1 ] = result;
+
+    return text;
+
+};
+
+var parseHtmlStyle = function( text ){
+
+    // Eliminamos comentarios, tabuladores e interpretamos línea a línea
+    text = removeHtmlComments( text );
+    text = text.replace( '\t', '' );
+    text = text.split('\n');
+
+    // Hacemos un trim de líneas
+    text = text.map( function( line ){
+        return $.trim( line );
+    });
+
+    // Eliminamos las líneas vacías e inútiles
+    text = text.filter( function( line ){
+        return line.length && line[ 0 ] !== '{' && line[ 0 ] !== '@';
+    });
+
+    // Prevenimos lineas rotas
+    var tmp     = '';
+    var newText = [];
+
+    for( var i in text ){
+
+        tmp += text[ i ];
+
+        if( text[ i ][ text[ i ].length - 1 ] === '}' ){
+            
+            newText.push( tmp );
+            tmp = '';
+
+        }
+
+    }
+
+    text    = newText;
+    newText = null;
+
+    // Parseamos linea a línea
+    text = text.map( function( line ){
+        return parseHtmlLineStyle( line );
+    });
+
+    return text;
+
+};
+
+var parseHtmlAttrStyle = function( data ){
+
+    var obj = {};
+    data    = data.split(/;\s*/ig);
+
+    data.map( function( item ){
+
+        if( item ){
+
+            item             = item.split(/\s*:\s*/ig);
+            obj[ item[ 0 ] ] = item[ 1 ];
+
+        }
+
+    });
+
+    return obj;
+
 };
 
 var processFile = function( data, noDecode ){
@@ -5416,6 +5637,24 @@ var realTimeUserConnect = function( info ){
 
     });
     
+};
+
+var removeHtmlComments = function( text ){
+
+    if( text.match( /<!--[\s\S]*?-->/g ) ){
+
+        text = text.replace( /<!--[\s\S]*?-->/g, '' );
+
+        return removeHtmlComments( text );
+
+    }else{
+        return text;
+    }
+
+};
+
+var removeHtmlPseudoXml = function( text ){
+    return text.replace( /<o:p>[\s\S]*?<\/o:p>/g, '' );
 };
 
 var removeRangeLines = function( includeLimits, start, end ){
@@ -7292,7 +7531,7 @@ wz.system.on( 'paste', function( paste ){
     }
 
     if( type === 'text/html' ){
-
+        insertHtmlText( content );
     }else if( type === 'text/plain' ){
         insertPlainText( content );
     }
