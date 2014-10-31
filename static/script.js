@@ -3832,8 +3832,13 @@ var insertHtmlText = function( text ){
         $(this).html( normalizeHtmlChildren( this, 0 ) );
     });
 
-    console.log( document.html() );
+    var result = [];
 
+    // Generamos el JSON
+    document.find('p').each( function(){
+        console.log( $(this).html() );
+    });
+    
 };
 
 var insertPlainText = function( text ){
@@ -4335,7 +4340,7 @@ var normalizeHtmlChildren = function( element, level ){
 
             });
 
-            result.append( newChildren );
+            result.append( newChildren.html() );
 
         }else{
             result.append( this );
@@ -4360,6 +4365,7 @@ var normalizeHtmlChildren = function( element, level ){
 
         result = result.html().replace( /\n/ig, ' ' );
         result = result.replace( /&nbsp; /ig, ' ' );
+        result = result.replace( /&quot;/ig, '\'' );
 
     }
 
@@ -4576,11 +4582,13 @@ var parseHtmlAttrStyle = function( data ){
         if( item ){
 
             item             = item.split(/\s*:\s*/ig);
-            obj[ item[ 0 ] ] = item[ 1 ];
+            obj[ item[ 0 ] ] = item[ 1 ]; // ? item[ 1 ].replace( /"/g, '\'' ) : '';
 
         }
 
     });
+
+    delete obj['undefined'];
 
     return obj;
 
