@@ -315,7 +315,6 @@
     left: 8px;
     width: 10px;
     height: 10px;
-    background: #f00;
     background: url('@static/sprite.png') -234px 0;
     background-size: 269px 18px;
 }
@@ -358,9 +357,9 @@
 }
 
 .toolbar-list i{
-    width: 10px;
-    height: 10px;
-    margin-right: 5px;
+    margin: 2px 6px 0 2px;
+    width: 8px;
+    height: 8px;
     display: inline-block;
 }
 
@@ -379,7 +378,8 @@
 }
 
 .toolbar-list .active i{
-    background: #f00;
+    background: url('@static/tick_dropdown.png') 0 0;
+    background-size: 8px 8px;
 }
 
 .toolbar-list i.pdf{
@@ -406,7 +406,6 @@
     left: 8px;
     width: 10px;
     height: 10px;
-    background: #f00;
     background: url('@static/sprite.png') -234px 0;
     background-size: 269px 18px;
 }
