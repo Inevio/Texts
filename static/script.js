@@ -1742,6 +1742,28 @@ var getElementPositionY = function( page, pageId, paragraph, paragraphId, line, 
 
 };
 
+var getGlobalParagraphId = function( pageId, paragraphId ){
+
+    for( var i = 0; i < pageId; i++ ){
+        paragraphId += pageList[ i ].paragraphList.length;
+    }
+
+    return paragraphId;
+
+};
+
+var getGlobalParagraphChar = function( paragraph, lineId, lineCharId ){
+
+    var charId = lineCharId;
+
+    for( var i = 0; i < lineId; i++ ){
+        charId += currentParagraph.lineList[ i ].totalChars;
+    }
+
+    return charId;
+    
+};
+
 var getLineIndentationLeft = function( id, paragraph ){
 
     if( !id && paragraph.indentationSpecialType === 1 ){
@@ -2034,7 +2056,7 @@ var handleArrowDown = function(){
     realtime.send({
 
         cmd : CMD_POSITION,
-        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
 
     });
 
@@ -2157,7 +2179,7 @@ var handleArrowLeft = function(){
     realtime.send({
 
         cmd : CMD_POSITION,
-        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
         
     });
 
@@ -2271,7 +2293,7 @@ var handleArrowRight = function(){
     realtime.send({
 
         cmd : CMD_POSITION,
-        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
         
     });
 
@@ -2390,7 +2412,7 @@ var handleArrowUp = function(){
     realtime.send({
 
         cmd : CMD_POSITION,
-        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
         
     });
 
@@ -3103,22 +3125,14 @@ var handleCharNormal = function( newChar, dontSend ){
     }
 
     // To Do -> Basarse en las posiciones originales, no el las nuevas
-    var paragraphId = currentParagraphId;
-    var charId      = currentLineCharId - 1;
-
-    for( i = 0; i < currentPageId; i++ ){
-        paragraphId += pageList[ i ].paragraphList.length;
-    }
-
-    for( i = 0; i < currentLineId; i++ ){
-        charId += currentParagraph.lineList[ i ].totalChars;
-    }
+    var paragraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
+    var charId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
 
     realtime.send({
         
         cmd  : CMD_NEWCHAR,
-        data : [ paragraphId, charId, newChar ],
-        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        data : [ paragraphId, charId - 1, newChar ],
+        pos  : [ paragraphId, charId ]
 
     });
 
@@ -3337,22 +3351,14 @@ var handleEnter = function( dontSend ){
     }
 
     // To Do -> Basarse en las posiciones originales, no el las nuevas
-    var paragraphId = originalParagraphId;
-    var charId      = originalLineChar;
-
-    for( i = 0; i < originalPageId; i++ ){
-        paragraphId += pageList[ i ].paragraphList.length;
-    }
-
-    for( i = 0; i < originalLineId; i++ ){
-        charId += originalParagraph.lineList[ i ].totalChars;
-    }
+    var paragraphId = getGlobalParagraphId( newPageId, newParagraphId );
+    var charId      = getGlobalParagraphChar( newParagraph, 0, 0 );
 
     realtime.send({
         
         cmd  : CMD_ENTER,
-        data : [ paragraphId, charId ],
-        pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        data : [ getGlobalParagraphId( originalPageId, originalParagraphId ), getGlobalParagraphChar( originalParagraph, originalLineId, originalLineChar ) ],
+        pos  : [ getGlobalParagraphId( newPageId, newParagraphId ), getGlobalParagraphChar( newParagraph, 0, 0 ) ]
 
     });
 
@@ -5518,7 +5524,7 @@ var realTimeConnect = function( error, firstConnection){
     realtime.send({
 
         cmd : CMD_POSITION,
-        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
 
     });
 
@@ -5556,7 +5562,7 @@ var realTimeMessage = function( info, data ){
         realtime.send({
 
             cmd : CMD_DOCUMENT_READY,
-            pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+            pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
 
         });
 
@@ -5604,6 +5610,7 @@ var realTimeMessage = function( info, data ){
         console.log('CMD_ENTER');
 
         elements = getElementsByRemoteParagraph( data.data[ 0 ], data.data[ 1 ], true );
+        console.log( elements );
 
         handleRemoteEnter( elements.pageId, elements.page, elements.paragraphId, elements.paragraph, elements.lineId, elements.line, elements.lineChar, elements.nodeId, elements.node, elements.nodeChar );
         updatePages();
@@ -5668,10 +5675,9 @@ var realTimeMessage = function( info, data ){
     }
 
     if( data.pos ){
+        console.log( info.sender, data.pos );
         updateRemoteUserPosition( info.sender, data.pos );
     }
-
-    console.log( 'Editando ', usersEditing );
 
 };
 
@@ -5707,7 +5713,7 @@ var realTimeUserConnect = function( info ){
     realtime.send({
 
         cmd : CMD_SYNC,
-        pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+        pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
 
     });
 
@@ -7205,18 +7211,18 @@ var updateBlink = function(){
             // Cursor
             ctxSel.fillRect(
 
-                parseInt( usersPosition[ i ][ 0 ], 10 ),
-                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ),
+                parseInt( usersPosition[ i ].x, 10 ),
+                parseInt( usersPosition[ i ].y - scrollTop + usersPosition[ i ].line.height - usersPosition[ i ].node.height, 10 ),
                 2,
-                usersPosition[ i ][ 3 ]
+                usersPosition[ i ].node.height
 
             );
 
             // Fondo del nombre
             ctxSel.fillRect(
 
-                parseInt( usersPosition[ i ][ 0 ], 10 ),
-                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 - 14, // 2 por la separación respecto al cursor y 14 del tamaño de la caja
+                parseInt( usersPosition[ i ].x, 10 ),
+                parseInt( usersPosition[ i ].y - scrollTop + usersPosition[ i ].line.height - usersPosition[ i ].node.height, 10 ) - 2 - 14, // 2 por la separación respecto al cursor y 14 del tamaño de la caja
                 ctxSel.measureText( usersEditing[ i ].fullName ).width + 8, // 4 y 4 de margenes laterales
                 14
 
@@ -7228,8 +7234,8 @@ var updateBlink = function(){
             ctxSel.fillText(
 
                 usersEditing[ i ].fullName,
-                parseInt( usersPosition[ i ][ 0 ], 10 ) + 4, // 4 del margen lateral izquierdo
-                parseInt( usersPosition[ i ][ 1 ] - scrollTop + usersPosition[ i ][ 2 ] - usersPosition[ i ][ 3 ], 10 ) - 2 - 3 // 2 por la separación respecto al cursor y 3 de la diferencia con el tamaño de la caja
+                parseInt( usersPosition[ i ].x, 10 ) + 4, // 4 del margen lateral izquierdo
+                parseInt( usersPosition[ i ].y - scrollTop + usersPosition[ i ].line.height - usersPosition[ i ].node.height, 10 ) - 2 - 3 // 2 por la separación respecto al cursor y 3 de la diferencia con el tamaño de la caja
 
             );
 
@@ -7290,6 +7296,12 @@ var updateRange = function(){
 };
 
 var updateRemoteUserPosition = function( userId, pos ){
+
+    pos   = getElementsByRemoteParagraph( pos[ 0 ], pos[ 1 ] );
+    pos.x = getElementPositionX( pos.page, pos.pageId, pos.paragraph, pos.paragraphId, pos.line, pos.lineId, pos.node, pos.nodeId, pos.nodeChar );
+    pos.y = getElementPositionY( pos.page, pos.pageId, pos.paragraph, pos.paragraphId, pos.line, pos.lineId, pos.node, pos.nodeId, pos.nodeChar );
+
+    console.log( pos.x, pos.y );
 
     usersPosition[ userId ] = pos;
     waitingRangeUpdate      = true;
@@ -7869,7 +7881,7 @@ selections
             realtime.send({
 
                 cmd : CMD_POSITION,
-                pos : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
+                pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
                 
             });
 
