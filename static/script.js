@@ -3869,6 +3869,41 @@ var insertPlainText = function( text ){
 
 };
 
+var logAllNodesWidth = function(){
+
+    var list = [];
+
+    for( var lp = 0; lp < pageList.length; lp++ ){
+
+        for( var lpg = 0; lpg < pageList[ lp ].paragraphList.length; lpg++ ){
+
+            for( var ll = 0; ll < pageList[ lp ].paragraphList[ lpg ].lineList.length; ll++ ){
+
+                for( var ln = 0; ln < pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList.length; ln++ ){
+                    
+                    list.push({
+
+                        page : lp,
+                        paragraph : lpg,
+                        line : ll,
+                        node : ln,
+                        width : pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].width,
+                        lastCharWidth : pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].charList.slice( -1 )[ 0 ]
+
+                    });
+
+                }
+
+            }
+
+        }
+
+    }
+
+    console.table( list );
+
+};
+
 var mapRangeLines = function( includeLimits, start, end, callback ){
 
     var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoopId, nodeLoopId, finalPage, finalParagraph, fakeEndLineId, j, k, m;
@@ -4868,6 +4903,7 @@ var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate
         newNode.string        = nodesToMove.string.slice( j );
         nodesToMove.string    = nodesToMove.string.slice( 0, j );
         nodesToMove.charList  = nodesToMove.charList.slice( 0, j );
+        nodesToMove.width     = nodesToMove.charList.slice( -1 )[ 0 ];
         line.totalChars      -= newNode.string.length;
         newLine.totalChars   += newNode.string.length;
 
@@ -5830,7 +5866,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
             for( i = 0; i < paragraph.lineList.length; i++ ){
                 realocateLineInverse( paragraph, i, 0 );
-
             }
 
         }
@@ -7007,6 +7042,8 @@ var setSelectedParagraphsStyle = function( key, value ){
             requestStartCheck     = true;
             charInParagraphStart -= firstNodeLengthStart;
 
+        }else if( key === 'indentationLeftAdd' ){
+            requestStartCheck = true;
         }
 
         if( requestStartCheck ){
