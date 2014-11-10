@@ -920,49 +920,9 @@ var drawRange = function(){
     waitingRangeUpdate = false;
 
     // Calculamos la altura de inicio
-    var startHeight = 0;
+    var startHeight = getElementPositionY( currentRangeStart.page, currentRangeStart.pageId, currentRangeStart.paragraph, currentRangeStart.paragraphId, currentRangeStart.line, currentRangeStart.lineId );
+    var startWidth  = getElementPositionX( currentRangeStart.page, currentRangeStart.pageId, currentRangeStart.paragraph, currentRangeStart.paragraphId, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
     var i;
-
-    // Calculamos la posición vertical de la página de inicio
-    for( i = 0; i < currentRangeStart.pageId; i++ ){
-        startHeight += pageList[ i ].height + GAP;
-    }
-
-    // Tenemos en cuenta el margen superior
-    startHeight += currentRangeStart.page.marginTop;
-
-    // Calculamos la posición vertical del párrafo de inicio
-    for( i = 0; i < currentRangeStart.paragraphId; i++ ){
-        startHeight += currentRangeStart.page.paragraphList[ i ].height;
-    }
-
-    // Calculamos la posición vertical de la linea de inicio
-    for( i = 0; i < currentRangeStart.lineId; i++ ){
-        startHeight += currentRangeStart.paragraph.lineList[ i ].height * currentRangeStart.paragraph.spacing;
-    }
-
-    // Calculamos el ancho de inicio
-    var startWidth = 0;
-
-    // Margen izquierdo
-    startWidth += currentRangeStart.page.marginLeft;
-
-    // Margen izquierdo del párrafo
-    startWidth += getLineIndentationLeftOffset( currentRangeStart.lineId, currentRangeStart.paragraph );
-
-    // Alineación del párrafo
-    startWidth += getLineOffset( currentRangeStart.line, currentRangeStart.paragraph );
-
-    // Calculamos la posición del caracter
-    for( i = 0; i < currentRangeStart.nodeId; i++ ){
-        startWidth += currentRangeStart.line.nodeList[ i ].justifyWidth || currentRangeStart.line.nodeList[ i ].width;
-    }
-
-    if( currentRangeStart.node.justifyCharList ){
-        startWidth += currentRangeStart.node.justifyCharList[ currentRangeStart.nodeChar - 1 ] || 0;
-    }else{
-        startWidth += currentRangeStart.node.charList[ currentRangeStart.nodeChar - 1 ] || 0;
-    }
 
     // Procedimiento de coloreado
     var width  = 0;
@@ -1702,6 +1662,83 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
         nodeChar    : nodeChar
 
     };
+
+};
+
+var getElementPosition = function( page, pageId, paragraph, paragraphId, line, lineId, node, nodeId, nodeChar ){
+
+    return {
+
+        x : getElementPositionX( page, pageId, paragraph, paragraphId, line, lineId, node, nodeId, nodeChar ),
+        y : getElementPositionY( page, pageId, paragraph, paragraphId, line, lineId, node, nodeId, nodeChar )
+    };
+
+};
+
+var getElementPositionX = function( page, pageId, paragraph, paragraphId, line, lineId, node, nodeId, nodeChar ){
+
+    // Calculamos la posición horizontal
+    var i = 0;
+    var x = 0;
+
+    // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
+    x = 0;
+
+    // Márgen lateral de la página
+    x += page.marginLeft;
+
+    // Margen lateral del párrafo
+    x += getLineIndentationLeftOffset( lineId, paragraph );
+
+    // Alineación de la línea
+    x += getLineOffset( line, paragraph );
+
+    // Posicion dentro de la linea
+    for( i = 0; i < nodeId; i++ ){
+        x += line.nodeList[ i ].justifyWidth || line.nodeList[ i ].width;
+    }
+
+    if( nodeChar > 0 ){
+
+        if( node.justifyCharList ){
+            x += node.justifyCharList[ nodeChar - 1 ];
+        }else{
+            x += node.charList[ nodeChar - 1 ];   
+        }
+        
+    }
+
+    return x;
+
+};
+
+var getElementPositionY = function( page, pageId, paragraph, paragraphId, line, lineId, node, nodeId, nodeChar ){
+
+    // Calculamos la posición vertical
+    var i = 0;
+    var y = 0;
+
+    // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
+
+    // Tamaño de cada página
+    for( i = 0; i < pageId; i++ ){
+        y += pageList[ i ].height + GAP;
+    }
+
+    // Márgen superior
+    y += page.marginTop;
+
+    // Tamaño de cada párrafo
+    for( i = 0; i < paragraphId; i++ ){
+        y += page.paragraphList[ i ].height;
+    }
+
+    // Tamaño de cada línea
+    for( i = 0; i < lineId; i++ ){
+        y += paragraph.lineList[ i ].height * paragraph.spacing;
+    }
+
+    return y;
 
 };
 
@@ -6174,28 +6211,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         currentParagraphId !== paragraph ||
         currentLineId !== line
     ){
-
-        // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
-        positionAbsoluteY = 0;
-
-        // Tamaño de cada página
-        for( i = 0; i < page; i++ ){
-            positionAbsoluteY += pageList[ i ].height + GAP;
-        }
-
-        // Márgen superior
-        positionAbsoluteY += currentPage.marginTop;
-
-        // Tamaño de cada párrafo
-        for( i = 0; i < paragraph; i++ ){
-            positionAbsoluteY += currentPage.paragraphList[ i ].height;
-        }
-
-        // Tamaño de cada línea
-        for( i = 0; i < line; i++ ){
-            positionAbsoluteY += currentParagraph.lineList[ i ].height * currentParagraph.spacing;
-        }
-
+        positionAbsoluteY = getElementPositionY( currentPage, page, currentParagraph, paragraph, currentLine, line );
     }
 
     // Calculamos la posición horizontal si es necesario
@@ -6207,34 +6223,7 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
         currentNodeId !== node ||
         currentLineCharId !== lineChar
     ){
-
-        // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
-        positionAbsoluteX = 0;
-
-        // Márgen lateral de la página
-        positionAbsoluteX += currentPage.marginLeft;
-
-        // Margen lateral del párrafo
-        positionAbsoluteX += getLineIndentationLeftOffset( line, currentParagraph );
-
-        // Alineación de la línea
-        positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
-
-        // Posicion dentro de la linea
-        for( i = 0; i < node; i++ ){
-            positionAbsoluteX += currentLine.nodeList[ i ].justifyWidth || currentLine.nodeList[ i ].width;
-        }
-
-        if( nodeChar > 0 ){
-
-            if( currentNode.justifyCharList ){
-                positionAbsoluteX += currentNode.justifyCharList[ nodeChar - 1 ];
-            }else{
-                positionAbsoluteX += currentNode.charList[ nodeChar - 1 ];   
-            }
-            
-        }
-
+        positionAbsoluteX = getElementPositionX( currentPage, page, currentParagraph, paragraph, currentLine, line, currentNode, node, nodeChar );
     }
 
     // Si hubo cambios limpiamos los estilos temporales
