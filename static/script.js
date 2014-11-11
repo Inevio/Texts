@@ -13,6 +13,10 @@ var ALIGN_LEFT = 0;
 var ALIGN_CENTER = 1;
 var ALIGN_RIGHT = 2;
 var ALIGN_JUSTIFY = 3;
+var BROWSER_FIREFOX = 0;
+var BROWSER_IE = 1;
+var BROWSER_WEBKIT = 2;
+var BROWSER_TYPE = /webkit/i.test( navigator.userAgent ) ? BROWSER_WEBKIT : ( /trident/i.test( navigator.userAgent ) ? BROWSER_IE : BROWSER_FIREFOX );
 var CENTIMETER = 37.795275591;
 var CMD_SYNC = 0;
 var CMD_DOCUMENT = 1;
@@ -143,10 +147,14 @@ var usersEditing  = {};
 // Waiting variables
 var waitingCheckLetter      = false;
 var waitingCheckLetterInput = false;
-var waitingComposition      = false;
 var waitingPageUpdate       = false;
 var waitingRangeUpdate      = false;
 var waitingRuleLeftUpdate   = false;
+
+// Composition Variables
+var compositionCounter = 0;
+var compositionEnded   = false;
+var keydownHandled     = false;
 
 // Blink variables
 var blinkEnabled = false;
@@ -463,12 +471,12 @@ var checkTemporalStyle = function( key, useCurrentNode ){
 
 var cleanComposition = function( isEnd ){
 
-    if( !isEnd && typeof waitingComposition === 'number' ){
+    if( !isEnd && compositionCounter ){
         input.blur().focus();
     }
 
-    waitingComposition = false;
-    input[ 0 ].value   = '';
+    compositionEnded = false;
+    input[ 0 ].value = '';
 
 };
 
@@ -1959,6 +1967,8 @@ var handleArrowDown = function(){
 
     var pageId, paragraph, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j, wHeritage;
 
+    cleanComposition();
+
     // Comprobamos si es la última línea del párrafo
     if( currentLineId === currentParagraph.lineList.length - 1 ){
 
@@ -2075,6 +2085,8 @@ var handleArrowDown = function(){
 };
 
 var handleArrowLeft = function(){
+
+    cleanComposition();
 
     verticalKeysEnabled = false;
 
@@ -2199,6 +2211,8 @@ var handleArrowLeft = function(){
 
 var handleArrowRight = function(){
 
+    cleanComposition();
+
     verticalKeysEnabled = false;
 
     if( currentRangeEnd ){
@@ -2314,6 +2328,8 @@ var handleArrowRight = function(){
 var handleArrowUp = function(){
 
     var pageId, paragraph, paragraphId, line, lineId, lineChar, nodeId, nodeChar, nodeList, charList, i, j, wHeritage;
+
+    cleanComposition();
 
     // Comprobamos si es la primera línea del párrafo
     if( currentLineId === 0 ){
@@ -7635,56 +7651,100 @@ moreButton.on( 'click', function(){
 });
 
 input
-.on( 'blur', function(){
-    console.log('blur event');
-})
-.on( 'keydown', function(e){
+.on( 'keydown', function( e ){
 
     if( e.ctrlKey || e.metaKey ){
         return;
-    }else if( e.key && e.key.length === 1 ){
+    }else if( e.keyCode === KEY_ARROW_LEFT ){
 
-        handleChar( e.key );
-        updatePages();
+        handleArrowLeft();
 
-        waitingCheckLetter = false;
+        keydownHandled = true;
 
-        e.preventDefault();
+    }else if( e.keyCode === KEY_ARROW_UP ){
 
-    }else if( e.which === KEY_BACKSPACE ){
+        handleArrowUp();
+
+        keydownHandled = true;
+
+    }else if( e.keyCode === KEY_ARROW_RIGHT ){
+
+        handleArrowRight();
+
+        keydownHandled = true;
+
+    }else if( e.keyCode === KEY_ARROW_DOWN ){
+
+        handleArrowDown();
+
+        keydownHandled = true;
+
+    }else if( e.keyCode === KEY_BACKSPACE ){
 
         handleBackspace();
         updatePages();
 
-    }else if( e.which === KEY_ENTER ){
+        keydownHandled = true;
 
-        handleEnter();
-        updatePages();
-
-    }else if( e.which === KEY_ARROW_LEFT ){
-        handleArrowLeft();
-    }else if( e.which === KEY_ARROW_UP ){
-        handleArrowUp();
-    }else if( e.which === KEY_ARROW_RIGHT ){
-        handleArrowRight();
-    }else if( e.which === KEY_ARROW_DOWN ){
-        handleArrowDown();
-    }else if( e.which === KEY_DEL ){
+    }else if( e.keyCode === KEY_DEL ){
 
         handleDel();
         updatePages();
 
-    }else{
-        waitingCheckLetter = true;
+        keydownHandled = true;
+
+    }else if( e.keyCode === KEY_DEL ){
+
+        handleDel();
+        updatePages();
+
+        keydownHandled = true;
+
     }
 
 })
 
-.on( 'keypress', function(){
-    
-    if( waitingCheckLetter && !waitingCheckLetterInput ){
+.on( 'keypress', function(e){
 
-        waitingCheckLetterInput = true;
+    if( e.ctrlKey || e.metaKey ){
+        return;
+    }else if( compositionEnded && e.which === KEY_BACKSPACE ){
+
+        handleBackspace();
+        updatePages();
+
+    }else if( e.key && e.key.length === 1 ){
+
+        // Este método solo funcionaba en Firefox cuando se escribió. Aunque Firefox es compatible
+        // con el método del setTimeout para recuperar lo tecleado, este caso es mucho más rápido,
+        // permitiendo que Firefox sea el navegador más eficiente a la hora de teclear
+
+        handleChar( e.key );
+        updatePages();
+
+        e.preventDefault();
+
+    }else if( compositionEnded && e.keyCode === KEY_ARROW_LEFT ){
+        handleArrowLeft();
+    }else if( compositionEnded && e.keyCode === KEY_ARROW_UP ){
+        handleArrowUp();
+    }else if( compositionEnded && e.keyCode === KEY_ARROW_RIGHT ){
+        handleArrowRight();
+    }else if( compositionEnded && e.keyCode === KEY_ARROW_DOWN ){
+        handleArrowDown();
+    }else if( e.keyCode === KEY_ENTER ){
+
+        handleEnter();
+        updatePages();
+
+    }else if( compositionEnded && e.keyCode === KEY_DEL ){
+
+        handleDel();
+        updatePages();
+
+    }else if( !waitingCheckLetter && !keydownHandled ){
+
+        waitingCheckLetter = true;
 
         setTimeout( function(){
 
@@ -7698,75 +7758,54 @@ input
 
             }
 
-            input[ 0 ].value        = '';
-            waitingCheckLetter      = false;
-            waitingCheckLetterInput = false;
+            input[ 0 ].value   = '';
+            waitingCheckLetter = false;
 
         }, 4 );
 
     }
 
+    keydownHandled = false;
+
+})
+
+.on( 'keyup', function( e ){
+
+    if( compositionEnded ){
+        cleanComposition();
+    }
+
+    keydownHandled = false;
+
 })
 
 .on( 'compositionstart', function( e ){
 
-    console.log( 'compositionstart', e.originalEvent.data, e );
-
-    waitingComposition = 0;
-
-    /*
-    setTimeout( function(){
-
-        console.log( 'antes', input.val() );
-
-        handleChar( input[ 0 ].value );
-        updatePages();
-
-        console.log( 'despues', input.val() );
-
-    }, 4 );
-    */
+    compositionCounter = 0;
+    compositionEnded   = false;
 
 })
 
 .on( 'compositionupdate', function( e ){
 
-    console.log( 'compositionupdate', e.originalEvent.data, e );
-    
-    if( waitingComposition++ ){
-        handleBackspace();
-    }
+    if( !compositionCounter++ ){
 
-    handleChar( e.originalEvent.data /*input[ 0 ].value*/ );
-    updatePages();
+        handleChar( e.originalEvent.data );
+        updatePages();
+
+    }
     
 })
 
 .on( 'compositionend', function( e ){
 
-    console.log( 'compositionend', e.originalEvent.data, e );
+    handleBackspace();
+    handleChar( e.originalEvent.data );
+    cleanComposition( true );
+    updatePages();
 
-    /*
-    setTimeout( function(){
-
-        console.log( 'antes', input.val() );
-
-        if( waitingComposition ){
-            handleBackspace();
-        }
-        
-        if( input[ 0 ].value ){
-            handleChar( input[ 0 ].value );
-        }
-
-        updatePages();
-        */
-        cleanComposition( true );
-        /*
-        console.log( 'despues', input.val() );
-
-    }, 4 );
-    */
+    compositionCounter = 0;
+    compositionEnded   = true;
 
 });
 
@@ -8754,7 +8793,6 @@ scrollV
 
 });
 
-// Start
 // Start
 if( !params ){
     start();
