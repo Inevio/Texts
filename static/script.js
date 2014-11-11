@@ -461,6 +461,17 @@ var checkTemporalStyle = function( key, useCurrentNode ){
 
 };
 
+var cleanComposition = function( isEnd ){
+
+    if( !isEnd && typeof waitingComposition === 'number' ){
+        input.blur().focus();
+    }
+
+    waitingComposition = false;
+    input[ 0 ].value   = '';
+
+};
+
 var clearTemporalStyle = function(){
     
     temporalStyle = null;
@@ -7624,6 +7635,9 @@ moreButton.on( 'click', function(){
 });
 
 input
+.on( 'blur', function(){
+    console.log('blur event');
+})
 .on( 'keydown', function(e){
 
     if( e.ctrlKey || e.metaKey ){
@@ -7694,12 +7708,13 @@ input
 
 })
 
-.on( 'compositionstart', function(ev){
+.on( 'compositionstart', function( e ){
 
-    console.log('compositionstart');
+    console.log( 'compositionstart', e.originalEvent.data, e );
 
-    waitingComposition = true;
+    waitingComposition = 0;
 
+    /*
     setTimeout( function(){
 
         console.log( 'antes', input.val() );
@@ -7710,32 +7725,48 @@ input
         console.log( 'despues', input.val() );
 
     }, 4 );
+    */
 
 })
 
-.on( 'compositionend', function(ev){
+.on( 'compositionupdate', function( e ){
 
-    console.log('compositionend');
+    console.log( 'compositionupdate', e.originalEvent.data, e );
+    
+    if( waitingComposition++ ){
+        handleBackspace();
+    }
 
-    waitingComposition = false;
+    handleChar( e.originalEvent.data /*input[ 0 ].value*/ );
+    updatePages();
+    
+})
 
+.on( 'compositionend', function( e ){
+
+    console.log( 'compositionend', e.originalEvent.data, e );
+
+    /*
     setTimeout( function(){
 
         console.log( 'antes', input.val() );
 
-        handleBackspace();
+        if( waitingComposition ){
+            handleBackspace();
+        }
         
         if( input[ 0 ].value ){
             handleChar( input[ 0 ].value );
         }
 
         updatePages();
-
-        input[ 0 ].value = '';
-
+        */
+        cleanComposition( true );
+        /*
         console.log( 'despues', input.val() );
 
     }, 4 );
+    */
 
 });
 
@@ -7747,8 +7778,9 @@ selections
     }
 
     verticalKeysEnabled = false;
+    selectionEnabled    = true;
 
-    selectionEnabled = true;
+    cleanComposition();
     e.preventDefault();
 
     var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, charList;
