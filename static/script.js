@@ -143,6 +143,7 @@ var usersEditing  = {};
 // Waiting variables
 var waitingCheckLetter      = false;
 var waitingCheckLetterInput = false;
+var waitingComposition      = false;
 var waitingPageUpdate       = false;
 var waitingRangeUpdate      = false;
 var waitingRuleLeftUpdate   = false;
@@ -7622,7 +7623,8 @@ moreButton.on( 'click', function(){
 
 });
 
-input.on( 'keydown', function(e){
+input
+.on( 'keydown', function(e){
 
     if( e.ctrlKey || e.metaKey ){
         return;
@@ -7662,9 +7664,9 @@ input.on( 'keydown', function(e){
         waitingCheckLetter = true;
     }
 
-});
+})
 
-input.on( 'keypress', function(){
+.on( 'keypress', function(){
     
     if( waitingCheckLetter && !waitingCheckLetterInput ){
 
@@ -7689,6 +7691,51 @@ input.on( 'keypress', function(){
         }, 4 );
 
     }
+
+})
+
+.on( 'compositionstart', function(ev){
+
+    console.log('compositionstart');
+
+    waitingComposition = true;
+
+    setTimeout( function(){
+
+        console.log( 'antes', input.val() );
+
+        handleChar( input[ 0 ].value );
+        updatePages();
+
+        console.log( 'despues', input.val() );
+
+    }, 4 );
+
+})
+
+.on( 'compositionend', function(ev){
+
+    console.log('compositionend');
+
+    waitingComposition = false;
+
+    setTimeout( function(){
+
+        console.log( 'antes', input.val() );
+
+        handleBackspace();
+        
+        if( input[ 0 ].value ){
+            handleChar( input[ 0 ].value );
+        }
+
+        updatePages();
+
+        input[ 0 ].value = '';
+
+        console.log( 'despues', input.val() );
+
+    }, 4 );
 
 });
 
