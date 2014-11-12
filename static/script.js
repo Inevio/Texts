@@ -3975,6 +3975,69 @@ var logAllNodesWidth = function(){
 
 };
 
+var logParagraphText = function(){
+
+    var chars  = 0;
+    var string = '';
+
+    for( var lp = 0; lp < pageList.length; lp++ ){
+
+        for( var lpg = 0; lpg < pageList[ lp ].paragraphList.length; lpg++ ){
+
+            for( var ll = 0; ll < pageList[ lp ].paragraphList[ lpg ].lineList.length; ll++ ){
+
+                for( var ln = 0; ln < pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList.length; ln++ ){
+
+                    chars  += pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].string.length;
+                    string += pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].string;
+
+                }
+
+            }
+
+        }
+
+    }
+
+    console.log( chars, string );
+
+};
+
+var getTotalNodesInsideLines = function( lines ){
+
+    var list = [];
+
+    for( var i = 0; i < lines.length; i++ ){
+        list.push( lines[ i ].nodeList.length );
+    }
+
+    return list;
+
+};
+
+var logTotalNodesInsideLines = function( lines ){
+
+    var list = [];
+
+    for( var i = 0; i < lines.length; i++ ){
+
+        list.push({
+
+            line  : i,
+            nodes : lines[ i ].nodeList.length
+
+        });
+
+    }
+
+    if( list.length ){
+        console.table( list );
+    }else{
+        console.warn( 'no hay lineas' );
+    }
+
+};
+
 var mapRangeLines = function( includeLimits, start, end, callback ){
 
     var pageLoop, pageLoopId, paragraphLoop, paragraphLoopId, lineLoopId, nodeLoopId, finalPage, finalParagraph, fakeEndLineId, j, k, m;
@@ -5029,7 +5092,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     var i, j, newNode, maxSize;
 
     // Si la línea no existe se ignora
-    if( !line ){
+    if( !line /*|| !line.totalChars*/ ){
         return counter;
     }
 
@@ -5040,16 +5103,32 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         return counter;
     }
 
+    //console.log( 1, getTotalNodesInsideLines( paragraph.lineList ) );
+    //console.log(1);
+    //logParagraphText();
+
     // Comprobamos si al ser la primera palabra la que ha cambiado debemos intentar hacer un realocado con la linea superior
     // To Do -> Comprobar si modified char alguna vez coge el valor 0
     if( !dontPropagate && id > 0 && lineWords[ 0 ].string.length >= modifiedChar ){
 
         var totalChars = paragraph.lineList[ id - 1 ].totalChars;
 
+        //console.log('posible primero', id+1, line, paragraph.lineList[ id + 1 ].totalChars );
         counter          = realocateLineInverse( paragraph, id - 1, 0, true );
+        //console.log('sale primero', id+1, line, paragraph.lineList[ id + 1 ].totalChars );
         counter.lineChar = totalChars + currentLineCharId; // To Do -> Quizás alguna vez deba ser sin currentLineCharId sino que debería llevar un valor concreto. Comprobar
 
+        if( !line.totalChars ){
+            console.log( 'sale', line, line.totalChars );
+            return realocateLineInverse( paragraph, id, 0 )
+            return counter;
+        }
+
     }
+
+    //console.log( 2, getTotalNodesInsideLines( paragraph.lineList ) );
+    //console.log(2);
+    //logParagraphText();
 
     // Comprobamos si la palabra de la siguiente línea puede entrar en la línea actual
     var nextLine = paragraph.lineList[ id + 1 ];
@@ -5076,8 +5155,13 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     }
 
+    //console.log(3);
+    //logParagraphText();
+
     // Si no hay palabras separadas comprobamos si debe entrar parte de la siguiente línea porque se ha partido la palabra
     if( !wordsToMove.length ){
+
+        //console.log('posible palabra rota');
 
         // Si la palabra no está rota
         if(
@@ -5087,6 +5171,8 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             measureLineJustify( paragraph, line, id );
             return counter;
         }
+
+        //console.log('palabra rota');
 
         var nodeId   = null;
         var charId   = null;
@@ -5106,9 +5192,12 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
         // To Do -> Seguro que esto hace falta?
         if( nodeId === null ){
+            console.warn('Caso extraño #1');
             measureLineJustify( paragraph, line, id );
             return counter;
         }
+
+        //console.log( 'encontrado', nextLine.nodeList[ nodeId ].string );
 
         for( i = 0; i < nextLine.nodeList[ nodeId ].charList.length; i++ ){
             
@@ -5128,6 +5217,8 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             measureLineJustify( paragraph, line, id );
             return counter;
         }
+
+        //console.log( nodeId );
 
         // To Do -> Pueden darse casos en los que sea mejor mover un nodo entero
         // To Do -> Pueden darse casos en los que un nodo se quede vacío
@@ -5154,11 +5245,17 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     }
 
+    //console.log('no hay palabra rota', id, line );
+
+    //console.log( 3, getTotalNodesInsideLines( paragraph.lineList ) );
+
     counter.realocation = true;
 
     // Comprobamos si la última palabra a mover comparte nodo con la siguiente y hay que partir
     var lastWordToMove = wordsToMove.slice( -1 )[ 0 ];
     var charsToMove    = 0;
+
+    //console.log( line.nodeList.length );
 
     // Mismos nodos, necesitamos partir
     if( nextLineWords[ lastWordToMove + 1 ] && nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] === nextLineWords[ lastWordToMove + 1 ].nodeList[ 0 ] ){
@@ -5203,14 +5300,28 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     // Distintos nodos, podemos mover los nodos completos
     }else{
 
+        //console.log(4);
+        logParagraphText();
+        //console.log( wordsToMove );
+
         for( i = 0; i < wordsToMove.length; i++ ){
             charsToMove += nextLineWords[ wordsToMove[ i ] ].string.length;
         }
 
+        //console.log( 'line b', line.nodeList.length );
         line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 ) );
+        //console.log( 'line d', line.nodeList.length, line.nodeList );
         line.totalChars     += charsToMove;
+        //console.log( 'next b', id + 1, nextLine.nodeList.length, nextLine.totalChars );
         nextLine.nodeList    = nextLine.nodeList.slice( nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 );
         nextLine.totalChars -= charsToMove;
+        //console.log( 'next d', id + 1, nextLine.nodeList.length, nextLine.totalChars );
+
+        // To Do -> Que pasa si el siguiente nodo se queda vacio?
+
+        //console.log(5);
+        logParagraphText();
+        //console.log(' ');
 
     }
 
@@ -5233,6 +5344,9 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     }
 
+    //console.log(6);
+    //logParagraphText();
+
     maxSize = 0;
     
     for( j = 0; j < nextLine.nodeList.length; j++ ){
@@ -5253,14 +5367,25 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     if( !nextLine.totalChars ){
 
+        //console.log( 'nextLine vacia', paragraph.lineList.length );
         paragraph.lineList  = paragraph.lineList.slice( 0, id + 1 ).concat( paragraph.lineList.slice( id + 2 ) );
+        //console.log( 'nextLine vaciada', paragraph.lineList.length );
         paragraph.height   -= nextLine.height * paragraph.spacing;
 
     }
 
+    //console.log(7);
+    //logParagraphText();
+
+    //console.log( 5, getTotalNodesInsideLines( paragraph.lineList ) );
+
     if( !dontPropagate ){
+        //console.log( 'vamos a probar', paragraph.lineList[ id + 1 ].nodeList.length );
         realocateLineInverse( paragraph, id + 1, 0 );
     }
+
+    //console.log(8);
+    //logParagraphText();
 
     // To Do -> Esto es un fixeo no muy óptimo, no se están actualizando bien las alturas de los párrafos. Hacerlo más optimo.
     //          Para emular el error necesitamos 1 párrafo de varias lineas, una linea en blanco, 1 párrafo de varias lineas,
@@ -5278,7 +5403,15 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     paragraph.height = height;
 
     normalizeLine( line );
+
+    //console.log(9);
+    //logParagraphText();
+    
     measureLineJustify( paragraph, line, id );
+
+    //console.log( 6, getTotalNodesInsideLines( paragraph.lineList ) );
+    //console.log(10);
+    //logParagraphText();
 
     return counter;
 
@@ -5929,15 +6062,33 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         if( value >= 0 ){
 
+            //console.log('mas');
+            //logAllNodesWidth();
+            logParagraphText();
+
             for( i = 0; i < paragraph.lineList.length; i++ ){
                 realocateLine( pageId, paragraph, i, 0 );
             }
 
+            logParagraphText();
+            //logAllNodesWidth();
+            //console.log(' ');
+
         }else{
 
+            //console.log('menos');
+            //logAllNodesWidth();
+            logParagraphText();
+
             for( i = 0; i < paragraph.lineList.length; i++ ){
+                console.log( 'iteracion', i );
                 realocateLineInverse( paragraph, i, 0 );
+                logParagraphText();
             }
+
+            //logParagraphText();
+            //logAllNodesWidth();
+            console.log(' ');
 
         }
 
@@ -7075,6 +7226,8 @@ var setSelectedParagraphsStyle = function( key, value ){
 
             while( true ){
 
+                //console.log( currentParagraph.lineList[ currentLineId ].totalChars, charInParagraphStart );
+
                 if( currentParagraph.lineList[ currentLineId ].totalChars >= charInParagraphStart ){
                     break;
                 }
@@ -7089,6 +7242,8 @@ var setSelectedParagraphsStyle = function( key, value ){
             currentNodeId     = 0;
 
             while( true ){
+
+                //console.log( currentLine.nodeList[ currentNodeId ].string, charInParagraphStart );
 
                 if( currentLine.nodeList[ currentNodeId ].string.length >= charInParagraphStart ){
                     break;
