@@ -105,6 +105,7 @@ var toolsListContainer  = $('.toolbar-list-container');
 var toolsList           = $('.toolbar-list');
 var toolsColorContainer = $('.toolbar-color-picker-container');
 var toolsColor          = $('.toolbar-color-picker');
+var toolsColorHover     = $('.toolbar-color-picker-hover');
 var toolsColorColor     = $('.tool-button-color .color');
 var pages               = $('.pages');
 var selections          = $('.selections');
@@ -8759,7 +8760,33 @@ toolsColor
     e.stopPropagation();
 })
 
-.on( 'click', 'td', function(){
+.on( 'mouseenter', 'td', function(){
+
+    var pos = $(this).position();
+
+    // To Do -> Existe un problema con las tablas entre distintos navegadores.
+    //          Firefox indica la posición de la celda sin contar los bordes (solo el contenido)
+    //          Chrome si tiene en cuenta los bordes
+    //          Ver posibles soluciones o ver si lo han arreglado en futuras release de jQuery
+
+    if( BROWSER_TYPE === BROWSER_FIREFOX ){
+
+        pos.top  = pos.top - parseInt( toolsColorHover.css('border-top-width'), 10 );
+        pos.left = pos.left - parseInt( toolsColorHover.css('border-left-width'), 10 );
+
+    }
+
+    toolsColorHover.css({
+
+        'background-color' : $(this).css('background-color'),
+        top                : pos.top,
+        left               : pos.left
+
+    });
+
+})
+
+toolsColorHover.on( 'click', function(){
 
     toolsColorEnabled = false;
 
@@ -8769,8 +8796,8 @@ toolsColor
         toolsColor.removeClass('active-color');
 
         toolsColorColor
-            .attr( 'data-tool-value', normalizeColor( $(this).css('background-color') ) )
-            .css( 'background-color', $(this).css('background-color') )
+            .attr( 'data-tool-value', normalizeColor( toolsColorHover.css('background-color') ) )
+            .css( 'background-color', toolsColorHover.css('background-color') )
             .click();
 
     }else if( toolsColor.hasClass('active-page-color') ){
@@ -8778,7 +8805,7 @@ toolsColor
         toolsColorContainer.css( 'display', 'none' );
         toolsColor.removeClass('active-page-color');
 
-        setPagesStyle( 'pageBackgroundColor', normalizeColor( $(this).css('background-color') ) );
+        setPagesStyle( 'pageBackgroundColor', normalizeColor( toolsColorHover.css('background-color') ) );
 
     }
 

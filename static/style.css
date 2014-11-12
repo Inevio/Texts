@@ -410,6 +410,14 @@
     background-size: 269px 18px;
 }
 
+.toolbar-color-picker-hover{
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    border: 1px solid #fff;
+    outline: 1px solid #000
+}
+
 .toolbar-color-picker{
     position: absolute;
     height: auto;
