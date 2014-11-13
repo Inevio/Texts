@@ -1919,7 +1919,7 @@ var getWordsMetrics = function( line ){
                 currentWord.width     += ( nodeList[ i ].charList[ offset + words[ j ].length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
                 currentWord.widthTrim += ( nodeList[ i ].charList[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
 
-                currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
+                currentWord.offset.push( [ offset, offset + /*currentWord.string.length*/ words[ j ].length - 1 ] );
                 currentWord.nodeList.push( i );
 
                 offset += words[ j ].length;
@@ -1942,7 +1942,7 @@ var getWordsMetrics = function( line ){
             currentWord.widthTrim = ( nodeList[ i ].charList[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodeList[ i ].charList[ offset - 1 ] || 0 );
             currentWord.nodeList  = [ i ];
 
-            currentWord.offset.push( [ offset, offset + currentWord.string.length - 1 ] );
+            currentWord.offset.push( [ offset, offset + /*currentWord.string.length*/ words[ j ].length - 1 ] );
 
             offset += words[ j ].length;
 
