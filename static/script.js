@@ -75,7 +75,7 @@ var PAGEDIMENSIONS = {
 
     'US Letter'          : { width : 21.59, height : 27.94 },
     'US Legal'           : { width : 21.59, height : 35.56 },
-    'A4'                 : { width : 21,    height : 29.7  },
+    'A4'                 : { width : /*21*/10,    height : 29.7  },
     'A5'                 : { width : 14.81, height : 20.99 },
     'JIS B5'             : { width : 18.2,  height : 25.71 },
     'B5'                 : { width : 17.6,  height : 25.01 },
@@ -5088,330 +5088,302 @@ var realocateLine = function( pageId, paragraph, lineId, lineChar, dontPropagate
 var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate ){
 
     var line    = paragraph.lineList[ id ];
-    var counter = { realocation : false, lineChar : 0 };
-    var i, j, newNode, maxSize;
+    var counter = 0;
+    var i, newNode;
 
     // Si la línea no existe se ignora
-    if( !line /*|| !line.totalChars*/ ){
+    if( !line ){
         return counter;
     }
 
     var lineWords = getWordsMetrics( line );
 
+    // To Do -> Linea llena de espacios
+
+    // Si no hay palabras
     if( !lineWords.length ){
-        measureLineJustify( paragraph, line, id );
+        //measureLineJustify( paragraph, line, id );
         return counter;
-    }
 
-    //console.log( 1, getTotalNodesInsideLines( paragraph.lineList ) );
-    //console.log(1);
-    //logParagraphText();
-
-    // Comprobamos si al ser la primera palabra la que ha cambiado debemos intentar hacer un realocado con la linea superior
-    // To Do -> Comprobar si modified char alguna vez coge el valor 0
-    if( !dontPropagate && id > 0 && lineWords[ 0 ].string.length >= modifiedChar ){
-
-        var totalChars = paragraph.lineList[ id - 1 ].totalChars;
-
-        //console.log('posible primero', id+1, line, paragraph.lineList[ id + 1 ].totalChars );
-        counter          = realocateLineInverse( paragraph, id - 1, 0, true );
-        //console.log('sale primero', id+1, line, paragraph.lineList[ id + 1 ].totalChars );
-        counter.lineChar = totalChars + currentLineCharId; // To Do -> Quizás alguna vez deba ser sin currentLineCharId sino que debería llevar un valor concreto. Comprobar
-
-        if( !line.totalChars ){
-            console.log( 'sale', line, line.totalChars );
-            return realocateLineInverse( paragraph, id, 0 )
-            return counter;
-        }
-
-    }
-
-    //console.log( 2, getTotalNodesInsideLines( paragraph.lineList ) );
-    //console.log(2);
-    //logParagraphText();
-
-    // Comprobamos si la palabra de la siguiente línea puede entrar en la línea actual
-    var nextLine = paragraph.lineList[ id + 1 ];
-
-    if( !nextLine ){
-        measureLineJustify( paragraph, line, id ); // To Do -> Hara falta aqui realmente?
+    // Si es la última palabra del párrafo
+    }else if( paragraph.lineList.length - 1 === id ){
+        //measureLineJustify( paragraph, line, id );
         return counter;
-    }
 
-    var currentWidth  = getNodesWidth( line );
-    var nextLineWords = getWordsMetrics( nextLine );
-    var heritage      = 0;
-    var wordsToMove   = [];
+    // Procedimientos para 2 o más palabras o 1 sola palabra con espacios al final
+    }else if( lineWords.length > 1 || lineWords[ 0 ].string.slice( -1 )[ 0 ] === ' ' ){
 
-    for( i = 0; i < nextLineWords.length; i++ ){
-
-        if( currentWidth + heritage + nextLineWords[ i ].widthTrim > line.width ){
-            break;
-        }
-
-        wordsToMove.push( i );
-        
-        heritage += nextLineWords[ i ].width;
-
-    }
-
-    //console.log(3);
-    //logParagraphText();
-
-    // Si no hay palabras separadas comprobamos si debe entrar parte de la siguiente línea porque se ha partido la palabra
-    if( !wordsToMove.length ){
-
-        //console.log('posible palabra rota');
-
-        // Si la palabra no está rota
-        if(
-            lineWords.slice( -1 )[ 0 ].string.indexOf(' ') !== -1 &&
-            nextLine.nodeList[ 0 ].string[ 0 ] !== ' '
-        ){
-            measureLineJustify( paragraph, line, id );
-            return counter;
-        }
-
-        //console.log('palabra rota');
-
-        var nodeId   = null;
-        var charId   = null;
-        
-        heritage = 0;
-
-        for( i = 0; i < nextLine.nodeList.length; i++ ){
+        var nextLine      = paragraph.lineList[ id + 1 ];
+        var currentWidth  = getNodesWidth( line );
+        var nextLineWords = getWordsMetrics( nextLine );
+        var heritage      = 0;
+        var wordsToMove   = [];
+    
+        for( i = 0; i < nextLineWords.length; i++ ){
+    
+            if( currentWidth + heritage + nextLineWords[ i ].widthTrim > line.width ){
+                break;
+            }
+    
+            wordsToMove.push( i );
             
-            if( nextLine.nodeList[ i ].width + currentWidth >= line.width ){
-                nodeId = i;
-                break;
-            }
-
-            heritage += nextLine.nodeList[ i ].width;
-
+            heritage += nextLineWords[ i ].width;
+    
         }
 
-        // To Do -> Seguro que esto hace falta?
-        if( nodeId === null ){
-            console.warn('Caso extraño #1');
-            measureLineJustify( paragraph, line, id );
+        if( !wordsToMove.length ){
             return counter;
         }
 
-        //console.log( 'encontrado', nextLine.nodeList[ nodeId ].string );
+        var lastWordToMove = nextLineWords[ wordsToMove.slice( -1 )[ 0 ] ];
+        var lastNodeToMove = lastWordToMove.nodeList.slice( -1 )[ 0 ];
+        var lastWordOffset = lastWordToMove.offset.slice( -1 )[ 0 ];
 
-        for( i = 0; i < nextLine.nodeList[ nodeId ].charList.length; i++ ){
-            
-            if( heritage + nextLine.nodeList[ nodeId ].charList[ i ] + currentWidth > line.width ){
-                charId = i - 1;
-                break;
+        // Si hay que mover los nodos completos
+        if( nextLine.nodeList[ lastNodeToMove ].charList.length - 1 === lastWordOffset[ 1 ] ){
+
+            var totalChars = 0;
+
+            for( i = 0; i < lastNodeToMove + 1; i++ ){
+                totalChars += nextLine.nodeList[ i ].charList.length;
             }
 
-            if( heritage + nextLine.nodeList[ nodeId ].charList[ i ] + currentWidth === line.width ){
-                charId = i;
-                break;
-            }
+            line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, lastNodeToMove + 1 ) );
+            line.totalChars     += totalChars;
+            nextLine.nodeList    = nextLine.nodeList.slice( lastNodeToMove + 1 );
+            nextLine.totalChars -= totalChars;
 
-        }
-
-        if( charId === null || charId === -1 ){
-            measureLineJustify( paragraph, line, id );
-            return counter;
-        }
-
-        //console.log( nodeId );
-
-        // To Do -> Pueden darse casos en los que sea mejor mover un nodo entero
-        // To Do -> Pueden darse casos en los que un nodo se quede vacío
-        // To Do -> Pueden darse casos en los que haya que mover un conjunto de nodos
-        // To Do -> Actualizar las alturas de las lineas
-
-        var nodeToMove = nextLine.nodeList[ nodeId ];
-
-        newNode              = createNode( line );
-        newNode.style        = $.extend( {}, nodeToMove.style );
-        newNode.height       = nodeToMove.height;
-        newNode.string       = nodeToMove.string.slice( 0, charId + 1 );
-        nodeToMove.string    = nodeToMove.string.slice( charId + 1 );
-        line.totalChars     += newNode.string.length;
-        newLine.totalChars  -= newNode.string.length;
-
-        measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
-        measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
-
-        line.nodeList.push( newNode );
-        
-        measureLineJustify( paragraph, line, id );
-        return counter;
-
-    }
-
-    //console.log('no hay palabra rota', id, line );
-
-    //console.log( 3, getTotalNodesInsideLines( paragraph.lineList ) );
-
-    counter.realocation = true;
-
-    // Comprobamos si la última palabra a mover comparte nodo con la siguiente y hay que partir
-    var lastWordToMove = wordsToMove.slice( -1 )[ 0 ];
-    var charsToMove    = 0;
-
-    //console.log( line.nodeList.length );
-
-    // Mismos nodos, necesitamos partir
-    if( nextLineWords[ lastWordToMove + 1 ] && nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] === nextLineWords[ lastWordToMove + 1 ].nodeList[ 0 ] ){
-        
-        // Comprobamos si la primera palabra a mover tiene el mismo nodo que la ultima a mover
-        // Partido de un solo nodo
-        if( nextLineWords[ 0 ].nodeList[ 0 ] === nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] ){
-
-            var nextNode = nextLine.nodeList[ nextLineWords[ 0 ].nodeList[ 0 ] ]; // Estamos poniendo nextLineWords[ 0 ].nodeList[ 0 ] pero teóricamente debe ser siempre el 0, puede comprobarse empíricamente y optimizarlo en un futuro
-
-            for( i = 0; i < wordsToMove.length; i++ ){
-                charsToMove += nextLineWords[ wordsToMove[ i ] ].string.length;
-            }
-
-            newNode              = createNode( line );
-            newNode.string       = nextNode.string.slice( 0, charsToMove );
-            newNode.charList     = nextNode.charList.slice( 0, charsToMove );
-            newNode.width        = newNode.charList.slice( -1 )[ 0 ];
-            newNode.style        = $.extend( {}, nextNode.style );
-            newNode.height       = nextNode.height;
-            line.nodeList        = line.nodeList.concat( newNode );
-            line.totalChars     += charsToMove;
-            nextLine.nodeList    = nextLine.nodeList.slice( nextLineWords[ 0 ].nodeList[ 0 ] ); // Estamos poniendo nextLineWords[ 0 ].nodeList[ 0 ] pero teóricamente debe ser siempre el 0, puede comprobarse empíricamente y optimizarlo en un futuro
-            nextLine.totalChars -= charsToMove;
-            nextNode.string      = nextNode.string.slice( charsToMove );
-            nextNode.charList    = [];
-
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= nextNode.string.length; i++ ){
-                nextNode.charList.push( ctx.measureText( nextNode.string.slice( 0, i ) ).width );
-            }
-
-            nextNode.width = nextNode.charList.slice( -1 )[ 0 ];
-
-        // Movimiento de nodos y partido del último
+        // Si hay que partir un nodo
         }else{
-            // To Do
-            console.log('to do - movimiento de nodos y partido del ultimo');
+            
+            var nodeToMove = nextLine.nodeList[ lastNodeToMove ];
+            var totalChars = 0;
+
+            for( i = 0; i < lastNodeToMove; i++ ){
+                totalChars += nextLine.nodeList[ i ].charList.length;
+            }
+
+            line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, lastNodeToMove ) );
+            line.totalChars     += totalChars;
+            nextLine.nodeList    = nextLine.nodeList.slice( lastNodeToMove );
+            nextLine.totalChars -= totalChars;
+            newNode              = createNode( line );
+            newNode.style        = $.extend( {}, nodeToMove.style );
+            newNode.height       = nodeToMove.height;
+            newNode.string       = nodeToMove.string.slice( 0, lastWordOffset[ 1 ] + 1 );
+            nodeToMove.string    = nodeToMove.string.slice( lastWordOffset[ 1 ] + 1 );
+            line.totalChars     += newNode.string.length;
+            newLine.totalChars  -= newNode.string.length;
+
+            measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
+            measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
+
+            line.nodeList.push( newNode );
+
         }
-        
-    // Distintos nodos, podemos mover los nodos completos
+
+        // Si hemos dejado vacía la siguiente línea la eliminamos y volvemos a invocar el método por si podemos traer algo d ela siguiente
+        if( !nextLine.nodeList.length ){
+
+            paragraph.lineList  = paragraph.lineList.slice( 0, id + 1 ).concat( paragraph.lineList.slice( id + 2 ) );
+            counter            += realocateLineInverse( paragraph, id, 0, true );
+
+        }
+
+        measureLineJustify( paragraph, line, id );
+
+    // Si es una palabra rota
     }else{
 
-        //console.log(4);
-        logParagraphText();
-        //console.log( wordsToMove );
-
-        for( i = 0; i < wordsToMove.length; i++ ){
-            charsToMove += nextLineWords[ wordsToMove[ i ] ].string.length;
-        }
-
-        //console.log( 'line b', line.nodeList.length );
-        line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 ) );
-        //console.log( 'line d', line.nodeList.length, line.nodeList );
-        line.totalChars     += charsToMove;
-        //console.log( 'next b', id + 1, nextLine.nodeList.length, nextLine.totalChars );
-        nextLine.nodeList    = nextLine.nodeList.slice( nextLineWords[ lastWordToMove ].nodeList.slice( -1 )[ 0 ] + 1 );
-        nextLine.totalChars -= charsToMove;
-        //console.log( 'next d', id + 1, nextLine.nodeList.length, nextLine.totalChars );
-
-        // To Do -> Que pasa si el siguiente nodo se queda vacio?
-
-        //console.log(5);
-        logParagraphText();
-        //console.log(' ');
-
-    }
-
-    // Actualizamos los tamaños
-    maxSize = 0;
+        var nextLine      = paragraph.lineList[ id + 1 ];
+        var currentWidth  = getNodesWidth( line );
+        var nextLineWords = getWordsMetrics( nextLine );
+        var heritage      = 0;
+        var wordsToMove   = [];
     
-    for( j = 0; j < line.nodeList.length; j++ ){
-
-        if( line.nodeList[ j ].height > maxSize ){
-            maxSize = line.nodeList[ j ].height;
-        }
-
-    }
-
-    if( maxSize !== line.height ){
-
-        paragraph.height -= line.height * paragraph.spacing;
-        paragraph.height += maxSize * paragraph.spacing;
-        line.height       = maxSize;
-
-    }
-
-    //console.log(6);
-    //logParagraphText();
-
-    maxSize = 0;
+        for( i = 0; i < nextLineWords.length; i++ ){
     
-    for( j = 0; j < nextLine.nodeList.length; j++ ){
-
-        if( nextLine.nodeList[ j ].height > maxSize ){
-            maxSize = nextLine.nodeList[ j ].height;
+            if( currentWidth + heritage + nextLineWords[ i ].widthTrim > line.width ){
+                break;
+            }
+    
+            wordsToMove.push( i );
+            
+            heritage += nextLineWords[ i ].width;
+    
         }
 
-    }
+        if( !wordsToMove.length ){
+            
+            var nodeToMove   = null;
+            var nodeId       = null;
+            var charId       = null;
+            var heritage     = 0;
 
-    if( maxSize !== nextLine.height ){
+            for( i = 0; i < nextLine.nodeList.length; i++ ){
+                
+                // To Do -> Estamos seguros que es el comportamiento correcto en el caso de que sea igual?
+                if( nextLine.nodeList[ i ].width + heritage + currentWidth >= line.width ){
+                    nodeId = i;
+                    break;
+                }
 
-        paragraph.height -= nextLine.height * paragraph.spacing;
-        paragraph.height += maxSize * paragraph.spacing;
-        nextLine.height   = maxSize;
+                heritage += nextLine.nodeList[ i ].width;
+
+            }
+
+            if( nodeId === null ){
+
+                nodeId    = nextLine.nodeList.length - 1;
+                heritage -= nextLine.nodeList[ nodeId ].width;
+
+            }
+
+            nodeToMove = nextLine.nodeList[ nodeId ];
+
+            for( i = 0; i < nodeToMove.charList.length; i++ ){
+                
+                if( heritage + nodeToMove.charList[ i ] + currentWidth > line.width ){
+                    charId = i - 1;
+                    break;
+                }
+
+                if( heritage + nodeToMove.charList[ i ] + currentWidth === line.width ){
+                    charId = i;
+                    break;
+                }
+
+            }
+
+            if( charId === -1 ){
+
+                if( nodeId === 0 ){
+                    //measureLineJustify( paragraph, line, id );
+                    return counter;
+                }
+
+                nodeId     = nodeId - 1;
+                nodeToMove = nextLine.nodeList[ nodeId ];
+                charId     = nodeToMove.charList.length - 1;
+
+            }
+
+            if( charId === null ){
+                // To Do -> Se necesitará invocar de nuevo la función para ver si hay que arrastrar las siguientes líneas. Seguro que hace falta? O solo cuando no se encontró nodo?
+                charId = nodeToMove.charList.length - 1;
+            }
+
+            // Movemos todos los nodos anteriores
+            // Si hay que mover entero tambien el nodo de "corte"
+            if( nodeToMove.charList.length - 1 === charId ){
+
+                var totalChars = 0;
+
+                for( i = 0; i < nodeId + 1; i++ ){
+                    totalChars += nextLine.nodeList[ i ].charList.length;
+                }
+
+                line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, nodeId + 1 ) );
+                line.totalChars     += totalChars;
+                nextLine.nodeList    = nextLine.nodeList.slice( nodeId + 1 );
+                nextLine.totalChars -= totalChars;
+
+            // Si hay que cortar el nodo
+            }else{
+
+                var totalChars = 0;
+
+                for( i = 0; i < nodeId; i++ ){
+                    totalChars += nextLine.nodeList[ i ].charList.length;
+                }
+
+                line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, nodeId ) );
+                line.totalChars     += totalChars;
+                nextLine.nodeList    = nextLine.nodeList.slice( nodeId );
+                nextLine.totalChars -= totalChars;
+                newNode              = createNode( line );
+                newNode.style        = $.extend( {}, nodeToMove.style );
+                newNode.height       = nodeToMove.height;
+                newNode.string       = nodeToMove.string.slice( 0, charId + 1 );
+                nodeToMove.string    = nodeToMove.string.slice( charId + 1 );
+                line.totalChars     += newNode.string.length;
+                newLine.totalChars  -= newNode.string.length;
+
+                measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
+                measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
+
+                line.nodeList.push( newNode );
+
+            }
+
+        }else{
+
+            var lastWordToMove = nextLineWords[ wordsToMove.slice( -1 )[ 0 ] ];
+            var lastNodeToMove = lastWordToMove.nodeList.slice( -1 )[ 0 ];
+            var lastWordOffset = lastWordToMove.offset.slice( -1 )[ 0 ];
+
+            // Si hay que mover los nodos completos
+            if( nextLine.nodeList[ lastNodeToMove ].charList.length - 1 === lastWordOffset[ 1 ] ){
+
+                var totalChars = 0;
+
+                for( i = 0; i < lastNodeToMove + 1; i++ ){
+                    totalChars += nextLine.nodeList[ i ].charList.length;
+                }
+
+                line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, lastNodeToMove + 1 ) );
+                line.totalChars     += totalChars;
+                nextLine.nodeList    = nextLine.nodeList.slice( lastNodeToMove + 1 );
+                nextLine.totalChars -= totalChars;
+
+            }else{
+
+                // To Do -> No hemos podido testear el caso porque no hemos sabido emularlo
+                console.info('Caso no testeado: parte si, parte no. Avisar si se muestra este mensaje');
+
+                var nodeToMove = nextLine.nodeList[ lastNodeToMove ];
+                var totalChars = 0;
+
+                for( i = 0; i < lastNodeToMove; i++ ){
+                    totalChars += nextLine.nodeList[ i ].charList.length;
+                }
+
+                line.nodeList        = line.nodeList.concat( nextLine.nodeList.slice( 0, lastNodeToMove ) );
+                line.totalChars     += totalChars;
+                nextLine.nodeList    = nextLine.nodeList.slice( lastNodeToMove );
+                nextLine.totalChars -= totalChars;
+                newNode              = createNode( line );
+                newNode.style        = $.extend( {}, nodeToMove.style );
+                newNode.height       = nodeToMove.height;
+                newNode.string       = nodeToMove.string.slice( 0, lastWordOffset[ 1 ] + 1 );
+                nodeToMove.string    = nodeToMove.string.slice( lastWordOffset[ 1 ] + 1 );
+                line.totalChars     += newNode.string.length;
+                newLine.totalChars  -= newNode.string.length;
+
+                measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
+                measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
+
+                line.nodeList.push( newNode );
+
+            }
+
+        }
+        
+        // Si hemos dejado vacía la siguiente línea
+        if( !nextLine.nodeList.length ){
+
+            paragraph.lineList  = paragraph.lineList.slice( 0, id + 1 ).concat( paragraph.lineList.slice( id + 2 ) );
+            counter            += realocateLineInverse( paragraph, id, 0, true );
+
+        }
+
+        measureLineJustify( paragraph, line, id );
         
     }
 
-    if( !nextLine.totalChars ){
-
-        //console.log( 'nextLine vacia', paragraph.lineList.length );
-        paragraph.lineList  = paragraph.lineList.slice( 0, id + 1 ).concat( paragraph.lineList.slice( id + 2 ) );
-        //console.log( 'nextLine vaciada', paragraph.lineList.length );
-        paragraph.height   -= nextLine.height * paragraph.spacing;
-
-    }
-
-    //console.log(7);
-    //logParagraphText();
-
-    //console.log( 5, getTotalNodesInsideLines( paragraph.lineList ) );
-
-    if( !dontPropagate ){
-        //console.log( 'vamos a probar', paragraph.lineList[ id + 1 ].nodeList.length );
-        realocateLineInverse( paragraph, id + 1, 0 );
-    }
-
-    //console.log(8);
-    //logParagraphText();
-
-    // To Do -> Esto es un fixeo no muy óptimo, no se están actualizando bien las alturas de los párrafos. Hacerlo más optimo.
-    //          Para emular el error necesitamos 1 párrafo de varias lineas, una linea en blanco, 1 párrafo de varias lineas,
-    //          una linea en blanco y 1 párrafo de varias lineas.
-    //          Nos vamos al principio del segundo párrafo con contenido y borramos. Volvemos a borrar. Si intentamos seleccionar
-    //          el segundo párrafo vacio no se pondrá el cursor en posición correcta porque el primer párrafo ahora no tendrá la
-    //          altura adecuada.
-
-    var height = 0;
-
-    for( i = 0; i < paragraph.lineList.length; i++ ){
-        height += paragraph.lineList[ i ].height;
-    }
-
-    paragraph.height = height;
-
-    normalizeLine( line );
-
-    //console.log(9);
-    //logParagraphText();
-    
-    measureLineJustify( paragraph, line, id );
-
-    //console.log( 6, getTotalNodesInsideLines( paragraph.lineList ) );
-    //console.log(10);
-    //logParagraphText();
+    // To Do -> Actualizar las alturas de las lineas
+    // To Do -> Actualizar el counter
+    // To Do -> Ver en que casos hacer measureJustifyLine
 
     return counter;
 
@@ -6062,8 +6034,6 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         if( value >= 0 ){
 
-            //console.log('mas');
-            //logAllNodesWidth();
             logParagraphText();
 
             for( i = 0; i < paragraph.lineList.length; i++ ){
@@ -6071,24 +6041,19 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
             }
 
             logParagraphText();
-            //logAllNodesWidth();
-            //console.log(' ');
+            logAllNodesWidth();
 
         }else{
 
-            //console.log('menos');
-            //logAllNodesWidth();
             logParagraphText();
 
             for( i = 0; i < paragraph.lineList.length; i++ ){
-                console.log( 'iteracion', i );
                 realocateLineInverse( paragraph, i, 0 );
-                logParagraphText();
+                
             }
 
-            //logParagraphText();
-            //logAllNodesWidth();
-            console.log(' ');
+            logParagraphText();
+            logAllNodesWidth();
 
         }
 
@@ -7226,8 +7191,6 @@ var setSelectedParagraphsStyle = function( key, value ){
 
             while( true ){
 
-                //console.log( currentParagraph.lineList[ currentLineId ].totalChars, charInParagraphStart );
-
                 if( currentParagraph.lineList[ currentLineId ].totalChars >= charInParagraphStart ){
                     break;
                 }
@@ -7242,8 +7205,6 @@ var setSelectedParagraphsStyle = function( key, value ){
             currentNodeId     = 0;
 
             while( true ){
-
-                //console.log( currentLine.nodeList[ currentNodeId ].string, charInParagraphStart );
 
                 if( currentLine.nodeList[ currentNodeId ].string.length >= charInParagraphStart ){
                     break;
