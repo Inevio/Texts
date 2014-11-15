@@ -18,6 +18,7 @@ var BROWSER_IE = 1;
 var BROWSER_WEBKIT = 2;
 var BROWSER_TYPE = /webkit/i.test( navigator.userAgent ) ? BROWSER_WEBKIT : ( /trident/i.test( navigator.userAgent ) ? BROWSER_IE : BROWSER_FIREFOX );
 var CENTIMETER = 37.795275591;
+var CHUNK_FILE_NODES = 40;
 var CMD_SYNC = 0;
 var CMD_DOCUMENT = 1;
 var CMD_DOCUMENT_READY = 2;
@@ -475,13 +476,13 @@ var chunkFileNodes = function( node ){
     var current = node;
     var tmp;
 
-    if( current.string.length > 50 ){
+    if( current.string.length > CHUNK_FILE_NODES ){
 
-        while( current.string.length > 50 ){
+        while( current.string.length > CHUNK_FILE_NODES ){
 
             tmp            = $.extend( {}, current );
-            current.string = current.string.slice( 0, 50 );
-            tmp.string     = tmp.string.slice( 50 );
+            current.string = current.string.slice( 0, CHUNK_FILE_NODES );
+            tmp.string     = tmp.string.slice( CHUNK_FILE_NODES );
 
             nodes.push( current );
 
@@ -2596,9 +2597,11 @@ var handleBackspaceNormal = function( dontSend ){
 
         }else{
 
-            var prevLine = currentParagraph.lineList[ currentLineId - 1 ];
-            var prevNode = prevLine.nodeList.slice( -1 )[ 0 ];
-            var original = prevLine.totalChars - 1;
+            var localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
+            var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
+            var prevLine         = currentParagraph.lineList[ currentLineId - 1 ];
+            var prevNode         = prevLine.nodeList.slice( -1 )[ 0 ];
+            var original         = prevLine.totalChars - 1;
 
             prevNode.string           = prevNode.string.slice( 0, -1 );
             prevNode.charList         = prevNode.charList.slice( 0, -1 );
@@ -2622,26 +2625,22 @@ var handleBackspaceNormal = function( dontSend ){
 
             prevLine.height          = maxSize;
             currentParagraph.height += maxSize * currentParagraph.spacing; // To Do -> Estamos seguros de que esto es correcto?
-            currentLineId            = currentLineId - 1;
-            currentLine              = currentParagraph.lineList[ currentLineId ];
 
-            var realocate = realocateLine( currentPageId, currentParagraph, currentLineId, original );
+            console.log( currentLineId - 1, currentParagraph.lineList[ currentLineId - 1 ] );
 
-            //measureLineJustify( currentParagraph, currentLine, currentLineId );
-            
-            if( realocate >= 0 ){
+            var realocate        = realocateLine( currentPageId, currentParagraph, currentLineId - 1, original );
+            var updatedPosition  = getElementsByRemoteParagraph( localParagraphId, localCharId );
 
-                currentLineId     = currentLineId + 1;
-                currentLine       = currentParagraph.lineList[ currentLineId ];
-                currentLineCharId = realocate;
-
-                var positions = getNodeInPosition( currentLine, realocate );
-
-                currentNodeId     = positions.nodeId;
-                currentNode       = currentLine.nodeList[ currentNodeId ];
-                currentNodeCharId = positions.nodeChar;
-
-            }
+            currentPageId      = updatedPosition.pageId;
+            currentPage        = updatedPosition.page;
+            currentParagraphId = updatedPosition.paragraphId;
+            currentParagraph   = updatedPosition.paragraph;
+            currentLineId      = updatedPosition.lineId;
+            currentLine        = updatedPosition.line;
+            currentLineCharId  = updatedPosition.lineChar;
+            currentNodeId      = updatedPosition.nodeId;
+            currentNode        = updatedPosition.node;
+            currentNodeCharId  = updatedPosition.nodeChar;
 
         }
 
@@ -3093,59 +3092,27 @@ var handleCharNormal = function( newChar, dontSend ){
     currentLineCharId      += newChar.length;
     currentNodeCharId      += newChar.length;
 
-    var realocation = realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId );
+    var localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
+    var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
+    var realocation      = realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId );
 
     //measureLineJustify( currentParagraph, currentLine, currentLineId );
 
     if( realocation > 0 ){
 
-        currentLineId++;
+        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId );
 
-        currentLine = currentParagraph.lineList[ currentLineId ];
+        setCursor(
 
-        var forceCursor = false;
+            updatedPosition.pageId,
+            updatedPosition.paragraphId,
+            updatedPosition.lineId,
+            updatedPosition.lineChar,
+            updatedPosition.nodeId,
+            updatedPosition.nodeChar,
+            true
 
-        if( !currentLine ){
-
-            forceCursor         = true;
-            currentPageId      += 1;
-            currentPage         =  pageList[ currentPageId ];
-            currentParagraphId  = 0;
-            currentParagraph    = currentPage.paragraphList[ currentParagraphId ];
-            currentLineId       = 0;
-            currentLine         = currentParagraph.lineList[ currentLineId ];
-
-            // To Do -> Cambiar el cursor con un setCursor
-        }
-
-        currentLineCharId = realocation;
-        newNode           = getNodeInPosition( currentLine, currentLineCharId );
-        currentNodeId     = newNode.nodeId;
-        currentNode       = currentLine.nodeList[ currentNodeId ];
-        currentNodeCharId = newNode.nodeChar;
-        temporalStyle     = null;
-
-        if( forceCursor ){
-            setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
-        }else{
-
-            positionAbsoluteY += currentLine.height * currentParagraph.spacing;
-
-            // Reiniciamos la posición horizontal
-            positionAbsoluteX  = 0;
-            positionAbsoluteX += currentPage.marginLeft;
-            positionAbsoluteX += getLineIndentationLeftOffset( currentLineId, currentParagraph );
-            positionAbsoluteX += getLineOffset( currentLine, currentParagraph );
-
-            for( i = 0; i < currentNodeId; i++ ){
-                positionAbsoluteX += currentLine.nodeList[ i ].width;
-            }
-
-            positionAbsoluteX += currentNode.charList[ currentNodeCharId - 1 ];
-
-            calculateScroll();
-
-        }
+        );
 
     }else if( temporalStyle ){
 
@@ -5193,6 +5160,7 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
+    // To Do -> Debe fusionar los nodos iguales contiguos de la línea
 
     return counter;
 
@@ -5574,6 +5542,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
+    // To Do -> Debe fusionar los nodos iguales contiguos de la línea
 
     return counter;
 
@@ -6224,26 +6193,16 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
         if( value >= 0 ){
 
-            logParagraphText();
-
             for( i = 0; i < paragraph.lineList.length; i++ ){
-                realocateLine( pageId, paragraph, i, 0 );
+                realocateLine( pageId, paragraph, i, 0, true );
             }
-
-            logParagraphText();
-            logAllNodesWidth();
 
         }else{
 
-            logParagraphText();
-
             for( i = 0; i < paragraph.lineList.length; i++ ){
-                realocateLineInverse( paragraph, i, 0 );
+                realocateLineInverse( paragraph, i, 0, true );
                 
             }
-
-            logParagraphText();
-            logAllNodesWidth();
 
         }
 
@@ -6310,7 +6269,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         }
 
         for( i = 0; i < paragraph.lineList.length; i++ ){
-            realocateLine( pageId, paragraph, i, 0 );
+            realocateLine( pageId, paragraph, i, 0, true );
         }
 
     }else if( key === 'listNone' ){
@@ -7031,11 +6990,11 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
         mapRangeParagraphs( rangeStart, rangeEnd, function( pageId, page, paragraphId, paragraph ){
 
             for( var i = 0; i < paragraph.lineList.length; i++ ){
-                realocateLine( pageId, paragraph, i, 0 );
+                realocateLine( pageId, paragraph, i, 0, true );
             }
 
             for( var j = 0; j < paragraph.lineList.length; j++ ){
-                realocateLineInverse( paragraph, j, 0 );
+                realocateLineInverse( paragraph, j, 0, true );
             }
 
         });
