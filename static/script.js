@@ -4896,11 +4896,10 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
     var lineWords = getWordsMetrics( line );
 
     // To Do -> Linea llena de espacios
-    // To Do -> Hacer un caso optimizado por si la primera palabra no entra
 
     // Si no hay palabras
     if( !lineWords.length ){
-        //measureLineJustify( paragraph, line, id );
+        measureLineJustify( paragraph, line, id );
         return counter;
 
     // Procedimientos para 2 o más palabras y la primera palabra de la línea entra
@@ -4927,6 +4926,7 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         }
 
         if( !wordsToMove.length ){
+            measureLineJustify( paragraph, line, id );
             return counter;
         }
 
@@ -5024,8 +5024,6 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         }
 
         paragraph.height = height;
-
-        //measureLineJustify( paragraph, line, id );
         
     // Si es una palabra rota
     }else if( lineWords[ 0 ].widthTrim > line.width ){
@@ -5054,9 +5052,9 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
 
         }
 
-        var nodeId       = i;
-        var nodeToMove   = line.nodeList[ nodeId ];
-        var charId       = 0;
+        var nodeId     = i;
+        var nodeToMove = line.nodeList[ nodeId ];
+        var charId     = 0;
 
         for( i = 0; i < nodeToMove.charList.length; i++ ){
 
@@ -5072,12 +5070,8 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
 
         }
 
-        console.log( nodeId, charId );
-
         // Si es al principio del nodo hacemos un movimiento simple
         if( charId === 0) {
-
-            console.log('simple');
 
             var totalChars = 0;
 
@@ -5093,8 +5087,6 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
 
         // Si es en medio de un nodo hay que partir los nodos
         }else{
-
-            console.log('partido de nodos');
 
             var totalChars = 0;
 
@@ -5156,19 +5148,24 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         }
 
         paragraph.height = height;
-
-        //measureLineJustify( paragraph, line, id );
         
     }
 
-    // To Do -> Ver en que casos hacer measureJustifyLine
-    // To Do -> Propagación
+    if( !dontPropagate ){
+        realocateLine( pageId, paragraph, id + 1, 0 );
+    }
+
+    measureLineJustify( paragraph, line, id );
+
+    // To Do -> Actualizar el counter bien
 
     return counter;
 
 };
 
 var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate ){
+
+    // To Do -> Debe funcionar tambien para recoger contenido de la linea siguiente si un párrafo está roto
 
     var line    = paragraph.lineList[ id ];
     var counter = 0;
@@ -5185,12 +5182,12 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     // Si no hay palabras
     if( !lineWords.length ){
-        //measureLineJustify( paragraph, line, id );
+        measureLineJustify( paragraph, line, id );
         return counter;
 
     // Si es la última palabra del párrafo
     }else if( paragraph.lineList.length - 1 === id ){
-        //measureLineJustify( paragraph, line, id );
+        measureLineJustify( paragraph, line, id );
         return counter;
 
     // Procedimientos para 2 o más palabras o 1 sola palabra con espacios al final
@@ -5215,6 +5212,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         }
 
         if( !wordsToMove.length ){
+            measureLineJustify( paragraph, line, id );
             return counter;
         }
 
@@ -5265,15 +5263,50 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
         }
 
-        // Si hemos dejado vacía la siguiente línea la eliminamos y volvemos a invocar el método por si podemos traer algo d ela siguiente
+        // Actualizamos la altura de la línea actual
+        var maxSize = 0;
+
+        for( i = 0; i < line.nodeList.length; i++ ){
+
+            if( line.nodeList[ i ].height > maxSize ){
+                maxSize = line.nodeList[ i ].height;
+            }
+
+        }
+        
+        line.height = maxSize;
+
+        // Si hemos dejado vacía la siguiente línea la eliminamos y volvemos a invocar el método por si podemos traer algo de la siguiente
         if( !nextLine.nodeList.length ){
 
             paragraph.lineList  = paragraph.lineList.slice( 0, id + 1 ).concat( paragraph.lineList.slice( id + 2 ) );
             counter            += realocateLineInverse( paragraph, id, 0, true );
 
+        }else{
+
+            // Actualizamos la altura de la siguiente línea
+            maxSize = 0;
+
+            for( i = 0; i < nextLine.nodeList.length; i++ ){
+
+                if( nextLine.nodeList[ i ].height > maxSize ){
+                    maxSize = nextLine.nodeList[ i ].height;
+                }
+
+            }
+
+            nextLine.height = maxSize;
+
         }
 
-        measureLineJustify( paragraph, line, id );
+        // Actualizamos la altura del párrafo
+        var height = 0;
+
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            height += paragraph.lineList[ i ].height;
+        }
+
+        paragraph.height = height;
 
     // Si es una palabra rota
     }else{
@@ -5341,7 +5374,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             if( charId === -1 ){
 
                 if( nodeId === 0 ){
-                    //measureLineJustify( paragraph, line, id );
+                    measureLineJustify( paragraph, line, id );
                     return counter;
                 }
 
@@ -5451,6 +5484,19 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             }
 
         }
+
+        // Actualizamos la altura de la línea actual
+        var maxSize = 0;
+
+        for( i = 0; i < line.nodeList.length; i++ ){
+
+            if( line.nodeList[ i ].height > maxSize ){
+                maxSize = line.nodeList[ i ].height;
+            }
+
+        }
+        
+        line.height = maxSize;
         
         // Si hemos dejado vacía la siguiente línea
         if( !nextLine.nodeList.length ){
@@ -5458,16 +5504,41 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             paragraph.lineList  = paragraph.lineList.slice( 0, id + 1 ).concat( paragraph.lineList.slice( id + 2 ) );
             counter            += realocateLineInverse( paragraph, id, 0, true );
 
+        }else{
+
+            // Actualizamos la altura de la siguiente línea
+            maxSize = 0;
+
+            for( i = 0; i < nextLine.nodeList.length; i++ ){
+
+                if( nextLine.nodeList[ i ].height > maxSize ){
+                    maxSize = nextLine.nodeList[ i ].height;
+                }
+
+            }
+
+            nextLine.height = maxSize;
+
         }
 
-        measureLineJustify( paragraph, line, id );
+        // Actualizamos la altura del párrafo
+        var height = 0;
+
+        for( i = 0; i < paragraph.lineList.length; i++ ){
+            height += paragraph.lineList[ i ].height;
+        }
+
+        paragraph.height = height;
         
     }
 
-    // To Do -> Actualizar las alturas de las lineas
-    // To Do -> Actualizar el counter
-    // To Do -> Ver en que casos hacer measureJustifyLine
-    // To Do -> Propagación
+    if( !dontPropagate ){
+        realocateLineInverse( paragraph, id + 1, 0 );
+    }
+
+    measureLineJustify( paragraph, line, id );
+
+    // To Do -> Actualizar el counter bien
 
     return counter;
 
