@@ -469,6 +469,34 @@ var checkTemporalStyle = function( key, useCurrentNode ){
 
 };
 
+var chunkFileNodes = function( node ){
+
+    var nodes   = [];
+    var current = node;
+    var tmp;
+
+    if( current.string.length > 50 ){
+
+        while( current.string.length > 50 ){
+
+            tmp            = $.extend( {}, current );
+            current.string = current.string.slice( 0, 50 );
+            tmp.string     = tmp.string.slice( 50 );
+
+            nodes.push( current );
+
+            current = tmp;
+
+        }
+
+    }else{
+        nodes.push( current );
+    }
+
+    return nodes;
+
+};
+
 var cleanComposition = function( isEnd ){
 
     if( !isEnd && compositionCounter ){
@@ -4776,7 +4804,8 @@ var processFile = function( data, noDecode ){
 
     //console.log( JSON.stringify( data, null, 4 ) );
 
-    var i, j, value;
+    var i, j, k, value;
+    var chunkedNodes;
     var node;
     var line;
     var paragraph;
@@ -4837,23 +4866,29 @@ var processFile = function( data, noDecode ){
 
         for( j = 0; j < data.paragraphList[ i ].nodeList.length; j++ ){
             
-            // To Do -> Importar estilos
+            // To Do -> Importar estilos. ¿A que se refiere esto?
 
-            node         = createNode( line );
-            node.string  = data.paragraphList[ i ].nodeList[ j ].string;
-            node.blocked = !!data.paragraphList[ i ].nodeList[ j ].blocked;
+            chunkedNodes = chunkFileNodes( data.paragraphList[ i ].nodeList[ j ] );
 
-            setNodeStyle( paragraph, line, node, 'color', data.paragraphList[ i ].nodeList[ j ].style.color );
-            setNodeStyle( paragraph, line, node, 'font-family', data.paragraphList[ i ].nodeList[ j ].style['font-family'] );
-            setNodeStyle( paragraph, line, node, 'font-style', data.paragraphList[ i ].nodeList[ j ].style['font-style'] );
-            setNodeStyle( paragraph, line, node, 'font-weight', data.paragraphList[ i ].nodeList[ j ].style['font-weight'] );
-            setNodeStyle( paragraph, line, node, 'text-decoration-underline', data.paragraphList[ i ].nodeList[ j ].style['text-decoration-underline'] );
-            setNodeStyle( paragraph, line, node, 'font-size', data.paragraphList[ i ].nodeList[ j ].style['font-size'] );
+            for( k = 0; k < chunkedNodes.length; k++ ){
 
-            measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
-            line.nodeList.push( node );
+                node         = createNode( line );
+                node.string  = chunkedNodes[ k ].string;
+                node.blocked = !!chunkedNodes[ k ].blocked;
 
-            line.totalChars += node.string.length;
+                setNodeStyle( paragraph, line, node, 'color', chunkedNodes[ k ].style.color );
+                setNodeStyle( paragraph, line, node, 'font-family', chunkedNodes[ k ].style['font-family'] );
+                setNodeStyle( paragraph, line, node, 'font-style', chunkedNodes[ k ].style['font-style'] );
+                setNodeStyle( paragraph, line, node, 'font-weight', chunkedNodes[ k ].style['font-weight'] );
+                setNodeStyle( paragraph, line, node, 'text-decoration-underline', chunkedNodes[ k ].style['text-decoration-underline'] );
+                setNodeStyle( paragraph, line, node, 'font-size', chunkedNodes[ k ].style['font-size'] );
+
+                measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
+                line.nodeList.push( node );
+
+                line.totalChars += node.string.length;
+
+            }
 
         }
 
