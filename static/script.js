@@ -76,7 +76,7 @@ var PAGEDIMENSIONS = {
 
     'US Letter'          : { width : 21.59, height : 27.94 },
     'US Legal'           : { width : 21.59, height : 35.56 },
-    'A4'                 : { width : /*21*/10,    height : 29.7  },
+    'A4'                 : { width : 21,    height : 29.7  },
     'A5'                 : { width : 14.81, height : 20.99 },
     'JIS B5'             : { width : 18.2,  height : 25.71 },
     'B5'                 : { width : 17.6,  height : 25.01 },
@@ -2962,7 +2962,7 @@ var handleDelNormal = function( dontSend ){
         currentLineId === currentParagraph.lineList.length - 1 &&
         currentLineCharId === currentLine.totalChars
     ){
-        console.log( 'final del documento, se ignora' );
+        console.info( 'final del documento, se ignora' );
         return;
     }
 
@@ -2990,6 +2990,7 @@ var handleDelNormal = function( dontSend ){
 
         }
 
+        // To Do
         console.log('to do');
 
     }else{
@@ -3378,11 +3379,13 @@ var handleEnter = function( dontSend ){
 
 };
 
-var handleRemoteBackspace = function(  pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar  ){
+var handleRemoteBackspace = function( pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar  ){
+
+    // To Do -> Seguramente haya que revisar el realocateLineInverse
 
     // Principio del documento
     if( !pageId && !paragraphId && !lineId && !lineChar ){
-        console.log( 'principio del documento, se ignora' );
+        console.info( 'principio del documento, se ignora' );
         return;
     }
 
@@ -5148,11 +5151,11 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         realocateLine( pageId, paragraph, id + 1, 0 );
     }
 
+    normalizeLine( line );
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
-    // To Do -> Debe fusionar los nodos iguales contiguos de la línea
-
+    
     return counter;
 
 };
@@ -5530,10 +5533,10 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         realocateLineInverse( paragraph, id + 1, 0 );
     }
 
+    normalizeLine( line );
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
-    // To Do -> Debe fusionar los nodos iguales contiguos de la línea
 
     return counter;
 
@@ -8324,11 +8327,11 @@ selections
 
         );
 
-        console.log('selecciona la palabra', wordId, word );
+        console.info('selecciona la palabra', wordId, word );
 
     // Click que coincide con los clicks previos y corresponde a seleccionar el párrafo
     }else if( clickCounter === 3 ){
-        console.log('seleccionamos el párrafo', paragraphId, paragraph );
+        console.info('seleccionamos el párrafo', paragraphId, paragraph );
 
         selectionStart = {
 
