@@ -2491,7 +2491,7 @@ var handleBackspaceNormal = function( dontSend ){
 
     // Principio del documento
     if( !currentPageId && !currentParagraphId && !currentLineId && !currentLineCharId ){
-        console.log( 'principio del documento, se ignora' );
+        console.info( 'principio del documento, se ignora' );
         return;
     }
 
@@ -2510,88 +2510,74 @@ var handleBackspaceNormal = function( dontSend ){
 
             // Si hay contenido fusionamos los párrafos
             var prevParagraph;
-            var mergeParagraphs;
-            var pageId;
-            var mergePreLastLine;
+            var mergeParagraphs  = currentLine.totalChars > 0;
+            var pageId           = currentPageId;
+            var mergePreLastLine = 0;
+            var localParagraphId = 0;
+            var localCharId      = 0;
 
             // El párrafo es el primero de la página
             if( currentParagraphId === 0 ){
-                prevParagraph = pageList[ currentPageId - 1 ].paragraphList[ pageList[ currentPageId - 1 ].paragraphList.length - 1 ];
+
+                prevParagraph    = pageList[ currentPageId - 1 ].paragraphList[ pageList[ currentPageId - 1 ].paragraphList.length - 1 ];
+                localParagraphId = getGlobalParagraphId( currentPageId - 1, pageList[ currentPageId - 1 ].paragraphList.length - 1 );
+
             }else{
-                prevParagraph = currentPage.paragraphList[ currentParagraphId - 1 ];
+
+                prevParagraph    = currentPage.paragraphList[ currentParagraphId - 1 ];
+                localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId - 1 );
+
             }
 
-            mergeParagraphs = currentLine.totalChars > 0;
-            pageId          = currentPageId;
+            for( var i = 0; i < prevParagraph.lineList.length; i++ ){
+                localCharId += prevParagraph.lineList[ i ].totalChars;
+            }
+
+            if( currentParagraphId === 0 ){
+                updateRuleLeft();
+            }
 
             if( mergeParagraphs ){
 
-                mergePreLastLine        = prevParagraph.lineList.length - 1;
-                prevParagraph.lineList  = prevParagraph.lineList.concat( currentParagraph.lineList );
-                prevParagraph.height   += currentParagraph.height;
+                mergePreLastLine = prevParagraph.lineList.length - 1;
+
+                var lastLine = prevParagraph.lineList[ mergePreLastLine ];
+
+                for( var i = 0; i < currentParagraph.lineList.length; i++ ){
+
+                    lastLine.nodeList    = lastLine.nodeList.concat( currentParagraph.lineList[ i ].nodeList );
+                    lastLine.totalChars += currentParagraph.lineList[ i ].totalChars;
+
+                    if( currentParagraph.lineList[ i ].height > lastLine.height ){
+
+                        prevParagraph.height = prevParagraph.height - lastLine.height + currentParagraph.lineList[ i ],height;
+                        lastLine.height      = currentParagraph.lineList[ i ].height;
+
+                    }
+
+
+                }
 
             }
 
             currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
-
-            if( currentParagraphId - 1 >= 0 ){
-                currentParagraphId = currentParagraphId - 1;
-            }else{
-
-                currentPageId      = currentPageId - 1;
-                currentPage        = pageList[ currentPageId ];
-                currentParagraphId = currentPage.paragraphList.length - 1;
-
-                updateRuleLeft();
-                
-            }
-
-            currentParagraph = currentPage.paragraphList[ currentParagraphId ];
-
+            
             if( mergeParagraphs ){
-
-                mergeParagraphs = realocateLineInverse( currentParagraph, mergePreLastLine + 1, currentLineCharId );
-
-                if( mergeParagraphs.realocation && mergeParagraphs.lineChar > 0 ){
-
-                    currentLineId     = mergePreLastLine;
-                    currentLine       = currentParagraph.lineList[ currentLineId ];
-                    currentLineCharId = mergeParagraphs.lineChar;
-                    nodePosition      = getNodeInPosition( currentLine, mergeParagraphs.lineChar );
-                    currentNodeId     = nodePosition.nodeId;
-                    currentNode       = currentLine.nodeList[ currentNodeId ];
-                    currentNodeCharId = nodePosition.nodeChar;
-
-                }else{
-
-                    /*
-                    currentLineId     = currentParagraph.lineList.length - 1;
-                    currentLine       = currentParagraph.lineList[ currentLineId ];
-                    currentLineCharId = currentLine.totalChars;
-                    currentNodeId     = currentLine.nodeList.length - 1;
-                    currentNode       = currentLine.nodeList[ currentNodeId ];
-                    currentNodeCharId = currentNode.string.length;
-                    */
-
-                    //currentLineId     = currentParagraph.lineList.length - 1;
-                    currentLine       = currentParagraph.lineList[ currentLineId ];
-                    //currentLineCharId = currentLine.totalChars;
-                    //currentNodeId     = currentLine.nodeList.length - 1;
-                    currentNode       = currentLine.nodeList[ currentNodeId ];
-                    //currentNodeCharId = currentNode.string.length;
-
-                }
-
-            }else{
-
-                currentLineId     = currentParagraph.lineList.length - 1;
-                currentLine       = currentParagraph.lineList[ currentLineId ];
-                currentLineCharId = currentLine.totalChars;
-                currentNodeId     = currentLine.nodeList.length - 1;
-                currentNode       = currentLine.nodeList[ currentNodeId ];
-                currentNodeCharId = currentNode.string.length;
-
+                realocateLine( currentPageId, prevParagraph, mergePreLastLine );
             }
+
+            var pos = getElementsByRemoteParagraph( localParagraphId, localCharId );
+
+            currentPageId      = pos.pageId;
+            currentPage        = pos.page;
+            currentParagraphId = pos.paragraphId;
+            currentParagraph   = pos.paragraph;
+            currentLineId      = pos.lineId;
+            currentLine        = pos.line;
+            currentLineCharId  = pos.lineChar;
+            currentNodeId      = pos.nodeId;
+            currentNode        = pos.node;
+            currentNodeCharId  = pos.nodeChar;
 
             realocatePageInverse( pageId );
 
@@ -2599,7 +2585,8 @@ var handleBackspaceNormal = function( dontSend ){
 
             var localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
             var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
-            var prevLine         = currentParagraph.lineList[ currentLineId - 1 ];
+            var prevLineId       = currentLineId - 1;
+            var prevLine         = currentParagraph.lineList[ prevLineId ];
             var prevNode         = prevLine.nodeList.slice( -1 )[ 0 ];
             var original         = prevLine.totalChars - 1;
 
@@ -2626,10 +2613,8 @@ var handleBackspaceNormal = function( dontSend ){
             prevLine.height          = maxSize;
             currentParagraph.height += maxSize * currentParagraph.spacing; // To Do -> Estamos seguros de que esto es correcto?
 
-            console.log( currentLineId - 1, currentParagraph.lineList[ currentLineId - 1 ] );
-
-            var realocate        = realocateLine( currentPageId, currentParagraph, currentLineId - 1, original );
-            var updatedPosition  = getElementsByRemoteParagraph( localParagraphId, localCharId );
+            var realocate       = realocateLine( currentPageId, currentParagraph, currentLineId - 1, original );
+            var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId );
 
             currentPageId      = updatedPosition.pageId;
             currentPage        = updatedPosition.page;
@@ -2641,6 +2626,11 @@ var handleBackspaceNormal = function( dontSend ){
             currentNodeId      = updatedPosition.nodeId;
             currentNode        = updatedPosition.node;
             currentNodeCharId  = updatedPosition.nodeChar;
+
+            if( realocate && currentParagraph.lineList.length - 1 > prevLineId ){
+                // To Do -> No se si esto es necesario. Comprobar si se ejecuta alguna vez, y si lo hace, cuantas veces realoca
+                realocateLineInverse( currentParagraph, prevLineId );
+            }
 
         }
 
@@ -2709,6 +2699,7 @@ var handleBackspaceNormal = function( dontSend ){
         return;
     }
 
+    // To Do -> Debe mandar las coordenadas en el nuevo sistema
     // To Do -> Basarse en las posiciones originales, no el las nuevas
     var paragraphId = originalParagraphId;
     var charId      = originalLineChar;
