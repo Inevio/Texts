@@ -821,7 +821,7 @@ var displaySaveSuccessFully = function(){
     wz.banner()
         .setTitle( 'Texts - ' + currentOpenFile.name )
         .setText( currentOpenFile.name + ' ' + lang.fileSaved )
-        .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
+        .setIcon( 'https://static.inevio.com/app/7/saved.png' )
         .render();
 
 };
@@ -8989,7 +8989,7 @@ toolsList
         wz.banner()
                 .setTitle( 'Texts - Exporting PDF...' )
                 .setText( name + ' is being exported' )
-                .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
+                .setIcon( 'https://static.inevio.com/app/7/saved.png' )
                 .render();
 
         wz.tool.textsDocumentToPdf( name, 'root', generateDocument(), function( error ){
@@ -9002,7 +9002,7 @@ toolsList
             wz.banner()
                 .setTitle( 'Texts - ' + name )
                 .setText( name + ' ' + lang.fileSaved )
-                .setIcon( 'https://static.inevio.com/app/7/floppy.png' )
+                .setIcon( 'https://static.inevio.com/app/7/saved.png' )
                 .render();
 
         });
