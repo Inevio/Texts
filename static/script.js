@@ -4228,16 +4228,16 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
         var heritage   = 0;
         var identation = getLineIndentationLeftOffset( lineId, paragraph );
 
-        for( i = nodeChar + 1; i <= node.string.length; i++ ){
+        for( i = nodeChar; i < node.string.length; i++ ){
 
             // Si no es un tabulador seguimos el procedimiento habitual
-            if( node.string[ i - 1 ] !== '\t' ){
-                node.charList.push( ctx.measureText( node.string.slice( 0, i ) ).width + heritage );
+            if( node.string[ i ] !== '\t' ){
+                node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width + heritage );
                 continue;
             }
 
             // Posición actual
-            current = ctx.measureText( node.string.slice( 0, i ) ).width + heritage;
+            current = ctx.measureText( node.string.slice( 0, i + 1 ) ).width + heritage;
 
             // Posición anterior
             prev = node.charList.slice( -1 )[ 0 ] || 0;
@@ -4260,8 +4260,8 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
 
     }else{
 
-        for( i = nodeChar + 1; i <= node.string.length; i++ ){
-            node.charList.push( ctx.measureText( node.string.slice( 0, i ) ).width );
+        for( i = nodeChar; i < node.string.length; i++ ){
+            node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width );
         }
 
     }
@@ -6692,17 +6692,8 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
         // Si es todo el nodo
         if( rangeStart.nodeChar === 0 && rangeEnd.nodeChar === rangeEnd.node.string.length ){
 
-            newNode          = rangeStart.node;
-            newNode.charList = [];
-
-            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, rangeStart.node, key, value );
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, rangeStart.nodeChar );
 
         // Si comienza por el principio del nodo
         }else if( rangeStart.nodeChar === 0 ){
@@ -6713,24 +6704,18 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
             newNode.height           = rangeStart.node.height;
             rangeStart.node.string   = rangeStart.node.string.slice( rangeEnd.nodeChar );
             rangeStart.node.charList = [];
-
-            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
-
-            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, 0, rangeStart.node, rangeStart.nodeId, 0 );
-
             rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId ).concat( newNode ).concat( rangeStart.line.nodeList.slice( rangeStart.nodeId ) );
             rangeStart.node          = rangeStart.line.nodeList[ rangeEnd.nodeId ];
             newPositions             = getNodeInPosition( rangeEnd.line, rangeEnd.lineChar );
             rangeEnd.nodeId          = newPositions.nodeId;
             rangeEnd.node            = rangeEnd.line.nodeList[ rangeEnd.nodeId ];
             rangeEnd.nodeChar        = newPositions.nodeChar;
+            currentNode              = currentLine.nodeList[ currentNodeId ];
+
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
+            setCanvasTextStyle( newNode.style );
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, newNode, rangeStart.nodeId, 0 );
+            measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, rangeEnd.line.nodeList[ rangeEnd.nodeId + 1 ], rangeEnd.nodeId + 1, 0 );
 
         // Si termina por el final del nodo
         }else if( rangeEnd.nodeChar === rangeEnd.node.string.length ){
@@ -6741,23 +6726,15 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
             newNode.height           = rangeStart.node.height;
             rangeStart.node.string   = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
             rangeStart.node.charList = rangeStart.node.charList.slice( 0, rangeStart.nodeChar );
+            rangeStart.node.width    = rangeStart.node.charList.slice( -1 )[ 0 ] || 0;
+            rangeStart.line.nodeList = rangeStart.line.nodeList.concat( newNode );
+            rangeStart.nodeId        = rangeStart.nodeId + 1;
+            rangeStart.node          = rangeStart.line.nodeList[ rangeStart.nodeId ];
+            rangeStart.nodeChar      = 0;
+            currentNode              = currentLine.nodeList[ currentNodeId ];
 
             setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
-
-            rangeStart.node.width    = rangeStart.node.charList[ rangeStart.node.string.length - 1 ] || 0;
-            rangeStart.line.nodeList = rangeStart.line.nodeList.concat( newNode );
-            currentNode                     = rangeStart.line.nodeList[ currentNodeId ];
-
-            rangeStart.nodeId   = rangeStart.nodeId + 1;
-            rangeStart.node     = rangeStart.line.nodeList[ rangeStart.nodeId ];
-            rangeStart.nodeChar = 0;
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, newNode, rangeStart.nodeId, 0 );
 
         // El resto de casos
         }else{
@@ -6773,26 +6750,10 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
             rangeStart.node.string   = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
             rangeStart.node.charList = rangeStart.node.charList.slice( 0 , rangeStart.nodeChar );
             rangeStart.node.width    = rangeStart.node.charList[ rangeStart.node.charList.length - 1 ];
-
-            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
-
-            setCanvasTextStyle( endNode.style );
-
-            for( i = 1; i <= endNode.string.length; i++ ){
-                endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
-            }
-
-            endNode.width            = endNode.charList[ i - 2 ] || 0;
             rangeStart.line.nodeList = rangeStart.line.nodeList.slice( 0, rangeStart.nodeId + 1 ).concat( newNode ).concat( endNode ).concat( rangeStart.line.nodeList.slice( rangeStart.nodeId + 1 ) );
-            currentNode              = rangeStart.line.nodeList[ rangeStart.nodeId ];
+            currentNode              = currentLine.nodeList[ currentNodeId ];
 
+            // To Do -> Seguro que es correcto el start? No deberia ser el siguiente nodo y nodeChar a 0? Luego se corrige al hacer un setRange al final de la función
             var newPositionsStart = getNodeInPosition( rangeStart.line, rangeStart.lineChar );
             var newPositionsEnd   = getNodeInPosition( rangeEnd.line, rangeEnd.lineChar );
 
@@ -6802,6 +6763,11 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
             rangeEnd.nodeId     = newPositionsEnd.nodeId;
             rangeEnd.node       = rangeEnd.line.nodeList[ rangeEnd.nodeId ];
             rangeEnd.nodeChar   = newPositionsEnd.nodeChar;
+
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
+            // To Do -> Dependiente del to do newPositionsStart
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, newNode, rangeStart.nodeId + 1, 0 );
+            measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, endNode, rangeEnd.nodeId, 0 );
 
         }
 
@@ -6818,35 +6784,16 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
         // Comprobamos si es una selección completa del nodo
         if( rangeStart.nodeChar === 0 ){
 
-            newNode          = rangeStart.node;
-            newNode.charList = [];
-
-            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, rangeStart.node, key, value );
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, 0 );
 
         // Es parcial
         }else{
             
-            newNode        = createNode( rangeStart.line );
-            newNode.string = rangeStart.node.string.slice( rangeStart.nodeChar );
-            newNode.style  = $.extend( {}, rangeStart.node.style );
-            newNode.height = rangeStart.node.height;
-
-            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
-
+            newNode                  = createNode( rangeStart.line );
+            newNode.string           = rangeStart.node.string.slice( rangeStart.nodeChar );
+            newNode.style            = $.extend( {}, rangeStart.node.style );
+            newNode.height           = rangeStart.node.height;
             rangeStart.node.string   = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
             rangeStart.node.charList = rangeStart.node.charList.slice( 0, rangeStart.nodeChar );
             rangeStart.node.width    = rangeStart.node.charList[ rangeStart.nodeChar - 1 ];
@@ -6856,22 +6803,22 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
             rangeStart.node          = rangeStart.line.nodeList[ rangeStart.nodeId ];
             rangeEnd.nodeId          = rangeEnd.nodeId + 1;
 
+            setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, rangeStart.lineChar, rangeStart.node, rangeStart.nodeId, 0 );
+
         }
 
         // Nodos intermedios
+        var chars = rangeStart.lineChar + rangeStart.node.string.length;
+
         for( i = rangeStart.nodeId + 1; i < rangeEnd.nodeId; i++ ){
 
-            newNode          = rangeStart.line.nodeList[ i ];
-            newNode.charList = [];
+            newNode = rangeStart.line.nodeList[ i ];
 
             setNodeStyle( rangeStart.paragraph, rangeStart.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
+            measureNode( rangeStart.paragraph, rangeStart.line, rangeStart.lineId, chars, newNode, i, 0 );
 
-            for( j = 1; j <= newNode.string.length; j++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
-            }
-
-            newNode.width = newNode.charList[ j - 2 ] || 0;
+            chars += newNode.string.length;
 
         }
 
@@ -6879,47 +6826,24 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
         // Comprobamos si es una selección completa del nodo
         if( rangeEnd.nodeChar === rangeEnd.node.string.length ){
 
-            newNode          = rangeEnd.node;
-            newNode.charList = [];
-
-            setNodeStyle( rangeEnd.paragraph, rangeEnd.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
+            setNodeStyle( rangeEnd.paragraph, rangeEnd.line, rangeEnd.node, key, value );
+            measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, rangeEnd.node, rangeEnd.nodeId, 0 );
 
         // Es parcial
         }else{
             
-            newNode        = createNode( rangeEnd.line );
-            newNode.string = rangeEnd.node.string.slice( 0, rangeEnd.nodeChar );
-            newNode.style  = $.extend( {}, rangeEnd.node.style );
-            newNode.height = rangeEnd.node.height;
-
-            setNodeStyle( rangeEnd.paragraph, rangeEnd.line, newNode, key, value );
-            setCanvasTextStyle( newNode.style );
-
-            for( i = 1; i <= newNode.string.length; i++ ){
-                newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
-            }
-
-            newNode.width = newNode.charList[ i - 2 ] || 0;
-
+            newNode                = createNode( rangeEnd.line );
+            newNode.string         = rangeEnd.node.string.slice( 0, rangeEnd.nodeChar );
+            newNode.style          = $.extend( {}, rangeEnd.node.style );
+            newNode.height         = rangeEnd.node.height;
             rangeEnd.node.string   = rangeEnd.node.string.slice( rangeEnd.nodeChar );
-            rangeEnd.node.charList = [];
-
-            setCanvasTextStyle( rangeEnd.node.style );
-
-            for( i = 1; i <= rangeEnd.node.string.length; i++ ){
-                rangeEnd.node.charList.push( ctx.measureText( rangeEnd.node.string.slice( 0, i ) ).width );
-            }
-
             rangeEnd.node.width    = rangeEnd.node.charList[ i - 2 ] || 0;
             rangeEnd.line.nodeList = rangeEnd.line.nodeList.slice( 0, rangeEnd.nodeId ).concat( newNode ).concat( rangeEnd.line.nodeList.slice( rangeEnd.nodeId ) );
             rangeEnd.node          = newNode;
+
+            setNodeStyle( rangeEnd.paragraph, rangeEnd.line, newNode, key, value );
+            measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar - newNode.string.length, rangeEnd.node, rangeEnd.nodeId, 0 );
+            measureNode( rangeEnd.paragraph, rangeEnd.line, rangeEnd.lineId, rangeEnd.lineChar, rangeEnd.line.nodeList[ rangeEnd.nodeId + 1 ], rangeEnd.nodeId + 1, 0 );
 
         }
 
@@ -6945,21 +6869,12 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
         // Aplicamos el estilo a nodos intermedios
         mapRangeLines( false, rangeStart, rangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
 
-            var newNode, i, j;
+            var chars = 0;
 
-            for( i = 0; i < line.nodeList.length; i++ ){
+            for( var i = 0; i < line.nodeList.length; i++ ){
 
-                newNode          = line.nodeList[ i ];
-                newNode.charList = [];
-
-                setNodeStyle( paragraph, line, newNode, key, value );
-                setCanvasTextStyle( newNode.style );
-
-                for( j = 1; j <= newNode.string.length; j++ ){
-                    newNode.charList.push( ctx.measureText( newNode.string.slice( 0, j ) ).width );
-                }
-
-                newNode.width = newNode.charList[ j - 2 ] || 0;
+                setNodeStyle( paragraph, line, line.nodeList[ i ], key, value );
+                measureNode( paragraph, line, lineId, chars, line.nodeList[ i ], i, 0 );
 
             }
             
@@ -6999,6 +6914,7 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
     if( !propagated ){
 
         currentNode = currentLine.nodeList[ currentNodeId ]; // To Do -> No estoy seguro de que esto esté en el mejor sitio posible, comprobar
+        // To Do -> Habría que actualizar el currentNodeCharId
 
         updatePages();
         setRange( rangeStart, rangeEnd, true );
