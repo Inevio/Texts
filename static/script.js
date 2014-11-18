@@ -3060,14 +3060,10 @@ var handleCharNormal = function( newChar, dontSend ){
             currentNode.string   = currentNode.string.slice( 0, currentNodeCharId );
             currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
             currentNode.width    = currentNode.charList.slice( -1 )[ 0 ];
-
-            for( i = 1; i <= endNode.string.length; i++ ){
-                endNode.charList.push( ctx.measureText( endNode.string.slice( 0, i ) ).width );
-            }
-
-            endNode.width        = endNode.charList.slice( -1 )[ 0 ];
             currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
             currentNodeId        = currentNodeId + 1;
+
+            measureNode( currentParagraph, currentLine, currentLineId, currentLineCharId, endNode, currentNodeId + 1, 0 );
 
         }
 
@@ -3747,13 +3743,13 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
 
         }
 
-        setCanvasTextStyle( newNode.style );
-
-        for( i = 1; i <= newNode.string.length; i++ ){
-            newNode.charList.push( ctx.measureText( newNode.string.slice( 0, i ) ).width );
+        // To Do -> Testear si esto funciona
+        if( paragraph.listMode ){
+            measureNode( newParagraph, newLine, 0, 0, newNode, 1, 0 );
+        }else{
+            measureNode( newParagraph, newLine, 0, 0, newNode, 0, 0 );
         }
-
-        newNode.width       = newNode.charList[ newNode.charList.length - 1 ];
+        
         newLine.totalChars += newNode.string.length;
 
         // Eliminamos el contenido del nodo actual y actualizamos su tamaño
