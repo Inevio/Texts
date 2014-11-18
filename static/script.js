@@ -1865,7 +1865,7 @@ var getLineTextTrimmedWidth = function( line ){
         result += nodeList[ i ].width;
     }
 
-    nodeList  = nodeList.slice( -1 )[ 0 ];
+    nodeList  = nodeList[ nodeList.length - 1 ];
     result   += nodeList.charList[ trimRight( nodeList.string ).length - 1 ] || 0;
 
     return result;
@@ -2588,12 +2588,12 @@ var handleBackspaceNormal = function( dontSend ){
             var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
             var prevLineId       = currentLineId - 1;
             var prevLine         = currentParagraph.lineList[ prevLineId ];
-            var prevNode         = prevLine.nodeList.slice( -1 )[ 0 ];
+            var prevNode         = prevLine.nodeList[ prevLine.nodeList.length - 1 ];
             var original         = prevLine.totalChars - 1;
 
             prevNode.string           = prevNode.string.slice( 0, -1 );
             prevNode.charList         = prevNode.charList.slice( 0, -1 );
-            prevNode.width            = prevNode.charList.slice( -1 )[ 0 ];
+            prevNode.width            = prevNode.charList[ prevNode.charList.length - 1 ];
             prevLine.totalChars      += currentLine.totalChars - 1;
             prevLine.nodeList         = prevLine.nodeList.concat( currentLine.nodeList );
             currentParagraph.lineList = currentParagraph.lineList.slice( 0, currentLineId ).concat( currentParagraph.lineList.slice( currentLineId + 1 ) );
@@ -3059,7 +3059,7 @@ var handleCharNormal = function( newChar, dontSend ){
             endNode.height       = currentNode.height;
             currentNode.string   = currentNode.string.slice( 0, currentNodeCharId );
             currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId );
-            currentNode.width    = currentNode.charList.slice( -1 )[ 0 ];
+            currentNode.width    = currentNode.charList[ currentNode.charList.length - 1 ];
             currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId + 1 ).concat( newNode ).concat( endNode ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
             currentNodeId        = currentNodeId + 1;
 
@@ -3421,12 +3421,12 @@ var handleRemoteBackspace = function( pageId, page, paragraphId, paragraph, line
         }else{
 
             var prevLine = paragraph.lineList[ lineId - 1 ];
-            var prevNode = prevLine.nodeList.slice( -1 )[ 0 ];
+            var prevNode = prevLine.nodeList[ prevLine.nodeList.length - 1 ];
             var original = prevLine.totalChars - 1;
 
             prevNode.string      = prevNode.string.slice( 0, -1 );
             prevNode.charList    = prevNode.charList.slice( 0, -1 );
-            prevNode.width       = prevNode.charList.slice( -1 )[ 0 ];
+            prevNode.width       = prevNode.charList[ prevNode.charList.length - 1 ];
             prevLine.totalChars += line.totalChars - 1;
             prevLine.nodeList    = prevLine.nodeList.concat( line.nodeList );
             paragraph.lineList   = paragraph.lineList.slice( 0, lineId ).concat( paragraph.lineList.slice( lineId + 1 ) );
@@ -3929,6 +3929,7 @@ var insertPlainText = function( text ){
 var logAllNodesWidth = function(){
 
     var list = [];
+    var node;
 
     for( var lp = 0; lp < pageList.length; lp++ ){
 
@@ -3938,14 +3939,16 @@ var logAllNodesWidth = function(){
 
                 for( var ln = 0; ln < pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList.length; ln++ ){
                     
+                    node = pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ];
+
                     list.push({
 
-                        page : lp,
-                        paragraph : lpg,
-                        line : ll,
-                        node : ln,
-                        width : pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].width,
-                        lastCharWidth : pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].charList.slice( -1 )[ 0 ]
+                        page          : lp,
+                        paragraph     : lpg,
+                        line          : ll,
+                        node          : ln,
+                        width         : node.width,
+                        lastCharWidth : node.charList[ node.charList.length - 1 ]
 
                     });
 
@@ -3965,6 +3968,7 @@ var logParagraphText = function(){
 
     var chars  = 0;
     var string = '';
+    var node;
 
     for( var lp = 0; lp < pageList.length; lp++ ){
 
@@ -3974,8 +3978,9 @@ var logParagraphText = function(){
 
                 for( var ln = 0; ln < pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList.length; ln++ ){
 
-                    chars  += pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].string.length;
-                    string += pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ].string;
+                    node    = pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].nodeList[ ln ];
+                    chars  += node.string.length;
+                    string += node.string;
 
                 }
 
@@ -4230,7 +4235,7 @@ var measureLineJustify = function( paragraph, line, lineId ){
         }
 
         node.justifyCharList = justifyCharList;
-        node.justifyWidth    = justifyCharList.slice( -1 )[ 0 ];
+        node.justifyWidth    = justifyCharList[ justifyCharList.length - 1 ];
 
     }
 
@@ -4268,7 +4273,7 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
             current = ctx.measureText( node.string.slice( 0, i + 1 ) ).width + heritage;
 
             // Posición anterior
-            prev = node.charList.slice( -1 )[ 0 ] || 0;
+            prev = node.charList[ node.charList.length - 1 ] || 0;
 
             // Multiplos anteriores
             multiples = Math.ceil( prev / ( 1.26 * CENTIMETER ), 10 );
@@ -4294,7 +4299,7 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
 
     }
 
-    node.width = node.charList.slice( -1 )[ 0 ] || 0;
+    node.width = node.charList[ node.charList.length - 1 ] || 0;
 
 };
 
@@ -4664,7 +4669,7 @@ var parseHtmlLineStyle = function( text ){
     });
 
     // Si termina en punto una regla debe eliminarse
-    if( text[ 0 ].slice( -1 ) === '.' ){
+    if( text[ 0 ][ text[ 0 ].length - 1 ] === '.' ){
 
         text[ 0 ] = text[ 0 ].slice( 0, -1 );
         text[ 1 ] = {};
@@ -5214,7 +5219,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         return counter;
 
     // Procedimientos para 2 o más palabras o 1 sola palabra con espacios al final
-    }else if( lineWords.length > 1 || lineWords[ 0 ].string.slice( -1 )[ 0 ] === ' ' ){
+    }else if( lineWords.length > 1 || lineWords[ 0 ].string[ lineWords[ 0 ].string.length - 1 ] === ' ' ){
 
         var nextLine      = paragraph.lineList[ id + 1 ];
         var currentWidth  = getNodesWidth( line );
@@ -5239,9 +5244,9 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             return counter;
         }
 
-        var lastWordToMove = nextLineWords[ wordsToMove.slice( -1 )[ 0 ] ];
-        var lastNodeToMove = lastWordToMove.nodeList.slice( -1 )[ 0 ];
-        var lastWordOffset = lastWordToMove.offset.slice( -1 )[ 0 ];
+        var lastWordToMove = nextLineWords[ wordsToMove[ wordsToMove.length - 1 ] ];
+        var lastNodeToMove = lastWordToMove.nodeList[ lastWordToMove.nodeList.length - 1 ];
+        var lastWordOffset = lastWordToMove.offset[ lastWordToMove.offset - 1 ];
 
         // Si hay que mover los nodos completos
         if( nextLine.nodeList[ lastNodeToMove ].charList.length - 1 === lastWordOffset[ 1 ] ){
@@ -5457,9 +5462,9 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
         }else{
 
-            var lastWordToMove = nextLineWords[ wordsToMove.slice( -1 )[ 0 ] ];
-            var lastNodeToMove = lastWordToMove.nodeList.slice( -1 )[ 0 ];
-            var lastWordOffset = lastWordToMove.offset.slice( -1 )[ 0 ];
+            var lastWordToMove = nextLineWords[ wordsToMove[ wordsToMove.length - 1 ] ];
+            var lastNodeToMove = lastWordToMove.nodeList[ lastWordToMove.nodeList.length - 1 ];
+            var lastWordOffset = lastWordToMove.offset[ lastWordToMove.offset.length - 1 ];
 
             // Si hay que mover los nodos completos
             if( nextLine.nodeList[ lastNodeToMove ].charList.length - 1 === lastWordOffset[ 1 ] ){
@@ -5766,7 +5771,7 @@ var realocatePageInverse = function( id ){
         return;
     }
 
-    var prevParagraph = page.paragraphList.slice( -1 )[ 0 ];
+    var prevParagraph = page.paragraphList[ page.paragraphList.length - 1 ];
     var newParagraph  = $.extend( {}, nextParagraph );
 
     nextParagraph.lineList  = nextParagraph.lineList.slice( 1 );
@@ -6253,8 +6258,8 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
 
             }else if( pageId > 0 ){
 
-                if( pageList[ pageId - 1 ].paragraphList.slice( -1 )[ 0 ].listMode === LIST_NUMBER ){
-                    number = parseInt( pageList[ pageId - 1 ].paragraphList.slice( -1 )[ 0 ].lineList[ 0 ].nodeList[ 0 ].string, 10 ) + 1;
+                if( pageList[ pageId - 1 ].paragraphList[ pageList[ pageId - 1 ].paragraphList.length - 1 ].listMode === LIST_NUMBER ){
+                    number = parseInt( pageList[ pageId - 1 ].paragraphList[ pageList[ pageId - 1 ].paragraphList.length - 1 ].lineList[ 0 ].nodeList[ 0 ].string, 10 ) + 1;
                 }
 
             }
@@ -6466,14 +6471,16 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
             // Si existe una línea anterior en el párrafo actual
             if( currentParagraph.lineList[ line - 1 ] ){
 
+                var tmpLine = currentParagraph.lineList[ line - 1 ];
+
                 return setCursor(
 
                     page,
                     paragraph,
                     line - 1,
-                    currentParagraph.lineList[ line - 1 ].totalChars,
-                    currentParagraph.lineList[ line - 1 ].nodeList.length - 1,
-                    currentParagraph.lineList[ line - 1 ].nodeList.slice( -1 )[ 0 ].string.length,
+                    tmpLine.totalChars,
+                    tmpLine.nodeList.length - 1,
+                    tmpLine.nodeList[ tmpLine.nodeList.length - 1 ].string.length,
                     true
 
                 );
@@ -6483,14 +6490,17 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
             // Si existe un párrafo anterior en la página actual
             if( currentPage.paragraphList[ paragraph - 1 ] ){
 
+                var tmpParagraph = currentPage.paragraphList[ paragraph - 1 ];
+                var tmpLine      = tmpParagraph.lineList[ tmpParagraph.lineList.length - 1 ]
+
                 return setCursor(
 
                     page,
                     paragraph - 1,
-                    currentPage.paragraphList[ paragraph - 1 ].lineList.length - 1,
-                    currentPage.paragraphList[ paragraph - 1 ].lineList.slice( -1 )[ 0 ].totalChars,
-                    currentPage.paragraphList[ paragraph - 1 ].lineList.slice( -1 )[ 0 ].nodeList.length - 1,
-                    currentPage.paragraphList[ paragraph - 1 ].lineList.slice( -1 )[ 0 ].nodeList.slice( -1 )[ 0 ].string.length,
+                    tmpParagraph.lineList.length - 1,
+                    tmpLine.totalChars,
+                    tmpLine.nodeList.length - 1,
+                    tmpLine.nodeList[ tmpLine.nodeList.length - 1 ].string.length,
                     true
 
                 );
@@ -6500,14 +6510,18 @@ var setCursor = function( page, paragraph, line, lineChar, node, nodeChar, force
             // Si existe una página anterior en el documento
             if( pageList[ page - 1 ] ){
 
+                var tmpPage      = pageList[ page - 1 ];
+                var tmpParagraph = tmpPage.paragraphList[ tmpPage.paragraphList.length - 1 ];
+                var tmpLine      = tmpParagraph.lineList[ tmpParagraph.lineList.length - 1 ];
+
                 return setCursor(
 
                     page - 1,
-                    pageList[ page - 1 ].paragraphList.length - 1,
-                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.length - 1,
-                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.slice( -1 )[ 0 ].totalChars,
-                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.slice( -1 )[ 0 ].nodeList.length - 1,
-                    pageList[ page - 1 ].paragraphList.slice( -1 )[ 0 ].lineList.slice( -1 )[ 0 ].nodeList.slice( -1 )[ 0 ].string.length,
+                    tmpPage.paragraphList.length - 1,
+                    tmpParagraph.lineList.length - 1,
+                    tmpLine.totalChars,
+                    tmpLine.nodeList.length - 1,
+                    tmpLine.nodeList[ tmpLine.nodeList.length - 1 ].string.length,
                     true
 
                 );
@@ -6751,7 +6765,7 @@ var setRangeNodeStyle = function( rangeStart, rangeEnd, key, value, propagated, 
             newNode.height           = rangeStart.node.height;
             rangeStart.node.string   = rangeStart.node.string.slice( 0, rangeStart.nodeChar );
             rangeStart.node.charList = rangeStart.node.charList.slice( 0, rangeStart.nodeChar );
-            rangeStart.node.width    = rangeStart.node.charList.slice( -1 )[ 0 ] || 0;
+            rangeStart.node.width    = rangeStart.node.charList[ rangeStart.node.charList.length - 1 ] || 0;
             rangeStart.line.nodeList = rangeStart.line.nodeList.concat( newNode );
             rangeStart.nodeId        = rangeStart.nodeId + 1;
             rangeStart.node          = rangeStart.line.nodeList[ rangeStart.nodeId ];
@@ -8261,9 +8275,9 @@ selections
                 lineId      : lineId,
                 line        : line,
                 lineChar    : lineChar + word.string.length,
-                nodeId      : word.nodeList.slice( -1 )[ 0 ],
-                node        : line.nodeList[ word.nodeList.slice( -1 )[ 0 ] ],
-                nodeChar    : word.offset.slice( -1 )[ 0 ][ 1 ] + 1
+                nodeId      : word.nodeList[ word.nodeList.length - 1 ],
+                node        : line.nodeList[ word.nodeList[ word.nodeList.length - 1 ] ],
+                nodeChar    : word.offset[ word.offset.length - 1 ][ 1 ] + 1
 
             }
 
@@ -8290,8 +8304,8 @@ selections
 
         };
 
-        line = paragraph.lineList.slice( -1 )[ 0 ];
-        node = line.nodeList.slice( -1 )[ 0 ];
+        line = paragraph.lineList[ paragraph.lineList.length - 1 ];
+        node = line.nodeList[ line.nodeList.length - 1 ];
 
         setRange(
 
