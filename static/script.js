@@ -3225,7 +3225,7 @@ var handleEnter = function( dontSend ){
         newLine.nodeList.unshift( $.extend( true, {}, currentParagraph.lineList[ 0 ].nodeList[ 0 ] ) );
 
         newParagraph.listMode = currentParagraph.listMode;
-        newLine.tabList       = [ 1 ]; // To Do -> Herencia de tabs
+        newLine.tabList       = getTabsInLine( newLine );
         newLine.totalChars    = newLine.nodeList[ 0 ].string.length;
 
     }else if( currentParagraph.listMode === LIST_NUMBER){
@@ -3234,7 +3234,7 @@ var handleEnter = function( dontSend ){
 
         newParagraph.listMode        = currentParagraph.listMode;
         newLine.nodeList[ 0 ].string = ( parseInt( newLine.nodeList[ 0 ].string, 10 ) + 1 ) + '.' + '\t';
-        newLine.tabList              = [ newLine.nodeList[ 0 ].string.indexOf('\t') ]; // To Do -> Herencia de tabs
+        newLine.tabList              = getTabsInLine( newLine );
         newLine.totalChars           = newLine.nodeList[ 0 ].string.length;
 
         measureNode( newParagraph, newLine, 0, 0, newLine.nodeList[ 0 ], 0, 0 );
@@ -3706,7 +3706,7 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
         newLine.nodeList.unshift( $.extend( true, {}, paragraph.lineList[ 0 ].nodeList[ 0 ] ) );
 
         newParagraph.listMode = paragraph.listMode;
-        newLine.tabList       = [ 1 ]; // To Do -> Herencia de tabs
+        newLine.tabList       = getTabsInLine( newLine );
         newLine.totalChars    = newLine.nodeList[ 0 ].string.length;
 
     }else if( paragraph.listMode === LIST_NUMBER){
@@ -3715,7 +3715,7 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
 
         newParagraph.listMode        = paragraph.listMode;
         newLine.nodeList[ 0 ].string = ( parseInt( newLine.nodeList[ 0 ].string, 10 ) + 1 ) + '.' + '\t';
-        newLine.tabList              = [ newLine.nodeList[ 0 ].string.indexOf('\t') ]; // To Do -> Herencia de tabs
+        newLine.tabList              = getTabsInLine( newLine );
         newLine.totalChars           = newLine.nodeList[ 0 ].string.length;
 
         measureNode( newParagraph, newLine, 0, 0, newLine.nodeList[ 0 ], 0, 0 );
@@ -3749,7 +3749,7 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
         }else{
             measureNode( newParagraph, newLine, 0, 0, newNode, 0, 0 );
         }
-        
+
         newLine.totalChars += newNode.string.length;
 
         // Eliminamos el contenido del nodo actual y actualizamos su tamaño
@@ -3995,6 +3995,38 @@ var getTotalNodesInsideLines = function( lines ){
 
     for( var i = 0; i < lines.length; i++ ){
         list.push( lines[ i ].nodeList.length );
+    }
+
+    return list;
+
+};
+
+var getTabsInLine = function( line ){
+
+    var list       = [];
+    var totalChars = 0;
+    var index, startIndex;
+
+    for( var i = 0; i < line.nodeList.length; i++ ){
+
+        startIndex = 0;
+
+        while( index = str.indexOf( line.nodeList[ i ].string, startIndex ) > -1 ){
+            
+            list.push({
+
+                nodeId   : i,
+                nodeChar : index,
+                lineChar : totalChars + index
+
+            });
+
+            startIndex = index + 1;
+
+        }
+
+        totalChars += line.nodeList[ i ].string.length;
+
     }
 
     return list;
@@ -6241,7 +6273,7 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         newNode.style.color                 = '#000000';
         paragraph.indentationSpecialType    = INDENTATION_HANGING;
         paragraph.indentationSpecialValue   = value;
-        paragraph.lineList[ 0 ].tabList     = [ newNode.string.indexOf('\t') ]; // To Do -> Conservar el resto de tabuladores
+        paragraph.lineList[ 0 ].tabList     = getTabsInLine( paragraph.lineList[ 0 ] );
         paragraph.lineList[ 0 ].totalChars += newNode.string.length;
         
         setNodeStyle( paragraph, paragraph.lineList[ 0 ], newNode, 'font-size', paragraph.lineList[ 0 ].nodeList[ 1 ].style['font-size'] );
@@ -6270,12 +6302,12 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
         paragraph.listMode                  = LIST_NONE;
         paragraph.indentationSpecialType    = INDENTATION_NONE;
         paragraph.indentationSpecialValue   = 0;
-        paragraph.lineList[ 0 ].tabList     = []; // To Do -> Conservar el resto de tabuladores
         paragraph.lineList[ 0 ].totalChars -= paragraph.lineList[ 0 ].nodeList[ 0 ].string.length;
         
         // Eliminamos el bullet
         paragraph.lineList[ 0 ].nodeList.shift();
-        // To Do -> Medir de nuevo los nodos por si tienen tabuladores
+
+        paragraph.lineList[ 0 ].tabList = getTabsInLine( paragraph.lineList[ 0 ] );
 
         setParagraphStyle( pageId, page, paragraphId, paragraph, 'indentationLeftAdd', value, true );
     
