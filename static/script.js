@@ -4270,19 +4270,11 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
 
 };
 
-var mergeNodes = function( first, second ){
-
-    var i = first.string.length;
+var mergeNodes = function( paragraph, lineId, line, lineChar, firstId, first, second ){
 
     first.string += second.string;
 
-    setCanvasTextStyle( first.style );
-
-    for( i = i + 1; i <= first.string.length; i++ ){
-        first.charList.push( ctx.measureText( first.string.slice( 0, i ) ).width );
-    }
-
-    first.width = first.charList.slice( -1 )[ 0 ];
+    measureNode( paragraph, line, lineId, lineChar, first, firstId, 0 );
 
 };
 
@@ -4532,13 +4524,14 @@ var normalizeHtmlChildren = function( element, level ){
 
 };
 
-var normalizeLine = function( line ){
+var normalizeLine = function( paragraph, lineId, line ){
 
     if( line.nodeList.length === 1 ){
         return;
     }
 
     var comparation;
+    var chars = line.nodeList[ 0 ].string.length;
 
     for( var i = 1; i < line.nodeList.length; ){
 
@@ -4546,12 +4539,16 @@ var normalizeLine = function( line ){
 
         if( comparation && !line.nodeList[ i - 1 ].blocked && !line.nodeList[ i ].blocked ){
             
-            mergeNodes( line.nodeList[ i - 1 ], line.nodeList[ i ] );
-            
-            line.nodeList = line.nodeList.slice( 0, i).concat( line.nodeList.slice( i + 1 ) );
+            mergeNodes( paragraph, lineId, line, chars, i - 1, line.nodeList[ i - 1 ], line.nodeList[ i ] );
+
+            chars         += line.nodeList[ i ].string.length;
+            line.nodeList  = line.nodeList.slice( 0, i ).concat( line.nodeList.slice( i + 1 ) );
 
         }else{
+
+            chars += line.nodeList[ i ].string.length;
             i++;
+
         }
 
     }
@@ -5152,7 +5149,7 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         realocateLine( pageId, paragraph, id + 1, 0 );
     }
 
-    normalizeLine( line );
+    normalizeLine( paragraph, id, line );
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
@@ -5534,7 +5531,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         realocateLineInverse( paragraph, id + 1, 0 );
     }
 
-    normalizeLine( line );
+    normalizeLine( paragraph, id, line );
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
