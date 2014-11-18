@@ -44,6 +44,7 @@ var INFO_DESCRIPTION = 'Inevio Texts File';
 var INFO_GENERATOR = 'Inevio Texts';
 var INFO_VERSION = 1;
 var KEY_BACKSPACE = 8;
+var KEY_TAB = 9;
 var KEY_ENTER = 13;
 var KEY_ARROW_LEFT = 37;
 var KEY_ARROW_UP = 38;
@@ -890,20 +891,29 @@ var drawPages = function(){
                         setCanvasTextStyle( node.style );
 
                         if(
-                            paragraph.align !== ALIGN_JUSTIFY ||
-                            j === paragraph.lineList.length - 1
+                            node.string.lastIndexOf('\t') === -1 &&
+                            (
+                                paragraph.align !== ALIGN_JUSTIFY ||
+                                j === paragraph.lineList.length - 1
+                            )
                         ){
                             ctx.fillText( node.string, startX, startY );
                         }else{
 
-                            tracks        = node.string.split(/( +)/g);
+                            tracks        = node.string.split(/(\S+)/g);
                             trackHeritage = 0;
                             trackChars    = 0;
 
                             for( l = 0; l < tracks.length; l++ ){
 
-                                if( tracks[ l ][ 0 ] === ' ' ){
-                                    trackHeritage = node.justifyCharList[ trackChars + tracks[ l ].length - 1 ];
+                                if( tracks[ l ][ 0 ] === ' ' || tracks[ l ][ 0 ] === '\t' ){
+
+                                    if( paragraph.align === ALIGN_JUSTIFY ){
+                                        trackHeritage = node.justifyCharList[ trackChars + tracks[ l ].length - 1 ];
+                                    }else{
+                                        trackHeritage = node.charList[ trackChars + tracks[ l ].length - 1 ];
+                                    }
+
                                 }else if( tracks[ l ] ){
                                     ctx.fillText( tracks[ l ], startX + trackHeritage, startY );
                                 }
@@ -929,7 +939,6 @@ var drawPages = function(){
                         startY = startY + underlineHeight;
                         endX   = startX + node.width;
                         endY   = startY;
-
 
                         ctx.beginPath();
                         
@@ -4259,14 +4268,24 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
         var prev       = 0;
         var multiples  = 0;
         var heritage   = 0;
+        var index      = 0;
         var identation = getLineIndentationLeftOffset( lineId, paragraph );
 
         for( i = nodeChar; i < node.string.length; i++ ){
 
             // Si no es un tabulador seguimos el procedimiento habitual
             if( node.string[ i ] !== '\t' ){
-                node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width + heritage );
+
+                index = node.string.slice( 0, i + 1 ).lastIndexOf('\t');
+
+                if( index === -1 ){
+                    node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width + heritage );
+                }else{
+                    node.charList.push( node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width + heritage );
+                }
+
                 continue;
+
             }
 
             // Posición actual
@@ -4284,8 +4303,7 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
             }
 
             // Calculamos la nueva posición
-            heritage = ( 1.26 * CENTIMETER * multiples ) - identation - current;
-            current  = ( 1.26 * CENTIMETER * multiples ) - identation;
+            current = ( 1.26 * CENTIMETER * multiples ) - identation;
 
             node.charList.push( current );
 
@@ -4625,9 +4643,7 @@ var openFile = function( structure ){
             currentOpenFile = structure;
 
             setViewTitle( currentOpenFile.name );
-
             processFile( data );
-
             start();
 
         });
@@ -4640,9 +4656,7 @@ var openFile = function( structure ){
             currentOpenFile = structure;
 
             setViewTitle( currentOpenFile.name );
-
             processFile( data );
-
             start();
 
         });
@@ -7908,13 +7922,6 @@ input
 
         keydownHandled = true;
 
-    }else if( e.keyCode === KEY_DEL ){
-
-        handleDel();
-        updatePages();
-
-        keydownHandled = true;
-
     }
 
 })
@@ -7928,6 +7935,12 @@ input
         handleBackspace();
         updatePages();
 
+    }else if( e.keyCode === KEY_TAB ){
+        
+        handleChar('\t');
+        updatePages();
+        e.preventDefault();
+
     }else if( e.key && e.key.length === 1 ){
 
         // Este método solo funcionaba en Firefox cuando se escribió. Aunque Firefox es compatible
@@ -7936,7 +7949,6 @@ input
 
         handleChar( e.key );
         updatePages();
-
         e.preventDefault();
 
     }else if( compositionEnded && e.keyCode === KEY_ARROW_LEFT ){
