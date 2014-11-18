@@ -4259,10 +4259,10 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
     node.charList = node.charList.slice( 0, nodeChar );
 
     // Si tiene tabuladores seguiremos un procedimiento especial
-    if( /\t/.test( node.string ) ){
+    if( node.string.lastIndexOf('\t') !== -1 ){
 
-        // To Do -> Herencia de nodos anteriores
-        // To Do -> Offset de la línea
+        // To Do -> Cálculo de la posición del tabulado teniendo en cuenta la herencia de nodos anteriores
+        // To Do -> Cálculo de la posición del tabulado teniendo en cuenta el offset de la línea
 
         var current    = 0;
         var prev       = 0;
@@ -4279,33 +4279,40 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
                 index = node.string.slice( 0, i + 1 ).lastIndexOf('\t');
 
                 if( index === -1 ){
-                    node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width + heritage );
+                    node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width /*+ heritage*/ );
                 }else{
-                    node.charList.push( node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width + heritage );
+                    node.charList.push( node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/ );
                 }
 
-                continue;
+            }else{
+
+                index = node.string.slice( 0, i ).lastIndexOf('\t');
+
+                // Posición actual
+                if( index === -1 ){
+                    //node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width /*+ heritage*/ );
+                    current = ctx.measureText( node.string.slice( 0, i + 1 ) ).width;
+                }else{
+                    //node.charList.push( node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/ );
+                    current = node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width;
+                }
+
+                // Posición anterior y múltiplos anteriores
+                prev      = node.charList[ node.charList.length - 1 ] || 0;
+                multiples = Math.ceil( prev / ( 1.26 * CENTIMETER ), 10 );
+
+                // Si estamos justo en el límite sumamos 1
+                if( parseFloat( ( prev % ( 1.26 * CENTIMETER ) ).toFixed( 12 ) ) === 0 ){
+                    multiples++;
+                }
+
+                // Calculamos la nueva posición
+                //heritage = ( 1.26 * CENTIMETER * multiples ) - identation - current;
+                current = ( 1.26 * CENTIMETER * multiples ) - identation;
+
+                node.charList.push( current );
 
             }
-
-            // Posición actual
-            current = ctx.measureText( node.string.slice( 0, i + 1 ) ).width + heritage;
-
-            // Posición anterior
-            prev = node.charList[ node.charList.length - 1 ] || 0;
-
-            // Multiplos anteriores
-            multiples = Math.ceil( prev / ( 1.26 * CENTIMETER ), 10 );
-
-            // Si estamos justo en el límite sumamos 1
-            if( ( prev / ( 1.26 * CENTIMETER ) ) === 0 ){
-                multiples++;
-            }
-
-            // Calculamos la nueva posición
-            current = ( 1.26 * CENTIMETER * multiples ) - identation;
-
-            node.charList.push( current );
 
         }
 
