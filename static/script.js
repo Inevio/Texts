@@ -4267,7 +4267,7 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
         var current    = 0;
         var prev       = 0;
         var multiples  = 0;
-        var heritage   = 0;
+        /*var heritage   = 0;*/
         var index      = 0;
         var identation = getLineIndentationLeftOffset( lineId, paragraph );
 
@@ -4290,24 +4290,21 @@ var measureNode = function( paragraph, line, lineId, lineChar, node, nodeId, nod
 
                 // Posición actual
                 if( index === -1 ){
-                    //node.charList.push( ctx.measureText( node.string.slice( 0, i + 1 ) ).width /*+ heritage*/ );
-                    current = ctx.measureText( node.string.slice( 0, i + 1 ) ).width;
+                    current = ctx.measureText( node.string.slice( 0, i + 1 ) ).width /*+ heritage*/;
                 }else{
-                    //node.charList.push( node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/ );
-                    current = node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width;
+                    current = node.charList[ index ] + ctx.measureText( node.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/;
                 }
 
                 // Posición anterior y múltiplos anteriores
-                prev      = node.charList[ node.charList.length - 1 ] || 0;
-                multiples = Math.ceil( prev / ( 1.26 * CENTIMETER ), 10 );
+                multiples = Math.ceil( current / ( 1.26 * CENTIMETER ), 10 );
 
                 // Si estamos justo en el límite sumamos 1
-                if( parseFloat( ( prev % ( 1.26 * CENTIMETER ) ).toFixed( 12 ) ) === 0 ){
+                if( parseFloat( ( current % ( 1.26 * CENTIMETER ) ).toFixed( 12 ) ) === 0 ){
                     multiples++;
                 }
 
                 // Calculamos la nueva posición
-                //heritage = ( 1.26 * CENTIMETER * multiples ) - identation - current;
+                /*heritage = ( 1.26 * CENTIMETER * multiples ) - identation - current;*/
                 current = ( 1.26 * CENTIMETER * multiples ) - identation;
 
                 node.charList.push( current );
