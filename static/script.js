@@ -1932,7 +1932,7 @@ var getWordsMetrics = function( line ){
 
         if(
             breakedWord &&
-            nodeList[ i ].string[ 0 ] === ' '
+            ( nodeList[ i ].string[ 0 ] === ' ' || nodeList[ i ].string[ 0 ] === '\t' )
         ){
 
             tmp   = nodeList[ i ].string.split(/( +)/g);
@@ -1942,12 +1942,12 @@ var getWordsMetrics = function( line ){
             if( nodeList[ i ].string.length !== nodeList[ i ].string.split(' ').length - 1 ){
 
                 tmp   = nodeList[ i ].string.slice( tmp[ 1 ].length );
-                words = words.concat( tmp.match(/( *[\S*\t*]+ *| +)/g) || [''] );
 
+                words = words.concat( tmp.match(/(\s*[\S*]+\s*|\s+)/g) || [''] );
             }
 
         }else{
-            words = nodeList[ i ].string.match(/( *[\S*\t*]+ *| +)/g) || [''];
+            words = nodeList[ i ].string.match(/(\s*[\S*]+\s*|\s+)/g) || [''];
         }
 
         for( j = 0; j < words.length; j++ ){
