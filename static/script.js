@@ -17,6 +17,9 @@ var BROWSER_FIREFOX = 0;
 var BROWSER_IE = 1;
 var BROWSER_WEBKIT = 2;
 var BROWSER_TYPE = /webkit/i.test( navigator.userAgent ) ? BROWSER_WEBKIT : ( /trident/i.test( navigator.userAgent ) ? BROWSER_IE : BROWSER_FIREFOX );
+var CLOSEOPTION_DONTSAVE = 0;
+var CLOSEOPTION_CANCEL = 1;
+var CLOSEOPTION_SAVE = 2;
 var CENTIMETER = 37.795275591;
 var CHUNK_FILE_NODES = 40;
 var CMD_SYNC = 0;
@@ -102,6 +105,7 @@ var win                 = $(this);
 var newButton           = $('.option-new');
 var saveButton          = $('.option-save');
 var moreButton          = $('.option-more');
+var closeButton         = $('.wz-view-close');
 var toolsMenu           = $('.toolbar-menu');
 var toolsLine           = $('.tools-line');
 var toolsListContainer  = $('.toolbar-list-container');
@@ -662,15 +666,15 @@ var compareNodeStyles = function( first, second ){
 
 };
 
-var createDocument = function(){
+var createDocument = function( remoteCallback ){
 
     var file = generateDocument();
     var name;
 
     if( currentOpenFile ){
-        name = currentOpenFile.name.replace( /.docx$/i, '' );
+        name = currentOpenFile.name.replace( /(.docx|.doc|.odt|.rtf)$/i, '' );
     }else{
-        name = 'New Document';
+        name = lang.newDocument;
     }
 
     var counter  = 0;
@@ -678,6 +682,7 @@ var createDocument = function(){
 
         if( error && error !== 'FILE NAME EXISTS ALREADY' ){
             alert( error );
+            remoteCallback( error );
             return;
         }
 
@@ -696,6 +701,7 @@ var createDocument = function(){
         setViewTitle( currentOpenFile.name );
 
         displaySaveSuccessFully();
+        remoteCallback();
 
     };
 
@@ -6159,16 +6165,18 @@ var resetBlink = function(){
 
 };
 
-var saveDocument = function(){
+var saveDocument = function( callback ){
 
     currentOpenFile.write( JSON.stringify( generateDocument() ), function( error ){
 
         if( error ){
             alert( 'Error: ' + error );
+            callback( error );
             return;
         }
 
         displaySaveSuccessFully();
+        callback();
 
     });
 
@@ -7348,7 +7356,7 @@ var setSelectedParagraphsStyle = function( key, value ){
 var setViewTitle = function( name ){
 
     if( !name ){
-        name = 'New Document';
+        name = lang.newDocument;
     }
 
     viewTitle.text( name );
@@ -7885,6 +7893,50 @@ moreButton.on( 'click', function(){
             display : 'block'
 
         });
+
+});
+
+closeButton.on( 'click', function(e){
+
+    e.stopPropagation();
+    
+    var dialog = wz.dialog();
+
+    dialog
+        .setTitle( lang.saveQuestion.replace( '%s', currentOpenFile ? currentOpenFile.name : lang.newDocument ) )
+        .setButton( 0, lang.dontSave, 'red' )
+        .setButton( 1, lang.cancel, 'black' )
+        .setButton( 2, lang.save );
+
+    dialog = dialog.render( function( button ){
+
+        if( button === CLOSEOPTION_DONTSAVE ){
+            wz.app.removeView( win );
+        }else if( button === CLOSEOPTION_CANCEL ){
+            input.focus();
+        }else if( button === CLOSEOPTION_SAVE ){
+            
+            var callback = function( error ){
+
+                if( error ){
+                    input.focus();
+                }else{
+                    wz.app.removeView( win );
+                }
+
+            };
+
+            if( currentOpenFile && currentOpenFile.mime === 'application/inevio-texts' ){
+                saveDocument( callback );
+            }else{
+                createDocument( callback );
+            }
+
+        }
+
+    });
+
+    console.log( dialog );
 
 });
 
@@ -8960,7 +9012,7 @@ toolsList
     // Modo más opciones
     }else if( toolsList.hasClass('active-moreoptions') ){
         
-        var name = ( currentOpenFile ? currentOpenFile.name.replace( /.docx|.texts$/i, '' ) : 'New document' ) + '.pdf';
+        var name = ( currentOpenFile ? currentOpenFile.name.replace( /.docx|.texts$/i, '' ) : lang.newDocument ) + '.pdf';
 
         wz.banner()
                 .setTitle( 'Texts - Exporting PDF...' )

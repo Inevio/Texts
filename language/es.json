@@ -1,7 +1,12 @@
 
 {
 
+	"newDocument" : "Nuevo documento",
     "fileSaved" : "ha sido guardado",
+    "saveQuestion" : "¿Deseas guardar los cambios realizados a %s?",
+    "dontSave" : "No guardar",
+	"cancel" : "Cancelar",
+	"save" : "Guardar",
 
     "copy" : "Copiar",
 	"cut" : "Cortar",

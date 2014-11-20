@@ -948,3 +948,10 @@
     background-color: #bcbcbc;
     border: solid 1px #a8a8a8;
 }
+
+.wz-dialog .wz-ui-button{
+    padding-left: 15px;
+    padding-right: 15px;
+    width: auto;
+    margin: 0 10px;
+}

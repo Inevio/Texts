@@ -1,7 +1,12 @@
 
 {
 
+	"newDocument" : "New document",
 	"fileSaved" : "has been saved",
+	"saveQuestion" : "Do you want to save the changes you made to %s?",
+	"dontSave" : "Don't save",
+	"cancel" : "Cancel",
+	"save" : "Save",
 
 	"copy" : "Copy",
 	"cut" : "Cut",
