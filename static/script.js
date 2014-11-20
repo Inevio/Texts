@@ -1949,12 +1949,12 @@ var getWordsMetrics = function( line ){
             if( nodeList[ i ].string.length !== nodeList[ i ].string.split(' ').length - 1 ){
 
                 tmp   = nodeList[ i ].string.slice( tmp[ 1 ].length );
-                words = words.concat( tmp.match(/(\s*[\S*]+\s*|\s+)/g) || [''] );
+                words = words.concat( tmp.match(/( *[\S*]+ *| *[\t*]+ *| +)/g) || [''] );
 
             }
 
         }else{
-            words = nodeList[ i ].string.match(/(\s*[\S*]+\s*|\s+)/g) || [''];
+            words = nodeList[ i ].string.match(/( *[\S*]+ *| *[\t*]+ *| +)/g) || [''];
         }
 
         for( j = 0; j < words.length; j++ ){
@@ -4032,8 +4032,8 @@ var getTabsInLine = function( line ){
 
         startIndex = 0;
 
-        while( index = str.indexOf( line.nodeList[ i ].string, startIndex ) > -1 ){
-            
+        while( ( index = line.nodeList[ i ].string.indexOf( '\t', startIndex ) ) > -1 ){
+
             list.push({
 
                 nodeId   : i,
@@ -4941,6 +4941,10 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
     }
 
     if( getNodesWidth( line ) <= line.width ){
+
+        // To Do -> Optimizar y hacerlo solo cuando haga falta
+        line.tabList = getTabsInLine( line );
+        
         measureLineJustify( paragraph, line, id );
         return counter;
     }
@@ -4951,6 +4955,10 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
 
     // Si no hay palabras
     if( !lineWords.length ){
+
+        // To Do -> Optimizar y hacerlo solo cuando haga falta
+        line.tabList = getTabsInLine( line );
+        
         measureLineJustify( paragraph, line, id );
         return counter;
 
@@ -4978,8 +4986,13 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         }
 
         if( !wordsToMove.length ){
+
+            // To Do -> Optimizar y hacerlo solo cuando haga falta
+            line.tabList = getTabsInLine( line );
+            
             measureLineJustify( paragraph, line, id );
             return counter;
+
         }
 
         var firstWordToMove = lineWords[ wordsToMove[ 0 ] ];
@@ -5208,6 +5221,10 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
     }
 
     normalizeLine( paragraph, id, line );
+
+    // To Do -> Optimizar y hacerlo solo cuando haga falta
+    line.tabList = getTabsInLine( line );
+    
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
@@ -5226,7 +5243,11 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     // Si la línea no existe se ignora
     if( !line ){
+
+        // To Do -> Optimizar y hacerlo solo cuando haga falta
+        line.tabList = getTabsInLine( line );
         return counter;
+
     }
 
     var lineWords = getWordsMetrics( line );
@@ -5235,11 +5256,20 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     // Si no hay palabras
     if( !lineWords.length ){
+
+        // To Do -> Optimizar y hacerlo solo cuando haga falta
+        line.tabList = getTabsInLine( line );
+        
         measureLineJustify( paragraph, line, id );
         return counter;
 
+
     // Si es la última palabra del párrafo
     }else if( paragraph.lineList.length - 1 === id ){
+
+        // To Do -> Optimizar y hacerlo solo cuando haga falta
+        line.tabList = getTabsInLine( line );
+        
         measureLineJustify( paragraph, line, id );
         return counter;
 
@@ -5265,8 +5295,13 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         }
 
         if( !wordsToMove.length ){
+
+            // To Do -> Optimizar y hacerlo solo cuando haga falta
+            line.tabList = getTabsInLine( line );
+            
             measureLineJustify( paragraph, line, id );
             return counter;
+
         }
 
         var lastWordToMove = nextLineWords[ wordsToMove[ wordsToMove.length - 1 ] ];
@@ -5427,8 +5462,13 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             if( charId === -1 ){
 
                 if( nodeId === 0 ){
+
+                    // To Do -> Optimizar y hacerlo solo cuando haga falta
+                    line.tabList = getTabsInLine( line );
+                    
                     measureLineJustify( paragraph, line, id );
                     return counter;
+
                 }
 
                 nodeId     = nodeId - 1;
@@ -5590,6 +5630,10 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
     }
 
     normalizeLine( paragraph, id, line );
+
+    // To Do -> Optimizar y hacerlo solo cuando haga falta
+    line.tabList = getTabsInLine( line );
+    
     measureLineJustify( paragraph, line, id );
 
     // To Do -> Actualizar el counter bien
