@@ -99,6 +99,7 @@ var PASTE_FORMATS = [ 'text/html', 'text/plain' ];
 
 // DOM variables
 var win                 = $(this);
+var newButton           = $('.option-new');
 var saveButton          = $('.option-save');
 var moreButton          = $('.option-more');
 var toolsMenu           = $('.toolbar-menu');
@@ -1942,8 +1943,8 @@ var getWordsMetrics = function( line ){
             if( nodeList[ i ].string.length !== nodeList[ i ].string.split(' ').length - 1 ){
 
                 tmp   = nodeList[ i ].string.slice( tmp[ 1 ].length );
-
                 words = words.concat( tmp.match(/(\s*[\S*]+\s*|\s+)/g) || [''] );
+
             }
 
         }else{
@@ -7850,6 +7851,10 @@ wz.system.on( 'paste', function( paste ){
 
 win.parent().on( 'wz-dragend', function(){
     input.focus();
+});
+
+newButton.on( 'click', function(){
+    wz.app.createView();
 });
 
 saveButton.on( 'click', function(){
