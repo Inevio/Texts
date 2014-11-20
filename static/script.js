@@ -5057,38 +5057,13 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         }
 
         // Actualizamos la altura de la línea actual
-        var maxSize = 0;
-
-        for( i = 0; i < line.nodeList.length; i++ ){
-
-            if( line.nodeList[ i ].height > maxSize ){
-                maxSize = line.nodeList[ i ].height;
-            }
-
-        }
+        updateLineHeight( line );
 
         // Actualizamos la altura de la siguiente línea
-        line.height = maxSize;
-        maxSize     = 0;
-
-        for( i = 0; i < nextLine.nodeList.length; i++ ){
-
-            if( nextLine.nodeList[ i ].height > maxSize ){
-                maxSize = nextLine.nodeList[ i ].height;
-            }
-
-        }
-
-        nextLine.height = maxSize;
+        updateLineHeight( nextLine );
 
         // Actualizamos la altura del párrafo
-        var height = 0;
-
-        for( i = 0; i < paragraph.lineList.length; i++ ){
-            height += paragraph.lineList[ i ].height;
-        }
-
-        paragraph.height = height;
+        updateParagraphHeight( paragraph );
         
     // Si es una palabra rota
     }else if( lineWords[ 0 ].widthTrim > line.width ){
@@ -5181,38 +5156,13 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         }
         
         // Actualizamos la altura de la línea actual
-        var maxSize = 0;
-
-        for( i = 0; i < line.nodeList.length; i++ ){
-
-            if( line.nodeList[ i ].height > maxSize ){
-                maxSize = line.nodeList[ i ].height;
-            }
-
-        }
+        updateLineHeight( line );
 
         // Actualizamos la altura de la siguiente línea
-        line.height = maxSize;
-        maxSize     = 0;
-
-        for( i = 0; i < nextLine.nodeList.length; i++ ){
-
-            if( nextLine.nodeList[ i ].height > maxSize ){
-                maxSize = nextLine.nodeList[ i ].height;
-            }
-
-        }
-
-        nextLine.height = maxSize;
+        updateLineHeight( nextLine );
 
         // Actualizamos la altura del párrafo
-        var height = 0;
-
-        for( i = 0; i < paragraph.lineList.length; i++ ){
-            height += paragraph.lineList[ i ].height;
-        }
-
-        paragraph.height = height;
+        updateParagraphHeight( paragraph );
         
     }
 
@@ -5352,17 +5302,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         }
 
         // Actualizamos la altura de la línea actual
-        var maxSize = 0;
-
-        for( i = 0; i < line.nodeList.length; i++ ){
-
-            if( line.nodeList[ i ].height > maxSize ){
-                maxSize = line.nodeList[ i ].height;
-            }
-
-        }
-        
-        line.height = maxSize;
+        updateLineHeight( line );
 
         // Si hemos dejado vacía la siguiente línea la eliminamos y volvemos a invocar el método por si podemos traer algo de la siguiente
         if( !nextLine.nodeList.length ){
@@ -5373,28 +5313,12 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         }else{
 
             // Actualizamos la altura de la siguiente línea
-            maxSize = 0;
-
-            for( i = 0; i < nextLine.nodeList.length; i++ ){
-
-                if( nextLine.nodeList[ i ].height > maxSize ){
-                    maxSize = nextLine.nodeList[ i ].height;
-                }
-
-            }
-
-            nextLine.height = maxSize;
+            updateLineHeight( nextLine );
 
         }
 
         // Actualizamos la altura del párrafo
-        var height = 0;
-
-        for( i = 0; i < paragraph.lineList.length; i++ ){
-            height += paragraph.lineList[ i ].height;
-        }
-
-        paragraph.height = height;
+        updateParagraphHeight( paragraph );
 
     // Si es una palabra rota
     }else{
@@ -5579,17 +5503,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         }
 
         // Actualizamos la altura de la línea actual
-        var maxSize = 0;
-
-        for( i = 0; i < line.nodeList.length; i++ ){
-
-            if( line.nodeList[ i ].height > maxSize ){
-                maxSize = line.nodeList[ i ].height;
-            }
-
-        }
-        
-        line.height = maxSize;
+        updateLineHeight( line );
         
         // Si hemos dejado vacía la siguiente línea
         if( !nextLine.nodeList.length ){
@@ -5600,28 +5514,12 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
         }else{
 
             // Actualizamos la altura de la siguiente línea
-            maxSize = 0;
-
-            for( i = 0; i < nextLine.nodeList.length; i++ ){
-
-                if( nextLine.nodeList[ i ].height > maxSize ){
-                    maxSize = nextLine.nodeList[ i ].height;
-                }
-
-            }
-
-            nextLine.height = maxSize;
+            updateLineHeight( nextLineWords );
 
         }
 
         // Actualizamos la altura del párrafo
-        var height = 0;
-
-        for( i = 0; i < paragraph.lineList.length; i++ ){
-            height += paragraph.lineList[ i ].height;
-        }
-
-        paragraph.height = height;
+        updateParagraphHeight( paragraph );
         
     }
 
@@ -7791,6 +7689,34 @@ var updateToolsLineStatus = function(){
         $( '.tool-button-list-sorted', toolsLine ).addClass('active');
 
     }
+
+};
+
+var updateLineHeight = function( line ){
+    
+    var height = 0;
+
+    for( i = 0; i < line.nodeList.length; i++ ){
+
+        if( line.nodeList[ i ].height > height ){
+            height = line.nodeList[ i ].height;
+        }
+
+    }
+    
+    line.height = height;
+
+};
+
+var updateParagraphHeight = function( paragraph ){
+    
+    var height = 0;
+
+    for( var i = 0; i < paragraph.lineList.length; i++ ){
+        height += paragraph.lineList[ i ].height;
+    }
+
+    paragraph.height = height;
 
 };
 
