@@ -2745,26 +2745,10 @@ var handleBackspaceNormal = function( dontSend ){
 var handleBackspaceSelection = function( dontSend ){
 
     var i;
-    var paragraphIdStart     = currentRangeStart.paragraphId;
-    var charInParagraphStart = currentRangeStart.lineChar;
-    var paragraphIdEnd       = currentRangeEnd.paragraphId;
-    var charInParagraphEnd   = currentRangeEnd.lineChar;
-
-    for( i = 0; i < currentRangeStart.pageId; i++ ){
-        paragraphIdStart += pageList[ i ].paragraphList.length;
-    }
-
-    for( i = 0; i < currentRangeStart.lineId; i++ ){
-        charInParagraphStart += currentRangeStart.paragraph.lineList[ i ].totalChars;
-    }
-
-    for( i = 0; i < currentRangeEnd.pageId; i++ ){
-        paragraphIdEnd += pageList[ i ].paragraphList.length;
-    }
-
-    for( i = 0; i < currentRangeEnd.lineId; i++ ){
-        charInParagraphEnd += currentRangeEnd.paragraph.lineList[ i ].totalChars;
-    }
+    var paragraphIdStart     = getGlobalParagraphId( currentRangeStart.pageId, currentRangeStart.paragraphId );
+    var charInParagraphStart = getGlobalParagraphChar( currentRangeStart.paragraph, currentRangeStart.lineId, currentRangeStart.lineChar );
+    var paragraphIdEnd       = getGlobalParagraphId( currentRangeEnd.pageId, currentRangeEnd.paragraphId );
+    var charInParagraphEnd   = getGlobalParagraphChar( currentRangeEnd.paragraph, currentRangeEnd.lineId, currentRangeEnd.lineChar );
 
     // Si está en el mismo nodo
     if(
@@ -2778,8 +2762,17 @@ var handleBackspaceSelection = function( dontSend ){
         currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
         currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
         
-        measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
-        
+        if( currentRangeStart.node.string.length ){
+            measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
+        }else{
+
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId ).concat( currentRangeStart.line.nodeList.slice( currentRangeStart.nodeId + 1 ) );
+
+            updateLineHeight( currentRangeStart.line );
+            updateParagraphHeight( currentRangeStart.paragraph );
+
+        }
+
     // Si está en la misma línea pero en distintos nodos
     }else if(
         currentRangeStart.pageId === currentRangeEnd.pageId &&
@@ -2807,144 +2800,145 @@ var handleBackspaceSelection = function( dontSend ){
         currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
 
         measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, currentRangeEnd.nodeChar );
-        
+        updateLineHeight( currentRangeStart.line );
+        updateParagraphHeight( currentRangeStart.paragraph );
+
     // Si están en varias líneas
     }else{
-
-        // Líneas intermedias
-        removeRangeLines( false, currentRangeStart, currentRangeEnd );
-        
-        // Calculamos los nuevos id's del párrafo y linea final
-        if(
-            currentRangeStart.pageId === currentRangeEnd.pageId &&
-            currentRangeStart.paragraphId === currentRangeEnd.paragraphId
-        ){
-            currentRangeEnd.lineId = currentRangeStart.lineId + 1;
-        }else{
-
-            currentRangeEnd.lineId = 0;
-
-            if( currentRangeStart.pageId === currentRangeEnd.pageId ){
-                currentRangeEnd.paragraphId = currentRangeStart.paragraphId + 1;
-            }else{
-                currentRangeEnd.paragraphId = 0;
-            }
-
-        }
 
         // Línea final
         // Eliminamos los primeros nodes de la línea
         for( i = 0; i < currentRangeEnd.nodeId; i++ ){
+
             currentRangeEnd.line.totalChars -= currentRangeEnd.line.nodeList[ i ].string.length;
+            currentRangeEnd.lineChar        -= currentRangeEnd.line.nodeList[ i ].string.length;
+
         }
 
         currentRangeEnd.line.totalChars -= currentRangeEnd.node.string.length;
+        currentRangeEnd.lineChar        -= currentRangeEnd.node.string.length;
         currentRangeEnd.node.string      = currentRangeEnd.node.string.slice( currentRangeEnd.nodeChar );
         currentRangeEnd.line.totalChars += currentRangeEnd.node.string.length;
+        currentRangeEnd.lineChar        += currentRangeEnd.node.string.length;
 
         // Si el nodo no se queda vacío
         if( currentRangeEnd.node.string.length ){
+
             measureNode( currentRangeEnd.paragraph, currentRangeEnd.line, currentRangeEnd.lineId, currentRangeEnd.lineChar, currentRangeEnd.node, currentRangeEnd.nodeId, 0 );
 
-            // To Do -> Quizás haya que arreglar el lineChar y nodeChar
+            currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId );
 
-        // Si el nodo se queda vacio pero hay nodos después
-        }else if( currentRangeEnd.line.nodeList[ currentRangeEnd.line.nodeId + 1 ] ){
+        // Si el nodo se queda vacio
+        }else{
 
             currentRangeEnd.line.nodeList = currentRangeEnd.line.nodeList.slice( currentRangeEnd.nodeId + 1 );
-            currentRangeStart.nodeId         = currentRangeStart.nodeId + 1;
-            currentRangeStart.node           = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.nodeChar       = 0;
+            currentRangeEnd.nodeId        = currentRangeEnd.nodeId + 1;
+            currentRangeEnd.node          = currentRangeEnd.line.nodeList[ currentRangeEnd.nodeId ];
+            currentRangeEnd.nodeChar      = 0;
 
-        // Si el nodo se queda vacio y no hay más nodos en la linea
-        }else{
-            currentRangeEnd.paragraph.lineList = currentRangeEnd.paragraph.lineList.slice( currentRangeEnd.lineId + 1 );
         }
 
-        // Borramos los párrafos que sean necesarios
-        // Si el rango empieza y termina en el mismo párrafo
-        if(
-            (
-                currentRangeStart.pageId !== currentRangeEnd.pageId ||
-                currentRangeStart.paragraphId !== currentRangeEnd.paragraphId
-            ) &&
-            !currentRangeEnd.paragraph.lineList.length
-        ){
-            currentRangeEnd.page.paragraphList = currentRangeEnd.page.paragraphList.slice( 0, currentRangeEnd.paragraphId ).concat( currentRangeEnd.page.paragraphList.slice( currentRangeEnd.paragraphId + 1 ) );
+        // Líneas intermedias
+        removeRangeLines( false, currentRangeStart, currentRangeEnd );
+
+        // Eliminar la linea final si hace falta
+        if( !currentRangeEnd.line.nodeList.length ){
+            currentRangeEnd.paragraph.lineList = currentRangeEnd.paragraph.lineList.slice( currentRangeEnd.lineId + 1 );
+            // To Do -> Actualizar la línea. Quizás no sea necesario realmente
+        }else{
+            updateLineHeight( currentRangeEnd.line );
         }
 
         // Línea inicial
         // Nodo inicial
         currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
+        currentRangeStart.lineChar        -= currentRangeStart.node.string.length;
         currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar );
         currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
+        currentRangeStart.lineChar        += currentRangeStart.node.string.length;
 
         measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
 
         // Eliminamos los nodos siguientes de la línea
         for( i = currentRangeStart.nodeId + 1; i < currentRangeStart.line.nodeList.length; i++ ){
+
             currentRangeStart.line.totalChars -= currentRangeStart.line.nodeList[ i ].string.length;
+            currentRangeStart.lineChar        -= currentRangeStart.line.nodeList[ i ].string.length;
+
         }
 
         // Si el nodo no se queda vacío
         if( currentRangeStart.node.string.length ){
             currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
 
-            // To Do -> Quizás haya que arreglar el lineChar y nodeChar
-
-        // Si se ha quedado vacío pero hay más nodos antes
-        }else if( currentRangeStart.nodeId > 0 ){
-
-            currentRangeStart.line.nodeList  = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId );
-            currentRangeStart.nodeId         = currentRangeStart.nodeId - 1;
-            currentRangeStart.node           = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
-            currentRangeStart.nodeChar       = currentRangeStart.node.string.length;
-
-        // Si se ha quedado vacío y era el primer nodo de la línea
+        // Si el nodo se queda vacio
         }else{
-            currentRangeStart.paragraph.lineList = currentRangeStart.paragraph.lineList.slice( 0, currentRangeStart.lineId || 1 );
+
+            currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId );
+            currentRangeStart.nodeId        = currentRangeStart.nodeId - 1;
+            currentRangeStart.node          = currentRangeStart.line.nodeList[ currentRangeStart.nodeId ];
+            currentRangeStart.nodeChar      = currentRangeStart.node.string.length - 1;
+
         }
 
-        // Borramos los párrafos que sean necesarios
-        // Si el rango empieza y termina en el mismo párrafo
+        // Eliminar la linea inicial si hace falta
+        if( !currentRangeStart.line.nodeList.length ){
+            currentRangeStart.paragraph.lineList = currentRangeStart.paragraph.lineList.slice( currentRangeStart.lineId + 1 );
+            // To Do -> Actualizar la línea
+        }else{
+            updateLineHeight( currentRangeStart.line );
+        }
+
+        realocatePageInverse( currentRangeStart.pageId );
+
+        // To do -> Hacer el caso si no existe la pagina
+        // Si el párrafo no existe
+        // if( !pageList[ currentRangeStart.pageId ].paragraphList[ currentRangeStart.paragraphId ] ){
+        //     currentRangeStart.paragraphId = currentRangeStart.paragraphId - 1;
+        // }
+
+        // Fusionamos lineas
+        // Si es el mismo párrafo
         if(
             currentRangeStart.pageId === currentRangeEnd.pageId &&
             currentRangeStart.paragraphId === currentRangeEnd.paragraphId
         ){
 
-            if( !currentRangeStart.paragraph.lineList.length ){
-                currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
+            var firstLine = currentRangeStart.paragraph.lineList[ 0 ];
+
+            for( i = 1; i < currentRangeStart.paragraph.lineList.length; i++ ){
+                firstLine.nodeList    = firstLine.nodeList.concat( currentRangeStart.paragraph.lineList[ i ].nodeList );
+                firstLine.totalChars += currentRangeStart.paragraph.lineList[ i ].totalChars;
             }
 
-            // To Do -> Quizás haya que cambiar las coordenadas
+            currentRangeStart.paragraph.lineList = [ currentRangeStart.paragraph.lineList[ 0 ] ];
+
+            updateLineHeight( currentRangeStart.line );
+            updateParagraphHeight( currentRangeStart.paragraph );
+            realocateLine( currentRangeStart.pageId, currentRangeStart.paragraph, 0, 0 );
+
+        // Si son distintos párrafos
         }else{
+            mergeParagraphs( currentRangeStart.pageId, currentRangeStart.page, currentRangeStart.paragraphId, currentRangeStart.paragraphId + 1 );
 
-            // Si el párrafo se queda vacío
-            if(
-                currentRangeStart.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length &&
-                currentRangeEnd.paragraph.lineList.length
-            ){
-                mergeParagraphs( currentRangeStart.pageId, currentRangeStart.page, currentRangeStart.paragraphId, currentRangeStart.paragraphId + 1 );
-            }else if(
-                !currentRangeStart.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length &&
-                currentRangeEnd.paragraph.lineList[ 0 ].nodeList[ 0 ].string.length
-            ){
-                currentRangeStart.page.paragraphList = currentRangeStart.page.paragraphList.slice( 0, currentRangeStart.paragraphId ).concat( currentRangeStart.page.paragraphList.slice( currentRangeStart.paragraphId + 1 ) );
-            }
-
-        }
-
-        realocatePageInverse( currentRangeStart.pageId );
-
-        // Si el párrafo no existe
-        if( !pageList[ currentRangeStart.pageId ].paragraphList[ currentRangeStart.paragraphId ] ){
-            currentRangeStart.paragraphId = currentRangeStart.paragraphId - 1;
         }
 
     }
 
-    setCursor( currentRangeStart.pageId, currentRangeStart.paragraphId, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.nodeId, currentRangeStart.nodeChar, true );
-    realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
+    var updatedPosition = getElementsByRemoteParagraph( paragraphIdStart, charInParagraphStart );
+
+    setCursor(
+
+        updatedPosition.pageId,
+        updatedPosition.paragraphId,
+        updatedPosition.lineId,
+        updatedPosition.lineChar,
+        updatedPosition.nodeId,
+        updatedPosition.nodeChar,
+        true
+
+    );
+    
     resetBlink();
 
     if( !realtime || dontSend ){
@@ -4401,6 +4395,12 @@ var mergeParagraphs = function( pageId, page, firstId, secondId ){
     if( firstParagraph.split === PARAGRAPH_SPLIT_START && secondParagraph.split === PARAGRAPH_SPLIT_END ){
         firstParagraph.split = PARAGRAPH_SPLIT_NONE;
     }
+
+    for( i = 0; i < firstParagraph.lineList.length; i++ ){
+        updateLineHeight( firstParagraph.lineList[ i ] );
+    }
+
+    updateParagraphHeight( firstParagraph );
     
     realocateLine( pageId, firstParagraph, 0, 0 );
 
