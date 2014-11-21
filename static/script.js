@@ -2655,6 +2655,9 @@ var handleBackspaceNormal = function( dontSend ){
 
     }else{
 
+        var localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
+        var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) - 1;
+
         currentNode.string   = currentNode.string.slice( 0, currentNodeCharId - 1 ).concat( currentNode.string.slice( currentNodeCharId ) );
         currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId - 1 );
 
@@ -2664,27 +2667,14 @@ var handleBackspaceNormal = function( dontSend ){
         currentNodeCharId--;
         currentLine.totalChars--;
 
-        // Realocamos el contenido
-        var realocation = realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
-
-        //measureLineJustify( currentParagraph, currentLine, currentLineId );
-
-        // Se ha producido una realocation inversa
-        if( realocation.realocation && realocation.lineChar > 0 ){
-
-            currentLineId     = currentLineId - 1;
-            currentLine       = currentParagraph.lineList[ currentLineId ];
-            currentLineCharId = realocation.lineChar;
-            nodePosition      = getNodeInPosition( currentLine, realocation.lineChar );
-            currentNodeId     = nodePosition.nodeId;
-            currentNode       = currentLine.nodeList[ currentNodeId ];
-            currentNodeCharId = nodePosition.nodeChar;
-
         // El nodo se queda vacío y hay más nodos en la línea
-        }else if( !currentNode.string.length && currentLine.nodeList.length > 1 ){
+        if( !currentNode.string.length && currentLine.nodeList.length > 1 ){
 
             currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
             updateTools          = true;
+
+            updateLineHeight( currentLine );
+            updateParagraphHeight( currentParagraph );
 
         // El nodo se queda vacío y no hay más nodos en la línea
         }else if( currentLineId && !currentNode.string.length && currentLine.nodeList.length === 1 ){
@@ -2700,6 +2690,19 @@ var handleBackspaceNormal = function( dontSend ){
             updateTools               = true;
 
         }
+
+        // Realocamos el contenido
+        var realocation = realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
+
+        // To Do -> realocateLineInverse tiene un to do dentro esperando a que se arregle el problema de los contadores. Cuando no tenga ese to do, por favor, hacer las siguientes operaciones solo si el contador es mayor que 0
+        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId );
+
+        currentPageId      = updatedPosition.pageId;
+        currentParagraphId = updatedPosition.paragraphId;
+        currentLineId      = updatedPosition.lineId;
+        currentLineCharId  = updatedPosition.lineChar;
+        currentNodeId      = updatedPosition.nodeId;
+        currentNodeCharId  = updatedPosition.nodeChar;
 
     }
 
@@ -7696,7 +7699,7 @@ var updateLineHeight = function( line ){
     
     var height = 0;
 
-    for( i = 0; i < line.nodeList.length; i++ ){
+    for( var i = 0; i < line.nodeList.length; i++ ){
 
         if( line.nodeList[ i ].height > height ){
             height = line.nodeList[ i ].height;
