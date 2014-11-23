@@ -2656,7 +2656,8 @@ var handleBackspaceNormal = function( dontSend ){
     }else{
 
         var localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
-        var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) - 1;
+        var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
+        var endOfLine        = currentLineCharId === currentLine.totalChars;
 
         currentNode.string   = currentNode.string.slice( 0, currentNodeCharId - 1 ).concat( currentNode.string.slice( currentNodeCharId ) );
         currentNode.charList = currentNode.charList.slice( 0, currentNodeCharId - 1 );
@@ -2692,10 +2693,35 @@ var handleBackspaceNormal = function( dontSend ){
         }
 
         // Realocamos el contenido
-        var realocation = realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
+        if(
+            endOfLine &&
+            currentLineId !== currentParagraph.lineList.length - 1
+        ){
+
+            var firstLine = currentParagraph.lineList[ 0 ];
+
+            for( i = 1; i < currentParagraph.lineList.length; i++ ){
+
+                firstLine.nodeList    = firstLine.nodeList.concat( currentParagraph.lineList[ i ].nodeList );
+                firstLine.totalChars += currentParagraph.lineList[ i ].totalChars;
+
+            }
+
+            currentParagraph.lineList = [ currentParagraph.lineList[ 0 ] ];
+
+            updateLineHeight( firstLine );
+            updateParagraphHeight( currentParagraph );
+            realocateLine( currentPageId, currentParagraph, 0, 0 );
+
+        }else{
+
+            realocateLineInverse( currentParagraph, currentLineId - 1, 0, true );
+            realocateLineInverse( currentParagraph, currentLineId, 0 );
+
+        }
 
         // To Do -> realocateLineInverse tiene un to do dentro esperando a que se arregle el problema de los contadores. Cuando no tenga ese to do, por favor, hacer las siguientes operaciones solo si el contador es mayor que 0
-        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId );
+        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId - 1 );
 
         currentPageId      = updatedPosition.pageId;
         currentParagraphId = updatedPosition.paragraphId;
@@ -2913,7 +2939,7 @@ var handleBackspaceSelection = function( dontSend ){
 
             currentRangeStart.paragraph.lineList = [ currentRangeStart.paragraph.lineList[ 0 ] ];
 
-            updateLineHeight( currentRangeStart.line );
+            updateLineHeight( firstLine );
             updateParagraphHeight( currentRangeStart.paragraph );
             realocateLine( currentRangeStart.pageId, currentRangeStart.paragraph, 0, 0 );
 
@@ -2959,13 +2985,15 @@ var handleDel = function( dontSend ){
 
     if( currentRangeStart ){
         handleBackspaceSelection( dontSend );
-    }else{
+    }/*else{
         handleDelNormal( dontSend );
-    }
+    }*/
 
 };
 
 var handleDelNormal = function( dontSend ){
+
+    // To Do -> Implementar bien
 
     verticalKeysEnabled = false;
 
@@ -3959,7 +3987,9 @@ var logAllNodesWidth = function(){
                         page          : lp,
                         paragraph     : lpg,
                         line          : ll,
+                        totalChars    : pageList[ lp ].paragraphList[ lpg ].lineList[ ll ].totalChars,
                         node          : ln,
+                        chars         : node.string.length,
                         width         : node.width,
                         lastCharWidth : node.charList[ node.charList.length - 1 ]
 
