@@ -1651,7 +1651,7 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
     // Fix range
     // Si es el principio de un rango y está al final del nodo
     if(
-        !isEnd,
+        !isEnd &&
         node.string.length === nodeChar
     ){
 
@@ -2657,9 +2657,10 @@ var handleBackspaceNormal = function( dontSend ){
     }else if(
 
         currentParagraph.listMode &&
-        currentLineId === 0 &&
+        !currentLineId &&
         currentNodeId === 1 &&
-        currentLine.nodeList[ currentNodeId - 1 ].blocked
+        currentLine.nodeList[ currentNodeId - 1 ].blocked &&
+        !currentNodeCharId
 
     ){
 
@@ -2741,7 +2742,7 @@ var handleBackspaceNormal = function( dontSend ){
         }
 
         // To Do -> realocateLineInverse tiene un to do dentro esperando a que se arregle el problema de los contadores. Cuando no tenga ese to do, por favor, hacer las siguientes operaciones solo si el contador es mayor que 0
-        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId - 1 );
+        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId - 1, true );
 
         currentPageId      = updatedPosition.pageId;
         currentParagraphId = updatedPosition.paragraphId;
