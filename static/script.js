@@ -3028,16 +3028,22 @@ var handleDel = function( dontSend ){
 
     if( currentRangeStart ){
         handleBackspaceSelection( dontSend );
-    }/*else{
+    }else{
         handleDelNormal( dontSend );
-    }*/
+    }
 
 };
 
 var handleDelNormal = function( dontSend ){
 
-    // To Do -> Implementar bien
+    // To Do -> Implementar una versión más optimizada
+    // To Do -> Implementar dontSend
+    // To Do -> Implementar colaborativo
 
+    handleArrowRight();
+    handleBackspace();
+    
+    /*
     verticalKeysEnabled = false;
 
     // Final del documento
@@ -3092,7 +3098,8 @@ var handleDelNormal = function( dontSend ){
     realocateLineInverse( currentParagraph, currentLineId, currentLineCharId );
     resetBlink();
 
-    // To Do -> Implementar colaborativo
+    
+    */
 
 };
 
