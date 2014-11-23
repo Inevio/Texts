@@ -2583,7 +2583,7 @@ var handleBackspaceNormal = function( dontSend ){
                 realocateLine( currentPageId, prevParagraph, mergePreLastLine );
             }
 
-            var pos = getElementsByRemoteParagraph( localParagraphId, localCharId );
+            var pos = getElementsByRemoteParagraph( localParagraphId, localCharId, true );
 
             currentPageId      = pos.pageId;
             currentPage        = pos.page;
@@ -2631,7 +2631,7 @@ var handleBackspaceNormal = function( dontSend ){
             currentParagraph.height += maxSize * currentParagraph.spacing; // To Do -> Estamos seguros de que esto es correcto?
 
             var realocate       = realocateLine( currentPageId, currentParagraph, currentLineId - 1, original );
-            var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId );
+            var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId, true );
 
             currentPageId      = updatedPosition.pageId;
             currentPage        = updatedPosition.page;
@@ -2995,7 +2995,7 @@ var handleBackspaceSelection = function( dontSend ){
 
     }
 
-    var updatedPosition = getElementsByRemoteParagraph( paragraphIdStart, charInParagraphStart );
+    var updatedPosition = getElementsByRemoteParagraph( paragraphIdStart, charInParagraphStart, true );
 
     setCursor(
 
@@ -7986,8 +7986,6 @@ closeButton.on( 'click', function(e){
         }
 
     });
-
-    console.log( dialog );
 
 });
 
