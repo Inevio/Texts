@@ -2653,6 +2653,26 @@ var handleBackspaceNormal = function( dontSend ){
 
         updateTools = true;
 
+    // Si está en un párrafo en modo lista
+    }else if(
+
+        currentParagraph.listMode &&
+        currentLineId === 0 &&
+        currentNodeId === 1 &&
+        currentLine.nodeList[ currentNodeId - 1 ].blocked
+
+    ){
+
+        var bulletLength = currentLine.nodeList[ 0 ].string.length;
+
+        setParagraphStyle( currentPageId, currentPage, currentParagraphId, currentParagraph, 'listNone' );
+
+        currentNodeId      = currentNodeId - 1;
+        currentLineCharId -= bulletLength;
+
+        setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
+        handleBackspaceNormal( true );
+
     }else{
 
         var localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
