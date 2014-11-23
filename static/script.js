@@ -2808,7 +2808,19 @@ var handleBackspaceSelection = function( dontSend ){
         currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
         currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
         
-        if( currentRangeStart.node.string.length ){
+        // Si todavía queda contenido dentro o es el primer nodo de la línea, no lo borramos
+        if(
+
+            currentRangeStart.node.string.length ||
+            !currentRangeStart.nodeId ||
+            (
+                currentRangeStart.paragraph.listMode &&
+                currentRangeStart.lineId === 0 &&
+                currentRangeStart.nodeId === 1 &&
+                currentRangeStart.line.nodeList[ currentRangeStart.nodeId - 1 ].blocked
+            )
+
+        ){
             measureNode( currentRangeStart.paragraph, currentRangeStart.line, currentRangeStart.lineId, currentRangeStart.lineChar, currentRangeStart.node, currentRangeStart.nodeId, currentRangeStart.nodeChar );
         }else{
 
@@ -2914,7 +2926,18 @@ var handleBackspaceSelection = function( dontSend ){
         }
 
         // Si el nodo no se queda vacío
-        if( currentRangeStart.node.string.length ){
+        if(
+
+            currentRangeStart.node.string.length ||
+            !currentRangeStart.nodeId ||
+            (
+                currentRangeStart.paragraph.listMode &&
+                currentRangeStart.lineId === 0 &&
+                currentRangeStart.nodeId === 1 &&
+                currentRangeStart.line.nodeList[ currentRangeStart.nodeId - 1 ].blocked
+            )
+
+        ){
             currentRangeStart.line.nodeList = currentRangeStart.line.nodeList.slice( 0, currentRangeStart.nodeId + 1 );
 
         // Si el nodo se queda vacio
@@ -2963,8 +2986,8 @@ var handleBackspaceSelection = function( dontSend ){
             updateParagraphHeight( currentRangeStart.paragraph );
             realocateLine( currentRangeStart.pageId, currentRangeStart.paragraph, 0, 0 );
 
-        // Si son distintos párrafos
-        }else{
+        // Si son distintos párrafos y todavía existe el último párrafo
+        }else if( currentRangeEnd.paragraph.lineList.length ){
             mergeParagraphs( currentRangeStart.pageId, currentRangeStart.page, currentRangeStart.paragraphId, currentRangeStart.paragraphId + 1 );
 
         }
@@ -4439,19 +4462,17 @@ var mergeParagraphs = function( pageId, page, firstId, secondId ){
     firstParagraph.lineList = [ line ];
     line.height             = maxHeight;
     line.totalChars         = totalChars;
-    line.nodeList           = newNodeList;
+    line.nodeList           = newNodeList.filter( function( item ){ return item.string.length; });
+    line.tabList            = getTabsInLine( line );
     page.paragraphList      = page.paragraphList.slice( 0, firstId + 1 ).concat( page.paragraphList.slice( secondId + 1 ) );
 
     if( firstParagraph.split === PARAGRAPH_SPLIT_START && secondParagraph.split === PARAGRAPH_SPLIT_END ){
         firstParagraph.split = PARAGRAPH_SPLIT_NONE;
     }
 
-    for( i = 0; i < firstParagraph.lineList.length; i++ ){
-        updateLineHeight( firstParagraph.lineList[ i ] );
-    }
-
+    updateLineHeight( firstParagraph.lineList[ 0 ] );
     updateParagraphHeight( firstParagraph );
-    
+    normalizeLine( firstParagraph, 0, firstParagraph.lineList[ 0 ] );
     realocateLine( pageId, firstParagraph, 0, 0 );
 
     // To Do -> Quizás habría que hacer un realocate a la inversa de la página
@@ -4667,6 +4688,8 @@ var normalizeLine = function( paragraph, lineId, line ){
         }
 
     }
+
+    line.tabList = getTabsInLine( line );
 
 };
 
