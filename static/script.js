@@ -5196,9 +5196,6 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
     // Si la línea no existe se ignora
     if( !line ){
-
-        // To Do -> Optimizar y hacerlo solo cuando haga falta
-        line.tabList = getTabsInLine( line );
         return counter;
 
     }
@@ -5259,7 +5256,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
 
         var lastWordToMove = nextLineWords[ wordsToMove[ wordsToMove.length - 1 ] ];
         var lastNodeToMove = lastWordToMove.nodeList[ lastWordToMove.nodeList.length - 1 ];
-        var lastWordOffset = lastWordToMove.offset[ lastWordToMove.offset - 1 ];
+        var lastWordOffset = lastWordToMove.offset[ lastWordToMove.offset.length - 1 ];
 
         // Si hay que mover los nodos completos
         if( nextLine.nodeList[ lastNodeToMove ].charList.length - 1 === lastWordOffset[ 1 ] ){
@@ -5295,7 +5292,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
             newNode.string       = nodeToMove.string.slice( 0, lastWordOffset[ 1 ] + 1 );
             nodeToMove.string    = nodeToMove.string.slice( lastWordOffset[ 1 ] + 1 );
             line.totalChars     += newNode.string.length;
-            newLine.totalChars  -= newNode.string.length;
+            nextLine.totalChars -= newNode.string.length;
 
             measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
             measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
@@ -5443,7 +5440,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
                 newNode.string       = nodeToMove.string.slice( 0, charId + 1 );
                 nodeToMove.string    = nodeToMove.string.slice( charId + 1 );
                 line.totalChars     += newNode.string.length;
-                newLine.totalChars  -= newNode.string.length;
+                nextLine.totalChars -= newNode.string.length;
 
                 measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
                 measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
@@ -5494,7 +5491,7 @@ var realocateLineInverse = function( paragraph, id, modifiedChar, dontPropagate 
                 newNode.string       = nodeToMove.string.slice( 0, lastWordOffset[ 1 ] + 1 );
                 nodeToMove.string    = nodeToMove.string.slice( lastWordOffset[ 1 ] + 1 );
                 line.totalChars     += newNode.string.length;
-                newLine.totalChars  -= newNode.string.length;
+                nextLine.totalChars -= newNode.string.length;
 
                 measureNode( paragraph, line, 0, 0, newNode, 0, 0 );
                 measureNode( paragraph, nextLine, 0, 0, nodeToMove, 0, 0 );
