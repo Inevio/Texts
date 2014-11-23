@@ -8796,6 +8796,10 @@ selections
 
 });
 
+$('.ruler-top, .rule-top, .rule-left').on( 'mousedown', function( e ){
+    e.preventDefault();
+});
+
 toolsMenu
 .on( 'click', 'li:not(.active)', function(){
 
