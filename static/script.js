@@ -3175,11 +3175,19 @@ var handleCharNormal = function( newChar, dontSend ){
 
     var localParagraphId = getGlobalParagraphId( currentPageId, currentParagraphId );
     var localCharId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
-    var realocation      = realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId );
+    var realocate        = false;
 
-    //measureLineJustify( currentParagraph, currentLine, currentLineId );
+    if( newChar.indexOf(' ') >= 0 || newChar.indexOf('\t') >= 0 ){
 
-    if( realocation > 0 ){
+        realocate = true;
+
+        realocateLineInverse( currentParagraph, currentLineId - 1, currentLineCharId );
+
+    }
+
+    realocate = realocate || ( realocateLine( currentPageId, currentParagraph, currentLineId, currentLineCharId ) > 0 );
+
+    if( realocate ){
 
         var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId );
 
@@ -5024,7 +5032,18 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
         return counter;
     }
 
-    if( getNodesWidth( line ) <= line.width ){
+    var lastNode = line.nodeList[ line.nodeList.length - 1 ];
+
+    // Si entra en la línea y no se está escribiendo al principio de una palabra partida
+    if(
+
+        getNodesWidth( line ) <= line.width &&
+        (
+            paragraph.lineList.length - 1 === id ||
+            lastNode.string[ lastNode.string.length - 1 ] === ' '
+        )
+
+    ){
 
         // To Do -> Optimizar y hacerlo solo cuando haga falta
         line.tabList = getTabsInLine( line );
@@ -5071,11 +5090,21 @@ var realocateLine = function( pageId, paragraph, id, lineChar, dontPropagate ){
 
         if( !wordsToMove.length ){
 
-            // To Do -> Optimizar y hacerlo solo cuando haga falta
-            line.tabList = getTabsInLine( line );
-            
-            measureLineJustify( paragraph, line, id );
-            return counter;
+            if(
+                ( paragraph.lineList.length - 1 !== id ) &&
+                lineWords[ lineWords.length - 1 ].string[ lineWords[ lineWords.length - 1 ].string.length - 1 ] !== ' '
+
+            ){
+                wordsToMove.push( lineWords.length - 1 );
+            }else{
+
+                // To Do -> Optimizar y hacerlo solo cuando haga falta
+                line.tabList = getTabsInLine( line );
+                
+                measureLineJustify( paragraph, line, id );
+                return counter;
+
+            }
 
         }
 
