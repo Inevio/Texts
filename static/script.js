@@ -3010,6 +3010,8 @@ var handleBackspaceSelection = function( dontSend ){
     );
     
     resetBlink();
+    clearTemporalStyle();
+    updateToolsLineStatus(); // To Do -> Comprobar si se tiene que ejecutar siempre o solo algunas veces
 
     if( !realtime || dontSend ){
         return;
