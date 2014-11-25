@@ -772,7 +772,7 @@ var createParagraph = function( page ){
 
     paragraph.lineList.push( line );
 
-    paragraph.height += line.height;
+    paragraph.height += line.height * paragraph.spacing;
 
     return paragraph;
 
@@ -2566,12 +2566,10 @@ var handleBackspaceNormal = function( dontSend ){
                     lastLine.totalChars += currentParagraph.lineList[ i ].totalChars;
 
                     if( currentParagraph.lineList[ i ].height > lastLine.height ){
-
-                        prevParagraph.height = prevParagraph.height - lastLine.height + currentParagraph.lineList[ i ],height;
-                        lastLine.height      = currentParagraph.lineList[ i ].height;
-
+                        lastLine.height = currentParagraph.lineList[ i ].height;
                     }
 
+                    updateParagraphHeight( prevParagraph );
 
                 }
 
@@ -2627,8 +2625,13 @@ var handleBackspaceNormal = function( dontSend ){
 
             }
 
-            prevLine.height          = maxSize;
+            prevLine.height = maxSize;
+
+            /*
             currentParagraph.height += maxSize * currentParagraph.spacing; // To Do -> Estamos seguros de que esto es correcto?
+            */
+
+            updateParagraphHeight( currentParagraph );
 
             var realocate       = realocateLine( currentPageId, currentParagraph, currentLineId - 1, original );
             var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId, true );
@@ -3546,8 +3549,13 @@ var handleRemoteBackspace = function( pageId, page, paragraphId, paragraph, line
 
             }
 
-            prevLine.height   = maxSize;
+            prevLine.height = maxSize;
+
+            /*
             paragraph.height += maxSize * paragraph.spacing; // To Do -> Estamos seguros de que esto es correcto?
+            */
+
+            updateParagraphHeight( paragraph );
 
         }
 
@@ -6399,14 +6407,14 @@ var setParagraphStyle = function( pageId, page, paragraphId, paragraph, key, val
     
     }else if( key == 'spacing' ){
 
-        var prev = paragraph['spacing'];
+        var prev = paragraph.spacing;
 
         // Si no hay un cambio real no hacemos nada
         if( value === prev ){
             return;
         }
 
-        paragraph['spacing'] = value;
+        paragraph.spacing = value;
 
         // Propagamos lo cambios necesarios al párrafo
         for( i = 0; i < paragraph.lineList.length; i++ ){
@@ -7825,7 +7833,7 @@ var updateParagraphHeight = function( paragraph ){
     var height = 0;
 
     for( var i = 0; i < paragraph.lineList.length; i++ ){
-        height += paragraph.lineList[ i ].height;
+        height += paragraph.lineList[ i ].height * paragraph.spacing;
     }
 
     paragraph.height = height;
