@@ -4744,39 +4744,43 @@ var normalizePlainParagraph = function( paragraph ){
 
 };
 
-var openFile = function( structure ){
+var openFile = function( structureId ){
 
     // To Do -> Error
 
-    if( structure.mime === 'application/inevio-texts' ){
+    wz.fs( structureId, function( error, structure ){
 
-        structure.read( function( error, data ){
+        if( structure.mime === 'application/inevio-texts' ){
 
-            // Asociamos todos los datos del fichero con sus variables correspondientes
-            currentOpenFile = structure;
+            structure.read( function( error, data ){
 
-            setViewTitle( currentOpenFile.name );
-            processFile( data );
-            start();
+                // Asociamos todos los datos del fichero con sus variables correspondientes
+                currentOpenFile = structure;
 
-        });
+                setViewTitle( currentOpenFile.name );
+                processFile( data );
+                start();
 
-    }else if( structure.formats['inevio-texts'] ){
+            });
 
-        structure.formats['inevio-texts'].read( function( error, data ){
+        }else if( structure.formats['inevio-texts'] ){
 
-            // Asociamos todos los datos del fichero con sus variables correspondientes
-            currentOpenFile = structure;
+            structure.formats['inevio-texts'].read( function( error, data ){
 
-            setViewTitle( currentOpenFile.name );
-            processFile( data );
-            start();
+                // Asociamos todos los datos del fichero con sus variables correspondientes
+                currentOpenFile = structure;
 
-        });
+                setViewTitle( currentOpenFile.name );
+                processFile( data );
+                start();
 
-    }else{
-        alert( 'FILE FORMAT NOT RECOGNIZED' );
-    }
+            });
+
+        }else{
+            alert( 'FILE FORMAT NOT RECOGNIZED' );
+        }
+
+    });
     
 };
 
