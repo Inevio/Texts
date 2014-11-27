@@ -4948,7 +4948,7 @@ var processFile = function( data, noDecode ){
 
     );
 
-    pageList           = [];
+    pageList           = [ page ];
     page.paragraphList = [];
 
     for( i = 0; i < data.paragraphList.length; i++ ){
@@ -5018,19 +5018,16 @@ var processFile = function( data, noDecode ){
         page.paragraphList.push( paragraph );
 
     }
-
-    pageList.push( page );
-
     // Realocamos el contenido
+    for( i = 0; i < pageList[ 0 ].paragraphList.length; i++ ){
+
+        setCursor( 0, i, 0, 0, 0, 0, true );
+        realocateLine( 0, pageList[ 0 ].paragraphList[ i ], 0, 0 );
+
+    }
+
     for( i = 0; i < pageList.length; i++ ){
-
-        for( j = 0; j < pageList[ i ].paragraphList.length; j++ ){
-
-            setCursor( i, j, 0, 0, 0, 0, true );
-            realocateLine( i, pageList[ i ].paragraphList[ j ], 0, 0 );
-
-        }
-
+        realocatePage( i );
     }
     
 };
