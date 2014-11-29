@@ -1586,18 +1586,17 @@ var getElementsByRemoteParagraph = function( remoteParagraphId, remoteParagraphC
 
     var i, page, pageId, paragraph, paragraphId, line, lineId, lineChar, node, nodeId, nodeChar;
 
-    i      = 0;
-    pageId = 0;
+    pageId      = 0;
+    paragraphId = remoteParagraphId;
 
     while( true ){
 
-        if( i + pageList[ pageId ].paragraphList.length >= remoteParagraphId ){
-            paragraphId = remoteParagraphId - i;
+        if( ( pageList[ pageId ].paragraphList.length - 1 ) >= paragraphId ){
             break;
         }
 
-        i      += pageList[ pageId ].paragraphList.length;
-        pageId += 1;
+        paragraphId -= pageList[ pageId ].paragraphList.length;
+        pageId      += 1
 
     }
 
