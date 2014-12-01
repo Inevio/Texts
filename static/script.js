@@ -3193,7 +3193,7 @@ var handleCharNormal = function( newChar, dontSend ){
 
     if( realocate ){
 
-        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId );
+        var updatedPosition = getElementsByRemoteParagraph( localParagraphId, localCharId, true );
 
         setCursor(
 
