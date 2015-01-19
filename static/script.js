@@ -919,7 +919,10 @@ var drawPages = function(){
 
                                 if( tracks[ l ][ 0 ] === ' ' || tracks[ l ][ 0 ] === '\t' ){
 
-                                    if( paragraph.align === ALIGN_JUSTIFY ){
+                                    if(
+                                        paragraph.align === ALIGN_JUSTIFY &&
+                                        node.justifyCharList
+                                    ){
                                         trackHeritage = node.justifyCharList[ trackChars + tracks[ l ].length - 1 ];
                                     }else{
                                         trackHeritage = node.charList[ trackChars + tracks[ l ].length - 1 ];
