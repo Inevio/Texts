@@ -4928,7 +4928,7 @@ var processFile = function( data, noDecode ){
         return;
     }
 
-    //console.log( JSON.stringify( data, null, 4 ) );
+    //console.log( JSON.stringify( data, null, 2 ) );
 
     var i, j, k, value;
     var chunkedNodes;
@@ -4989,6 +4989,18 @@ var processFile = function( data, noDecode ){
         }
 
         line.width -= getLineIndentationLeftOffset( 0, paragraph );
+
+        if( !data.paragraphList[ i ].nodeList.length ){
+            
+            var emptyNode = newNode();
+
+            setNodeStyle( paragraph, line, emptyNode, 'font-size', 12 );
+            setNodeStyle( paragraph, line, emptyNode, 'font-family', 'Cambria' );
+            setNodeStyle( paragraph, line, emptyNode, 'color', '#000000' );
+
+            data.paragraphList[ i ].nodeList.push( emptyNode );
+
+        }
 
         for( j = 0; j < data.paragraphList[ i ].nodeList.length; j++ ){
             
