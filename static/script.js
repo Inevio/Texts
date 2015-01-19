@@ -497,6 +497,10 @@ var chunkFileNodes = function( node ){
 
         }
 
+        if( current.string.length ){
+            nodes.push( current );
+        }
+
     }else{
         nodes.push( current );
     }
