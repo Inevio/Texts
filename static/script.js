@@ -651,6 +651,10 @@ var compareNodeStyles = function( first, second ){
     var firstKeys   = Object.keys( firstStyle );
     var totalKeys   = firstKeys.length;
 
+    if( totalKeys !== Object.keys( secondStyle ).length ){
+        return false;
+    }
+
     for( var i = 0; i < totalKeys; i++ ){
 
         if( firstStyle[ firstKeys[ i ] ] !== secondStyle[ firstKeys[ i ] ] ){
