@@ -5823,6 +5823,8 @@ var realocatePage = function( id, propagated ){
             mergeParagraphs( id + 1, newPage, 0, 1 );
         }
 
+        newPage.paragraphList = newPage.paragraphList.slice( 0, 1 ).concat( page.paragraphList.slice( paragraphId + 1 ) ).concat( newPage.paragraphList.slice( 1 ) );
+        page.paragraphList    = page.paragraphList.slice( 0, paragraphId + 1 );
     }
 
     // Fusionamos los párrafos que sean necesarios
