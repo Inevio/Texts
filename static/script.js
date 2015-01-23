@@ -37,6 +37,7 @@ var CMD_PARAGRAPH_STYLE = 11;
 var CMD_RANGE_PARAGRAPH_STYLE = 12;
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
+var DIMENSION_TO_CM = 1440 / 2.54;
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var GAP = 20;
@@ -4937,6 +4938,10 @@ var processFile = function( data, noDecode ){
 
     //console.log( JSON.stringify( data, null, 2 ) );
 
+    data.info.version = data.info.version.toString();
+
+    console.log( data.defaultPage.width, data.defaultPage.width / DIMENSION_TO_CM * CENTIMETER );
+
     var i, j, k, value;
     var chunkedNodes;
     var node;
@@ -4945,15 +4950,15 @@ var processFile = function( data, noDecode ){
     var page = createPage(
 
         {
-            width  : data.defaultPage.width * CENTIMETER,
-            height : data.defaultPage.height * CENTIMETER
+            width  : data.info.version === '1' ? data.defaultPage.width * CENTIMETER : data.defaultPage.width / DIMENSION_TO_CM * CENTIMETER,
+            height : data.info.version === '1' ? data.defaultPage.height * CENTIMETER : data.defaultPage.height / DIMENSION_TO_CM * CENTIMETER
         },
 
         {
-            top    : data.defaultPage.marginTop * CENTIMETER,
-            right  : data.defaultPage.marginRight * CENTIMETER,
-            bottom : data.defaultPage.marginBottom * CENTIMETER,
-            left   : data.defaultPage.marginLeft * CENTIMETER
+            top    : data.info.version === '1' ? data.defaultPage.marginTop * CENTIMETER : data.defaultPage.marginTop / DIMENSION_TO_CM * CENTIMETER,
+            right  : data.info.version === '1' ? data.defaultPage.marginRight * CENTIMETER : data.defaultPage.marginRight / DIMENSION_TO_CM * CENTIMETER,
+            bottom : data.info.version === '1' ? data.defaultPage.marginBottom * CENTIMETER : data.defaultPage.marginBottom / DIMENSION_TO_CM * CENTIMETER,
+            left   : data.info.version === '1' ? data.defaultPage.marginLeft * CENTIMETER : data.defaultPage.marginLeft / DIMENSION_TO_CM * CENTIMETER
         }
 
     );
