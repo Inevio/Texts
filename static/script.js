@@ -207,6 +207,7 @@ var currentMouse          = MOUSE_NORMAL;
 var temporalStyle         = null;
 var toolsListEnabled      = false;
 var toolsColorEnabled     = false;
+var lastStatus            = null;
 
 // Button actions
 var buttonAction = {
@@ -3971,6 +3972,10 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
 
 };
 
+var hasStatusChanged = function(){
+    return lastStatus !== JSON.stringify( generateDocument() );
+};
+
 var hideDocument = function(){
     
     pages.css( 'display', 'none' );
@@ -6292,6 +6297,10 @@ var saveDocument = function( callback ){
 
 };
 
+var saveStatus = function(){
+    lastStatus = JSON.stringify( generateDocument() );
+};
+
 var setNodeStyle = function( paragraph, line, node, key, value ){
 
     if( value ){
@@ -7488,6 +7497,7 @@ var start = function(){
 
     if( !currentOpenFile ){
 
+        /*
         console.log({
 
             width : PAGEDIMENSIONS['A4'].width * CENTIMETER,
@@ -7501,6 +7511,7 @@ var start = function(){
             left   : MARGIN['Normal'].left * CENTIMETER
 
         });
+        */
 
         pageList.push(
 
@@ -7543,6 +7554,7 @@ var start = function(){
     updatePages();
     updateToolsLineStatus();
     activeRealTime();
+    saveStatus();
 
     loading.css( 'display', 'none' );
 
@@ -8051,6 +8063,10 @@ moreButton.on( 'click', function(){
 closeButton.on( 'click', function(e){
 
     e.stopPropagation();
+
+    if( !hasStatusChanged() ){
+        return wz.app.removeView( win );
+    }
     
     var dialog = wz.dialog();
 
