@@ -720,7 +720,19 @@ var createDocument = function( remoteCallback ){
 };
 
 var createFile = function( name, data, callback ){
-    wz.fs.create( name, 'application/inevio-texts', 'root', JSON.stringify( data ), callback );
+
+    wz.fs.saveFile( 'root', { name : name, extension : 'texts' }, function( error, destiny, name, replace ){
+
+        console.log( arguments );
+
+        if( error ){
+            return callback( error );
+        }
+
+        wz.fs.create( name, 'application/inevio-texts', destiny, JSON.stringify( data ), callback );
+
+    });
+
 };
 
 var createLine = function( id, paragraph ){
@@ -8032,9 +8044,9 @@ newButton.on( 'click', function(){
 saveButton.on( 'click', function(){
     
     if( currentOpenFile && currentOpenFile.mime === 'application/inevio-texts' ){
-        saveDocument();
+        saveDocument( function(){} );
     }else{
-        createDocument();
+        createDocument( function(){} );
     }
 
 });
