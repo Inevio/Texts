@@ -912,10 +912,11 @@ var drawPages = function(){
                     // Draw the nodes
                     for( k = 0; k < line.nodeList.length; k++ ){
 
-                        node          = line.nodeList[ k ];
-                        ctx.fillStyle = node.style.color;
-                        startX        = parseInt( page.marginLeft + getLineIndentationLeftOffset( j, paragraph ) + wHeritage, 10 );
-                        startY        = parseInt( pageHeight + page.marginTop + line.height + hHeritage, 10 );
+                        node             = line.nodeList[ k ];
+                        ctx.fillStyle    = node.style.color;
+                        ctx.textBaseline = 'bottom';
+                        startX           = parseInt( page.marginLeft + getLineIndentationLeftOffset( j, paragraph ) + wHeritage, 10 );
+                        startY           = parseInt( pageHeight + page.marginTop + line.height + hHeritage, 10 );
 
                         setCanvasTextStyle( node.style );
 
@@ -7668,7 +7669,14 @@ var updateBlink = function(){
             blinkCurrent     = newCurrent;
             ctxSel.fillStyle = '#000000';
 
-            ctxSel.fillRect( parseInt( positionAbsoluteX, 10 ), parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ), 1, currentNode.height );
+            ctxSel.fillRect(
+
+                parseInt( positionAbsoluteX, 10 ),
+                parseInt( positionAbsoluteY - scrollTop + currentLine.height - currentNode.height, 10 ),
+                1,
+                currentNode.height
+
+            );
 
             debugTimeEnd('cursor on');
 
