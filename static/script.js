@@ -20,7 +20,7 @@ var BROWSER_TYPE = /webkit/i.test( navigator.userAgent ) ? BROWSER_WEBKIT : ( /t
 var CLOSEOPTION_DONTSAVE = 0;
 var CLOSEOPTION_CANCEL = 1;
 var CLOSEOPTION_SAVE = 2;
-var CENTIMETER = 37.795275591;
+var CENTIMETER = 37.79527559055;
 var CHUNK_FILE_NODES = 40;
 var CMD_SYNC = 0;
 var CMD_DOCUMENT = 1;
@@ -37,6 +37,7 @@ var CMD_PARAGRAPH_STYLE = 11;
 var CMD_RANGE_PARAGRAPH_STYLE = 12;
 var DEBUG = false;
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
+var DIMENSION_TO_CM = 1440 / 2.54;
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var GAP = 20;
@@ -206,6 +207,7 @@ var currentMouse          = MOUSE_NORMAL;
 var temporalStyle         = null;
 var toolsListEnabled      = false;
 var toolsColorEnabled     = false;
+var lastStatus            = null;
 
 // Button actions
 var buttonAction = {
@@ -718,7 +720,19 @@ var createDocument = function( remoteCallback ){
 };
 
 var createFile = function( name, data, callback ){
-    wz.fs.create( name, 'application/inevio-texts', 'root', JSON.stringify( data ), callback );
+
+    wz.fs.saveFile( 'root', { name : name, extension : 'texts' }, function( error, destiny, name, replace ){
+
+        console.log( arguments );
+
+        if( error ){
+            return callback( error );
+        }
+
+        wz.fs.create( name, 'application/inevio-texts', destiny, JSON.stringify( data ), callback );
+
+    });
+
 };
 
 var createLine = function( id, paragraph ){
@@ -1323,7 +1337,7 @@ var drawRuleTop = function(){
 
     // Calculamos la posición de inicio
     var limit      = ( currentPage.width - currentPage.marginLeft ) / CENTIMETER ;
-    var pos        = -parseFloat( ( currentPage.marginLeft / CENTIMETER ).toFixed( 2 ) );
+    var pos        = -1 * parseFloat( ( currentPage.marginLeft / CENTIMETER ).toFixed( 2 ) );
     var correction = parseFloat( ( parseFloat( Math.ceil( pos * 4 ) / 4 ).toFixed( 2 ) - pos ).toFixed( 2 ) ); // Redondea al múltiplo de 0.25 más cercano
     var width      = correction * CENTIMETER;
 
@@ -1842,11 +1856,11 @@ var getGlobalParagraphChar = function( paragraph, lineId, lineCharId ){
 
 var getLineIndentationLeft = function( id, paragraph ){
 
-    if( !id && paragraph.indentationSpecialType === 1 ){
+    if( !id && paragraph.indentationSpecialType === INDENTATION_FIRSTLINE ){
         return paragraph.indentationSpecialValue;
     }
 
-    if( id && paragraph.indentationSpecialType === 2 ){
+    if( id && paragraph.indentationSpecialType === INDENTATION_HANGING ){
         return paragraph.indentationSpecialValue;
     }
 
@@ -1856,15 +1870,15 @@ var getLineIndentationLeft = function( id, paragraph ){
 
 var getLineIndentationLeftOffset = function( id, paragraph ){
 
-    var width = paragraph.indentationLeft;
-
-    if( !id && paragraph.indentationSpecialType === 1 ){
-        width += paragraph.indentationSpecialValue;
-    }else if( id && paragraph.indentationSpecialType === 2 ){
-        width += paragraph.indentationSpecialValue;
+    if( !id && paragraph.indentationSpecialType === INDENTATION_FIRSTLINE ){
+        return paragraph.indentationLeft + paragraph.indentationSpecialValue;
     }
 
-    return width;
+    if( id && paragraph.indentationSpecialType === INDENTATION_HANGING ){
+        return paragraph.indentationLeft + paragraph.indentationSpecialValue;
+    }
+
+    return paragraph.indentationLeft;
 
 };
 
@@ -1872,9 +1886,13 @@ var getLineOffset = function( line, paragraph ){
     
     if( paragraph.align === ALIGN_LEFT || paragraph.align === ALIGN_JUSTIFY ){
         return 0;
-    }else if( paragraph.align === ALIGN_CENTER ){
+    }
+
+    if( paragraph.align === ALIGN_CENTER ){
         return ( line.width - getLineTextTrimmedWidth( line ) ) / 2;
-    }else if( paragraph.align === ALIGN_RIGHT ){
+    }
+
+    if( paragraph.align === ALIGN_RIGHT ){
         return line.width - getLineTextTrimmedWidth( line );
     }
     
@@ -3966,6 +3984,10 @@ var handleRemoteEnter = function( pageId, page, paragraphId, paragraph, lineId, 
 
 };
 
+var hasStatusChanged = function(){
+    return lastStatus !== JSON.stringify( generateDocument() );
+};
+
 var hideDocument = function(){
     
     pages.css( 'display', 'none' );
@@ -4930,12 +4952,28 @@ var processFile = function( data, noDecode ){
         data = wz.tool.decodeJSON( data );
     }
 
-    if( !data ){
+    if(
+        !data ||
+        !data.info ||
+        !data.info.version
+    ){
         alert( 'FILE FORMAT NOT RECOGNIZED' );
         return;
     }
 
     //console.log( JSON.stringify( data, null, 2 ) );
+
+    data.info.version = data.info.version.toString();
+
+    console.log({
+        width  : data.info.version === '1' ? data.defaultPage.width * CENTIMETER : data.defaultPage.width / DIMENSION_TO_CM * CENTIMETER,
+        height : data.info.version === '1' ? data.defaultPage.height * CENTIMETER : data.defaultPage.height / DIMENSION_TO_CM * CENTIMETER
+    },{
+        top    : data.info.version === '1' ? data.defaultPage.marginTop * CENTIMETER : data.defaultPage.marginTop / DIMENSION_TO_CM * CENTIMETER,
+        right  : data.info.version === '1' ? data.defaultPage.marginRight * CENTIMETER : data.defaultPage.marginRight / DIMENSION_TO_CM * CENTIMETER,
+        bottom : data.info.version === '1' ? data.defaultPage.marginBottom * CENTIMETER : data.defaultPage.marginBottom / DIMENSION_TO_CM * CENTIMETER,
+        left   : data.info.version === '1' ? data.defaultPage.marginLeft * CENTIMETER : data.defaultPage.marginLeft / DIMENSION_TO_CM * CENTIMETER
+    });
 
     var i, j, k, value;
     var chunkedNodes;
@@ -4945,15 +4983,15 @@ var processFile = function( data, noDecode ){
     var page = createPage(
 
         {
-            width  : data.defaultPage.width * CENTIMETER,
-            height : data.defaultPage.height * CENTIMETER
+            width  : data.info.version === '1' ? data.defaultPage.width * CENTIMETER : data.defaultPage.width / DIMENSION_TO_CM * CENTIMETER,
+            height : data.info.version === '1' ? data.defaultPage.height * CENTIMETER : data.defaultPage.height / DIMENSION_TO_CM * CENTIMETER
         },
 
         {
-            top    : data.defaultPage.marginTop * CENTIMETER,
-            right  : data.defaultPage.marginRight * CENTIMETER,
-            bottom : data.defaultPage.marginBottom * CENTIMETER,
-            left   : data.defaultPage.marginLeft * CENTIMETER
+            top    : data.info.version === '1' ? data.defaultPage.marginTop * CENTIMETER : data.defaultPage.marginTop / DIMENSION_TO_CM * CENTIMETER,
+            right  : data.info.version === '1' ? data.defaultPage.marginRight * CENTIMETER : data.defaultPage.marginRight / DIMENSION_TO_CM * CENTIMETER,
+            bottom : data.info.version === '1' ? data.defaultPage.marginBottom * CENTIMETER : data.defaultPage.marginBottom / DIMENSION_TO_CM * CENTIMETER,
+            left   : data.info.version === '1' ? data.defaultPage.marginLeft * CENTIMETER : data.defaultPage.marginLeft / DIMENSION_TO_CM * CENTIMETER
         }
 
     );
@@ -4984,16 +5022,18 @@ var processFile = function( data, noDecode ){
         }
 
         if( data.paragraphList[ i ].indentationSpecialValue ){
-            paragraph.indentationSpecialValue = data.paragraphList[ i ].indentationSpecialValue * CENTIMETER;
+            paragraph.indentationSpecialValue = data.info.version === '1' ? data.paragraphList[ i ].indentationSpecialValue * CENTIMETER : data.paragraphList[ i ].indentationSpecialValue / DIMENSION_TO_CM * CENTIMETER;
         }
         
         if( data.paragraphList[ i ].indentationLeft ){
 
-            value                      = data.paragraphList[ i ].indentationLeft * CENTIMETER;
+            value                      = data.info.version === '1' ? data.paragraphList[ i ].indentationLeft * CENTIMETER : data.paragraphList[ i ].indentationLeft / DIMENSION_TO_CM * CENTIMETER;
             paragraph.indentationLeft += value;
             paragraph.width           -= value;
 
         }
+
+        // To Do -> Identation Right
 
         line.width -= getLineIndentationLeftOffset( 0, paragraph );
 
@@ -6269,6 +6309,10 @@ var saveDocument = function( callback ){
 
 };
 
+var saveStatus = function(){
+    lastStatus = JSON.stringify( generateDocument() );
+};
+
 var setNodeStyle = function( paragraph, line, node, key, value ){
 
     if( value ){
@@ -7465,6 +7509,22 @@ var start = function(){
 
     if( !currentOpenFile ){
 
+        /*
+        console.log({
+
+            width : PAGEDIMENSIONS['A4'].width * CENTIMETER,
+            height : PAGEDIMENSIONS['A4'].height * CENTIMETER
+
+        },{
+
+            top    : MARGIN['Normal'].top * CENTIMETER,
+            right  : MARGIN['Normal'].right * CENTIMETER,
+            bottom : MARGIN['Normal'].bottom * CENTIMETER,
+            left   : MARGIN['Normal'].left * CENTIMETER
+
+        });
+        */
+
         pageList.push(
 
             createPage(
@@ -7506,6 +7566,7 @@ var start = function(){
     updatePages();
     updateToolsLineStatus();
     activeRealTime();
+    saveStatus();
 
     loading.css( 'display', 'none' );
 
@@ -7983,9 +8044,9 @@ newButton.on( 'click', function(){
 saveButton.on( 'click', function(){
     
     if( currentOpenFile && currentOpenFile.mime === 'application/inevio-texts' ){
-        saveDocument();
+        saveDocument( function(){} );
     }else{
-        createDocument();
+        createDocument( function(){} );
     }
 
 });
@@ -8014,6 +8075,10 @@ moreButton.on( 'click', function(){
 closeButton.on( 'click', function(e){
 
     e.stopPropagation();
+
+    if( !hasStatusChanged() ){
+        return wz.app.removeView( win );
+    }
     
     var dialog = wz.dialog();
 
