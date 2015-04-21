@@ -2685,7 +2685,7 @@ var handleBackspaceNormal = function( dontSend ){
 
         updateTools = true;
 
-    // Si está en un párrafo en modo lista
+    // Si está en un párrafo en modo lista al principio, justo delante del bullet y tab
     }else if(
 
         currentParagraph.listMode &&
@@ -2722,8 +2722,14 @@ var handleBackspaceNormal = function( dontSend ){
         currentLine.totalChars--;
 
         // El nodo se queda vacío y hay más nodos en la línea
-        if( !currentNode.string.length && currentLine.nodeList.length > 1 ){
-
+        if(
+            !currentNode.string.length &&
+            (
+                ( currentLine.nodeList.length > 1 && ( !currentParagraph.listMode || currentLineId ) ) ||
+                ( currentLine.nodeList.length > 2 && currentNodeId && !currentLine.nodeList[ currentNodeId - 1 ].blocked )
+            )
+        ){
+        
             currentLine.nodeList = currentLine.nodeList.slice( 0, currentNodeId ).concat( currentLine.nodeList.slice( currentNodeId + 1 ) );
             updateTools          = true;
 
