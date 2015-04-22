@@ -8137,6 +8137,14 @@ input
 
     if( e.ctrlKey || e.metaKey ){
         return;
+    }
+
+    if( e.keyCode === KEY_TAB ){
+        
+        handleChar('\t');
+        updatePages();
+        e.preventDefault();
+
     }else if( e.keyCode === KEY_ARROW_LEFT ){
 
         handleArrowLeft();
@@ -8183,16 +8191,12 @@ input
 
     if( e.ctrlKey || e.metaKey ){
         return;
-    }else if( compositionEnded && e.which === KEY_BACKSPACE ){
+    }
+
+    if( compositionEnded && e.which === KEY_BACKSPACE ){
 
         handleBackspace();
         updatePages();
-
-    }else if( e.keyCode === KEY_TAB ){
-        
-        handleChar('\t');
-        updatePages();
-        e.preventDefault();
 
     }else if( e.key && e.key.length === 1 ){
 
