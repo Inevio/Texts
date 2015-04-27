@@ -4666,6 +4666,7 @@ var normalizeColor = function( color ){
     }
 
     color = color.match(/(\d+)/g) || [ 0, 0, 0 ];
+    color = color.slice( 0, 3 ); // Prevents alpha if color was a rgba
 
     for( var i in color ){
 
@@ -8014,7 +8015,7 @@ win
 
 .key( 'ctrl+v, cmd+v', function(){
     textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento paste
-})
+});
 
 wz.system.on( 'copy', function( copy ){
     
@@ -9274,7 +9275,7 @@ toolsColor
 
     toolsColorHover.css({
 
-        'background-color' : $(this).css('background-color'),
+        'background-color' : normalizeColor( $(this).css('background-color') ),
         top                : pos.top,
         left               : pos.left
 
@@ -9293,7 +9294,7 @@ toolsColorHover.on( 'click', function(){
 
         toolsColorColor
             .attr( 'data-tool-value', normalizeColor( toolsColorHover.css('background-color') ) )
-            .css( 'background-color', toolsColorHover.css('background-color') )
+            .css( 'background-color', normalizeColor( toolsColorHover.css('background-color') ) )
             .click();
 
     }else if( toolsColor.hasClass('active-page-color') ){
