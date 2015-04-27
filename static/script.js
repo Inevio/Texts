@@ -3349,6 +3349,15 @@ var handleEnter = function( dontSend ){
     var originalLineId      = currentLineId;
     var originalLineChar    = currentLineCharId;
 
+    // Desactivamos el modo lista si es necesario
+    if(
+        originalParagraph.listMode &&
+        originalParagraph.lineList.length === 1 &&
+        originalParagraph.lineList[ 0 ].totalChars === originalParagraph.lineList[ 0 ].nodeList[ 0 ].string.length
+    ){
+        return setSelectedParagraphsStyle('listNone');
+    }
+
     // Heredamos las propiedades del párrafo
     newParagraph.align                   = currentParagraph.align;
     newParagraph.indentationLeft         = currentParagraph.indentationLeft;
