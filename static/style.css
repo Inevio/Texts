@@ -898,8 +898,9 @@
     position: absolute;
     /*
     top: 0;
-    left: 0;
     */
+    left: -45px;
+    width: 10px;
     z-index: -1;
 }
 
