@@ -330,7 +330,7 @@
 }
 
 .toolbar-list-container{
-    position: fixed;
+    position: relative;
     z-index: 1;
     height: auto;
     max-height: 450px;
@@ -422,7 +422,7 @@
 }
 
 .toolbar-color-picker-container{
-    position: fixed;
+    position: relative;
     z-index: 1;
     height: auto;
     display: none;
