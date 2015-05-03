@@ -99,7 +99,7 @@ var PARAGRAPH_SPLIT_NONE = 0;
 var PARAGRAPH_SPLIT_START = 1;
 var PARAGRAPH_SPLIT_MIDDLE = 2;
 var PARAGRAPH_SPLIT_END = 3;
-var PASTE_FORMATS = [ 'text/html', 'text/plain' ];
+var PASTE_FORMATS = [ 'text/inevio-texts', 'text/html', 'text/plain' ];
 
 // DOM variables
 var win                 = $(this);
@@ -534,8 +534,9 @@ var clipboardCopy = function( e ){
 
     var res = {
 
-        'text/plain' : '',
-        'text/html'  : ''
+        'text/plain'        : '',
+        'text/html'         : '',
+        'text/inevio-texts' : {}
 
     };
 
@@ -551,11 +552,15 @@ var clipboardCopy = function( e ){
         currentRangeStart.lineId === currentRangeEnd.lineId
     ){
 
+        res['text/inevio-texts'].nodeList = [];
+
         // Mismo nodo
         if( currentRangeStart.nodeId === currentRangeEnd.nodeId ){
 
             res['text/plain'] += currentRangeStart.node.string.slice( currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
             res['text/html']  += nodeToSpan( currentRangeStart.node, currentRangeStart.nodeChar, currentRangeEnd.nodeChar );
+            
+            res['text/inevio-texts'].nodeList.push( nodeToRawNode( currentRangeStart.node, currentRangeStart.nodeChar, currentRangeEnd.nodeChar ) );
 
         }else{
 
@@ -566,15 +571,21 @@ var clipboardCopy = function( e ){
                     res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( currentRangeStart.nodeChar );
                     res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], currentRangeStart.nodeChar );
 
+                    res['text/inevio-texts'].nodeList.push( nodeToRawNode( currentRangeStart.line.nodeList[ i ], currentRangeStart.nodeChar ) );
+
                 }else if( i === currentRangeEnd.nodeId ){
 
                     res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( 0, currentRangeEnd.nodeChar );
                     res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], 0, currentRangeEnd.nodeChar );
 
+                    res['text/inevio-texts'].nodeList.push( nodeToRawNode( currentRangeStart.line.nodeList[ i ], 0, currentRangeEnd.nodeChar ) );
+
                 }else{
 
                     res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
                     res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+
+                    res['text/inevio-texts'].nodeList.push( currentRangeStart.line.nodeList[ i ] );
 
                 }
 
@@ -583,6 +594,10 @@ var clipboardCopy = function( e ){
         }
 
     }else{
+
+        res['text/inevio-texts'].nodeListStart = [];
+        res['text/inevio-texts'].nodeListEnd   = [];
+        res['text/inevio-texts'].paragraphList = [];
 
         var paragraphHash = currentRangeStart.pageId + '-' + currentRangeStart.paragraphId;
 
@@ -593,22 +608,37 @@ var clipboardCopy = function( e ){
                 res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( currentRangeStart.nodeChar );
                 res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], currentRangeStart.nodeChar );
 
+                res['text/inevio-texts'].nodeListStart.push( nodeToRawNode( currentRangeStart.line.nodeList[ i ], currentRangeStart.nodeChar ) );
+
             }else{
 
                 res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
                 res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
 
+                res['text/inevio-texts'].nodeListStart.push( nodeToRawNode( currentRangeStart.line.nodeList[ i ] ) );
+
             }
 
         }
 
+        var tmpDestiny = [];
+
         mapRangeLines( false, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
+
+            console.log( pageId + '-' + paragraphId, paragraphHash, pageId + '-' + paragraphId !== paragraphHash );
 
             if( pageId + '-' + paragraphId !== paragraphHash ){
 
+                if( currentRangeStart.pageId + '-' + currentRangeStart.paragraphId === paragraphHash ){
+                    res['text/inevio-texts'].nodeListStart = res['text/inevio-texts'].nodeListStart.concat( tmpDestiny );
+                }else{
+                    res['text/inevio-texts'].paragraphList.push( tmpDestiny );
+                }
+
                 res['text/plain'] += '\n';
-                res['text/html']  += '<br />\n';
+                res['text/html']  += '<br/>\n';
                 paragraphHash      = pageId + '-' + paragraphId;
+                tmpDestiny         = [];
 
             }
             
@@ -617,6 +647,8 @@ var clipboardCopy = function( e ){
                 res['text/plain'] += line.nodeList[ i ].string;
                 res['text/html']  += nodeToSpan( line.nodeList[ i ] );
 
+                tmpDestiny.push( nodeToRawNode( line.nodeList[ i ] ) );
+
             }
 
         });
@@ -624,27 +656,41 @@ var clipboardCopy = function( e ){
         if( currentRangeEnd.pageId + '-' + currentRangeEnd.paragraphId !== paragraphHash ){
             
             res['text/plain'] += '\n';
-            res['text/html']  += '<br />\n';
+            res['text/html']  += '<br/>\n';
 
+            if( tmpDestiny.length ){
+                res['text/inevio-texts'].paragraphList.push( tmpDestiny );
+            }
+
+        }else if( tmpDestiny.length ){
+            res.nodeListEnd = tmpDestiny;
         }
 
         for( var i = 0; i <= currentRangeEnd.nodeId; i++ ){
 
             if( i === currentRangeEnd.nodeId ){
 
-                res['text/plain'] += currentRangeStart.line.nodeList[ i ].string.slice( 0, currentRangeEnd.nodeChar );
-                res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ], 0, currentRangeEnd.nodeChar );
+                console.log( currentRangeEnd.line );
+
+                res['text/plain'] += currentRangeEnd.line.nodeList[ i ].string.slice( 0, currentRangeEnd.nodeChar );
+                res['text/html']  += nodeToSpan( currentRangeEnd.line.nodeList[ i ], 0, currentRangeEnd.nodeChar );
+
+                res['text/inevio-texts'].nodeListEnd.push( nodeToRawNode( currentRangeEnd.line.nodeList[ i ], 0, currentRangeEnd.nodeChar ) );
 
             }else{
 
-                res['text/plain'] += currentRangeStart.line.nodeList[ i ].string;
-                res['text/html']  += nodeToSpan( currentRangeStart.line.nodeList[ i ] );
+                res['text/plain'] += currentRangeEnd.line.nodeList[ i ].string;
+                res['text/html']  += nodeToSpan( currentRangeEnd.line.nodeList[ i ] );
+
+                res['text/inevio-texts'].nodeListEnd.push( nodeToRawNode( currentRangeEnd.line.nodeList[ i ] ) );
 
             }
 
         }
 
     }
+
+    res['text/inevio-texts'] = JSON.stringify( res['text/inevio-texts'] );
 
     return res;
 
@@ -741,7 +787,7 @@ var createLine = function( id, paragraph ){
 
     // To Do -> Asignar la altura dinámicamente
     line.height = 0;
-    line.width  = paragraph.width - getLineIndentationLeft( id, paragraph );
+    line.width  = paragraph.width - getLineIndentationLeft( id, paragraph ) || 0;
 
     // Creamos el nodo inicial
     line.nodeList.push( createNode() );
@@ -4047,13 +4093,21 @@ var insertHtmlText = function( text ){
         $(this).html( normalizeHtmlChildren( this, 0 ) );
     });
 
+    /*
+
     var result = [];
 
     // Generamos el JSON
+    /*
     document.find('p').each( function(){
         console.log( $(this).html() );
     });
-    
+    */
+
+    /*
+    document.find('')
+    */
+
 };
 
 var insertPlainText = function( text ){
@@ -4077,6 +4131,116 @@ var insertPlainText = function( text ){
             }else{
                 handleCharNormal( text[ i ] );
             }
+
+        }
+
+    }
+
+};
+
+var insertTextsText = function( text ){
+
+    var obj = JSON.parse( text );
+
+    console.log( obj );
+
+    // To Do
+    if( currentRangeStart ){
+        handleBackspace();
+    }
+
+    var paragraph, line, node, list;
+
+    if( obj.nodeList ){
+
+        list      = obj.nodeList;
+        paragraph = currentParagraph;
+        line      = currentLine;
+
+        for( var k = 0; k < list.length; k++ ){
+
+            node         = createNode( line );
+            node.string  = list[ k ].string;
+            node.blocked = !!list[ k ].blocked;
+
+            setNodeStyle( paragraph, line, node, 'color', list[ k ].style.color );
+            setNodeStyle( paragraph, line, node, 'font-family', list[ k ].style['font-family'] );
+            setNodeStyle( paragraph, line, node, 'font-style', list[ k ].style['font-style'] );
+            setNodeStyle( paragraph, line, node, 'font-weight', list[ k ].style['font-weight'] );
+            setNodeStyle( paragraph, line, node, 'text-decoration-underline', list[ k ].style['text-decoration-underline'] );
+            setNodeStyle( paragraph, line, node, 'font-size', list[ k ].style['font-size'] );
+
+            measureNode( paragraph, line, 0, line.totalChars, node, k, 0 );
+            line.nodeList.push( node );
+
+            line.totalChars += node.string.length;
+
+        }
+
+        realocateLine( currentPageId, currentParagraph, 0, currentLineId );
+
+    }else{
+        
+        list      = obj.nodeListStart;
+        paragraph = currentParagraph;
+        line      = currentLine;
+
+        for( var k = 0; k < list.length; k++ ){
+
+            node         = createNode( line );
+            node.string  = list[ k ].string;
+            node.blocked = !!list[ k ].blocked;
+
+            setNodeStyle( paragraph, line, node, 'color', list[ k ].style.color );
+            setNodeStyle( paragraph, line, node, 'font-family', list[ k ].style['font-family'] );
+            setNodeStyle( paragraph, line, node, 'font-style', list[ k ].style['font-style'] );
+            setNodeStyle( paragraph, line, node, 'font-weight', list[ k ].style['font-weight'] );
+            setNodeStyle( paragraph, line, node, 'text-decoration-underline', list[ k ].style['text-decoration-underline'] );
+            setNodeStyle( paragraph, line, node, 'font-size', list[ k ].style['font-size'] );
+
+            measureNode( paragraph, line, 0, line.totalChars, node, k, 0 );
+            line.nodeList.push( node );
+
+            line.totalChars += node.string.length;
+
+        }
+
+        realocateLine( currentPageId, currentParagraph, 0, currentLineId );
+
+        for( var k = 0; k < obj.paragraphList.length; k++ ){
+
+            list      = obj.paragraphList[ k ];
+            paragraph = createParagraph( currentPage );
+            line      = paragraph.lineList[ 0 ];
+
+            for( var l = 0; l < list.length; l++ ){
+
+                node         = createNode( line );
+                node.string  = list[ l ].string;
+                node.blocked = !!list[ l ].blocked;
+
+                setNodeStyle( paragraph, line, node, 'color', list[ l ].style.color );
+                setNodeStyle( paragraph, line, node, 'font-family', list[ l ].style['font-family'] );
+                setNodeStyle( paragraph, line, node, 'font-style', list[ l ].style['font-style'] );
+                setNodeStyle( paragraph, line, node, 'font-weight', list[ l ].style['font-weight'] );
+                setNodeStyle( paragraph, line, node, 'text-decoration-underline', list[ l ].style['text-decoration-underline'] );
+                setNodeStyle( paragraph, line, node, 'font-size', list[ l ].style['font-size'] );
+
+                measureNode( paragraph, line, 0, line.totalChars, node, l, 0 );
+                line.nodeList.push( node );
+
+                line.totalChars += node.string.length;
+
+            }
+
+            currentPage.paragraphList = currentPage.paragraphList.slice( 0, currentParagraphId + 1 ).concat( paragraph ).concat( currentPage.paragraphList.slice( currentParagraphId + 1 ) );
+            currentParagraphId        = currentParagraphId + 1;
+            currentParagraph          = currentPage.paragraphList[ currentParagraphId ];
+            currentLineId             = 0;
+            currentLine               = currentParagraph.lineList[ currentLine ];
+
+            console.log( currentPage.paragraphList );
+            //realocateLine( currentPageId, currentParagraph, 0, currentLineId );
 
         }
 
@@ -4619,6 +4783,27 @@ var newParagraph = function(){
 
 };
 
+var nodeToRawNode = function( node, start, end ){
+
+    var tmp = $.extend( true, {}, currentRangeStart.node );
+
+    delete tmp.blocked;
+    delete tmp.charList;
+    delete tmp.height;
+    delete tmp.width;
+
+    if( start && end ){
+        tmp.string = tmp.string.slice( start, end );
+    }else if( start ){
+        tmp.string = tmp.string.slice( start );
+    }else if( end ){
+        tmp.string = tmp.string.slice( 0, end );
+    }
+
+    return tmp;
+
+};
+
 var nodeToSpan = function( node, start, end ){
     return '<span style="' + nodeToSpanStyle( node.style ) + '">' + node.string.slice( start, end ) + '</span>';
 };
@@ -5085,7 +5270,7 @@ var processFile = function( data, noDecode ){
                 setNodeStyle( paragraph, line, node, 'text-decoration-underline', chunkedNodes[ k ].style['text-decoration-underline'] );
                 setNodeStyle( paragraph, line, node, 'font-size', chunkedNodes[ k ].style['font-size'] );
 
-                measureNode( paragraph, line, 0, line.totalChars, node, j, 0 );
+                measureNode( paragraph, line, 0, line.totalChars, node, k, 0 );
                 line.nodeList.push( node );
 
                 line.totalChars += node.string.length;
@@ -5097,10 +5282,11 @@ var processFile = function( data, noDecode ){
         page.paragraphList.push( paragraph );
 
     }
+    
     // Realocamos el contenido
     for( i = 0; i < pageList[ 0 ].paragraphList.length; i++ ){
 
-        setCursor( 0, i, 0, 0, 0, 0, true );
+        setCursor( 0, i, 0, 0, 0, 0, true ); // To Do -> Esto hay que hacerlo obligatoriamente o puede eliminarse?
         realocateLine( 0, pageList[ 0 ].paragraphList[ i ], 0, 0 );
 
     }
@@ -8046,8 +8232,10 @@ wz.system.on( 'paste', function( paste ){
         return;
     }
 
-    if( type === 'text/html' ){
-        insertHtmlText( content );
+    if( type === 'text/inevio-texts' ){
+        insertTextsText( content );
+    //}else if( type === 'text/html' ){
+        //insertHtmlText( content );
     }else if( type === 'text/plain' ){
         insertPlainText( content );
     }
