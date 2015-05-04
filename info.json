@@ -54,7 +54,7 @@
                     },
 
                     "css"    : ["style.css"],
-                    "script" : ["script.js"],
+                    "script" : ["script/script.dist.js"],
                     "start"  : []
 
                 }
