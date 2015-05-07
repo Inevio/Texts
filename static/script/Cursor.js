@@ -5,10 +5,170 @@ var Cursor = function(){
 	this.paragraph;
 	this.line;
 	this.node;
-	this.char;
 
+	this.char      = 0;
+    this.lineChar  = 0;
 	this.positionX = 0;
 	this.positionY = 0;
+
+};
+
+Cursor.prototype.move = function( positions ){
+
+    positions = parseInt( positions, 10 ) || 0;
+
+    if( !positions ){
+        return this;
+    }
+        
+    this.char     = this.char + positions;
+    this.lineChar = this.lineChar + positions;
+
+    if( this.char < 0 ){
+       
+        var prev = this.node.prev();
+
+        if( prev ){
+            
+            if(
+                this.line.id !== prev.parent.id ||
+                this.paragraph.id !== prev.parent.parent.id ||
+                this.page.id !== prev.parent.parent.parent.id
+            ){
+
+                this.node      = prev;
+                this.line      = prev.parent;
+                this.paragraph = this.line.parent;
+                this.page      = this.paragraph.parent;
+                this.char      = prev.string.length;
+                this.lineChar  = this.line.totalChars;
+
+                this.updatePositionY();
+
+            }else{
+
+                this.node = prev;
+                this.char = this.node.string.length - 1;
+
+            }
+
+        }else{
+
+            this.char     = 0;
+            this.lineChar = 0;
+
+        }
+
+    }else if( this.char > this.node.string.length ){
+
+        var next = this.node.next();
+
+        if( next ){
+
+            if(
+                this.line.id !== next.parent.id ||
+                this.paragraph.id !== next.parent.parent.id ||
+                this.page.id !== next.parent.parent.parent.id
+            ){
+
+                this.node      = next;
+                this.line      = next.parent;
+                this.paragraph = this.line.parent;
+                this.page      = this.paragraph.parent;
+                this.char      = 0;
+                this.lineChar  = 0;
+
+                this.updatePositionY();
+
+            }else{
+
+                this.node = next;
+                this.char = 1;
+
+            }
+
+        }else{
+
+            this.char     = this.node.string.length;
+            this.lineChar = this.line.totalChars;
+
+        }
+
+    }
+
+    this.updatePositionX();
+    canvasCursor.resetBlink();
+
+};
+
+Cursor.prototype.setNode = function( node, position ){
+    
+    console.warn('ToDo','setNode','Prevent blocked');
+
+    this.char      = parseInt( position, 10 ) || 0;
+    this.node      = node;
+    this.line      = this.node.parent;
+    this.paragraph = this.line.parent;
+    this.page      = this.paragraph.parent;
+
+    this.lineChar = position;
+
+    for( var i = 0; i < node.id; i++ ){
+        this.lineChar += this.line.nodes[ i ].string.length;
+    }
+    
+    this.updatePositionX();
+    this.updatePositionY();
+
+    return this;
+
+};
+
+Cursor.prototype.updatePosition = function(){
+
+    var node     = this.node.parent.nodes[ 0 ];
+    var prevNode = this.node;
+    var total    = this.lineChar;
+
+    while( total ){
+
+        if( !node ){
+
+            total          = 0;
+            this.node      = prevNode;
+            this.line      = this.node.parent;
+            this.paragraph = this.line.parent;
+            this.page      = this.paragraph.parent;
+            this.char      = this.node.string.length;
+            this.lineChar  = this.line.totalChars;
+
+        }else if( node.string.length < total ){
+
+            total -= node.string.length;
+            node   = node.next();
+
+        }else{
+            
+            this.node      = node;
+            this.line      = this.node.parent;
+            this.paragraph = this.line.parent;
+            this.page      = this.paragraph.parent;
+            this.char      = total;
+            this.lineChar  = total;
+            total          = 0;
+
+            for( var i = 0; i < this.node.id; i++ ){
+                this.lineChar += this.line.nodes[ i ].string.length;
+            }
+
+        }
+
+    }
+
+    this.updatePositionX();
+    this.updatePositionY();
+
+    return this;
 
 };
 
@@ -21,12 +181,10 @@ Cursor.prototype.updatePositionX = function(){
     this.positionX += this.page.marginLeft;
 
     // Margen lateral del párrafo
-    console.warn('ToDo','updatePositionX','getLineIndentationLeftOffset');
-    //this.positionX += getLineIndentationLeftOffset( this.line.id, this.paragraph );
+    this.positionX += this.line.getOffsetIndentationLeft( this.line.id, this.paragraph );
 
     // Alineación de la línea
-    console.warn('ToDo','updatePositionX','getLineOffset');
-    //this.positionX += getLineOffset( this.line, this.paragraph );
+    this.positionX += this.line.getOffset( this.line, this.paragraph );
 
     // Posicion dentro de la linea
     for( var i = 0; i < this.node.id; i++ ){
@@ -71,24 +229,5 @@ Cursor.prototype.updatePositionY = function(){
     }
 
     return this;
-
-};
-
-Cursor.prototype.setNode = function( node, position ){
-	
-	console.warn('ToDo','setNode');
-
-	this.char      = parseInt( position, 10 ) || 0;
-	this.node      = node;
-	this.line      = this.node.parent;
-	this.paragraph = this.line.parent;
-	this.page      = this.paragraph.parent;
-	
-	this.updatePositionX();
-	this.updatePositionY();
-
-	console.log( this );
-
-	return this;
 
 };

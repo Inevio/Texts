@@ -18,10 +18,45 @@ var TPage = function(){
 
 TPage.prototype.append = function( paragraph ){
 
-    console.warn('ToDo','TPage','append');
+    if( paragraph.parent ){
+        paragraph.parent.remove( paragraph.id );
+    }
 
     paragraph.id     = this.paragraphs.push( paragraph ) - 1;
     paragraph.parent = this;
+
+    paragraph.updateWidth();
+
+    // To Do -> Hacer realocate si es conveniente (a decision del programador)
+
+    return this;
+
+};
+
+TPage.prototype.next = function(){
+    return this.parent.pages[ this.id + 1 ];
+};
+
+TPage.prototype.prev = function(){
+    return this.parent.pages[ this.id - 1 ];
+};
+
+
+TPage.prototype.remove = function( paragraph ){
+
+    this.paragraphs[ position ].id     = undefined;
+    this.paragraphs[ position ].parent = undefined;
+
+    this.paragraphs = this.paragraphs.slice( 0, position ).concat( this.paragraphs.slice( position + 1 ) );
+
+    for( var i = position; i < this.paragraphs.length; i++ ){
+
+        this.paragraphs[ i ].id--;
+        this.paragraphs[ i ].updateWidth();
+    
+    }
+
+    // To Do -> Hacer realocate si es conveniente (a decision del programador)
 
     return this;
 
