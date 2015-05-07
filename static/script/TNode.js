@@ -16,7 +16,8 @@ var TNode = function(){
 
 TNode.prototype.insert = function( position, content ){
 
-    this.string = this.string.slice( 0, position ) + content + this.string.slice( position );
+    this.string             = this.string.slice( 0, position ) + content + this.string.slice( position );
+    this.parent.totalChars += content.length;
 
     this.updateWidth( position );
 
@@ -24,23 +25,86 @@ TNode.prototype.insert = function( position, content ){
 
 };
 
-TNode.prototype.setColor = function( size ){
-    console.warn('ToDo','setColor');
-    return this;
+TNode.prototype.next = function(){
+
+    var node = this.parent.nodes[ this.id + 1 ];
+
+    if( node ){
+        return node;
+    }
+
+    var line = this.parent.next();
+
+    while( line ){
+
+        if( line.nodes.length ){
+            return line.nodes[ 0 ];
+        }
+
+        line = this.parent.next();
+
+    }
+
 };
 
-TNode.prototype.setFont = function( size ){
-    console.warn('ToDo','setFont');
+TNode.prototype.prev = function(){
+    
+    var node = this.parent.nodes[ this.id - 1 ];
+
+    if( node ){
+        return node;
+    }
+
+    var line = this.parent.prev();
+
+    while( line ){
+
+        if( line.nodes.length ){
+            return line.nodes[ line.nodes.length - 1 ];
+        }
+
+        line = this.parent.prev();
+
+    }
+
+};
+
+TNode.prototype.setColor = function( color ){
+
+
+    this.style['color'] = color;
+
     return this;
+
+};
+
+TNode.prototype.setFont = function( font ){
+    
+    this.style['font-family'] = font;
+
+    this.updateHeight();
+    this.updateWidth();
+
+    return this;
+
 };
 
 TNode.prototype.setSize = function( size ){
 
-    console.warn('ToDo','setSize','realocate line & page');
+    this.style['font-size'] = size;
+    
+    this.updateHeight();
+    this.updateWidth();
+
+    return this;
+
+};
+
+TNode.prototype.updateHeight = function(){
 
     testZone.css({
 
-        'font-size'   : size + 'pt',
+        'font-size'   : this.style['font-size'] + 'pt',
         'font-family' : this.style['font-family']
 
     });
@@ -50,10 +114,7 @@ TNode.prototype.setSize = function( size ){
     this.height = lineHeight;
 
     if( lineHeight !== this.parent.height ){
-
-        this.updateWidth();
         this.parent.updateHeight();
-        
     }
 
     return this;
@@ -61,8 +122,6 @@ TNode.prototype.setSize = function( size ){
 };
 
 TNode.prototype.updateWidth = function( position ){
-
-    console.warn('ToDo','updateWidth','realocateLine');
 
     position   = parseInt( position, 10 ) || 0;
     this.chars = this.chars.slice( 0, position );
@@ -90,9 +149,9 @@ TNode.prototype.updateWidth = function( position ){
                 index = this.string.slice( 0, i + 1 ).lastIndexOf('\t');
 
                 if( index === -1 ){
-                    this.chars.push( ctx.measureText( this.string.slice( 0, i + 1 ) ).width /*+ heritage*/ );
+                    this.chars.push( canvasPages.ctx.measureText( this.string.slice( 0, i + 1 ) ).width /*+ heritage*/ );
                 }else{
-                    this.chars.push( this.chars[ index ] + ctx.measureText( this.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/ );
+                    this.chars.push( this.chars[ index ] + canvasPages.ctx.measureText( this.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/ );
                 }
 
             }else{
@@ -101,9 +160,9 @@ TNode.prototype.updateWidth = function( position ){
 
                 // Posición actual
                 if( index === -1 ){
-                    current = ctx.measureText( this.string.slice( 0, i + 1 ) ).width /*+ heritage*/;
+                    current = canvasPages.ctx.measureText( this.string.slice( 0, i + 1 ) ).width /*+ heritage*/;
                 }else{
-                    current = this.chars[ index ] + ctx.measureText( this.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/;
+                    current = this.chars[ index ] + canvasPages.ctx.measureText( this.string.slice( index + 1, i + 1 ) ).width /*+ heritage*/;
                 }
 
                 // Posición anterior y múltiplos anteriores
@@ -127,12 +186,14 @@ TNode.prototype.updateWidth = function( position ){
     }else{
 
         for( var i = position; i < this.string.length; i++ ){
-            this.chars.push( ctx.measureText( this.string.slice( 0, i + 1 ) ).width );
+            this.chars.push( canvasPages.ctx.measureText( this.string.slice( 0, i + 1 ) ).width );
         }
 
     }
 
     this.width = this.chars[ this.chars.length - 1 ] || 0;
+
+    this.parent.realocate();
 
     return this;
 

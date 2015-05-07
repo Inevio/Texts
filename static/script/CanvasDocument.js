@@ -59,18 +59,18 @@ CanvasDocument.prototype.draw = function(){
 
                 if( line.totalChars ){
 
-                    wHeritage = getLineOffset( line, paragraph );
+                    wHeritage = line.getOffset();
 
                     // Draw the nodes
                     for( var k = 0; k < line.nodes.length; k++ ){
 
-                        node             = line.nodes[ k ];
+                        node                  = line.nodes[ k ];
                         this.ctx.fillStyle    = node.style.color;
                         this.ctx.textBaseline = 'bottom';
-                        startX           = parseInt( page.marginLeft + getLineIndentationLeftOffset( j, paragraph ) + wHeritage, 10 );
-                        startY           = parseInt( pageHeight + page.marginTop + line.height + hHeritage, 10 );
+                        startX                = parseInt( page.marginLeft + line.getOffsetIndentationLeft() + wHeritage, 10 );
+                        startY                = parseInt( pageHeight + page.marginTop + line.height + hHeritage, 10 );
 
-                        setCanvasTextStyle( node.style );
+                        this.setTextStyle( node.style );
 
                         if(
                             node.string.lastIndexOf('\t') === -1 &&
