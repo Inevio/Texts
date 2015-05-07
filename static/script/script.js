@@ -105,6 +105,7 @@ var toolsColorEnabled     = false;
 var lastStatus            = null;
 
 // Button actions
+/*
 var buttonAction = {
 
     bold : function(){
@@ -198,6 +199,7 @@ var buttonAction = {
     }
 
 };
+*/
 
 // Preprocesed data
 var fontfamilyCode     = '';

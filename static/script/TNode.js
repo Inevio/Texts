@@ -69,6 +69,15 @@ TNode.prototype.prev = function(){
 
 };
 
+TNode.prototype.remove = function( position ){
+
+    this.string = this.string.slice( 0, position ) + this.string.slice( position + 1 );
+
+    this.parent.totalChars--;
+    this.updateWidth( position );
+
+};
+
 TNode.prototype.setColor = function( color ){
 
 
