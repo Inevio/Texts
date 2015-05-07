@@ -68,6 +68,7 @@ var blinkCurrent = false;
 var blinkGlobal  = false;
 
 // Selection variables
+var selectionRange       = new Range();
 var selectionEnabled     = false;
 var selectionStart       = null;
 var selectedEnabled      = true;

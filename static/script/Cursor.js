@@ -119,6 +119,7 @@ Cursor.prototype.setNode = function( node, position ){
     
     this.updatePositionX();
     this.updatePositionY();
+    canvasCursor.resetBlink();
 
     return this;
 

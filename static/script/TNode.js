@@ -4,6 +4,7 @@ var TNode = function(){
     this.id;
     this.parent;
     this.chars = [];
+    //this.justifyCharList = [];
 
     // Properties
     this.blocked = false;
@@ -11,6 +12,80 @@ var TNode = function(){
     this.string  = '';
     this.style   = {};
     this.width   = 0;
+
+};
+
+TNode.prototype.getPositionX = function( nodeChar ){
+
+    nodeChar = parseInt( nodeChar, 10 ) || 0;
+
+    // Calculamos la posición horizontal
+    var i = 0;
+    var x = 0;
+
+    // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
+    x = 0;
+
+    // Márgen lateral de la página
+    x += this.parent.parent.parent.marginLeft;
+
+    // Margen lateral del párrafo
+    x += this.parent.getOffsetIndentationLeft();
+
+    // Alineación de la línea
+    x += this.parent.getOffset();
+
+    // Posicion dentro de la linea
+    for( i = 0; i < this.id; i++ ){
+        x += this.parent.nodeList[ i ].justifyWidth || this.parent.nodeList[ i ].width;
+    }
+
+    if( nodeChar > 0 ){
+
+        if( this.justifyCharList ){
+            x += this.justifyCharList[ nodeChar - 1 ];
+        }else{
+            x += this.chars[ nodeChar - 1 ];   
+        }
+        
+    }
+
+    return x;
+
+};
+
+TNode.prototype.getPositionY = function(){
+
+    // Calculamos la posición vertical
+    var i           = 0;
+    var y           = 0;
+    var lineId      = this.parent.id;
+    var paragraph   = this.parent.parent;
+    var paragraphId = paragraph.id;
+    var page        = paragraph.parent;
+    var pageId      = page.id;
+
+    // To Do -> Seguramente esto pueda optimizarse guardando pasos intermedios
+
+    // Tamaño de cada página
+    for( i = 0; i < pageId; i++ ){
+        y += currentDocument.pages[ i ].height + GAP;
+    }
+
+    // Márgen superior
+    y += page.marginTop;
+
+    // Tamaño de cada párrafo
+    for( i = 0; i < paragraphId; i++ ){
+        y += page.paragraphs[ i ].height;
+    }
+
+    // Tamaño de cada línea
+    for( i = 0; i < lineId; i++ ){
+        y += paragraph.lines[ i ].height * paragraph.spacing;
+    }
+
+    return y;
 
 };
 
