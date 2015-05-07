@@ -1,4 +1,172 @@
 
+var compareHashes = function( first, second ){
+
+    for( var i = 0; i < first.length; i++ ){
+
+        if( first[ i ] > second[ i ] ){
+            return -1;
+        }else if( second[ i ] > first[ i ] ){
+            return 1;
+        }
+
+    }
+
+    return 0;
+
+};
+
+var getElementsByPosition = function( posX, posY ){
+
+    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, charList;
+
+    // Buscamos la posición vertical
+    var height = -scrollTop;
+
+    // Buscamos la página
+    for( pageId = 0; pageId < currentDocument.pages.length; pageId++ ){
+
+        if( currentDocument.pages[ pageId ].height + GAP + height < posY ){
+            height += currentDocument.pages[ pageId ].height + GAP;
+        }else{
+            break;
+        }
+
+    }
+
+    if( currentDocument.pages[ pageId ] ){
+
+        page = currentDocument.pages[ pageId ];
+
+        // Tenemos en cuenta el margen superior
+        height += page.marginTop;
+
+        // Buscamos el párrafo
+        for( paragraphId = 0; paragraphId < page.paragraphs.length; paragraphId++ ){
+
+            if( page.paragraphs[ paragraphId ].height + height < posY ){
+                height += page.paragraphs[ paragraphId ].height;
+            }else{
+                break;
+            }
+
+        }
+
+        if( page.paragraphs[ paragraphId ] ){
+            
+            paragraph = page.paragraphs[ paragraphId ];
+
+            // Buscamos la línea
+            for( lineId = 0; lineId < paragraph.lines.length; lineId++ ){
+            
+                if( ( paragraph.lines[ lineId ].height * paragraph.spacing ) + height < posY ){
+                    height += paragraph.lines[ lineId ].height * paragraph.spacing;
+                }else{
+                    break;
+                }
+
+            }
+
+            if( paragraph.lines[ lineId ] ){
+                line = paragraph.lines[ lineId ];
+            }else{
+                line = paragraph.lines[ --lineId ];
+            }
+
+        }else{
+
+            paragraph = page.paragraphs[ --paragraphId ];
+            lineId    = paragraph.lines.length - 1;
+            line      = paragraph.lines[ lineId ];
+
+        }
+
+    }else{
+
+        page        = currentDocument.pages[ --pageId ];
+        paragraphId = page.paragraphs.length - 1;
+        paragraph   = page.paragraphs[ paragraphId ];
+        lineId      = paragraph.lines.length - 1;
+        line        = paragraph.lines[ lineId ];
+
+    }
+
+    // Buscamos la posición horizontal
+    var width = 0;
+
+    // Tenemos en cuenta el margen izquierdo
+    width += page.marginLeft;
+
+    // Tenemos en cuenta el margen del párrafo
+    width += line.getOffsetIndentationLeft();
+
+    // Tenemos en cuenta la alineación del párrafo
+    width += line.getOffset();
+
+    // Buscamos el nodo y el nodeChar
+    // Principio del primer nodo
+    if( width >= posX ){
+        
+        nodeId   = 0;
+        node     = line.nodes[ nodeId ];
+        nodeChar = 0;
+        lineChar = 0;
+
+    }else{
+
+        lineChar = 0;
+
+        for( nodeId = 0; nodeId < line.nodes.length; nodeId++ ){
+
+            if( width <= posX && line.nodes[ nodeId ].width + width >= posX ){
+
+                node = line.nodes[ nodeId ];
+
+                for( nodeChar = 0; nodeChar < node.string.length; ){
+
+                    charList = node.justifyCharList || node.chars;
+
+                    if( charList[ nodeChar ] - ( ( charList[ nodeChar ] - ( charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                        break;
+                    }
+
+                    lineChar++;
+                    nodeChar++;
+
+                }
+                
+                break;
+                
+            }
+
+            width    += line.nodes[ nodeId ].width;
+            lineChar += line.nodes[ nodeId ].string.length;
+            
+        }
+
+        // Si no hay nodo es porque está al final de la línea
+        if( !node ){
+
+            lineChar = line.totalChars;
+            nodeId   = line.nodes.length - 1;
+            node     = line.nodes[ nodeId ];
+            nodeChar = node.string.length;
+
+        }
+
+    }
+
+    return {
+
+        page      : page,
+        paragraph : paragraph,
+        line      : line,
+        node      : node,
+        char      : nodeChar
+
+    };
+
+};
+
 var handleArrowLeft = function(){
     cursor.move( -1 );
 };
