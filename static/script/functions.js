@@ -1,4 +1,20 @@
 
+var cloneObject = function( obj ){
+
+    var target = {};
+
+    for( var i in obj ){
+
+        if( obj.hasOwnProperty( i ) ){
+            target[ i ] = obj[ i ];
+        }
+
+    }
+
+    return target;
+
+};
+
 var compareHashes = function( first, second ){
 
     for( var i = 0; i < first.length; i++ ){
@@ -52,12 +68,12 @@ var getElementsByPosition = function( posX, posY ){
         }
 
         if( page.paragraphs[ paragraphId ] ){
-            
+
             paragraph = page.paragraphs[ paragraphId ];
 
             // Buscamos la línea
             for( lineId = 0; lineId < paragraph.lines.length; lineId++ ){
-            
+
                 if( ( paragraph.lines[ lineId ].height * paragraph.spacing ) + height < posY ){
                     height += paragraph.lines[ lineId ].height * paragraph.spacing;
                 }else{
@@ -105,7 +121,7 @@ var getElementsByPosition = function( posX, posY ){
     // Buscamos el nodo y el nodeChar
     // Principio del primer nodo
     if( width >= posX ){
-        
+
         nodeId   = 0;
         node     = line.nodes[ nodeId ];
         nodeChar = 0;
@@ -133,14 +149,14 @@ var getElementsByPosition = function( posX, posY ){
                     nodeChar++;
 
                 }
-                
+
                 break;
-                
+
             }
 
             width    += line.nodes[ nodeId ].width;
             lineChar += line.nodes[ nodeId ].string.length;
-            
+
         }
 
         // Si no hay nodo es porque está al final de la línea
@@ -269,7 +285,7 @@ var handleBackspaceNormal = function( dontSend ){
             }
 
             currentPage.paragraphs = currentPage.paragraphs.slice( 0, currentParagraphId ).concat( currentPage.paragraphs.slice( currentParagraphId + 1 ) );
-            
+
             if( mergeParagraphs ){
                 realocateLine( currentPageId, prevParagraph, mergePreLastLine );
             }
@@ -394,7 +410,7 @@ var handleBackspaceNormal = function( dontSend ){
                 ( currentLine.nodes.length > 2 && currentNodeId && !currentLine.nodes[ currentNodeId - 1 ].blocked )
             )
         ){
-        
+
             currentLine.nodes = currentLine.nodes.slice( 0, currentNodeId ).concat( currentLine.nodes.slice( currentNodeId + 1 ) );
             updateTools          = true;
 
@@ -459,7 +475,7 @@ var handleBackspaceNormal = function( dontSend ){
     // Definimos el cursor
     setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true ); // To Do -> Seguramente pueda optimizarse sin necesidad de recalcular toda la nueva posición
     resetBlink();
-    clearTemporalStyle();
+    temporalStyle.clear();
 
     if( updateTools ){
         updateToolsLineStatus();
@@ -483,7 +499,7 @@ var handleBackspaceNormal = function( dontSend ){
     }
 
     realtime.send({
-        
+
         cmd  : CMD_BACKSPACE,
         data : [ paragraphId, charId ],
         pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
@@ -513,7 +529,7 @@ var handleBackspaceSelection = function( dontSend ){
         currentRangeStart.line.totalChars -= currentRangeStart.node.string.length;
         currentRangeStart.node.string      = currentRangeStart.node.string.slice( 0, currentRangeStart.nodeChar ) + currentRangeStart.node.string.slice( currentRangeEnd.nodeChar );
         currentRangeStart.line.totalChars += currentRangeStart.node.string.length;
-        
+
         // Si todavía queda contenido dentro o es el primer nodo de la línea, no lo borramos
         if(
 
@@ -713,9 +729,9 @@ var handleBackspaceSelection = function( dontSend ){
         true
 
     );
-    
+
     resetBlink();
-    clearTemporalStyle();
+    temporalStyle.clear();
     updateToolsLineStatus(); // To Do -> Comprobar si se tiene que ejecutar siempre o solo algunas veces
 
     if( !realtime || dontSend ){
@@ -723,7 +739,7 @@ var handleBackspaceSelection = function( dontSend ){
     }
 
     realtime.send({
-        
+
         cmd  : CMD_RANGE_BACKSPACE,
         data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd ],
         pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
@@ -842,7 +858,7 @@ var handleCharNormal = function( newChar, dontSend ){
     }else if( temporalStyle ){
 
         setCursor( currentPageId, currentParagraphId, currentLineId, currentLineCharId, currentNodeId, currentNodeCharId, true );
-        
+
         temporalStyle = null;
 
     }else{
@@ -877,7 +893,7 @@ var handleCharNormal = function( newChar, dontSend ){
     var charId      = getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId );
 
     realtime.send({
-        
+
         cmd  : CMD_NEWCHAR,
         data : [ paragraphId, charId - 1, newChar ],
         pos  : [ paragraphId, charId ]
@@ -921,7 +937,7 @@ var handleCharSelection = function( newChar, dontSend ){
     }
 
     realtime.send({
-    
+
         cmd  : CMD_RANGE_NEWCHAR,
         data : [ paragraphIdStart, charInParagraphStart, paragraphIdEnd, charInParagraphEnd, newChar ],
         pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
@@ -998,11 +1014,15 @@ var start = function(){
         page.append( paragraph );
         paragraph.append( line );
         line.append( node );
-        
-        node.setSize( 12 );
-        node.setFont('Cambria');
-        node.setColor('#000000');
 
+        node.setStyle({
+
+            'color'       : '#000000',
+            'font-family' : 'Cambria',
+            'font-size'   : 12
+
+        });
+        
         setViewTitle();
 
         console.log( currentDocument );
@@ -1064,25 +1084,25 @@ var updateToolsLineStatus = function(){
     */
 
     // Estilos de nodos
-    if( temporalStyle && checkTemporalStyle('font-family') ){
-        $( '.tool-fontfamily', toolsLine ).text( temporalStyle['font-family'] );
+    if( styleController.temporal && styleController.temporal.get('font-family') ){
+        $( '.tool-fontfamily', toolsLine ).text( styleController.temporal.get('font-family') );
     }else if( nodeStyles['font-family'] ){
         $( '.tool-fontfamily', toolsLine ).text( nodeStyles['font-family'] );
     }else{
         $( '.tool-fontfamily', toolsLine ).text('');
     }
 
-    if( temporalStyle && checkTemporalStyle('font-size') ){
-        $( '.tool-fontsize', toolsLine ).text( temporalStyle['font-size'] );
+    if( styleController.temporal && styleController.temporal.get('font-size') ){
+        $( '.tool-fontsize', toolsLine ).text( styleController.temporal.get('font-size') );
     }else if( nodeStyles['font-size'] ){
         $( '.tool-fontsize', toolsLine ).text( nodeStyles['font-size'] );
     }else{
         $( '.tool-fontsize', toolsLine ).text('');
     }
 
-    if( temporalStyle ){
+    if( styleController.temporal ){
 
-        if( checkTemporalStyle( 'font-weight', true ) ){
+        if( styleController.temporal.get( 'font-weight', true ) ){
             $( '.tool-button-bold', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-bold', toolsLine ).removeClass('active');
@@ -1098,9 +1118,9 @@ var updateToolsLineStatus = function(){
 
     }
 
-    if( temporalStyle ){
+    if( styleController.temporal ){
 
-        if( checkTemporalStyle( 'font-style', true ) ){
+        if( styleController.temporal.get( 'font-style', true ) ){
             $( '.tool-button-italic', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-italic', toolsLine ).removeClass('active');
@@ -1116,9 +1136,9 @@ var updateToolsLineStatus = function(){
 
     }
 
-    if( temporalStyle ){
+    if( styleController.temporal ){
 
-        if( checkTemporalStyle( 'text-decoration-underline', true ) ){
+        if( styleController.temporal.get( 'text-decoration-underline', true ) ){
             $( '.tool-button-underline', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-underline', toolsLine ).removeClass('active');
@@ -1141,17 +1161,17 @@ var updateToolsLineStatus = function(){
         $( '.tool-button-center, .tool-button-right, .tool-button-justify', toolsLine ).removeClass('active');
 
     }else if( paragraphStyles.align === ALIGN_CENTER ){
-        
+
         $( '.tool-button-center', toolsLine ).addClass('active');
         $( '.tool-button-left, .tool-button-right, .tool-button-justify', toolsLine ).removeClass('active');
 
     }else if( paragraphStyles.align === ALIGN_RIGHT ){
-        
+
         $( '.tool-button-right', toolsLine ).addClass('active');
         $( '.tool-button-left, .tool-button-center, .tool-button-justify', toolsLine ).removeClass('active');
 
     }else if( paragraphStyles.align === ALIGN_JUSTIFY ){
-        
+
         $( '.tool-button-justify', toolsLine ).addClass('active');
         $( '.tool-button-left, .tool-button-center, .tool-button-right', toolsLine ).removeClass('active');
 

@@ -130,233 +130,11 @@ canvasCursor.canvas
         return;
     }
 
-    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar;
-    var offset = canvasCursor.canvas.offset();
-    var posX   = e.pageX - offset.left;
-    var posY   = e.pageY - offset.top;
-
-    // Buscamos la posición vertical
-    var height = -scrollTop;
-
-    // Buscamos la página
-    for( pageId = 0; pageId < currentDocument.pages.length; pageId++ ){
-
-        if( currentDocument.pages[ pageId ].height + GAP + height < posY ){
-            height += currentDocument.pages[ pageId ].height + GAP;
-        }else{
-            break;
-        }
-
-    }
-
-    if( currentDocument.pages[ pageId ] ){
-
-        page = currentDocument.pages[ pageId ];
-
-        // Tenemos en cuenta el margen superior
-        height += page.marginTop;
-
-        // Buscamos el párrafo
-        for( paragraphId = 0; paragraphId < page.paragraphs.length; paragraphId++ ){
-
-            if( page.paragraphs[ paragraphId ].height + height < posY ){
-                height += page.paragraphs[ paragraphId ].height;
-            }else{
-                break;
-            }
-
-        }
-
-        if( page.paragraphs[ paragraphId ] ){
-            
-            paragraph = page.paragraphs[ paragraphId ];
-
-            // Buscamos la línea
-            for( lineId = 0; lineId < paragraph.lines.length; lineId++ ){
-            
-                if( ( paragraph.lines[ lineId ].height * paragraph.spacing ) + height < posY ){
-                    height += paragraph.lines[ lineId ].height * paragraph.spacing;
-                }else{
-                    break;
-                }
-
-            }
-
-            if( paragraph.lines[ lineId ] ){
-                line = paragraph.lines[ lineId ];
-            }else{
-                line = paragraph.lines[ --lineId ];
-            }
-
-        }else{
-
-            paragraph = page.paragraphs[ --paragraphId ];
-            lineId    = paragraph.lines.length - 1;
-            line      = paragraph.lines[ lineId ];
-
-        }
-
-    }else{
-
-        page        = currentDocument.pages[ --pageId ];
-        paragraphId = page.paragraphs.length - 1;
-        paragraph   = page.paragraphs[ paragraphId ];
-        lineId      = paragraph.lines.length - 1;
-        line        = paragraph.lines[ lineId ];
-
-    }
-
-    // Buscamos la posición horizontal
-    var width = 0;
-
-    // Tenemos en cuenta el margen izquierdo
-    width += page.marginLeft;
-
-    // Tenemos en cuenta el margen del párrafo
-    width += getOffsetIndentationLeft( lineId, paragraph );
-
-    // Tenemos en cuenta la alineación del párrafo
-    width += getLineOffset( line, paragraph );
-
-    // Buscamos el nodo y el nodeChar
-    // Principio del primer nodo
-    if( width >= posX ){
-        
-        nodeId   = 0;
-        node     = line.nodes[ nodeId ];
-        nodeChar = 0;
-        lineChar = 0;
-
-    }else{
-
-        lineChar = 0;
-        
-        // Buscamos nodo a nodo
-        for( nodeId = 0; nodeId < line.nodes.length; ){
-
-            // El caracter está en el nodo
-            if( width <= posX && ( line.nodes[ nodeId ].justifyWidth || line.nodes[ nodeId ].width ) + width >= posX ){
-
-                node = line.nodes[ nodeId ];
-
-                for( nodeChar = 0; nodeChar < node.string.length; ){
-                    
-                    if( node.justifyCharList ){
-
-                        if( node.justifyCharList[ nodeChar ] - ( ( node.justifyCharList[ nodeChar ] - ( node.justifyCharList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
-                            break;
-                        }
-
-                    }else{
-
-                        if( node.chars[ nodeChar ] - ( ( node.chars[ nodeChar ] - ( node.chars[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
-                            break;
-                        }
-
-                    }
-
-                    nodeChar++;
-                    lineChar++;
-
-                }
-
-                break;
-
-            }
-
-            lineChar += line.nodes[ nodeId ].string.length;
-            width    += line.nodes[ nodeId ].justifyWidth || line.nodes[ nodeId ].width;
-            nodeId   += 1;
-
-        }
-
-        if( !node ){
-
-            lineChar = line.totalChars;
-            nodeId   = line.nodes.length - 1;
-            node     = line.nodes[ nodeId ];
-            nodeChar = node.string.length;
-
-        }
-
-    }
-
-    if( nodeChar === 0 ){
-
-        if( nodeId === 0 ){
-
-            if( lineId === 0 ){
-
-                if( paragraphId === 0 ){
-
-                    if( pageId !== 0 ){
-
-                        pageId      = pageId - 1;
-                        page        = currentDocument.pages[ pageId ];
-                        paragraphId = page.paragraphs.length - 1;
-                        paragraph   = page.paragraphs[ paragraphId ];
-                        lineId      = paragraph.lines.length - 1;
-                        line        = paragraph.lines[ lineId ];
-                        lineChar    = line.totalChars;
-                        nodeId      = line.nodes.length - 1;
-                        node        = line.nodes[ nodeId ];
-                        nodeChar    = node.string.length;
-                    }
-
-                }else{
-
-                    paragraphId = paragraphId - 1;
-                    paragraph   = page.paragraphs[ paragraphId ];
-                    lineId      = paragraph.lines.length - 1;
-                    line        = paragraph.lines[ lineId ];
-                    lineChar    = line.totalChars;
-                    nodeId      = line.nodes.length - 1;
-                    node        = line.nodes[ nodeId ];
-                    nodeChar    = node.string.length;
-       
-                }
-
-            }else{
-
-                lineId   = lineId - 1;
-                line     = paragraph.lines[ lineId ];
-                lineChar = line.totalChars;
-                nodeId   = line.nodes.length - 1;
-                node     = line.nodes[ nodeId ];
-                nodeChar = node.string.length;
-
-            }
-
-        }else{
-
-            nodeId   = nodeId - 1;
-            node     = line.nodes[ nodeId ];
-            nodeChar = node.string.length;
-
-        }
-
-    }
-
-    setRange(
-
-        selectionStart,
-
-        {
-
-            pageId      : pageId,
-            page        : page,
-            paragraphId : paragraphId,
-            paragraph   : paragraph,
-            lineId      : lineId,
-            line        : line,
-            lineChar    : lineChar,
-            nodeId      : nodeId,
-            node        : node,
-            nodeChar    : nodeChar
-
-        }
-
-    );
+    var offset   = canvasCursor.canvas.offset();
+    var elements = getElementsByPosition( e.pageX - offset.left, e.pageY - offset.top );
+
+    selectionRange.setEnd( elements.node, elements.char );
+    canvasCursor.resetBlink();
 
 })
 
@@ -601,6 +379,16 @@ input
 
     compositionCounter = 0;
     compositionEnded   = true;
+
+});
+
+// Toggle buttons
+toolsLine
+.on( 'click', '.tool-button', function(){
+
+    input.focus();
+    buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
+    updateToolsLineStatus(); // To Do -> Quizás pueda optimizarse y aplicarse solo a los estilos que lo necesiten
 
 });
 

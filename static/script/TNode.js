@@ -15,6 +15,35 @@ var TNode = function(){
 
 };
 
+TNode.prototype.clone = function(){
+
+    var newNode = new TNode();
+
+    newNode.chars   = newNode.chars;
+    newNode.blocked = newNode.blocked;
+
+    newNode.height  = newNode.height;
+    newNode.string  = newNode.string;
+    newNode.style   = cloneObject( newNode.string );
+    newNode.width   = newNode.width;
+
+    return newNode;
+
+};
+
+TNode.prototype.getHash = function(){
+
+    return [
+
+        this.parent.parent.parent.id, // Page
+        this.parent.parent.id,        // Paragraph
+        this.parent.id,               // Line
+        this.id                       // Node
+
+    ];
+
+};
+
 TNode.prototype.getPositionX = function( nodeChar ){
 
     nodeChar = parseInt( nodeChar, 10 ) || 0;
@@ -45,9 +74,9 @@ TNode.prototype.getPositionX = function( nodeChar ){
         if( this.justifyCharList ){
             x += this.justifyCharList[ nodeChar - 1 ];
         }else{
-            x += this.chars[ nodeChar - 1 ];   
+            x += this.chars[ nodeChar - 1 ];
         }
-        
+
     }
 
     return x;
@@ -123,7 +152,7 @@ TNode.prototype.next = function(){
 };
 
 TNode.prototype.prev = function(){
-    
+
     var node = this.parent.nodes[ this.id - 1 ];
 
     if( node ){
@@ -153,32 +182,47 @@ TNode.prototype.remove = function( position ){
 
 };
 
-TNode.prototype.setColor = function( color ){
+TNode.prototype.setStyle = function( key, value ){
 
+    if( typeof key === 'string' ){
 
-    this.style['color'] = color;
+        var tmp = {};
 
-    return this;
+        tmp[ key ] = value;
+        key        = tmp;
+        tmp        = null;
 
-};
+    }
 
-TNode.prototype.setFont = function( font ){
-    
-    this.style['font-family'] = font;
+    var update = false;
 
-    this.updateHeight();
-    this.updateWidth();
+    for( var i in key ){
 
-    return this;
+        if( i === 'color' ){
+            this.style['color'] = key[ i ];
+        }else if(
+            i === 'font-family' ||
+            i === 'font-size' ||
+            i === 'font-weight' ||
+            i === 'font-style' ||
+            i === 'text-decoration-underline'
+        ){
 
-};
+            this.style[ i ] = key[ i ];
+            update          = true;
 
-TNode.prototype.setSize = function( size ){
+        }else{
+            console.warn('unrecognised style', i, key[ i ] );
+        }
 
-    this.style['font-size'] = size;
-    
-    this.updateHeight();
-    this.updateWidth();
+    }
+
+    if( update ){
+
+        this.updateHeight();
+        this.updateWidth();
+
+    }
 
     return this;
 

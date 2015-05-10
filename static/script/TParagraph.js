@@ -34,8 +34,19 @@ TParagraph.prototype.append = function( line ){
 
 };
 
+TParagraph.prototype.getHash = function(){
+
+    return [
+
+        this.parent.id, // Page
+        this.id         // Paragraph
+
+    ];
+
+};
+
 TParagraph.prototype.insert = function( position, line ){
-    
+
     if( line.parent ){
         line.parent.remove( line.id );
     }
@@ -54,7 +65,7 @@ TParagraph.prototype.insert = function( position, line ){
     this.updateHeight();
 
     // To Do -> Hacer realocate si es conveniente (a decision del programador)
-    
+
     return this;
 
 };
@@ -76,13 +87,13 @@ TParagraph.prototype.next = function(){
         }
 
         page = this.parent.next();
-        
+
     }
 
 };
 
 TParagraph.prototype.prev = function(){
-    
+
     var paragraph = this.parent.paragraphs[ this.id - 1 ];
 
     if( paragraph ){
@@ -98,7 +109,7 @@ TParagraph.prototype.prev = function(){
         }
 
         page = this.parent.next();
-        
+
     }
 
 };
@@ -114,7 +125,7 @@ TParagraph.prototype.remove = function( position ){
 
         this.lines[ i ].id--;
         this.lines[ i ].updateWidth();
-    
+
     }
 
     // To Do -> Hacer realocate si es conveniente (a decision del programador)
@@ -123,8 +134,93 @@ TParagraph.prototype.remove = function( position ){
 
 };
 
+TParagraph.prototype.setStyle = function( key, value ){
+
+    if( typeof key === 'string' ){
+
+        var tmp = {};
+
+        tmp[ key ] = value;
+        key        = tmp;
+        tmp        = null;
+
+    }
+
+    var update = false;
+
+    for( var i in key ){
+
+        if( i === 'align' ){
+
+            if( value === ALIGN_JUSTIFY ){
+                console.warn('ToDo','Paragraph setStyle Justify')
+                return this;
+            }
+
+            // Si aplicamos la misma alineacion a un parrafo se ignora el cambio
+            if( this.align !== value ){
+
+                // Si el párrafo estaba justificado, desjustificamos su contenido
+                /*
+                if( paragraph[ key ] === ALIGN_JUSTIFY ){
+
+                    var j, line, node;
+
+                    for( i = 0; i < paragraph.lines.length; i++ ){
+
+                        line = paragraph.lines[ i ];
+
+                        for( j = 0; j < line.nodes.length; j++ ){
+
+                            node = line.nodes[ j ];
+
+                            delete node.justifyCharList;
+                            delete node.justifyWidth;
+
+                        }
+
+                    }
+
+                }
+                */
+
+                this.align = value;
+                //update     = true;
+
+                // Si hemos justificado el párrafo, justificamos su contenido
+                /*
+                if( value === ALIGN_JUSTIFY ){
+
+                    for( i = 0; i < paragraph.lines.length; i++ ){
+                        measureLineJustify( paragraph, paragraph.lines[ i ], i );
+                    }
+
+                }
+                */
+
+            }
+
+        }else{
+            console.warn('unrecognised style', i, key[ i ] );
+        }
+
+    }
+
+    if( update ){
+
+        /*
+        this.updateHeight();
+        this.updateWidth();
+        */
+        
+    }
+
+    return this;
+
+};
+
 TParagraph.prototype.updateHeight = function(){
-    
+
     this.height = 0;
 
     for( var i = 0; i < this.lines.length; i++ ){
