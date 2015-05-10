@@ -14,7 +14,7 @@ var CanvasCursor = function(){
 
 CanvasCursor.prototype.draw = function(){
 
-    if( selectionRange.endNode ){
+    if( selectionRange.isValid() ){
         this.drawRange();
     }else{
         this.drawCursor();
@@ -63,6 +63,7 @@ CanvasCursor.prototype.drawCursor = function(){
         this.updateSize();
 
         // Los cursores remotos deben dibujarse antes para estar por devahi del actual
+        /*
         for( var i in usersPosition ){
 
             if( !usersEditing[ i ] ){
@@ -104,6 +105,7 @@ CanvasCursor.prototype.drawCursor = function(){
             );
 
         }
+        */
 
         if( ( blinkGlobal && !( this.blinkCurrent && !newCurrent ) ) || ( !this.blinkCurrent && newCurrent ) ){
 

@@ -100,107 +100,10 @@ var currentRangeStartHash = null;
 var currentRangeEndHash   = null;
 var currentMultipleHash   = null;
 var currentMouse          = MOUSE_NORMAL;
-var temporalStyle         = null;
 var toolsListEnabled      = false;
 var toolsColorEnabled     = false;
 var lastStatus            = null;
-
-// Button actions
-/*
-var buttonAction = {
-
-    bold : function(){
-
-        if(
-            ( currentRangeStart && currentRangeStart.node.style['font-weight'] ) ||
-            currentNode.style['font-weight'] ||
-            checkTemporalStyle('font-weight')
-        ){
-            setSelectedNodeStyle( 'font-weight' );
-        }else{
-            setSelectedNodeStyle( 'font-weight', 'bold' );
-        }
-        
-    },
-
-    italic : function(){
-        
-        if(
-            ( currentRangeStart && currentRangeStart.node.style['font-style'] ) ||
-            currentNode.style['font-style'] ||
-            checkTemporalStyle('font-style')
-        ){
-            setSelectedNodeStyle( 'font-style' );
-        }else{
-            setSelectedNodeStyle( 'font-style', 'italic' );
-        }
-
-    },
-
-    underline : function(){
-
-        if(
-            ( currentRangeStart && currentRangeStart.node.style['text-decoration-underline'] ) ||
-            currentNode.style['text-decoration-underline'] ||
-            checkTemporalStyle('text-decoration-underline')
-        ){
-            setSelectedNodeStyle( 'text-decoration-underline' );
-        }else{
-            setSelectedNodeStyle( 'text-decoration-underline', true );
-        }
-
-    },
-
-    color : function( value ){
-        setSelectedNodeStyle( 'color', value );
-    },
-
-    left : function(){
-        setSelectedParagraphsStyle( 'align', ALIGN_LEFT );
-    },
-
-    center : function(){
-        setSelectedParagraphsStyle( 'align', ALIGN_CENTER );
-    },
-
-    right : function(){
-        setSelectedParagraphsStyle( 'align', ALIGN_RIGHT );
-    },
-
-    justify : function(){
-        setSelectedParagraphsStyle( 'align', ALIGN_JUSTIFY );
-    },
-
-    indentDec : function(){
-        setSelectedParagraphsStyle( 'indentationLeftAdd', -1.27 * CENTIMETER );
-    },
-
-    indentInc : function(){
-        setSelectedParagraphsStyle( 'indentationLeftAdd', 1.27 * CENTIMETER );
-    },
-
-    listBullet : function(){
-
-        if( $( '.tool-button-list-unsorted', toolsLine ).hasClass('active') ){
-            setSelectedParagraphsStyle('listNone');
-        }else{
-            setSelectedParagraphsStyle('listBullet');
-        }
-
-    },
-
-    listNumber : function(){
-        
-        if( $( '.tool-button-list-sorted', toolsLine ).hasClass('active') ){
-            setSelectedParagraphsStyle('listNone');
-        }else{
-            setSelectedParagraphsStyle('listNumber');
-        }
-
-    }
-
-};
-*/
+var styleController       = new StyleController();
 
 // Preprocesed data
 var fontfamilyCode     = '';
