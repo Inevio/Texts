@@ -1,6 +1,6 @@
 
 var Cursor = function(){
-	
+
 	this.page;
 	this.paragraph;
 	this.line;
@@ -20,16 +20,16 @@ Cursor.prototype.move = function( positions ){
     if( !positions ){
         return this;
     }
-        
+
     this.char     = this.char + positions;
     this.lineChar = this.lineChar + positions;
 
     if( this.char < 0 ){
-       
+
         var prev = this.node.prev();
 
         if( prev ){
-            
+
             if(
                 this.line.id !== prev.parent.id ||
                 this.paragraph.id !== prev.parent.parent.id ||
@@ -97,12 +97,13 @@ Cursor.prototype.move = function( positions ){
     }
 
     this.updatePositionX();
+	//this.updatePositionY(); // To Do -> Esto es optimizable, no deberia tener que ejecutarse en todo momento
     canvasCursor.resetBlink();
 
 };
 
 Cursor.prototype.setNode = function( node, position ){
-    
+
     console.warn('ToDo','setNode','Prevent blocked');
 
     this.char      = parseInt( position, 10 ) || 0;
@@ -116,7 +117,7 @@ Cursor.prototype.setNode = function( node, position ){
     for( var i = 0; i < node.id; i++ ){
         this.lineChar += this.line.nodes[ i ].string.length;
     }
-    
+
     this.updatePositionX();
     this.updatePositionY();
     canvasCursor.resetBlink();
@@ -149,7 +150,7 @@ Cursor.prototype.updatePosition = function(){
             node   = node.next();
 
         }else{
-            
+
             this.node      = node;
             this.line      = this.node.parent;
             this.paragraph = this.line.parent;
@@ -197,9 +198,9 @@ Cursor.prototype.updatePositionX = function(){
         if( this.node.justifyCharList ){
             this.positionX += this.node.justifyCharList[ this.char - 1 ];
         }else{
-            this.positionX += this.node.chars[ this.char - 1 ];   
+            this.positionX += this.node.chars[ this.char - 1 ];
         }
-        
+
     }
 
     return this;

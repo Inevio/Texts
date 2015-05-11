@@ -126,10 +126,10 @@ CanvasDocument.prototype.draw = function(){
                         endY   = startY;
 
                         this.ctx.beginPath();
-                        
+
                         this.ctx.strokeStyle = node.style.color;
                         this.ctx.lineWidth   = underlineHeight;
-                        
+
                         this.ctx.moveTo( parseInt( startX, 10 ), parseInt( startY, 10 ) + 0.5 );
                         this.ctx.lineTo( parseInt( endX, 10 ), parseInt( endY, 10 ) + 0.5 );
                         this.ctx.stroke();
