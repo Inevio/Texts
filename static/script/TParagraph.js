@@ -15,7 +15,7 @@ var TParagraph = function(){
     this.listMode                = LIST_NONE;
     this.spacing                 = 1;
     this.width                   = 0;
-    this.split                   = 0;
+    //this.split                   = 0;
 
 };
 
@@ -31,6 +31,24 @@ TParagraph.prototype.append = function( line ){
     line.updateWidth();
 
     return this;
+
+};
+
+TParagraph.prototype.clone = function(){
+
+    var newParagraph = new TParagraph();
+
+    // Properties
+    newParagraph.align                   = this.align;
+    newParagraph.indentationLeft         = this.indentationLeft;
+    newParagraph.indentationRight        = this.indentationRight;
+    newParagraph.indentationSpecialType  = this.indentationSpecialType;
+    newParagraph.indentationSpecialValue = this.indentationSpecialValue;
+    newParagraph.listMode                = this.listMode;
+    newParagraph.spacing                 = this.spacing;
+    //newParagraph.split                   = this.split;
+
+    return newParagraph;
 
 };
 
@@ -212,8 +230,22 @@ TParagraph.prototype.setStyle = function( key, value ){
         this.updateHeight();
         this.updateWidth();
         */
-        
+
     }
+
+    return this;
+
+};
+
+TParagraph.prototype.split = function( lineId, nodeId, char ){
+
+    var newParagraph = this.clone();
+    var newLine      = new TLine();
+    var newNode      = this.lines[ lineId ].nodes[ nodeId ].split( char ).parent.nodes[ nodeId + 1 ];
+
+    this.parent.insert( this.id + 1, newParagraph );
+    newParagraph.append( newLine );
+    newLine.append( newNode );
 
     return this;
 

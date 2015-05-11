@@ -4,6 +4,7 @@ var TNode = function(){
     this.id;
     this.parent;
     this.chars = [];
+    this.uniqId = TNode.uniqId++;
     //this.justifyCharList = [];
 
     // Properties
@@ -15,17 +16,19 @@ var TNode = function(){
 
 };
 
+TNode.uniqId = 0;
+
 TNode.prototype.clone = function(){
 
     var newNode = new TNode();
 
-    newNode.chars   = newNode.chars;
-    newNode.blocked = newNode.blocked;
+    newNode.chars   = this.chars;
+    newNode.blocked = this.blocked;
 
-    newNode.height  = newNode.height;
-    newNode.string  = newNode.string;
-    newNode.style   = cloneObject( newNode.string );
-    newNode.width   = newNode.width;
+    newNode.height  = this.height;
+    newNode.string  = this.string;
+    newNode.style   = cloneObject( this.style );
+    newNode.width   = this.width;
 
     return newNode;
 
@@ -222,6 +225,52 @@ TNode.prototype.setStyle = function( key, value ){
         this.updateHeight();
         this.updateWidth();
 
+    }
+
+    return this;
+
+};
+
+TNode.prototype.slice = function( start, stop ){
+
+    this.string = this.string.slice( start, stop );
+
+    this.updateWidth();
+
+    return this;
+
+};
+
+TNode.prototype.split = function( start, stop ){
+
+    if( typeof stop === 'undefined' ){
+        stop = this.string.length;
+    }
+
+    /*
+    if( start === 0 && stop === this.string.length && this.string.length !== 0 ){
+        return this;
+    }
+    */
+
+    if( start === 0 ){
+
+        var newNode = this.clone();
+
+        this.parent.insert( this.id + 1, newNode );
+        this.slice( 0, stop );
+        newNode.slice( stop );
+
+    }else if( stop === this.string.length ){
+
+        var newNode = this.clone();
+
+        this.parent.insert( this.id + 1, newNode );
+        this.slice( 0, start );
+        newNode.slice( start, stop );
+
+    }else{
+        console.log('romper en 3');
     }
 
     return this;

@@ -20,9 +20,11 @@ TLine.prototype.append = function( node ){
         node.parent.remove( node.id );
     }
 
-    node.id     = this.nodes.push( node ) - 1;
-    node.parent = this;
+    node.id         = this.nodes.push( node ) - 1;
+    node.parent     = this;
+    this.totalChars = node.string.length;
 
+    this.updateHeight();
     this.realocate();
 
     return this;
@@ -89,7 +91,7 @@ TLine.prototype.getOffset = function(){
     if( this.parent.align === ALIGN_RIGHT ){
         return this.width - this.getTrimmedWidth();
     }
-    
+
     return 0; // To Do -> Justificado
 
 };
@@ -192,7 +194,7 @@ TLine.prototype.getWords = function(){
                     breakedWord = false;
 
                 }
-                
+
                 continue;
 
             }
@@ -224,6 +226,28 @@ TLine.prototype.getWords = function(){
 
 };
 
+TLine.prototype.insert = function( position, node ){
+
+    if( node.parent ){
+        node.parent.remove( node.id );
+    }
+
+    this.nodes  = this.nodes.slice( 0, position ).concat( node ).concat( this.nodes.slice( position ) );
+    node.parent = this;
+
+    for( var i = position; i < this.nodes.length; i++ ){
+        this.nodes[ i ].id = i;
+    }
+
+    this.realocate();
+    this.updateHeight();
+
+    // To Do -> Hacer realocate si es conveniente (a decision del programador)
+
+    return this;
+
+};
+
 TLine.prototype.next = function(){
 
     var line = this.parent.lines[ this.id + 1 ];
@@ -241,13 +265,13 @@ TLine.prototype.next = function(){
         }
 
         paragraph = this.parent.next();
-        
+
     }
 
 };
 
 TLine.prototype.prev = function(){
-    
+
     var line = this.parent.lines[ this.id - 1 ];
 
     if( line ){
@@ -263,7 +287,7 @@ TLine.prototype.prev = function(){
         }
 
         paragraph = this.parent.prev();
-        
+
     }
 
 };
@@ -288,7 +312,7 @@ TLine.prototype.realocate = function(){
 
         // To Do -> Optimizar y hacerlo solo cuando haga falta
         // To Do -> this.tabList = this.getTabs();
-        
+
         // To Do -> measureLineJustify( paragraph, line, this.id );
         return counter;
 
@@ -303,7 +327,7 @@ TLine.prototype.realocate = function(){
 
         // To Do -> Optimizar y hacerlo solo cuando haga falta
         this.tabList = this.getTabs(); // To Do -> Seguro que esto hay que calcularlo aqui?
-        
+
         measureLineJustify( paragraph, line, this.id );
         return counter;
 
@@ -317,7 +341,7 @@ TLine.prototype.realocate = function(){
         for( i = 0; i < lineWords.length; i++ ){
             heritage += lineWords[ i ].width;
         }
-    
+
         for( i = lineWords.length - 1; i >= 0 ; i-- ){
 
             heritage -= lineWords[ i ].width;
@@ -325,9 +349,9 @@ TLine.prototype.realocate = function(){
             if( heritage + lineWords[ i ].widthTrim <= this.width ){
                 break;
             }
-    
+
             wordsToMove.unshift( i );
-            
+
         }
 
         if( !wordsToMove.length ){
@@ -342,7 +366,7 @@ TLine.prototype.realocate = function(){
 
                 // To Do -> Optimizar y hacerlo solo cuando haga falta
                 this.tabList = this.getTabs(); // To Do -> Seguro que esto hay que calcularlo aqui?
-                
+
                 measureLineJustify( paragraph, line, this.id );
                 return counter;
 
@@ -379,10 +403,10 @@ TLine.prototype.realocate = function(){
             this.nodes           = this.nodes.slice( 0, firstNodeToMove );
             this.totalChars     -= totalChars;
             counter             += totalChars;
-            
+
         // Si hay que partir un nodo
         }else{
-            
+
             var nodeToMove = this.nodes[ firstNodeToMove ];
             var totalChars = 0;
 
@@ -414,7 +438,7 @@ TLine.prototype.realocate = function(){
         // Actualizamos la altura de la línea actual y la altura de la siguiente línea
         this.updateHeight();
         nextLine.updateHeight();
-        
+
     // Si es una palabra rota
     }else if( lineWords[ 0 ].widthTrim > this.width ){
 
@@ -452,7 +476,7 @@ TLine.prototype.realocate = function(){
                 charId = i;
                 break;
             }
-            
+
             if( heritage + nodeToMove.chars[ i ] === this.width ){
                 charId = i + 1;
                 break;
@@ -504,7 +528,7 @@ TLine.prototype.realocate = function(){
             nextLine.nodes.unshift( newNode );
 
         }
-        
+
         // Actualizamos la altura de la línea actual
         updateLineHeight( line );
 
@@ -513,7 +537,7 @@ TLine.prototype.realocate = function(){
 
         // Actualizamos la altura del párrafo
         updateParagraphHeight( paragraph );
-        
+
     }
 
     console.warn('ToDo','realocate');
@@ -526,15 +550,31 @@ TLine.prototype.realocate = function(){
 
     // To Do -> Optimizar y hacerlo solo cuando haga falta
     this.tabList = this.getTabs();
-    
+
     measureLineJustify( paragraph, line, id );
     */
 
     // To Do -> Actualizar el counter bien
-    console.log( counter );
     cursor.updatePosition();
-    
+
     return counter;
+
+};
+
+TLine.prototype.remove = function( position ){
+
+    this.nodes[ position ].id     = undefined;
+    this.nodes[ position ].parent = undefined;
+
+    this.nodes = this.nodes.slice( 0, position ).concat( this.nodes.slice( position + 1 ) );
+
+    for( var i = position; i < this.nodes.length; i++ ){
+        this.nodes[ i ].id--;
+    }
+
+    // To Do -> Hacer realocate si es conveniente (a decision del programador)
+
+    return this;
 
 };
 
@@ -551,7 +591,7 @@ TLine.prototype.updateHeight = function(){
     }
 
     if( lineHeight !== this.height ){
-        
+
         this.parent.height -= this.height * this.parent.spacing;
         this.parent.height += lineHeight * this.parent.spacing;
         this.height         = lineHeight;

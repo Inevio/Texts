@@ -21,7 +21,7 @@ CanvasRulerLeft.prototype.draw = function(){
     // Calculamos cuanto espacio hay por encima de la página actual
     var top = 0;
 
-    for( var i = 0; i < currentPageId; i++ ){
+    for( var i = 0; i < cursor.page.id; i++ ){
         top = currentDocument.pages[ i ].height + GAP;
     }
 

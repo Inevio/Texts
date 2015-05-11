@@ -82,6 +82,7 @@ var maxScrollTop = 0;
 // Current variables
 var currentDocument       = null;
 var currentOpenFile       = null;
+/*
 var currentPage           = null;
 var currentPageId         = null;
 var currentParagraph      = null;
@@ -92,12 +93,13 @@ var currentLineCharId     = null;
 var currentNode           = null;
 var currentNodeId         = null;
 var currentNodeCharId     = null;
-// var positionAbsoluteX     = 0;
-// var positionAbsoluteY     = 0;
+var positionAbsoluteX     = 0;
+var positionAbsoluteY     = 0;
 var currentRangeStart     = null;
 var currentRangeEnd       = null;
 var currentRangeStartHash = null;
 var currentRangeEndHash   = null;
+*/
 var currentMultipleHash   = null;
 var currentMouse          = MOUSE_NORMAL;
 var toolsListEnabled      = false;

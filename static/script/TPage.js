@@ -33,6 +33,29 @@ TPage.prototype.append = function( paragraph ){
 
 };
 
+TPage.prototype.insert = function( position, paragraph ){
+
+    if( paragraph.parent ){
+        paragraph.parent.remove( paragraph.id );
+    }
+
+    this.paragraphs  = this.paragraphs.slice( 0, position ).concat( paragraph ).concat( this.paragraphs.slice( position ) );
+    paragraph.parent = this;
+
+    for( var i = position; i < this.paragraphs.length; i++ ){
+
+        this.paragraphs[ i ].id = i;
+
+        this.paragraphs[ i ].updateWidth();
+
+    }
+
+    console.warn('ToDo','Page Insert','Realocate Page');
+
+    return this;
+
+};
+
 TPage.prototype.next = function(){
     return this.parent.pages[ this.id + 1 ];
 };
@@ -40,7 +63,6 @@ TPage.prototype.next = function(){
 TPage.prototype.prev = function(){
     return this.parent.pages[ this.id - 1 ];
 };
-
 
 TPage.prototype.remove = function( paragraph ){
 
@@ -53,7 +75,7 @@ TPage.prototype.remove = function( paragraph ){
 
         this.paragraphs[ i ].id--;
         this.paragraphs[ i ].updateWidth();
-    
+
     }
 
     // To Do -> Hacer realocate si es conveniente (a decision del programador)
