@@ -34,16 +34,16 @@ Range.prototype.clear = function(){
 
 Range.prototype.getLimits = function(){
 
-	if(
-		this.endNode &&
-		(
-			this.startPage.id > this.endPage.id ||
-			this.startParagraph.id > this.endParagraph.id ||
-			this.startLine.id > this.endLine.id ||
-			this.startNode.id > this.endNode.id ||
-			this.startChar > this.endChar
-		)
-	){
+	var compared = compareHashes(
+
+		[ this.startPage.id, this.startParagraph.id, this.startLine.id, this.startNode.id, this.startChar ],
+		[ this.endPage.id, this.endParagraph.id, this.endLine.id, this.endNode.id, this.endChar ]
+
+	);
+
+	console.log( compared );
+
+	if( this.endNode && compared > -1 ){
 
 		return {
 
@@ -114,11 +114,14 @@ Range.prototype.mapNodes = function( handler ){
 		tmpHash = node.getHash();
 
 		if( compareHashes( startHash, tmpHash ) === 0 ){
-			handler( node, this.startChar, this.node.string.length );
+			handler( node, this.startChar, node.string.length );
 		}else if( compareHashes( endHash, tmpHash ) === 0 ){
+
 			handler( node, 0, this.endChar );
+			return this;
+
 		}else{
-			handler( node, 0, this.node.string.length );
+			handler( node, 0, node.string.length );
 		}
 
 		node = node.next();

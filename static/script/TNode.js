@@ -69,7 +69,7 @@ TNode.prototype.getPositionX = function( nodeChar ){
 
     // Posicion dentro de la linea
     for( i = 0; i < this.id; i++ ){
-        x += this.parent.nodeList[ i ].justifyWidth || this.parent.nodeList[ i ].width;
+        x += this.parent.nodes[ i ].justifyWidth || this.parent.nodes[ i ].width;
     }
 
     if( nodeChar > 0 ){
@@ -247,30 +247,33 @@ TNode.prototype.split = function( start, stop ){
         stop = this.string.length;
     }
 
-    /*
-    if( start === 0 && stop === this.string.length && this.string.length !== 0 ){
-        return this;
-    }
-    */
-
     if( start === 0 ){
 
         var newNode = this.clone();
 
-        this.parent.insert( this.id + 1, newNode );
         this.slice( 0, stop );
         newNode.slice( stop );
+        this.parent.insert( this.id + 1, newNode );
 
     }else if( stop === this.string.length ){
 
         var newNode = this.clone();
 
-        this.parent.insert( this.id + 1, newNode );
         this.slice( 0, start );
-        newNode.slice( start, stop );
+        newNode.slice( start );
+        this.parent.insert( this.id + 1, newNode );
 
     }else{
-        console.log('romper en 3');
+
+        var firstNode  = this.clone();
+        var secondNode = this.clone();
+
+        this.slice( 0, start );
+        firstNode.slice( start, stop );
+        secondNode.slice( stop );
+        this.parent.insert( this.id + 1, firstNode );
+        this.parent.insert( this.id + 2, secondNode );
+
     }
 
     return this;
@@ -316,7 +319,7 @@ TNode.prototype.updateWidth = function( position ){
         var multiples  = 0;
         /*var heritage   = 0;*/
         var index      = 0;
-        var identation = getLineIndentationLeftOffset( lineId, paragraph );
+        var identation = this.parent.getOffsetIndentationLeft();
 
         for( var i = position; i < this.string.length; i++ ){
 
@@ -370,7 +373,9 @@ TNode.prototype.updateWidth = function( position ){
 
     this.width = this.chars[ this.chars.length - 1 ] || 0;
 
-    this.parent.realocate();
+    if( this.parent ){
+        this.parent.realocate();
+    }
 
     return this;
 

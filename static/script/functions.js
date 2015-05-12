@@ -1154,16 +1154,6 @@ var handleEnterNormal = function( dontSend ){
     cursor.paragraph.split( cursor.line.id, cursor.node.id, cursor.char );
     canvasPages.requestDraw();
     cursor.move( 1 );
-    console.table( [{
-
-        page : cursor.page.id,
-        paragraph : cursor.paragraph.id,
-        line : cursor.line.id,
-        node : cursor.node.id,
-        char : cursor.char,
-        lineChar : cursor.lineChar
-
-    }] );
 
 };
 
