@@ -17,6 +17,9 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 				node.setStyle( type, value );
 			}else{
 
+				node.split( start, stop );
+				node.next().setStyle( type, value );
+
 			}
 
 		});

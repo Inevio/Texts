@@ -20,9 +20,9 @@ TLine.prototype.append = function( node ){
         node.parent.remove( node.id );
     }
 
-    node.id         = this.nodes.push( node ) - 1;
-    node.parent     = this;
-    this.totalChars = node.string.length;
+    node.id          = this.nodes.push( node ) - 1;
+    node.parent      = this;
+    this.totalChars += node.string.length;
 
     this.updateHeight();
     this.realocate();
@@ -232,8 +232,9 @@ TLine.prototype.insert = function( position, node ){
         node.parent.remove( node.id );
     }
 
-    this.nodes  = this.nodes.slice( 0, position ).concat( node ).concat( this.nodes.slice( position ) );
-    node.parent = this;
+    this.nodes       = this.nodes.slice( 0, position ).concat( node ).concat( this.nodes.slice( position ) );
+    node.parent      = this;
+    this.totalChars += node.string.length;
 
     for( var i = position; i < this.nodes.length; i++ ){
         this.nodes[ i ].id = i;
@@ -493,9 +494,9 @@ TLine.prototype.realocate = function(){
                 totalChars += this.nodes[ i ].chars.length;
             }
 
-            nextLine.nodes    = this.nodes.slice( nodeId ).concat( nextLine.nodes );
+            nextLine.nodes       = this.nodes.slice( nodeId ).concat( nextLine.nodes );
             nextLine.totalChars += totalChars;
-            this.nodes        = this.nodes.slice( 0, nodeId );
+            this.nodes           = this.nodes.slice( 0, nodeId );
             this.totalChars     -= totalChars;
             counter             += totalChars;
 
@@ -508,9 +509,9 @@ TLine.prototype.realocate = function(){
                 totalChars += this.nodes[ i ].chars.length;
             }
 
-            nextLine.nodes    = this.nodes.slice( nodeId + 1 ).concat( nextLine.nodes );
+            nextLine.nodes       = this.nodes.slice( nodeId + 1 ).concat( nextLine.nodes );
             nextLine.totalChars += totalChars;
-            this.nodes        = this.nodes.slice( 0, nodeId + 1 );
+            this.nodes           = this.nodes.slice( 0, nodeId + 1 );
             this.totalChars     -= totalChars;
             counter             += totalChars;
             newNode              = createNode( nextLine );
@@ -561,10 +562,18 @@ TLine.prototype.realocate = function(){
 
 };
 
+TLine.prototype.realocateInverse = function(){
+
+    console.warn('ToDo','realocateInverse');
+    return this;
+
+};
+
 TLine.prototype.remove = function( position ){
 
-    this.nodes[ position ].id     = undefined;
-    this.nodes[ position ].parent = undefined;
+    this.nodes[ position ].id      = undefined;
+    this.nodes[ position ].parent  = undefined;
+    this.totalChars               -= this.nodes[ position ].string.length;
 
     this.nodes = this.nodes.slice( 0, position ).concat( this.nodes.slice( position + 1 ) );
 

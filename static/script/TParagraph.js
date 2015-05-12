@@ -218,6 +218,121 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             }
 
+        }else if( i === 'listBullet' || i === 'listNumber' ){
+
+            if( this.listMode ){
+                return;
+            }
+
+            value = 0.63 * CENTIMETER;
+
+            var newNode = this.lines[ 0 ].nodes[ 0 ].clone();
+
+            this.lines[ 0 ].insert( 0, newNode );
+            newNode.slice( 0, 0 );
+            this.setStyle( 'indentationLeftAdd', value );
+
+            if( i === 'listNumber' ){
+
+                /*
+                this.listMode = LIST_NUMBER;
+
+                var number = 1;
+
+                if( paragraphId > 0 ){
+
+                    if( page.paragraphs[ paragraphId - 1 ].listMode === LIST_NUMBER ){
+                        number = parseInt( page.paragraphs[ paragraphId - 1 ].lines[ 0 ].nodes[ 0 ].string, 10 ) + 1;
+                    }
+
+                }else if( pageId > 0 ){
+
+                    if( currentDocument.pages[ pageId - 1 ].paragraphs[ currentDocument.pages[ pageId - 1 ].paragraphs.length - 1 ].listMode === LIST_NUMBER ){
+                        number = parseInt( currentDocument.pages[ pageId - 1 ].paragraphs[ currentDocument.pages[ pageId - 1 ].paragraphs.length - 1 ].lines[ 0 ].nodes[ 0 ].string, 10 ) + 1;
+                    }
+
+                }
+
+                newNode.string = number + '.' + '\t';
+                */
+
+            }else{
+
+                this.listMode  = LIST_BULLET;
+                newNode.insert( 0, String.fromCharCode( 8226 ) + '\t' );
+                newNode.setStyle( 'font-family', 'Webdings' ); // To Do -> No usar webdings
+
+            }
+
+            /*
+            newNode.blocked              = true;
+            newNode.style.color          = '#000000';
+            this.indentationSpecialType  = INDENTATION_HANGING;
+            this.indentationSpecialValue = value;
+            this.lines[ 0 ].tabList     = getTabsInLine( this.lines[ 0 ] );
+            this.lines[ 0 ].totalChars += newNode.string.length;
+
+            setNodeStyle( this, this.lines[ 0 ], newNode, 'font-size', this.lines[ 0 ].nodes[ 1 ].style['font-size'] );
+
+            measureNode( this, this.lines[ 0 ], 0, 0, newNode, 0, 0 );
+
+            for( i = 0; i < this.lines.length; i++ ){
+
+                if( i ){
+                    this.lines[ i ].width -= value;
+                }
+
+            }
+
+            for( i = 0; i < this.lines.length; i++ ){
+                realocateLine( pageId, this, i, 0, true );
+            }
+            */
+
+        }else if( i === 'listNone' ){
+
+            if( !this.listMode ){
+                return;
+            }
+
+            value                        = this.indentationLeft * -1;
+            this.listMode                = LIST_NONE;
+            this.indentationSpecialType  = INDENTATION_NONE;
+            this.indentationSpecialValue = 0;
+
+            // Eliminamos el bullet
+            this.lines[ 0 ].remove( 0 );
+            this.setStyle( 'indentationLeftAdd', value );
+
+        }else if( i === 'indentationLeftAdd' ){
+
+            if( this.indentationLeft + value < 0 ){
+                value = -this.indentationLeft;
+            }else if( this.width - value <= 0 ){
+                return;
+            }
+
+            this.indentationLeft += value;
+            this.width           -= value;
+
+            for( i = 0; i < this.lines.length; i++ ){
+                this.lines[ i ].width -= value;
+            }
+
+            if( value >= 0 ){
+
+                for( i = 0; i < this.lines.length; i++ ){
+                    this.lines[ i ].realocate();
+                }
+
+            }else{
+
+                for( i = 0; i < this.lines.length; i++ ){
+                    this.lines[ i ].realocateInverse();
+                }
+
+            }
+
         }else{
             console.warn('unrecognised style', i, key[ i ] );
         }
@@ -246,6 +361,12 @@ TParagraph.prototype.split = function( lineId, nodeId, char ){
     this.parent.insert( this.id + 1, newParagraph );
     newParagraph.append( newLine );
     newLine.append( newNode );
+
+    if( this.listMode ){
+        newLine.insert( 0, this.lines[ 0 ].nodes[ 0 ].clone() );
+    }
+
+    console.log( newParagraph );
 
     return this;
 

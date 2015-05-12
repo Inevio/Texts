@@ -50,7 +50,7 @@ CanvasCursor.prototype.drawCursor = function(){
             this.blinkTime   = Date.now();
 
         }
-        
+
     }
 
     var newCurrent = this.blinkStatus < 600;
@@ -134,201 +134,42 @@ CanvasCursor.prototype.drawCursor = function(){
 
     this.requestDraw();
 
+    return this;
+
 };
 
 CanvasCursor.prototype.drawRange = function(){
 
     this.waiting = false;
 
-    // Calculamos la altura de inicio
-    var range       = selectionRange.getLimits();
-    var startWidth  = range.startNode.getPositionX( range.startChar );
-    var startHeight = range.startNode.getPositionY();
-    var i;
+    this.updateSize();
 
-    // Procedimiento de coloreado
-    var width  = 0;
-    var offset = 0;
+    this.ctx.globalAlpha = 0.3;
+    this.ctx.fillStyle   = '#7EBE30';
 
-    // Si principio y fin están en la misma linea
-    if(
-        range.startPage.id === range.endPage.id &&
-        range.startParagraph.id === range.endParagraph.id &&
-        range.startLine.id === range.endLine.id
-    ){
+    // To Do -> Puede optimizarse evitando recalcular las posiciones continuamente
+    selectionRange.mapNodes( ( function( node, start, end ){
 
-        this.updateSize();
-
-        this.ctx.globalAlpha = 0.3;
-        this.ctx.fillStyle   = '#7EBE30';
-
-        // Si el nodo inicial es el mismo que el final
-        if( range.startNode.id === range.endNode.id ){
-
-            if( range.endNode.justifyCharList ){
-                width = range.endNode.justifyCharList[ range.endChar - 1 ] - ( range.startNode.justifyCharList[ range.startChar - 1 ] || 0 );
-            }else{
-                width = range.endNode.chars[ range.endChar - 1 ] - ( range.startNode.chars[ range.startChar - 1 ] || 0 );
-            }
-            
-        }else{
-
-            if( range.startNode.justifyCharList ){
-
-                width += range.startNode.justifyWidth - ( range.startNode.justifyCharList[ range.startChar - 1 ] || 0 );
-            
-                for( i = range.startNode.id + 1; i < range.endNode.id; i++ ){
-                    width += range.startLine.nodes[ i ].justifyWidth;
-                }
-
-                width += range.endNode.justifyCharList[ range.endChar - 1 ] || 0;
-
-            }else{
-
-                width += range.startNode.width - ( range.startNode.chars[ range.startChar - 1 ] || 0 );
-            
-                for( i = range.startNode.id + 1; i < range.endNode.id; i++ ){
-                    width += range.startLine.nodes[ i ].width;
-                }
-
-                width += range.endNode.chars[ range.endChar - 1 ] || 0;
-
-            }
-            
-        }
-
-        this.ctx.rect(
-
-            startWidth,
-            startHeight - scrollTop,
-            width,
-            range.startLine.height * range.startParagraph.spacing
-
-        );
-
-        this.ctx.fill();
-
-        this.ctx.globalAlpha = 1;
-
-    // Principio y fin en distintas líneas
-    }else{
-
-        this.updateSize();
-
-        this.ctx.globalAlpha = 0.3;
-        this.ctx.fillStyle   = '#7EBE30';
-
-        // Coloreamos la linea del principio de forma parcial
-        if( range.startNode.justifyCharList ){
-            width = range.startNode.justifyWidth - ( range.startNode.justifyCharList[ range.startChar - 1 ] || 0 );
-        }else{
-            width = range.startNode.width - ( range.startNode.chars[ range.startChar - 1 ] || 0 );
-        }
-            
-        for( i = range.startNode.id + 1; i < range.startLine.nodes.length; i++ ){
-            width += range.startLine.nodes[ i ].justifyWidth || range.startLine.nodes[ i ].width;
+        if( !node.width || node.blocked ){
+            return;
         }
 
         this.ctx.beginPath();
         this.ctx.rect(
 
-            startWidth,
-            parseInt( startHeight - scrollTop, 10 ),
-            width,
-            range.startLine.height * range.startParagraph.spacing
+            node.getPositionX( start ),
+            node.getPositionY() - scrollTop,
+            node.chars[ end - 1 ] - ( node.chars[ start - 1 ] || 0 ),
+            node.parent.height * node.parent.parent.spacing
 
         );
-
         this.ctx.fill();
 
-        startHeight += range.startLine.height * range.startParagraph.spacing;
+    } ).bind( this ) );
 
-        var currentPageId  = range.startPage.id;
-        var heightHeritage = 0;
+    this.ctx.globalAlpha = 1;
 
-        // Coloreamos las lineas intermedias de forma completa
-        mapRangeLines( true, currentRangeStart, currentRangeEnd, function( pageId, page, paragraphId, paragraph, lineId, line ){
-
-            // To Do -> Esto es un workaround porque el false no funciona como debería
-            // To Do -> Esta podría ser una solución mejor para evitar los límites en el mapRangeLines
-            if(
-                ( pageId === range.startPage.id && paragraphId === range.startParagraph.id && lineId === range.startLine.id ) ||
-                ( pageId === range.endPage.id && paragraphId === range.endParagraph.id && lineId === range.endLine.id )
-            ){
-                return;
-            }
-
-            if( currentPageId !== pageId ){
-
-                heightHeritage += currentDocument.pages[ currentPageId ].height + GAP;
-                currentPageId   = pageId;
-                startHeight     = page.marginTop;
-
-            }
-
-            offset = page.marginLeft + getOffsetIndentationLeft( lineId, paragraph ) + getLineOffset( line, paragraph );
-            width  = 0;
-
-            // Obtenemos el tamaño de rectangulo a colorear
-            for( var n = 0; n < line.nodes.length; n++ ){
-                width += line.nodes[ n ].justifyWidth || line.nodes[ n ].width;
-            }
-
-            // Coloreamos la línea
-            this.ctx.beginPath();
-            this.ctx.rect(
-
-                offset,
-                parseInt( heightHeritage + startHeight - scrollTop, 10 ),
-                width,
-                line.height * paragraph.spacing
-
-            );
-
-            this.ctx.fill();
-            
-            startHeight += line.height * paragraph.spacing;
-
-        });
-
-        if( currentPageId !== range.endPage.id ){
-
-            heightHeritage += currentDocument.pages[ currentPageId ].height + GAP;
-            currentPageId   = range.endLine.id;
-            startHeight     = range.endPage.marginTop;
-
-        }
-
-        // Coloreamos la línea del final de forma parcial
-        width  = 0;
-        offset = range.endPage.marginLeft + getOffsetIndentationLeft( range.endLine.id, range.endParagraph ) + getLineOffset( range.endLine, range.endParagraph );
-
-        for( i = 0; i < range.endNode.id; i++ ){
-            width += range.endLine.nodes[ i ].justifyWidth || range.endLine.nodes[ i ].width;
-        }
-
-        // To Do -> Que debe pasar si es se coge el fallback 0?
-        if( range.endNode.justifyCharList ){
-            width += range.endNode.justifyCharList[ range.endChar - 1 ] || 0;
-        }else{
-            width += range.endNode.chars[ range.endChar - 1 ] || 0;
-        }
-
-        this.ctx.beginPath();
-        this.ctx.rect(
-
-            offset,
-            parseInt( heightHeritage + startHeight - scrollTop, 10 ),
-            width,
-            range.endLine.height * range.endParagraph.spacing
-
-        );
-
-        this.ctx.fill();
-
-        this.ctx.globalAlpha = 1;
-
-    }
+    return this;
 
 };
 

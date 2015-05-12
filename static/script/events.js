@@ -68,12 +68,12 @@ canvasCursor.canvas
 
         /*
         if( realtime ){
-            
+
             realtime.send({
 
                 cmd : CMD_POSITION,
                 pos : [ getGlobalParagraphId( currentPageId, currentParagraphId ), getGlobalParagraphChar( currentParagraph, currentLineId, currentLineCharId ) ]
-                
+
             });
 
         }
@@ -84,7 +84,7 @@ canvasCursor.canvas
 
         var words  = elements.line.getWords();
         var wordId = 0;
-        
+
         offset = elements.page.marginLeft + elements.line.getOffset();
 
         if( posX > offset ){
@@ -229,7 +229,7 @@ input
     }
 
     if( e.keyCode === KEY_TAB ){
-        
+
         handleChar('\t');
         canvasPages.requestDraw();
         e.preventDefault();
@@ -326,7 +326,7 @@ input
                 for( var i = 0; i < input[ 0 ].value.length; i++ ){
                     handleChar( input[ 0 ].value[ i ] );
                 }
-                
+
                 canvasPages.requestDraw();
 
             }
@@ -367,7 +367,7 @@ input
         canvasPages.requestDraw();
 
     }
-    
+
 })
 
 .on( 'compositionend', function( e ){
@@ -389,6 +389,168 @@ toolsLine
     input.focus();
     buttonAction[ $(this).attr('data-tool') ]( $(this).attr('data-tool-value') );
     updateToolsLineStatus(); // To Do -> Quizás pueda optimizarse y aplicarse solo a los estilos que lo necesiten
+
+});
+
+// Lists
+toolsMenu
+.on( 'click', 'li:not(.active)', function(){
+
+    $(this).siblings('.active').removeClass('active');
+    $(this).addClass('active');
+    toolsLine.find('article')
+        .removeClass('active')
+        .eq( $(this).index() )
+            .addClass('active');
+
+})
+
+.on( 'mousedown', function( e ){
+    e.stopPropagation();
+})
+
+.on( 'click', 'li', function(){
+
+    toolsListEnabled = false;
+
+    input.focus();
+    toolsListContainer.css( 'display', 'none' );
+
+    // Modo Tipografía
+    if( toolsList.hasClass('active-fontfamily') ){
+        setSelectedNodeStyle( 'font-family', $(this).text() );
+
+    // Modo Tamaño de letra
+    }else if( toolsList.hasClass('active-fontsize') ){
+        setSelectedNodeStyle( 'font-size', parseInt( $(this).text(), 10 ) );
+
+    // Modo Interlineado
+    }else if( toolsList.hasClass('active-linespacing') ){
+        setSelectedParagraphsStyle( 'spacing', parseFloat( $(this).text() ) );
+
+    // Modo más opciones
+    }else if( toolsList.hasClass('active-moreoptions') ){
+
+        var name = ( currentOpenFile ? currentOpenFile.name.replace( /.docx|.texts$/i, '' ) : lang.newDocument ) + '.pdf';
+
+        wz.banner()
+                .setTitle( 'Texts - Exporting PDF...' )
+                .setText( name + ' is being exported' )
+                .setIcon( 'https://static.inevio.com/app/7/saved.png' )
+                .render();
+
+        wz.tool.textsDocumentToPdf( name, 'root', generateDocument(), function( error ){
+
+            if( error ){
+                alert( error );
+                return;
+            }
+
+            wz.banner()
+                .setTitle( 'Texts - ' + name )
+                .setText( name + ' ' + lang.fileSaved )
+                .setIcon( 'https://static.inevio.com/app/7/saved.png' )
+                .render();
+
+        });
+
+    }
+
+    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-moreoptions active-page-dimensions active-page-margins');
+    updateToolsLineStatus();
+
+});
+
+// Font-family
+toolsLine
+.on( 'click', '.tool-fontfamily', function(){
+
+    toolsListEnabled = true;
+
+    if( !fontfamilyCode ){
+
+        for( var i = 0; i < FONTFAMILY.length; i++ ){
+            fontfamilyCode += '<li data-value="' + FONTFAMILY[ i ] + '"><i></i><span>' + FONTFAMILY[ i ] + '</span></li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-fontfamily')
+        .html( fontfamilyCode );
+
+    toolsListContainer
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
+
+        });
+
+    toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
+
+});
+
+// Font-size
+toolsLine
+.on( 'click', '.tool-fontsize', function(){
+
+    toolsListEnabled = true;
+
+    if( !fontsizeCode ){
+
+        for( var i = 0; i < FONTSIZE.length; i++ ){
+            fontsizeCode += '<li data-value="' + FONTSIZE[ i ] + '"><i></i><span>' + FONTSIZE[ i ] + '</span></li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-fontsize')
+        .html( fontsizeCode );
+
+    toolsListContainer
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
+
+        });
+
+    toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
+
+});
+
+// Spacing
+toolsLine
+.on( 'click', '.tool-button-line-spacing', function(){
+
+    toolsListEnabled = true;
+
+    if( !linespacingCode ){
+
+        for( var i = 0; i < LINESPACING.length; i++ ){
+            linespacingCode += '<li data-value="' + parseFloat( LINESPACING[ i ] ) + '"><i></i><span>' + LINESPACING[ i ] + '</span></li>';
+        }
+
+    }
+
+    toolsList
+        .addClass('active-linespacing')
+        .html( linespacingCode );
+
+    toolsListContainer
+        .css({
+
+            top     : $(this).position().top + $(this).outerHeight(),
+            left    : $(this).position().left,
+            display : 'block'
+
+        });
+
+    toolsList.find('[data-value="' + $(this).attr('data-value') + '"]').addClass('active');
 
 });
 
