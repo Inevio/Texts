@@ -92,17 +92,56 @@ Cursor.prototype.move = function( positions ){
 
 			while( true ){
 
+				if( !prev ){
 
+					this.char     = 0;
+		            this.lineChar = 0;
+					break;
 
+				}
 
+				if( prev.blocked ){
 
+					prev = prev.prev();
+					continue;
 
+				}
 
+				if(
+	                this.line.id !== prev.parent.id ||
+	                this.paragraph.id !== prev.parent.parent.id ||
+	                this.page.id !== prev.parent.parent.parent.id
+	            ){
 
+	                this.node      = prev;
+	                this.line      = prev.parent;
+	                this.paragraph = this.line.parent;
+	                this.page      = this.paragraph.parent;
+	                this.char      = this.node.string.length;
+	                this.lineChar  = this.node.string.length;
 
+					for( var i = 0; i < this.node.id; i++ ){
+						this.lineChar += this.line.nodes[ i ].string.length;
+					}
 
+	                this.updatePositionY();
 
+	            }else{
 
+	                this.node = prev;
+	                this.char = this.node.string.length;
+
+	            }
+
+				break;
+
+			}
+
+		}
+
+	}
+
+	console.warn('ToDo', 'Test if lineChar is always correct');
 
     this.updatePositionX();
 	//this.updatePositionY(); // To Do -> Esto es optimizable, no deberia tener que ejecutarse en todo momento
@@ -114,11 +153,16 @@ Cursor.prototype.setNode = function( node, position ){
 
     console.warn('ToDo','setNode','Prevent blocked');
 
+	var checked = checkCursorPosition( node, position );
+
+	node           = checked.node;
+	position       = checked.position;
     this.char      = parseInt( position, 10 ) || 0;
     this.node      = node;
     this.line      = this.node.parent;
     this.paragraph = this.line.parent;
     this.page      = this.paragraph.parent;
+    this.lineChar  = position;
 
     for( var i = 0; i < node.id; i++ ){
         this.lineChar += this.line.nodes[ i ].string.length;
