@@ -264,8 +264,8 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             }
 
+            newNode.blocked = true;
             /*
-            newNode.blocked              = true;
             newNode.style.color          = '#000000';
             this.indentationSpecialType  = INDENTATION_HANGING;
             this.indentationSpecialValue = value;

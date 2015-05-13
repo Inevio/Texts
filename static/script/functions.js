@@ -1,4 +1,31 @@
 
+var checkCursorPosition = function( node, position ){
+
+    if( node.id !== 0 ){
+
+        if( position === 0 && !node.prev().blocked ){
+
+            node     = node.prev();
+            position = node.string.length;
+
+        }
+
+    }else if( node.blocked ){
+
+        node     = node.next();
+        position = 0;
+
+    }
+
+    return {
+
+        node     : node,
+        position : position
+
+    };
+
+};
+
 var cloneObject = function( obj ){
 
     var target = {};

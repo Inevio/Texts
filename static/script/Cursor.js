@@ -24,77 +24,85 @@ Cursor.prototype.move = function( positions ){
     this.char     = this.char + positions;
     this.lineChar = this.lineChar + positions;
 
-    if( this.char < 0 ){
+	// Movimiento a la derecha
+	if( positions > 0 ){
 
-        var prev = this.node.prev();
+		if( this.char > this.node.string.length ){
 
-        if( prev ){
+			var next = this.node.next();
 
-            if(
-                this.line.id !== prev.parent.id ||
-                this.paragraph.id !== prev.parent.parent.id ||
-                this.page.id !== prev.parent.parent.parent.id
-            ){
+			while( true ){
 
-                this.node      = prev;
-                this.line      = prev.parent;
-                this.paragraph = this.line.parent;
-                this.page      = this.paragraph.parent;
-                this.char      = prev.string.length;
-                this.lineChar  = this.line.totalChars;
+				if( !next ){
 
-                this.updatePositionY();
+					this.char     = this.node.string.length;
+		            this.lineChar = this.line.totalChars;
+					break;
 
-            }else{
+				}
 
-                this.node = prev;
-                this.char = this.node.string.length - 1;
+				if( next.blocked ){
 
-            }
+					next = next.next();
+					continue;
 
-        }else{
+				}
 
-            this.char     = 0;
-            this.lineChar = 0;
+				if(
+	                this.line.id !== next.parent.id ||
+	                this.paragraph.id !== next.parent.parent.id ||
+	                this.page.id !== next.parent.parent.parent.id
+	            ){
 
-        }
+	                this.node      = next;
+	                this.line      = next.parent;
+	                this.paragraph = this.line.parent;
+	                this.page      = this.paragraph.parent;
+	                this.char      = 0;
+	                this.lineChar  = 0;
 
-    }else if( this.char > this.node.string.length ){
+	                this.updatePositionY();
 
-        var next = this.node.next();
+	            }else{
 
-        if( next ){
+	                this.node = next;
+	                this.char = 1;
 
-            if(
-                this.line.id !== next.parent.id ||
-                this.paragraph.id !== next.parent.parent.id ||
-                this.page.id !== next.parent.parent.parent.id
-            ){
+	            }
 
-                this.node      = next;
-                this.line      = next.parent;
-                this.paragraph = this.line.parent;
-                this.page      = this.paragraph.parent;
-                this.char      = 0;
-                this.lineChar  = 0;
+				break;
 
-                this.updatePositionY();
+			}
 
-            }else{
+	    }
 
-                this.node = next;
-                this.char = 1;
+	// Movimiento a la izquierda
+	}else{
 
-            }
+		if(
+			this.char < 0 ||
+			(
+				this.char === 0 &&
+				this.node.id !== 0 &&
+				!this.node.prev().blocked
+			)
+		){
 
-        }else{
+			var prev = this.node.prev();
 
-            this.char     = this.node.string.length;
-            this.lineChar = this.line.totalChars;
+			while( true ){
 
-        }
 
-    }
+
+
+
+
+
+
+
+
+
+
 
     this.updatePositionX();
 	//this.updatePositionY(); // To Do -> Esto es optimizable, no deberia tener que ejecutarse en todo momento
@@ -111,8 +119,6 @@ Cursor.prototype.setNode = function( node, position ){
     this.line      = this.node.parent;
     this.paragraph = this.line.parent;
     this.page      = this.paragraph.parent;
-
-    this.lineChar = position;
 
     for( var i = 0; i < node.id; i++ ){
         this.lineChar += this.line.nodes[ i ].string.length;
