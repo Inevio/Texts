@@ -1,9 +1,9 @@
 
 var TNode = function(){
 
-    this.id;
-    this.parent;
-    this.chars = [];
+    this.id     = undefined;
+    this.parent = undefined;
+    this.chars  = [];
     this.uniqId = TNode.uniqId++;
     //this.justifyCharList = [];
 
@@ -123,8 +123,7 @@ TNode.prototype.getPositionY = function(){
 
 TNode.prototype.insert = function( position, content ){
 
-    this.string             = this.string.slice( 0, position ) + content + this.string.slice( position );
-    this.parent.totalChars += content.length;
+    this.string = this.string.slice( 0, position ) + content + this.string.slice( position );
 
     this.updateWidth( position );
 
@@ -180,8 +179,15 @@ TNode.prototype.remove = function( position ){
 
     this.string = this.string.slice( 0, position ) + this.string.slice( position + 1 );
 
-    this.parent.totalChars--;
     this.updateWidth( position );
+
+};
+
+TNode.prototype.setBlocked = function( value ){
+    
+    this.blocked = value;
+
+    return this;
 
 };
 

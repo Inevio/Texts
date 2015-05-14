@@ -28,7 +28,7 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 		canvasCursor.requestDraw();
 
     // Principio de un párrafo vacío
-    }else if( currentLineId === 0 && currentLine.totalChars === 0 ){
+    }else if( currentLineId === 0 && currentLine.totalChars() === 0 ){
 
         // Calculamos las posiciones de inicio
         /*
@@ -40,7 +40,7 @@ StyleController.prototype.setNodeStyle = function( type, value ){
         }
 
         for( i = 0; i < currentLineId; i++ ){
-            charInParagraphStart += currentParagraph.lines[ i ].totalChars;
+            charInParagraphStart += currentParagraph.lines[ i ].totalChars();
         }
 
         // Aplicamos el estilo

@@ -5,24 +5,26 @@ var Cursor = function(){
 	this.paragraph;
 	this.line;
 	this.node;
+	this.char;
 
-	this.char      = 0;
-    this.lineChar  = 0;
-	this.positionX = 0;
-	this.positionY = 0;
+    this.paragraphChar = 0;
+	this.positionX     = 0;
+	this.positionY     = 0;
 
 };
 
 Cursor.prototype.move = function( positions ){
 
-    positions = parseInt( positions, 10 ) || 0;
+	positions = parseInt( positions, 10 ) || 0;
 
     if( !positions ){
         return this;
     }
 
-    this.char     = this.char + positions;
-    this.lineChar = this.lineChar + positions;
+	var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
+
+	this.node = nodeInfo.node;
+	this.char = nodeInfo.char + positions;
 
 	// Movimiento a la derecha
 	if( positions > 0 ){
@@ -35,8 +37,7 @@ Cursor.prototype.move = function( positions ){
 
 				if( !next ){
 
-					this.char     = this.node.string.length;
-		            this.lineChar = this.line.totalChars;
+					this.char = this.node.string.length;
 					break;
 
 				}
@@ -59,7 +60,6 @@ Cursor.prototype.move = function( positions ){
 	                this.paragraph = this.line.parent;
 	                this.page      = this.paragraph.parent;
 	                this.char      = 0;
-	                this.lineChar  = 0;
 
 	                this.updatePositionY();
 
@@ -94,8 +94,7 @@ Cursor.prototype.move = function( positions ){
 
 				if( !prev ){
 
-					this.char     = 0;
-		            this.lineChar = 0;
+					this.char = 0;
 					break;
 
 				}
@@ -118,11 +117,6 @@ Cursor.prototype.move = function( positions ){
 	                this.paragraph = this.line.parent;
 	                this.page      = this.paragraph.parent;
 	                this.char      = this.node.string.length;
-	                this.lineChar  = this.node.string.length;
-
-					for( var i = 0; i < this.node.id; i++ ){
-						this.lineChar += this.line.nodes[ i ].string.length;
-					}
 
 	                this.updatePositionY();
 
@@ -141,10 +135,11 @@ Cursor.prototype.move = function( positions ){
 
 	}
 
-	console.warn('ToDo', 'Test if lineChar is always correct');
+	console.warn('ToDo', 'Test if paragraphChar is always correct');
+
+	this.paragraphChar = getGlobalParagraphCharId( this.node, this.char );
 
     this.updatePositionX();
-	//this.updatePositionY(); // To Do -> Esto es optimizable, no deberia tener que ejecutarse en todo momento
     canvasCursor.resetBlink();
 
 };
@@ -155,18 +150,14 @@ Cursor.prototype.setNode = function( node, position ){
 
 	var checked = checkCursorPosition( node, position );
 
-	node           = checked.node;
-	position       = checked.position;
-    this.char      = parseInt( position, 10 ) || 0;
-    this.node      = node;
-    this.line      = this.node.parent;
-    this.paragraph = this.line.parent;
-    this.page      = this.paragraph.parent;
-    this.lineChar  = position;
-
-    for( var i = 0; i < node.id; i++ ){
-        this.lineChar += this.line.nodes[ i ].string.length;
-    }
+	node               = checked.node;
+	position           = checked.position;
+    this.char          = parseInt( position, 10 ) || 0;
+    this.node          = node;
+    this.line          = this.node.parent;
+    this.paragraph     = this.line.parent;
+    this.page          = this.paragraph.parent;
+    this.paragraphChar = getGlobalParagraphCharId( this.node, this.char );
 
     this.updatePositionX();
     this.updatePositionY();
@@ -178,9 +169,14 @@ Cursor.prototype.setNode = function( node, position ){
 
 Cursor.prototype.updatePosition = function(){
 
+	var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
+
+	this.setNode( nodeInfo.node, nodeInfo.char );
+
+	/*
     var node     = this.node.parent.nodes[ 0 ];
     var prevNode = this.node;
-    var total    = this.lineChar;
+    var total    = this.paragraphChar;
 
     while( total ){
 
@@ -191,8 +187,7 @@ Cursor.prototype.updatePosition = function(){
             this.line      = this.node.parent;
             this.paragraph = this.line.parent;
             this.page      = this.paragraph.parent;
-            this.char      = this.node.string.length;
-            this.lineChar  = this.line.totalChars;
+            this.char          = this.node.string.length;
 
         }else if( node.string.length < total ){
 
@@ -206,16 +201,17 @@ Cursor.prototype.updatePosition = function(){
             this.paragraph = this.line.parent;
             this.page      = this.paragraph.parent;
             this.char      = total;
-            this.lineChar  = total;
+            this.paragraphChar  = total;
             total          = 0;
 
             for( var i = 0; i < this.node.id; i++ ){
-                this.lineChar += this.line.nodes[ i ].string.length;
+                this.paragraphChar += this.line.nodes[ i ].string.length;
             }
 
         }
 
     }
+	*/
 
     this.updatePositionX();
     this.updatePositionY();

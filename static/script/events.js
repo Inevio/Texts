@@ -3,21 +3,18 @@
 win
 .on( 'mousedown', function(){
 
-    /*
     if( !toolsListEnabled && !toolsColorEnabled ){
         return;
     }
 
     toolsListEnabled = false;
     toolsColorEnabled = false;
-    */
+
     input.focus();
-    /*
     toolsListContainer.css( 'display', 'none' );
     toolsColorContainer.css( 'display', 'none' );
     toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-moreoptions active-page-dimensions active-page-margins');
     toolsColor.removeClass('active-color active-page-color');
-    */
 
 })
 
@@ -392,7 +389,7 @@ toolsLine
 
 });
 
-// Lists
+// Change tools menu
 toolsMenu
 .on( 'click', 'li:not(.active)', function(){
 
@@ -403,8 +400,10 @@ toolsMenu
         .eq( $(this).index() )
             .addClass('active');
 
-})
+});
 
+// Lists
+toolsList
 .on( 'mousedown', function( e ){
     e.stopPropagation();
 })
@@ -418,15 +417,15 @@ toolsMenu
 
     // Modo Tipografía
     if( toolsList.hasClass('active-fontfamily') ){
-        setSelectedNodeStyle( 'font-family', $(this).text() );
+        styleController.setNodeStyle( 'font-family', $(this).text() );
 
     // Modo Tamaño de letra
     }else if( toolsList.hasClass('active-fontsize') ){
-        setSelectedNodeStyle( 'font-size', parseInt( $(this).text(), 10 ) );
+        styleController.setNodeStyle( 'font-size', parseInt( $(this).text(), 10 ) );
 
     // Modo Interlineado
     }else if( toolsList.hasClass('active-linespacing') ){
-        setSelectedParagraphsStyle( 'spacing', parseFloat( $(this).text() ) );
+        styleController.setParagraphStyle( 'spacing', parseFloat( $(this).text() ) );
 
     // Modo más opciones
     }else if( toolsList.hasClass('active-moreoptions') ){
@@ -442,8 +441,7 @@ toolsMenu
         wz.tool.textsDocumentToPdf( name, 'root', generateDocument(), function( error ){
 
             if( error ){
-                alert( error );
-                return;
+                return alert( error );
             }
 
             wz.banner()

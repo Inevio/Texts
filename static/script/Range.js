@@ -17,16 +17,20 @@ var Range = function(){
 
 Range.prototype.clear = function(){
 
-	this.startPage      = undefined;
-	this.startParagraph = undefined;
-	this.startLine      = undefined;
-	this.startNode      = undefined;
-	this.startChar      = undefined;
-	this.endPage        = undefined;
-	this.endParagraph   = undefined;
-	this.endLine        = undefined;
-	this.endNode        = undefined;
-	this.endChar        = undefined;
+	this.startPage              = undefined;
+	this.startParagraph         = undefined;
+	this.startLine              = undefined;
+	this.startNode              = undefined;
+	this.startChar              = undefined;
+	this.startGlobalParagraphId = undefined;
+	this.startGlobalCharId      = undefined;
+	this.endPage                = undefined;
+	this.endParagraph           = undefined;
+	this.endLine                = undefined;
+	this.endNode                = undefined;
+	this.endChar                = undefined;
+	this.endGlobalParagraphId   = undefined;
+	this.endGlobalCharId        = undefined;
 
 	return this;
 
@@ -169,11 +173,13 @@ Range.prototype.mapParagraphs = function( handler ){
 
 Range.prototype.setStart = function( node, position ){
 
-	this.startNode      = node;
-	this.startLine      = node.parent;
-	this.startParagraph = this.startLine.parent;
-	this.startPage      = this.startParagraph.parent;
-	this.startChar      = parseInt( position, 10 ) || 0;
+	this.startNode              = node;
+	this.startLine              = node.parent;
+	this.startParagraph         = this.startLine.parent;
+	this.startPage              = this.startParagraph.parent;
+	this.startChar              = parseInt( position, 10 ) || 0;
+	this.startGlobalParagraphId = getGlobalParagraphId( this.startParagraph );
+	this.startGlobalCharId      = getGlobalParagraphCharId( this.startNode, this.startChar );
 
 	return this;
 
@@ -181,11 +187,13 @@ Range.prototype.setStart = function( node, position ){
 
 Range.prototype.setEnd = function( node, position ){
 
-	this.endNode      = node;
-	this.endLine      = node.parent;
-	this.endParagraph = this.endLine.parent;
-	this.endPage      = this.endParagraph.parent;
-	this.endChar      = parseInt( position, 10 ) || 0;
+	this.endNode      		  = node;
+	this.endLine      		  = node.parent;
+	this.endParagraph 		  = this.endLine.parent;
+	this.endPage      		  = this.endParagraph.parent;
+	this.endChar      		  = parseInt( position, 10 ) || 0;
+	this.endGlobalParagraphId = getGlobalParagraphId( this.endParagraph );
+	this.endGlobalCharId      = getGlobalParagraphCharId( this.endNode, this.endChar );
 
 	return this;
 

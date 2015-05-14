@@ -264,13 +264,12 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             }
 
-            newNode.blocked = true;
+            newNode.setBlocked( true );
             /*
             newNode.style.color          = '#000000';
             this.indentationSpecialType  = INDENTATION_HANGING;
             this.indentationSpecialValue = value;
-            this.lines[ 0 ].tabList     = getTabsInLine( this.lines[ 0 ] );
-            this.lines[ 0 ].totalChars += newNode.string.length;
+            this.lines[ 0 ].tabList      = getTabsInLine( this.lines[ 0 ] );
 
             setNodeStyle( this, this.lines[ 0 ], newNode, 'font-size', this.lines[ 0 ].nodes[ 1 ].style['font-size'] );
 
