@@ -57,7 +57,7 @@ CanvasDocument.prototype.draw = function(){
                 // To Do -> Altura de línea
                 line = paragraph.lines[ j ];
 
-                if( line.totalChars ){
+                if( line.totalChars( true ) ){
 
                     wHeritage = line.getOffset();
 

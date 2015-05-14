@@ -8,9 +8,8 @@ var TLine = function(){
     this.nodes = [];
 
     // Properties
-    this.height     = 0;
-    this.totalChars = 0;
-    this.width      = 0;
+    this.height = 0;
+    this.width  = 0;
 
 };
 
@@ -20,9 +19,8 @@ TLine.prototype.append = function( node ){
         node.parent.remove( node.id );
     }
 
-    node.id          = this.nodes.push( node ) - 1;
-    node.parent      = this;
-    this.totalChars += node.string.length;
+    node.id     = this.nodes.push( node ) - 1;
+    node.parent = this;
 
     this.updateHeight();
     this.realocate();
@@ -232,9 +230,8 @@ TLine.prototype.insert = function( position, node ){
         node.parent.remove( node.id );
     }
 
-    this.nodes       = this.nodes.slice( 0, position ).concat( node ).concat( this.nodes.slice( position ) );
-    node.parent      = this;
-    this.totalChars += node.string.length;
+    this.nodes  = this.nodes.slice( 0, position ).concat( node ).concat( this.nodes.slice( position ) );
+    node.parent = this;
 
     for( var i = position; i < this.nodes.length; i++ ){
         this.nodes[ i ].id = i;
@@ -399,11 +396,9 @@ TLine.prototype.realocate = function(){
                 totalChars += this.nodes[ i ].chars.length;
             }
 
-            nextLine.nodes       = this.nodes.slice( firstNodeToMove ).concat( nextLine.nodes );
-            nextLine.totalChars += totalChars;
-            this.nodes           = this.nodes.slice( 0, firstNodeToMove );
-            this.totalChars     -= totalChars;
-            counter             += totalChars;
+            nextLine.nodes  = this.nodes.slice( firstNodeToMove ).concat( nextLine.nodes );
+            this.nodes      = this.nodes.slice( 0, firstNodeToMove );
+            counter        += totalChars;
 
         // Si hay que partir un nodo
         }else{
@@ -415,20 +410,16 @@ TLine.prototype.realocate = function(){
                 totalChars += this.nodes[ i ].chars.length;
             }
 
-            // To Do -> Esto no es especialmente limpio ni correcto con el sistema de objetos, hacerlo mejor
-            nextLine.nodes       = this.nodes.slice( firstNodeToMove + 1 ).concat( nextLine.nodes );
-            nextLine.totalChars += totalChars;
-            this.nodes           = this.nodes.slice( 0, firstNodeToMove + 1 );
-            this.totalChars     -= totalChars;
-            counter             += totalChars;
-            newNode              = new TNode();
-            newNode.style        = $.extend( {}, nodeToMove.style );
-            newNode.height       = nodeToMove.height;
-            newNode.string       = nodeToMove.string.slice( firstWordOffset[ 0 ] );
-            nodeToMove.string    = nodeToMove.string.slice( 0, firstWordOffset[ 0 ] );
-            this.totalChars     -= newNode.string.length;
-            nextLine.totalChars += newNode.string.length;
-            counter             += newNode.string.length;
+            // To Do -> Esto n es especialmente limpio ni correcto con el sistema de objetos, hacerlo mejor
+            nextLine.nodes     = this.nodes.slice( firstNodeToMove + 1 ).concat( nextLine.nodes );
+            this.nodes         = this.nodes.slice( 0, firstNodeToMove + 1 );
+            counter           += totalChars;
+            newNode            = new TNode();
+            newNode.style      = $.extend( {}, nodeToMove.style );
+            newNode.height     = nodeToMove.height;
+            newNode.string     = nodeToMove.string.slice( firstWordOffset[ 0 ] );
+            nodeToMove.string  = nodeToMove.string.slice( 0, firstWordOffset[ 0 ] );
+            counter           += newNode.string.length;
 
             nextLine.append( newNode );
             nodeToMove.updateWidth();
@@ -494,11 +485,9 @@ TLine.prototype.realocate = function(){
                 totalChars += this.nodes[ i ].chars.length;
             }
 
-            nextLine.nodes       = this.nodes.slice( nodeId ).concat( nextLine.nodes );
-            nextLine.totalChars += totalChars;
-            this.nodes           = this.nodes.slice( 0, nodeId );
-            this.totalChars     -= totalChars;
-            counter             += totalChars;
+            nextLine.nodes  = this.nodes.slice( nodeId ).concat( nextLine.nodes );
+            this.nodes      = this.nodes.slice( 0, nodeId );
+            counter        += totalChars;
 
         // Si es en medio de un nodo hay que partir los nodos
         }else{
@@ -509,19 +498,15 @@ TLine.prototype.realocate = function(){
                 totalChars += this.nodes[ i ].chars.length;
             }
 
-            nextLine.nodes       = this.nodes.slice( nodeId + 1 ).concat( nextLine.nodes );
-            nextLine.totalChars += totalChars;
-            this.nodes           = this.nodes.slice( 0, nodeId + 1 );
-            this.totalChars     -= totalChars;
-            counter             += totalChars;
-            newNode              = createNode( nextLine );
-            newNode.style        = $.extend( {}, nodeToMove.style );
-            newNode.height       = nodeToMove.height;
-            newNode.string       = nodeToMove.string.slice( charId );
-            nodeToMove.string    = nodeToMove.string.slice( 0, charId );
-            this.totalChars     -= newNode.string.length;
-            nextLine.totalChars += newNode.string.length;
-            counter             += newNode.string.length;
+            nextLine.nodes     = this.nodes.slice( nodeId + 1 ).concat( nextLine.nodes );
+            this.nodes         = this.nodes.slice( 0, nodeId + 1 );
+            counter           += totalChars;
+            newNode            = createNode( nextLine );
+            newNode.style      = $.extend( {}, nodeToMove.style );
+            newNode.height     = nodeToMove.height;
+            newNode.string     = nodeToMove.string.slice( charId );
+            nodeToMove.string  = nodeToMove.string.slice( 0, charId );
+            counter           += newNode.string.length;
 
             measureNode( paragraph, line, 0, 0, nodeToMove, 0, 0 );
             measureNode( paragraph, nextLine, 0, 0, newNode, 0, 0 );
@@ -571,9 +556,8 @@ TLine.prototype.realocateInverse = function(){
 
 TLine.prototype.remove = function( position ){
 
-    this.nodes[ position ].id      = undefined;
-    this.nodes[ position ].parent  = undefined;
-    this.totalChars               -= this.nodes[ position ].string.length;
+    this.nodes[ position ].id     = undefined;
+    this.nodes[ position ].parent = undefined;
 
     this.nodes = this.nodes.slice( 0, position ).concat( this.nodes.slice( position + 1 ) );
 
@@ -586,6 +570,22 @@ TLine.prototype.remove = function( position ){
     return this;
 
 };
+
+TLine.prototype.totalChars = function( includeBlocked ){
+
+    var total = 0;
+
+    for( var i = 0; i < this.nodes.length; i++ ){
+
+        if( includeBlocked || !this.nodes.blocked ){
+            total += this.nodes[ i ].string.length;
+        }
+        
+    }
+
+    return total;
+
+}
 
 TLine.prototype.updateHeight = function(){
 
