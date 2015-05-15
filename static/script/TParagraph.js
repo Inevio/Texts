@@ -262,7 +262,7 @@ TParagraph.prototype.setStyle = function( key, value ){
 
                 this.listMode  = LIST_BULLET;
                 newNode.insert( 0, String.fromCharCode( 8226 ) + '\t' );
-                newNode.setStyle( 'font-family', 'Webdings' ); // To Do -> No usar webdings
+                newNode.setStyle( 'font-family', 'Symbol' );
 
             }
 
