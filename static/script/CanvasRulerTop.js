@@ -1,11 +1,16 @@
 
 var CanvasRulerTop = function(){
 
+    TCanvas.call( this );
+
     this.canvas  = $('.rule-top');
     this.ctx     = this.canvas[ 0 ].getContext('2d');
-    this.waiting = false;
 
 };
+
+CanvasRulerTop.prototype = new TCanvas();
+
+CanvasRulerTop.prototype.constructor = CanvasRulerTop;
 
 CanvasRulerTop.prototype.draw = function(){
 
@@ -96,41 +101,5 @@ CanvasRulerTop.prototype.draw = function(){
     this.ctx.lineWidth = 1;
     this.ctx.strokeStyle = '#cacaca';
     this.ctx.stroke();
-
-};
-
-CanvasRulerTop.prototype.requestDraw = function(){
-
-    if( this.waiting ){
-        return;
-    }
-
-    this.waiting = true;
-
-    requestAnimationFrame( this.draw.bind( this ) );
-
-};
-
-CanvasRulerTop.prototype.updateSize = function(){
-
-    if( activeHiRes ){
-
-        var oldWidth  = this.canvas.width();
-        var oldHeight = this.canvas.height();
-
-        this.canvas[ 0 ].width  = oldWidth * pixelRatio;
-        this.canvas[ 0 ].height = oldHeight * pixelRatio;
-
-        this.canvas[ 0 ].style.width  = oldWidth + 'px';
-        this.canvas[ 0 ].style.height = oldHeight + 'px';
-
-        this.ctx.scale( pixelRatio, pixelRatio );
-
-    }else{
-
-        this.canvas[ 0 ].width  = this.canvas.width();
-        this.canvas[ 0 ].height = this.canvas.height();
-
-    }
 
 };

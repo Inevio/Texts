@@ -1,11 +1,16 @@
 
 var CanvasRulerLeft = function(){
 
+    TCanvas.call( this );
+
     this.canvas  = $('.rule-left');
     this.ctx     = this.canvas[ 0 ].getContext('2d');
-    this.waiting = false;
 
 };
+
+CanvasRulerLeft.prototype = new TCanvas();
+
+CanvasRulerLeft.prototype.constructor = CanvasRulerLeft;
 
 CanvasRulerLeft.prototype.draw = function(){
 
@@ -116,41 +121,5 @@ CanvasRulerLeft.prototype.draw = function(){
     this.ctx.lineWidth = 1;
     this.ctx.strokeStyle = '#cacaca';
     this.ctx.stroke();
-
-};
-
-CanvasRulerLeft.prototype.requestDraw = function(){
-
-    if( this.waiting ){
-        return;
-    }
-
-    this.waiting = true;
-
-    requestAnimationFrame( this.draw.bind( this ) );
-
-};
-
-CanvasRulerLeft.prototype.updateSize = function(){
-
-    if( activeHiRes ){
-
-        var oldWidth  = this.canvas.width();
-        var oldHeight = this.canvas.height();
-
-        this.canvas[ 0 ].width  = oldWidth * pixelRatio;
-        this.canvas[ 0 ].height = oldHeight * pixelRatio;
-
-        this.canvas[ 0 ].style.width  = oldWidth + 'px';
-        this.canvas[ 0 ].style.height = oldHeight + 'px';
-
-        this.ctx.scale( pixelRatio, pixelRatio );
-
-    }else{
-
-        this.canvas[ 0 ].width  = this.canvas.width();
-        this.canvas[ 0 ].height = this.canvas.height();
-
-    }
 
 };
