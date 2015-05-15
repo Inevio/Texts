@@ -184,7 +184,7 @@ TNode.prototype.remove = function( position ){
 };
 
 TNode.prototype.setBlocked = function( value ){
-    
+
     this.blocked = value;
 
     return this;

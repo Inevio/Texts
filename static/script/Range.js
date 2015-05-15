@@ -45,11 +45,11 @@ Range.prototype.getLimits = function(){
 
 	);
 
-	console.log( compared );
+	var limits;
 
-	if( this.endNode && compared > -1 ){
+	if( this.endNode && compared === -1 ){
 
-		return {
+		limits = {
 
 			startPage      : this.endPage,
 			startParagraph : this.endParagraph,
@@ -64,22 +64,47 @@ Range.prototype.getLimits = function(){
 
 		};
 
+	}else{
+
+		limits = {
+
+			startPage      : this.startPage,
+			startParagraph : this.startParagraph,
+			startLine      : this.startLine,
+			startNode      : this.startNode,
+			startChar      : this.startChar,
+			endPage        : this.endPage,
+			endParagraph   : this.endParagraph,
+			endLine        : this.endLine,
+			endNode        : this.endNode,
+			endChar        : this.endChar
+
+		};
+
 	}
 
-	return {
+	if(
+		limits.startNode.string.length === this.startChar &&
+		limits.startLine.nodes.length - 1 !== this.startNode.id
+	){
 
-		startPage      : this.startPage,
-		startParagraph : this.startParagraph,
-		startLine      : this.startLine,
-		startNode      : this.startNode,
-		startChar      : this.startChar,
-		endPage        : this.endPage,
-		endParagraph   : this.endParagraph,
-		endLine        : this.endLine,
-		endNode        : this.endNode,
-		endChar        : this.endChar
+		limits.startNode = limits.startNode.next();
+		limits.startChar = 0;
 
-	};
+	}
+
+	if(
+		limits.endNode.id &&
+		!limits.endNode.prev().blocked &&
+		limits.endChar === 0
+	){
+
+		limits.endNode = limits.endNode.prev();
+		limits.endChar = limits.endNode.string.length;
+
+	}
+
+	return limits;
 
 };
 
@@ -89,47 +114,135 @@ Range.prototype.isValid = function(){
 		return false;
 	}
 
-	return compareHashes(
+	var original = compareHashes(
 
 		[ this.startPage.id, this.startParagraph.id, this.startLine.id, this.startNode.id, this.startChar ],
 		[ this.endPage.id, this.endParagraph.id, this.endLine.id, this.endNode.id, this.endChar ]
 
-	) !== 0;
+	);
+
+	if( !original ){
+		return false;
+	}
+
+	var limits = this.getLimits();
+	var fixed  = compareHashes(
+
+		[ limits.startPage.id, limits.startParagraph.id, limits.startLine.id, limits.startNode.id, limits.startChar ],
+		[ limits.endPage.id, limits.endParagraph.id, limits.endLine.id, limits.endNode.id, limits.endChar ]
+
+	);
+
+	if( !fixed ){
+		return false;
+	}
+
+	if( original === -1 ){
+
+		return !!(
+
+			compareHashes(
+
+				[ this.startPage.id, this.startParagraph.id, this.startLine.id, this.startNode.id, this.startChar ],
+				[ limits.startPage.id, limits.startParagraph.id, limits.startLine.id, limits.startNode.id, limits.startChar ]
+
+			) &&
+
+			compareHashes(
+
+				[ limits.endPage.id, limits.endParagraph.id, limits.endLine.id, limits.endNode.id, limits.endChar ],
+				[ this.endPage.id, this.endParagraph.id, this.endLine.id, this.endNode.id, this.endChar ]
+
+			)
+
+		);
+
+	}else{
+
+		return !!(
+
+			compareHashes(
+
+				[ this.startPage.id, this.startParagraph.id, this.startLine.id, this.startNode.id, this.startChar ],
+				[ limits.endPage.id, limits.endParagraph.id, limits.endLine.id, limits.endNode.id, limits.endChar ]
+
+			) &&
+
+			compareHashes(
+
+				[ limits.startPage.id, limits.startParagraph.id, limits.startLine.id, limits.startNode.id, limits.startChar ],
+				[ this.endPage.id, this.endParagraph.id, this.endLine.id, this.endNode.id, this.endChar ]
+
+			)
+
+		);
+
+	}
 
 };
 
 Range.prototype.mapNodes = function( handler ){
 
-	var startHash = this.startNode.getHash();
-	var endHash   = this.endNode.getHash();
-	var node      = this.startNode;
+	var range     = this.getLimits();
+	var startHash = range.startNode.getHash();
+	var endHash   = range.endNode.getHash();
+	var node      = range.startNode;
 	var tmpHash;
 
 	if( compareHashes( startHash, endHash ) === 0 ){
 
-		handler( node, this.startChar, this.endChar );
+		handler( node, range.startChar, range.endChar );
 
 		return this;
 
 	}
+
+	var list = [];
 
 	while( node ){
 
 		tmpHash = node.getHash();
 
 		if( compareHashes( startHash, tmpHash ) === 0 ){
-			handler( node, this.startChar, node.string.length );
+
+			list.push({
+
+				node  : node,
+				start : range.startChar,
+				end   : node.string.length
+
+			});
+
 		}else if( compareHashes( endHash, tmpHash ) === 0 ){
 
-			handler( node, 0, this.endChar );
-			return this;
+			list.push({
+
+				node  : node,
+				start : 0,
+				end   : range.endChar
+
+			});
+
+			break;
 
 		}else{
-			handler( node, 0, node.string.length );
+
+			list.push({
+
+				node  : node,
+				start : 0,
+				end   : node.string.length
+
+			});
+
 		}
 
 		node = node.next();
 
+	}
+
+	for( var i = 0; i < list.length; i++ ){
+		handler( list[ i ].node, list[ i ].start, list[ i ].end );
 	}
 
 	return this;
@@ -172,6 +285,8 @@ Range.prototype.mapParagraphs = function( handler ){
 };
 
 Range.prototype.setStart = function( node, position ){
+
+	this.clear();
 
 	this.startNode              = node;
 	this.startLine              = node.parent;

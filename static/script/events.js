@@ -39,7 +39,6 @@ canvasCursor.canvas
     cleanComposition();
     */
     e.preventDefault();
-    selectionRange.clear();
 
     var offset       = canvasCursor.canvas.offset();
     var posX         = e.pageX - offset.left;
