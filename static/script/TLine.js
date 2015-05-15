@@ -541,7 +541,7 @@ TLine.prototype.realocate = function(){
     */
 
     // To Do -> Actualizar el counter bien
-    cursor.updatePosition();
+    cursor.updatePosition( true );
 
     return counter;
 
@@ -577,10 +577,10 @@ TLine.prototype.totalChars = function( includeBlocked ){
 
     for( var i = 0; i < this.nodes.length; i++ ){
 
-        if( includeBlocked || !this.nodes.blocked ){
+        if( includeBlocked || !this.nodes[ i ].blocked ){
             total += this.nodes[ i ].string.length;
         }
-        
+
     }
 
     return total;
