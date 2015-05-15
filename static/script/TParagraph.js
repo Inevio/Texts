@@ -168,6 +168,8 @@ TParagraph.prototype.setStyle = function( key, value ){
 
     for( var i in key ){
 
+        value = key[ i ];
+
         if( i === 'align' ){
 
             if( value === ALIGN_JUSTIFY ){
@@ -267,8 +269,10 @@ TParagraph.prototype.setStyle = function( key, value ){
             newNode.setBlocked( true );
             /*
             newNode.style.color          = '#000000';
+            */
             this.indentationSpecialType  = INDENTATION_HANGING;
             this.indentationSpecialValue = value;
+            /*
             this.lines[ 0 ].tabList      = getTabsInLine( this.lines[ 0 ] );
 
             setNodeStyle( this, this.lines[ 0 ], newNode, 'font-size', this.lines[ 0 ].nodes[ 1 ].style['font-size'] );
@@ -332,6 +336,16 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             }
 
+        }else if( i == 'spacing' ){
+
+            if( value !== this.spacing ){
+
+                this.spacing = value;
+
+                this.updateHeight();
+
+            }
+
         }else{
             console.warn('unrecognised style', i, key[ i ] );
         }
@@ -376,7 +390,7 @@ TParagraph.prototype.updateHeight = function(){
     this.height = 0;
 
     for( var i = 0; i < this.lines.length; i++ ){
-        this.height += this.lines[ i ].height;
+        this.height += this.lines[ i ].height * this.spacing;
     }
 
     return this;

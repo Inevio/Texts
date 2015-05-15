@@ -329,8 +329,8 @@ var handleBackspaceNormal = function( dontSend ){
 
 };
 
-/*
 var handleBackspaceSelection = function( dontSend ){
+    /*
 
     var i;
     var paragraphIdStart     = getGlobalParagraphId( currentRangeStart.pageId, currentRangeStart.paragraphId );
@@ -547,9 +547,9 @@ var handleBackspaceSelection = function( dontSend ){
         pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
     });
+    */
 
 };
-*/
 
 var handleChar = function( newChar, dontSend ){
 
@@ -569,9 +569,9 @@ var handleCharNormal = function( newChar, dontSend ){
 
 };
 
-/*
 var handleCharSelection = function( newChar, dontSend ){
 
+    /*
     var i;
     var paragraphIdStart     = currentRangeStart.paragraphId;
     var charInParagraphStart = currentRangeStart.lineChar;
@@ -600,9 +600,26 @@ var handleCharSelection = function( newChar, dontSend ){
         pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
 
     });
+    */
 
 };
-*/
+
+var handleDel = function( dontSend ){
+
+    if( selectionRange.isValid() ){
+        handleBackspaceSelection( dontSend );
+    }else{
+        handleDelNormal( dontSend );
+    }
+
+};
+
+var handleDelNormal = function( dontSend ){
+
+    cursor.node.remove( cursor.char );
+    canvasPages.requestDraw();
+
+};
 
 var handleEnter = function( dontSend ){
 

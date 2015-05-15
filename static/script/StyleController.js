@@ -85,6 +85,7 @@ StyleController.prototype.setParagraphStyle = function( type, value ){
 	}
 
 	cursor.updatePositionX();
+	cursor.updatePositionY();
 	canvasPages.requestDraw();
 	canvasCursor.resetBlink();
 

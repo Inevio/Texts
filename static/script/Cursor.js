@@ -167,11 +167,28 @@ Cursor.prototype.setNode = function( node, position ){
 
 };
 
-Cursor.prototype.updatePosition = function(){
+Cursor.prototype.updatePosition = function( discardEndOfLine ){
 
 	var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
+	var node     = nodeInfo.node;
+	var char     = nodeInfo.char;
 
-	this.setNode( nodeInfo.node, nodeInfo.char );
+	if( discardEndOfLine ){
+
+		if(
+			node.id === node.parent.nodes.length - 1 &&            // Es el último nodo de la línea
+			node.string.length === char &&                         // Es el último caracter de la línea
+			node.parent.id !== node.parent.parent.lines.length - 1 // No es la última línea
+		){
+
+			node = node.next();
+			char = 0;
+
+		}
+
+	}
+
+	this.setNode( node, char );
 
 	/*
     var node     = this.node.parent.nodes[ 0 ];
