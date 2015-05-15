@@ -1,12 +1,17 @@
 
 var CanvasDocument = function(){
 
-    this.canvas  = $('.pages');
-    this.ctx     = this.canvas[ 0 ].getContext('2d');
-    this.waiting = false;
-    this.height  = 0;
+    TCanvas.call( this );
+
+    this.canvas = $('.pages');
+    this.ctx    = this.canvas[ 0 ].getContext('2d');
+    this.height = 0;
 
 };
+
+CanvasDocument.prototype = new TCanvas();
+
+CanvasDocument.prototype.constructor = CanvasDocument;
 
 CanvasDocument.prototype.draw = function(){
 
@@ -157,18 +162,6 @@ CanvasDocument.prototype.draw = function(){
 
 };
 
-CanvasDocument.prototype.requestDraw = function(){
-
-	if( this.waiting ){
-        return;
-    }
-
-    this.waiting = true;
-
-    requestAnimationFrame( this.draw.bind( this ) );
-
-};
-
 CanvasDocument.prototype.setTextStyle = function( style ){
 
 	var font = '';
@@ -189,29 +182,5 @@ CanvasDocument.prototype.setTextStyle = function( style ){
     this.ctx.font = font;
 
     return this;
-
-};
-
-CanvasDocument.prototype.updateSize = function(){
-
-	if( activeHiRes ){
-
-        var oldWidth  = this.canvas.width();
-        var oldHeight = this.canvas.height();
-
-        this.canvas[ 0 ].width  = oldWidth * pixelRatio;
-        this.canvas[ 0 ].height = oldHeight * pixelRatio;
-
-        this.canvas[ 0 ].style.width  = oldWidth + 'px';
-        this.canvas[ 0 ].style.height = oldHeight + 'px';
-
-        this.ctx.scale( pixelRatio, pixelRatio );
-
-    }else{
-
-        this.canvas[ 0 ].width  = this.canvas.width();
-        this.canvas[ 0 ].height = this.canvas.height();
-
-    }
 
 };

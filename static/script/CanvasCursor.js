@@ -3,14 +3,19 @@ var CanvasCursor = function(){
 
     console.warn('ToDo','CanvasCursor','draw','clean & range support');
 
+    TCanvas.call( this );
+
     this.canvas       = $('.selections');
     this.ctx          = this.canvas[ 0 ].getContext('2d');
-    this.waiting      = false;
     this.blinkTime    = Date.now();
     this.blinkStatus  = 0;
     this.blinkCurrent = false;
 
 };
+
+CanvasCursor.prototype = new TCanvas();
+
+CanvasCursor.prototype.constructor = CanvasCursor;
 
 CanvasCursor.prototype.draw = function(){
 
@@ -173,18 +178,6 @@ CanvasCursor.prototype.drawRange = function(){
 
 };
 
-CanvasCursor.prototype.requestDraw = function(){
-
-    if( this.waiting ){
-        return;
-    }
-
-    this.waiting = true;
-
-    requestAnimationFrame( this.draw.bind( this ) );
-
-};
-
 CanvasCursor.prototype.resetBlink = function(){
 
     this.blinkTime    = Date.now();
@@ -197,29 +190,5 @@ CanvasCursor.prototype.resetBlink = function(){
         this.requestDraw();
 
     //}
-
-};
-
-CanvasCursor.prototype.updateSize = function(){
-
-    if( activeHiRes ){
-
-        var oldWidth  = this.canvas.width();
-        var oldHeight = this.canvas.height();
-
-        this.canvas[ 0 ].width  = oldWidth * pixelRatio;
-        this.canvas[ 0 ].height = oldHeight * pixelRatio;
-
-        this.canvas[ 0 ].style.width  = oldWidth + 'px';
-        this.canvas[ 0 ].style.height = oldHeight + 'px';
-
-        this.ctx.scale( pixelRatio, pixelRatio );
-
-    }else{
-
-        this.canvas[ 0 ].width  = this.canvas.width();
-        this.canvas[ 0 ].height = this.canvas.height();
-
-    }
 
 };
