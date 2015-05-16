@@ -10,6 +10,8 @@ StyleController.prototype.setNodeStyle = function( type, value ){
     // Selección normal
     if( selectionRange.isValid() ){
 
+		var i = 0;
+
 		selectionRange.mapNodes( function( node, start, stop ){
 
 			// Nodo completo
@@ -18,9 +20,16 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 			}else{
 
 				node.split( start, stop );
-				node.next().setStyle( type, value );
+
+				if( i ){
+					node.setStyle( type, value );
+				}else{
+					node.next().setStyle( type, value );
+				}
 
 			}
+
+			i++;
 
 		});
 
@@ -64,6 +73,14 @@ StyleController.prototype.setNodeStyle = function( type, value ){
     }else{
         this.temporal.set( type, value );
     }
+
+	cursor.updatePositionX();
+	cursor.updatePositionY();
+	selectionRange.update();
+	canvasPages.requestDraw();
+	canvasCursor.resetBlink();
+
+	return this;
 
 };
 

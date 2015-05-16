@@ -7,7 +7,7 @@ win
         return;
     }
 
-    toolsListEnabled = false;
+    toolsListEnabled  = false;
     toolsColorEnabled = false;
 
     input.focus();
@@ -50,8 +50,6 @@ canvasCursor.canvas
     if( clickCounter === 1 ){
         currentMultipleHash = [ start.pageId, start.paragraphId, start.lineId, start.lineChar ];
     }
-
-    console.log( clickCounter );
 
     // Click que no coincide con los clicks previos
     if(
