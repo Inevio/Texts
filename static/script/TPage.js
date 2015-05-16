@@ -64,7 +64,7 @@ TPage.prototype.prev = function(){
     return this.parent.pages[ this.id - 1 ];
 };
 
-TPage.prototype.remove = function( paragraph ){
+TPage.prototype.remove = function( position ){
 
     this.paragraphs[ position ].id     = undefined;
     this.paragraphs[ position ].parent = undefined;

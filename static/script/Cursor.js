@@ -140,6 +140,7 @@ Cursor.prototype.move = function( positions ){
 	this.paragraphChar = getGlobalParagraphCharId( this.node, this.char );
 
     this.updatePositionX();
+	selectionRange.clear();
     canvasCursor.resetBlink();
 
 };
@@ -161,6 +162,7 @@ Cursor.prototype.setNode = function( node, position ){
 
     this.updatePositionX();
     this.updatePositionY();
+	selectionRange.clear();
     canvasCursor.resetBlink();
 
     return this;

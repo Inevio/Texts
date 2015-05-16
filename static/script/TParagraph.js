@@ -88,6 +88,24 @@ TParagraph.prototype.insert = function( position, line ){
 
 };
 
+TParagraph.prototype.merge = function( paragraph ){
+
+    paragraph.parent.remove( paragraph.id );
+
+    var nodes = [];
+
+    for( var i = 0; i < paragraph.lines.length; i++ ){
+        nodes = nodes.concat( paragraph.lines[ i ].nodes );
+    }
+
+    for( var i = 0; i < nodes.length; i++ ){
+        this.lines[ this.lines.length - 1 ].append( nodes[ i ] )
+    }
+
+    return this;
+
+};
+
 TParagraph.prototype.next = function(){
 
     var paragraph = this.parent.paragraphs[ this.id + 1 ];

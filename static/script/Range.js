@@ -36,6 +36,26 @@ Range.prototype.clear = function(){
 
 };
 
+Range.prototype.collapseLeft = function( positions ){
+
+	var range = this.getLimits();
+
+	cursor.setNode( range.startNode, range.startChar );
+	cursor.move( positions );
+	canvasCursor.resetBlink();
+
+};
+
+Range.prototype.collapseRight = function( positions ){
+
+	var range = this.getLimits();
+
+	cursor.setNode( range.endNode, range.endChar );
+	cursor.move( positions );
+	canvasCursor.resetBlink();
+
+};
+
 Range.prototype.getLimits = function(){
 
 	var compared = compareHashes(
@@ -251,9 +271,10 @@ Range.prototype.mapNodes = function( handler ){
 
 Range.prototype.mapParagraphs = function( handler ){
 
-	var startHash = this.startParagraph.getHash();
-	var endHash   = this.endParagraph.getHash();
-	var paragraph = this.startParagraph;
+	var range     = this.getLimits();
+	var startHash = range.startParagraph.getHash();
+	var endHash   = range.endParagraph.getHash();
+	var paragraph = range.startParagraph;
 	var tmpHash;
 
 	if( compareHashes( startHash, endHash ) === 0 ){
@@ -264,20 +285,29 @@ Range.prototype.mapParagraphs = function( handler ){
 
 	}
 
+	var list = [];
+
 	while( paragraph ){
 
 		tmpHash = paragraph.getHash();
 
 		if( compareHashes( startHash, tmpHash ) === 0 ){
-			handler( paragraph );
+			list.push( paragraph );
 		}else if( compareHashes( endHash, tmpHash ) === 0 ){
-			handler( paragraph );
+
+			list.push( paragraph );
+			break;
+
 		}else{
-			handler( paragraph );
+			list.push( paragraph );
 		}
 
 		paragraph = paragraph.next();
 
+	}
+
+	for( var i = 0; i < list.length; i++ ){
+		handler( list[ i ] );
 	}
 
 	return this;
@@ -309,6 +339,18 @@ Range.prototype.setEnd = function( node, position ){
 	this.endChar      		  = parseInt( position, 10 ) || 0;
 	this.endGlobalParagraphId = getGlobalParagraphId( this.endParagraph );
 	this.endGlobalCharId      = getGlobalParagraphCharId( this.endNode, this.endChar );
+
+	return this;
+
+};
+
+Range.prototype.update = function(){
+
+	var start = getNodeByGlobalId( this.startParagraph, this.startGlobalCharId );
+	var end   = getNodeByGlobalId( this.endParagraph, this.endGlobalCharId );
+
+	this.setStart( start.node, start.char );
+	this.setEnd( end.node, end.char );
 
 	return this;
 
