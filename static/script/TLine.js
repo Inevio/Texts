@@ -140,6 +140,90 @@ TLine.prototype.getTabs = function(){
 
 };
 
+TLine.prototype.getWords = function(){
+
+    // To Do -> Revisar calidad del código
+
+    var nodes   = this.nodes;
+    var result  = [];
+    var words, breakedWord, currentWord, offset, i, j, tmp;
+
+    for( i = 0; i < nodes.length; i++ ){
+
+        offset = 0;
+
+        if(
+            breakedWord &&
+            ( nodes[ i ].string[ 0 ] === ' ' || nodes[ i ].string[ 0 ] === '\t' )
+        ){
+
+            tmp   = nodes[ i ].string.split(/( +)/g);
+            words = [ tmp[ 1 ] ];
+
+            // Sino no solo hay espacio
+            if( nodes[ i ].string.length !== nodes[ i ].string.split(' ').length - 1 ){
+
+                tmp   = nodes[ i ].string.slice( tmp[ 1 ].length );
+                words = words.concat( tmp.match(/( *[\S*]+ *| *[\t*]+ *| +)/g) || [''] );
+
+            }
+
+        }else{
+            words = nodes[ i ].string.match(/( *[\S*]+ *| *[\t*]+ *| +)/g) || [''];
+        }
+
+        for( j = 0; j < words.length; j++ ){
+
+            if( breakedWord ){
+
+                currentWord.string    += words[ j ];
+                currentWord.width     += ( nodes[ i ].chars[ offset + words[ j ].length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+                currentWord.widthTrim += ( nodes[ i ].chars[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+
+                currentWord.offset.push( [ offset, offset + /*currentWord.string.length*/ words[ j ].length - 1 ] );
+                currentWord.nodes.push( nodes[ i ] );
+
+                offset += words[ j ].length;
+
+                if( words[ j ].indexOf(' ') > -1 || i === nodes.length - 1 ){
+
+                    result.push( currentWord );
+
+                    breakedWord = false;
+
+                }
+
+                continue;
+
+            }
+
+            currentWord           = new Word();
+            currentWord.string    = words[ j ];
+            currentWord.width     = ( nodes[ i ].chars[ offset + words[ j ].length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+            currentWord.widthTrim = ( nodes[ i ].chars[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+            currentWord.nodes     = [ i ];
+
+            currentWord.offset.push( [ offset, offset + /*currentWord.string.length*/ words[ j ].length - 1 ] );
+
+            offset += words[ j ].length;
+
+            if(
+                words[ j ].indexOf(' ') > -1 ||
+                i === nodes.length - 1
+            ){
+                result.push( currentWord );
+            }else{
+                breakedWord = true;
+            }
+
+        }
+
+    }
+
+    return result;
+
+};
+
 TLine.prototype.insert = function( position, node ){
 
     if( node.parent ){

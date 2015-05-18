@@ -10,6 +10,7 @@ var Cursor = function(){
     this.paragraphChar = 0;
 	this.positionX     = 0;
 	this.positionY     = 0;
+	this.updating      = false;
 
 };
 
@@ -138,9 +139,14 @@ Cursor.prototype.setNode = function( node, position ){
     this.page          = this.paragraph.parent;
     this.paragraphChar = getGlobalParagraphCharId( this.node, this.char );
 
+	if( this.updating ){
+		selectionRange.update();
+	}else{
+		selectionRange.clear();
+	}
+
     this.updatePositionX();
     this.updatePositionY();
-	selectionRange.clear();
     canvasCursor.resetBlink();
 
     return this;
@@ -152,6 +158,8 @@ Cursor.prototype.updatePosition = function( discardEndOfLine ){
 	if( !this.page ){
 		return this;
 	}
+
+	this.updating = true;
 
 	var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
 	var node     = nodeInfo.node;
@@ -173,6 +181,8 @@ Cursor.prototype.updatePosition = function( discardEndOfLine ){
 	}
 
 	this.setNode( node, char );
+
+	this.updating = false;
 
 	/*
     var node     = this.node.parent.nodes[ 0 ];

@@ -183,6 +183,19 @@ TNode.prototype.remove = function( position ){
 
 };
 
+TNode.prototype.deleteIfEmpty = function(){
+
+    if( this.string.length ){
+        return false;
+    }
+
+    this.parent.remove( this.id );
+    cursor.updatePosition();
+
+    return true;
+
+};
+
 TNode.prototype.setBlocked = function( value ){
 
     this.blocked = value;
@@ -257,28 +270,28 @@ TNode.prototype.split = function( start, stop ){
 
         var newNode = this.clone();
 
+        this.parent.insert( this.id + 1, newNode );
         this.slice( 0, stop );
         newNode.slice( stop );
-        this.parent.insert( this.id + 1, newNode );
 
     }else if( stop === this.string.length ){
 
         var newNode = this.clone();
 
+        this.parent.insert( this.id + 1, newNode );
         this.slice( 0, start );
         newNode.slice( start );
-        this.parent.insert( this.id + 1, newNode );
 
     }else{
 
         var firstNode  = this.clone();
         var secondNode = this.clone();
 
+        this.parent.insert( this.id + 1, firstNode );
+        this.parent.insert( this.id + 2, secondNode );
         this.slice( 0, start );
         firstNode.slice( start, stop );
         secondNode.slice( stop );
-        this.parent.insert( this.id + 1, firstNode );
-        this.parent.insert( this.id + 2, secondNode );
 
     }
 

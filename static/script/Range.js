@@ -346,11 +346,24 @@ Range.prototype.setEnd = function( node, position ){
 
 Range.prototype.update = function(){
 
-	var start = getNodeByGlobalId( this.startParagraph, this.startGlobalCharId );
-	var end   = getNodeByGlobalId( this.endParagraph, this.endGlobalCharId );
 
-	this.setStart( start.node, start.char );
-	this.setEnd( end.node, end.char );
+	var start, end;
+
+	if( this.startParagraph ){
+		start = getNodeByGlobalId( this.startParagraph, this.startGlobalCharId );
+	}
+
+	if( this.endParagraph ){
+		end = getNodeByGlobalId( this.endParagraph, this.endGlobalCharId );
+	}
+
+	if( start ){
+		this.setStart( start.node, start.char );
+	}
+
+	if( end ){
+		this.setEnd( end.node, end.char );
+	}
 
 	return this;
 
