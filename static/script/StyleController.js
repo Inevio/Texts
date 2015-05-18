@@ -14,20 +14,22 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 
 		selectionRange.mapNodes( function( node, start, stop ){
 
-			// Nodo completo
-			if( start === 0 && stop === node.string.length ){
+			if(
+	            start === 0 &&
+	            stop === node.string.length
+	        ){
 				node.setStyle( type, value );
-			}else{
+	        }else if( start === 0 ){
 
 				node.split( start, stop );
+				node.setStyle( type, value );
 
-				if( i ){
-					node.setStyle( type, value );
-				}else{
-					node.next().setStyle( type, value );
-				}
+	        }else{
 
-			}
+				node.split( start, stop );
+				node.next().setStyle( type, value );
+
+	        }
 
 			i++;
 

@@ -213,7 +213,7 @@ TParagraph.prototype.next = function(){
             return page.paragraphs[ 0 ];
         }
 
-        page = this.parent.next();
+        page = page.next();
 
     }
 
@@ -227,7 +227,7 @@ TParagraph.prototype.prev = function(){
         return paragraph;
     }
 
-    var page = this.parent.next();
+    var page = this.parent.prev();
 
     while( page ){
 
@@ -235,7 +235,7 @@ TParagraph.prototype.prev = function(){
             return page.paragraphs[ page.paragraphs.length - 1 ];
         }
 
-        page = this.parent.next();
+        page = page.prev();
 
     }
 

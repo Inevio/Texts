@@ -262,7 +262,7 @@ TLine.prototype.next = function(){
             return paragraph.lines[ 0 ];
         }
 
-        paragraph = this.parent.next();
+        paragraph = paragraph.next();
 
     }
 
@@ -284,7 +284,7 @@ TLine.prototype.prev = function(){
             return paragraph.lines[ paragraph.lines.length - 1 ];
         }
 
-        paragraph = this.parent.prev();
+        paragraph = paragraph.prev();
 
     }
 
