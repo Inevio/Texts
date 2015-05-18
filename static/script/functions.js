@@ -250,7 +250,6 @@ var getGlobalParagraphCharId = function( node, charId ){
 
 var getNodeByGlobalId = function( paragraph, charId ){
 
-
     var counter = charId;
     var node    = paragraph.lines[ 0 ].nodes[ 0 ];
 
@@ -335,10 +334,11 @@ var handleBackspaceNormal = function( dontSend ){
     var node = cursor.node;
     var char = cursor.char;
 
-    if( cursor.char ){
+    if( cursor.paragraphChar ){
 
         cursor.move( -1 );
         node.remove( char - 1 );
+        node.deleteIfEmpty();
 
     }else if( cursor.line.id ){
 
@@ -380,9 +380,26 @@ var handleBackspaceSelection = function( dontSend ){
     });
 
     selectionRange.update();
-
     selectionRange.mapNodes( function( node, start, stop ){
-        // To Do
+
+        if(
+            start === 0 &&
+            stop === node.string.length
+        ){
+            node.slice( 0, 0 ).deleteIfEmpty();
+        }else if( start === 0 ){
+            node.slice( stop );
+        }else if( stop === node.string.length ){
+            node.slice( 0, start );
+        }else{
+
+            var newNode = node.clone().slice( stop );
+
+            node.slice( 0, start );
+            node.parent.insert( node.id + 1, newNode );
+
+        }
+
     });
 
 };
@@ -424,7 +441,18 @@ var handleDel = function( dontSend ){
 
 var handleDelNormal = function( dontSend ){
 
+    var node = cursor.node;
+    var char = cursor.char;
+
+    if( char === node.length ){
+
+        node = node.next();
+        char = 0;
+
+    }
+
     cursor.node.remove( cursor.char );
+    node.deleteIfEmpty();
     canvasPages.requestDraw();
 
 };
