@@ -27,7 +27,7 @@ TPage.prototype.append = function( paragraph ){
 
     paragraph.updateWidth();
 
-    // To Do -> Hacer realocate si es conveniente (a decision del programador)
+    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
 
     return this;
 
@@ -50,7 +50,7 @@ TPage.prototype.insert = function( position, paragraph ){
 
     }
 
-    console.warn('ToDo','Page Insert','Realocate Page');
+    console.warn('ToDo','Page Insert','reallocate Page');
 
     return this;
 
@@ -78,7 +78,7 @@ TPage.prototype.remove = function( position ){
 
     }
 
-    // To Do -> Hacer realocate si es conveniente (a decision del programador)
+    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
 
     return this;
 
