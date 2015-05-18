@@ -14,6 +14,7 @@ var TParagraph = function(){
     this.indentationSpecialValue = 0;
     this.listMode                = LIST_NONE;
     this.spacing                 = 1;
+    this.reallocating            = false;
     this.width                   = 0;
     //this.split                   = 0;
 
@@ -63,6 +64,96 @@ TParagraph.prototype.getHash = function(){
 
 };
 
+TParagraph.prototype.getWords = function(){
+
+    // To Do -> Revisar calidad del código
+
+    var nodes  = [];
+    var result = [];
+    var words, breakedWord, currentWord, offset, tmp;
+
+    // Obtenemos los nodos
+    for( var i = 0; i < this.lines.length; i++ ){
+        nodes = nodes.concat( this.lines[ i ].nodes );
+    }
+
+    // Obtenemos las palabras
+    for( var i = 0; i < nodes.length; i++ ){
+
+        offset = 0;
+
+        if(
+            breakedWord &&
+            ( nodes[ i ].string[ 0 ] === ' ' || nodes[ i ].string[ 0 ] === '\t' )
+        ){
+
+            tmp   = nodes[ i ].string.split(/( +)/g);
+            words = [ tmp[ 1 ] ];
+
+            // Sino no solo hay espacio
+            if( nodes[ i ].string.length !== nodes[ i ].string.split(' ').length - 1 ){
+
+                tmp   = nodes[ i ].string.slice( tmp[ 1 ].length );
+                words = words.concat( tmp.match(/( *[\S*]+ *| *[\t*]+ *| +)/g) || [''] );
+
+            }
+
+        }else{
+            words = nodes[ i ].string.match(/( *[\S*]+ *| *[\t*]+ *| +)/g) || [''];
+        }
+
+        for( var j = 0; j < words.length; j++ ){
+
+            if( breakedWord ){
+
+                currentWord.string    += words[ j ];
+                currentWord.width     += ( nodes[ i ].chars[ offset + words[ j ].length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+                currentWord.widthTrim += ( nodes[ i ].chars[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+
+                currentWord.offset.push( [ offset, offset + /*currentWord.string.length*/ words[ j ].length - 1 ] );
+                currentWord.nodes.push( nodes[ i ] );
+
+                offset += words[ j ].length;
+
+                if( words[ j ].indexOf(' ') > -1 || i === nodes.length - 1 ){
+
+                    result.push( currentWord );
+
+                    breakedWord = false;
+
+                }
+
+                continue;
+
+            }
+
+            currentWord           = new Word();
+            currentWord.string    = words[ j ];
+            currentWord.width     = ( nodes[ i ].chars[ offset + words[ j ].length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+            currentWord.widthTrim = ( nodes[ i ].chars[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
+            currentWord.nodes     = [ nodes[ i ] ];
+
+            currentWord.offset.push( [ offset, offset + /*currentWord.string.length*/ words[ j ].length - 1 ] );
+
+            offset += words[ j ].length;
+
+            if(
+                words[ j ].indexOf(' ') > -1 ||
+                i === nodes.length - 1
+            ){
+                result.push( currentWord );
+            }else{
+                breakedWord = true;
+            }
+
+        }
+
+    }
+
+    return result;
+
+};
+
 TParagraph.prototype.insert = function( position, line ){
 
     if( line.parent ){
@@ -82,7 +173,7 @@ TParagraph.prototype.insert = function( position, line ){
 
     this.updateHeight();
 
-    // To Do -> Hacer realocate si es conveniente (a decision del programador)
+    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
 
     return this;
 
@@ -150,6 +241,70 @@ TParagraph.prototype.prev = function(){
 
 };
 
+TParagraph.prototype.reallocate = function(){
+
+    if( this.reallocating ){
+        return this;
+    }
+
+    this.reallocating = true;
+
+    var words = this.getWords();
+
+    // Determinamos en que líneas tienen que ir
+    var line           = this.lines[ 0 ];
+    var availableWidth = line.width;
+
+    for( var i = 0; i < words.length; i++ ){
+
+        if( availableWidth - words[ i ].widthTrim >= 0 ){
+
+            words[ i ].line   = line;
+            availableWidth    -= words[ i ].width;
+
+        }else{
+
+            if( !this.lines[ line.id + 1 ] ){
+                this.append( new TLine() );
+            }
+
+            line             = this.lines[ line.id + 1 ];
+            availableWidth   = line.width;
+            words[ i ].line  = line;
+            availableWidth  -= words[ i ].width;
+
+        }
+
+    }
+
+    // Insertamos en cada línea
+    for( var i = words.length - 1; i >= 0 ; i-- ){
+
+        for( var j = words[ i ].nodes.length - 1; j >= 0; j-- ){
+
+            if( words[ i ].offset[ j ][ 0 ] === 0 ){
+                words[ i ].line.insert( 0, words[ i ].nodes[ j ] );
+            }else{
+
+                var newNode = words[ i ].nodes[ j ].clone().slice( words[ i ].offset[ j ][ 0 ], words[ i ].offset[ j ][ 1 ] + 1 );
+
+                words[ i ].nodes[ j ].slice( 0, words[ i ].offset[ j ][ 0 ] );
+                words[ i ].line.insert( 0, newNode );
+
+            }
+
+        }
+
+    }
+
+    cursor.updatePosition();
+
+    this.reallocating = false;
+
+    return this;
+
+};
+
 TParagraph.prototype.remove = function( position ){
 
     this.lines[ position ].id     = undefined;
@@ -164,7 +319,7 @@ TParagraph.prototype.remove = function( position ){
 
     }
 
-    // To Do -> Hacer realocate si es conveniente (a decision del programador)
+    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
 
     return this;
 
@@ -306,7 +461,7 @@ TParagraph.prototype.setStyle = function( key, value ){
             }
 
             for( i = 0; i < this.lines.length; i++ ){
-                realocateLine( pageId, this, i, 0, true );
+                reallocateLine( pageId, this, i, 0, true );
             }
             */
 
@@ -343,13 +498,13 @@ TParagraph.prototype.setStyle = function( key, value ){
             if( value >= 0 ){
 
                 for( i = 0; i < this.lines.length; i++ ){
-                    this.lines[ i ].realocate();
+                    this.lines[ i ].reallocate();
                 }
 
             }else{
 
                 for( i = 0; i < this.lines.length; i++ ){
-                    this.lines[ i ].realocateInverse();
+                    this.lines[ i ].reallocateInverse();
                 }
 
             }

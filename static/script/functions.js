@@ -341,7 +341,13 @@ var handleBackspaceNormal = function( dontSend ){
         node.remove( char - 1 );
 
     }else if( cursor.line.id ){
-        console.warn('ToDo');
+
+        //var paragraph = cursor.paragraph;
+        var node = cursor.node.prev();
+
+        cursor.move( -1 );
+        node.remove( node.string.length - 1 );
+
     }else{
 
         var paragraph = cursor.paragraph;

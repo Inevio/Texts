@@ -21,10 +21,10 @@ Cursor.prototype.move = function( positions ){
         return this;
     }
 
-	var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
+	//var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
 
-	this.node = nodeInfo.node;
-	this.char = nodeInfo.char + positions;
+	this.node = this.node; //nodeInfo.node;
+	this.char = this.char + positions; //nodeInfo.char + positions;
 
 	// Movimiento a la derecha
 	if( positions > 0 ){
@@ -55,13 +55,8 @@ Cursor.prototype.move = function( positions ){
 	                this.page.id !== next.parent.parent.parent.id
 	            ){
 
-	                this.node      = next;
-	                this.line      = next.parent;
-	                this.paragraph = this.line.parent;
-	                this.page      = this.paragraph.parent;
-	                this.char      = 0;
-
-	                this.updatePositionY();
+	                this.node = next;
+	                this.char = 0;
 
 	            }else{
 
@@ -106,27 +101,8 @@ Cursor.prototype.move = function( positions ){
 
 				}
 
-				if(
-	                this.line.id !== prev.parent.id ||
-	                this.paragraph.id !== prev.parent.parent.id ||
-	                this.page.id !== prev.parent.parent.parent.id
-	            ){
-
-	                this.node      = prev;
-	                this.line      = prev.parent;
-	                this.paragraph = this.line.parent;
-	                this.page      = this.paragraph.parent;
-	                this.char      = this.node.string.length;
-
-	                this.updatePositionY();
-
-	            }else{
-
-	                this.node = prev;
-	                this.char = this.node.string.length;
-
-	            }
-
+				this.node = prev;
+	            this.char = this.node.string.length;
 				break;
 
 			}
@@ -135,11 +111,13 @@ Cursor.prototype.move = function( positions ){
 
 	}
 
-	console.warn('ToDo', 'Test if paragraphChar is always correct');
-
+	this.line          = this.node.parent;
+	this.paragraph     = this.line.parent;
+	this.page          = this.paragraph.parent;
 	this.paragraphChar = getGlobalParagraphCharId( this.node, this.char );
 
     this.updatePositionX();
+	this.updatePositionY(); // To Do -> Hacer que se ejecute solo cuando haga falta
 	selectionRange.clear();
     canvasCursor.resetBlink();
 
@@ -170,6 +148,10 @@ Cursor.prototype.setNode = function( node, position ){
 };
 
 Cursor.prototype.updatePosition = function( discardEndOfLine ){
+
+	if( !this.page ){
+		return this;
+	}
 
 	var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
 	var node     = nodeInfo.node;

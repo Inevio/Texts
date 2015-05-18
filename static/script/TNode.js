@@ -380,7 +380,7 @@ TNode.prototype.updateWidth = function( position ){
     this.width = this.chars[ this.chars.length - 1 ] || 0;
 
     if( this.parent ){
-        this.parent.realocate();
+        this.parent.reallocate();
     }
 
     return this;
