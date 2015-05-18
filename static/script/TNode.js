@@ -8,11 +8,12 @@ var TNode = function(){
     //this.justifyCharList = [];
 
     // Properties
-    this.blocked = false;
-    this.height  = 0;
-    this.string  = '';
-    this.style   = {};
-    this.width   = 0;
+    this.blocked   = false;
+    this.height    = 0;
+    this.string    = '';
+    this.style     = {};
+    this.width     = 0;
+    this.splitting = false;
 
 };
 
@@ -147,7 +148,7 @@ TNode.prototype.next = function(){
             return line.nodes[ 0 ];
         }
 
-        line = this.parent.next();
+        line = line.next();
 
     }
 
@@ -169,7 +170,7 @@ TNode.prototype.prev = function(){
             return line.nodes[ line.nodes.length - 1 ];
         }
 
-        line = this.parent.prev();
+        line = line.prev();
 
     }
 
@@ -186,6 +187,16 @@ TNode.prototype.remove = function( position ){
 TNode.prototype.deleteIfEmpty = function(){
 
     if( this.string.length ){
+        return false;
+    }
+
+    if(
+        this.parent.id === 0 &&
+        (
+            this.id === 0 ||
+            this.prev().blocked
+        )
+    ){
         return false;
     }
 
@@ -262,6 +273,8 @@ TNode.prototype.slice = function( start, stop ){
 
 TNode.prototype.split = function( start, stop ){
 
+    this.splitting = true;
+
     if( typeof stop === 'undefined' ){
         stop = this.string.length;
     }
@@ -270,30 +283,32 @@ TNode.prototype.split = function( start, stop ){
 
         var newNode = this.clone();
 
-        this.parent.insert( this.id + 1, newNode );
         this.slice( 0, stop );
         newNode.slice( stop );
+        this.parent.insert( this.id + 1, newNode );
 
     }else if( stop === this.string.length ){
 
         var newNode = this.clone();
 
-        this.parent.insert( this.id + 1, newNode );
         this.slice( 0, start );
         newNode.slice( start );
+        this.parent.insert( this.id + 1, newNode );
 
     }else{
 
         var firstNode  = this.clone();
         var secondNode = this.clone();
 
-        this.parent.insert( this.id + 1, firstNode );
-        this.parent.insert( this.id + 2, secondNode );
         this.slice( 0, start );
         firstNode.slice( start, stop );
         secondNode.slice( stop );
+        this.parent.insert( this.id + 1, firstNode );
+        this.parent.insert( this.id + 2, secondNode );
 
     }
+
+    this.splitting = false;
 
     return this;
 
@@ -336,7 +351,7 @@ TNode.prototype.updateWidth = function( position ){
         var current    = 0;
         var prev       = 0;
         var multiples  = 0;
-        /*var heritage   = 0;*/
+        /*var heritage    = 0;*/
         var index      = 0;
         var identation = this.parent.getOffsetIndentationLeft();
 

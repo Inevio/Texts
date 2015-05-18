@@ -184,46 +184,6 @@ Cursor.prototype.updatePosition = function( discardEndOfLine ){
 
 	this.updating = false;
 
-	/*
-    var node     = this.node.parent.nodes[ 0 ];
-    var prevNode = this.node;
-    var total    = this.paragraphChar;
-
-    while( total ){
-
-        if( !node ){
-
-            total          = 0;
-            this.node      = prevNode;
-            this.line      = this.node.parent;
-            this.paragraph = this.line.parent;
-            this.page      = this.paragraph.parent;
-            this.char          = this.node.string.length;
-
-        }else if( node.string.length < total ){
-
-            total -= node.string.length;
-            node   = node.next();
-
-        }else{
-
-            this.node      = node;
-            this.line      = this.node.parent;
-            this.paragraph = this.line.parent;
-            this.page      = this.paragraph.parent;
-            this.char      = total;
-            this.paragraphChar  = total;
-            total          = 0;
-
-            for( var i = 0; i < this.node.id; i++ ){
-                this.paragraphChar += this.line.nodes[ i ].string.length;
-            }
-
-        }
-
-    }
-	*/
-
     this.updatePositionX();
     this.updatePositionY();
 
