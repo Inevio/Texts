@@ -1,10 +1,10 @@
 
 var TemporalStyle = function(){
-	this.attributes = {};	
+	this.attributes = {};
 };
 
 TemporalStyle.prototype.clear = function(){
-	
+
 	this.attributes = {};
 
 	return this;
@@ -22,8 +22,6 @@ TemporalStyle.prototype.set = function( type, value ){
 	}else{
 		delete this.attributes[ type ];
 	}
-
-	console.log( this.attributes );
 
 	return this;
 

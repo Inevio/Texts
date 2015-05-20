@@ -58,6 +58,24 @@ Range.prototype.collapseRight = function( positions ){
 
 Range.prototype.getLimits = function(){
 
+	if( !this.startNode ){
+		return {};
+	}
+
+	if( !this.endNode ){
+
+		return {
+
+			startPage      : this.startPage,
+			startParagraph : this.startParagraph,
+			startLine      : this.startLine,
+			startNode      : this.startNode,
+			startChar      : this.startChar
+
+		};
+
+	}
+
 	var compared = compareHashes(
 
 		[ this.startPage.id, this.startParagraph.id, this.startLine.id, this.startNode.id, this.startChar ],
@@ -67,7 +85,7 @@ Range.prototype.getLimits = function(){
 
 	var limits;
 
-	if( this.endNode && compared === -1 ){
+	if( compared === -1 ){
 
 		limits = {
 

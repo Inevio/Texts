@@ -104,8 +104,6 @@ canvasCursor.canvas
     // Click que coincide con los clicks previos y corresponde a seleccionar el párrafo
     }else{
 
-        console.log('todo el parrafo');
-
         var lastLine = elements.paragraph.lines[ elements.paragraph.lines.length - 1 ];
         var lastNode = lastLine.nodes[ lastLine.nodes.length - 1 ];
 

@@ -192,6 +192,7 @@ TNode.prototype.deleteIfEmpty = function(){
 
     if(
         this.parent.id === 0 &&
+        this.parent.parent.lines.length === 1 &&
         (
             this.id === 0 ||
             this.prev().blocked
@@ -407,7 +408,7 @@ TNode.prototype.updateWidth = function( position ){
 
     this.width = this.chars[ this.chars.length - 1 ] || 0;
 
-    if( this.parent ){
+    if( this.parent && !this.splitting ){
         this.parent.reallocate();
     }
 
