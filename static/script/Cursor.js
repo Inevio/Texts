@@ -162,8 +162,22 @@ Cursor.prototype.updatePosition = function( discardEndOfLine ){
 	this.updating = true;
 
 	var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
-	var node     = nodeInfo.node;
-	var char     = nodeInfo.char;
+	var node, char;
+
+	// Pueden darse casos en los que ya no exista el
+	if( nodeInfo ){
+
+		node = nodeInfo.node;
+		char = nodeInfo.char;
+
+	}else{
+
+		var range = selectionRange.getLimits();
+
+		node = range.startNode;
+		char = range.startChar;
+
+	}
 
 	if( discardEndOfLine ){
 

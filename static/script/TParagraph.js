@@ -297,7 +297,21 @@ TParagraph.prototype.reallocate = function(){
 
     }
 
-    cursor.updatePosition();
+    // Limpiamos líneas vacías
+    for( var i = 0; i < this.lines.length; ){
+
+        if( this.lines[ i ].nodes.length ){
+
+            i++;
+            continue;
+
+        }
+
+        this.remove( i );
+
+    }
+
+    cursor.updatePosition( true );
 
     this.reallocating = false;
 
@@ -551,8 +565,6 @@ TParagraph.prototype.split = function( lineId, nodeId, char ){
     if( this.listMode ){
         newLine.insert( 0, this.lines[ 0 ].nodes[ 0 ].clone() );
     }
-
-    console.log( newParagraph );
 
     return this;
 

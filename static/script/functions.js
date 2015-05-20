@@ -402,6 +402,8 @@ var handleBackspaceSelection = function( dontSend ){
 
     });
 
+    selectionRange.collapseLeft();
+
 };
 
 var handleChar = function( newChar, dontSend ){
