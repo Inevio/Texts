@@ -348,7 +348,7 @@ var handleBackspaceNormal = function( dontSend ){
         cursor.move( -1 );
         node.remove( node.string.length - 1 );
 
-    }else{
+    }else if( cursor.page.id || cursor.paragraph.id ){
 
         var paragraph = cursor.paragraph;
 
