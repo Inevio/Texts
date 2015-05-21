@@ -189,8 +189,15 @@ TParagraph.prototype.merge = function( paragraph ){
         nodes = nodes.concat( paragraph.lines[ i ].nodes );
     }
 
+    var mergedLineId = this.lines.length - 1;
+
     for( var i = 0; i < nodes.length; i++ ){
-        this.lines[ this.lines.length - 1 ].append( nodes[ i ] )
+        this.lines[ this.lines.length - 1 ].append( nodes[ i ] );
+    }
+
+    // Limpiamos nodos vacios
+    for( var i = 0; i < this.lines[ mergedLineId ].nodes.length; i++ ){
+        this.lines[ mergedLineId ].nodes[ i ].deleteIfEmpty();
     }
 
     return this;
