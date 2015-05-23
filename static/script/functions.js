@@ -299,6 +299,10 @@ var getParagraphByGlobalId = function( paragraphId ){
 
 };
 
+var handleArrowDown = function(){
+    cursor.verticalMove( 1 );
+};
+
 var handleArrowLeft = function(){
 
     if( selectionRange.isValid() ){
@@ -317,6 +321,10 @@ var handleArrowRight = function(){
         cursor.move( 1 );
     }
 
+};
+
+var handleArrowUp = function(){
+    cursor.verticalMove( -1 );
 };
 
 var handleBackspace = function( dontSend ){
@@ -446,15 +454,20 @@ var handleDelNormal = function( dontSend ){
     var node = cursor.node;
     var char = cursor.char;
 
-    if( char === node.length ){
+    if( char === node.string.length ){
 
         node = node.next();
         char = 0;
 
     }
 
-    cursor.node.remove( cursor.char );
+    if( !node ){
+        return;
+    }
+
+    node.remove( char );
     node.deleteIfEmpty();
+    cursor.updatePosition();
     canvasPages.requestDraw();
 
 };

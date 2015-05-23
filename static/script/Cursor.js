@@ -7,10 +7,13 @@ var Cursor = function(){
 	this.node;
 	this.char;
 
-    this.paragraphChar = 0;
-	this.positionX     = 0;
-	this.positionY     = 0;
-	this.updating      = false;
+    this.paragraphChar    = 0;
+	this.positionX        = 0;
+	this.positionY        = 0;
+	this.updating         = false;
+	this.verticalizing    = false;
+	this.verticalEnabled  = false;
+	this.verticalPosition = 0;
 
 };
 
@@ -21,6 +24,9 @@ Cursor.prototype.move = function( positions ){
     if( !positions ){
         return this;
     }
+	if( !this.verticalizing ){
+		this.verticalEnabled = false;
+	}
 
 	//var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
 
@@ -138,6 +144,10 @@ Cursor.prototype.setNode = function( node, position ){
     this.paragraph     = this.line.parent;
     this.page          = this.paragraph.parent;
     this.paragraphChar = getGlobalParagraphCharId( this.node, this.char );
+
+	if( !this.verticalizing ){
+		this.verticalEnabled = false;
+	}
 
 	if( this.updating ){
 		selectionRange.update();
@@ -262,5 +272,86 @@ Cursor.prototype.updatePositionY = function(){
     }
 
     return this;
+
+};
+
+Cursor.prototype.verticalMove = function( positions ){
+
+	positions = parseInt( positions, 10 ) || 0;
+
+	if( !positions ){
+		return this;
+	}
+
+	var line = this.line;
+
+	if( positions > 0 ){
+
+		while( positions-- ){
+			line = line.next();
+		}
+
+	}else{
+
+		while( positions++ ){
+			line = line.prev();
+		}
+
+	}
+
+	if( !line ){
+		return this;
+	}
+
+	if( !this.verticalEnabled ){
+
+		this.verticalEnabled  = true;
+		this.verticalPosition = this.positionX;
+
+	}
+
+	var node     = line.nodes[ i ];
+	var nodeChar = 0;
+	var heritage = line.getOffsetIndentationLeft() + line.parent.parent.marginLeft;
+
+	for( var i = 0; i < line.nodes.length; i++ ){
+
+		if( heritage + line.nodes[ i ].width < this.verticalPosition ){
+			heritage += line.nodes[ i ].width;
+			continue;
+		}
+
+		node = line.nodes[ i ];
+
+        for( var j = 0; j < node.chars.length; j++ ){
+
+            if( heritage + node.chars[ j ] > this.verticalPosition ){
+                nodeChar = j;
+                break;
+            }else if( j === node.chars.length - 1 || heritage + node.chars[ j ] === this.verticalPosition ){
+                nodeChar = j + 1;
+                break;
+            }
+
+        }
+
+		break;
+
+	}
+
+	if( !node ){
+
+		node     = line.nodes[ line.nodes.length - 1 ];
+        nodeChar = node.chars.length;
+
+	}
+
+	this.verticalizing = true;
+
+	this.setNode( node, nodeChar );
+
+	this.verticalizing = false;
+
+	return this;
 
 };
