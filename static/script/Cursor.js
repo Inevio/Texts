@@ -118,6 +118,8 @@ Cursor.prototype.move = function( positions ){
 
 	}
 
+	var oldPageId = ( this.page || {} ).id;
+
 	this.line          = this.node.parent;
 	this.paragraph     = this.line.parent;
 	this.page          = this.paragraph.parent;
@@ -128,13 +130,18 @@ Cursor.prototype.move = function( positions ){
 	selectionRange.clear();
     canvasCursor.resetBlink();
 
+	if( this.page.id !== oldPageId ){
+		canvasRulerLeft.requestDraw();
+	}
+
 };
 
 Cursor.prototype.setNode = function( node, position ){
 
     console.warn('ToDo','setNode','Prevent blocked');
 
-	var checked = checkCursorPosition( node, position );
+	var checked   = checkCursorPosition( node, position );
+	var oldPageId = ( this.page || {} ).id;
 
 	node               = checked.node;
 	position           = checked.position;
@@ -158,6 +165,10 @@ Cursor.prototype.setNode = function( node, position ){
     this.updatePositionX();
     this.updatePositionY();
     canvasCursor.resetBlink();
+
+	if( this.page.id !== oldPageId ){
+		canvasRulerLeft.requestDraw();
+	}
 
     return this;
 
@@ -271,7 +282,29 @@ Cursor.prototype.updatePositionY = function(){
         this.positionY += this.paragraph.lines[ i ].height * this.paragraph.spacing;
     }
 
+	this.updateScroll();
+
     return this;
+
+};
+
+Cursor.prototype.updateScroll = function(){
+
+	// Comprobamos si hay que hacer scroll
+	if(
+		scrollTop <= this.positionY &&
+		scrollTop + canvasCursor.canvas[ 0 ].height >= this.positionY + this.line.height
+	){
+		return this;
+	}
+
+	if( scrollTop > this.positionY ){
+		canvasCursor.canvas.trigger( 'mousewheel', [ 0, 0, scrollTop - this.positionY + GAP ] );
+	}else{
+		canvasCursor.canvas.trigger( 'mousewheel', [ 0, 0, scrollTop + canvasCursor.canvas[ 0 ].height - this.positionY - this.line.height - GAP ] );
+	}
+
+	return this;
 
 };
 

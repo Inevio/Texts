@@ -74,7 +74,7 @@ var PAGEDIMENSIONS = {
     'US Letter'          : { width : 21.59, height : 27.94 },
     'US Legal'           : { width : 21.59, height : 35.56 },
     //'A4'                 : { width : 21,    height : 29.7  },
-    'A4'                 : { width : 10,    height : 29.7  },
+    'A4'                 : { width : 10,    height : 10 },
     'A5'                 : { width : 14.81, height : 20.99 },
     'JIS B5'             : { width : 18.2,  height : 25.71 },
     'B5'                 : { width : 17.6,  height : 25.01 },

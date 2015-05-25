@@ -27,7 +27,7 @@ CanvasRulerLeft.prototype.draw = function(){
     var top = 0;
 
     for( var i = 0; i < cursor.page.id; i++ ){
-        top = currentDocument.pages[ i ].height + GAP;
+        top += currentDocument.pages[ i ].height + GAP;
     }
 
     // Comprobamos si deben dibujarse los márgenes de la página actual

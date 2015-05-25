@@ -210,6 +210,47 @@ canvasCursor.canvas
 
     updateToolsLineStatus();
 
+})
+
+// Controlador del scropll
+.on( 'mousewheel', function( e, delta, x, y ){
+
+    console.log( 'mousewheel', y );
+
+    var documentHeight = currentDocument.height();
+
+    if( documentHeight <= ( canvasPages.canvas[ 0 ].height /*/ pixelRatio*/ ) ){
+        return;
+    }
+
+    var originalScrollTop = scrollTop;
+    var newScroll         = scrollTop;
+
+    // El plugin de mousewheel está ya normalizado, anteriormete teníamos un factor de correción de x30
+    newScroll -= y;
+
+    if( newScroll < 0 ){
+        newScroll = 0;
+    }else if( newScroll > documentHeight - canvasPages.canvas[ 0 ].height ){
+        newScroll = documentHeight - canvasPages.canvas[ 0 ].height;
+    }
+
+    if( originalScrollTop === newScroll ){
+        return;
+    }
+
+    console.log('newScroll',newScroll)
+
+    /*
+    updateScroll( newScroll );
+    */
+    scrollTop = newScroll;
+
+    canvasPages.requestDraw();
+    canvasCursor.resetBlink();
+    canvasRulerLeft.requestDraw();
+    scrollVItem.css( 'y', parseInt( ( scrollV.height() - scrollVItem.outerHeight() ) * ( scrollTop / maxScrollTop ), 10 ) );
+
 });
 
 // Input
