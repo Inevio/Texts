@@ -31,9 +31,8 @@ CanvasDocument.prototype.draw = function(){
     this.updateSize();
 
     // To Do -> El scroll podría estar más optimizado
-    this.height   = pageHeight;
-    maxScrollTop  = pageHeight;
-    pageHeight   -= parseInt( scrollTop, 10 );
+    this.height  = pageHeight;
+    pageHeight  -= parseInt( scrollTop, 10 );
 
     // To Do -> Renderizar solo la parte que deba mostrarse
     for( var m = 0; m < currentDocument.pages.length; m++ ){
@@ -149,14 +148,8 @@ CanvasDocument.prototype.draw = function(){
 
         }
 
-        pageHeight            += Math.round( page.height ) + GAP;
+        pageHeight  += Math.round( page.height ) + GAP;
         this.height += Math.round( page.height ) + GAP;
-
-        if( m + 1 < currentDocument.pages.length ){
-            maxScrollTop += Math.round( page.height ) + GAP;
-        }else if( ( this.canvas[ 0 ].height / pixelRatio ) < page.height ){
-            maxScrollTop += page.height - ( this.canvas[ 0 ].height / pixelRatio ) + /*(*/ GAP /** 2 )*/;
-        }
 
     }
 
