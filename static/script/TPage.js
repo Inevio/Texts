@@ -27,9 +27,28 @@ TPage.prototype.append = function( paragraph ){
 
     paragraph.updateWidth();
 
-    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
+    if( this.parent ){
+        this.reallocate();
+    }
 
     return this;
+
+};
+
+TPage.prototype.clone = function(){
+
+    var newPage = new TPage();
+
+    // Properties
+    newPage.width           = this.width;
+    newPage.height          = this.height;
+    newPage.marginTop       = this.marginTop;
+    newPage.marginRight     = this.marginRight;
+    newPage.marginBottom    = this.marginBottom;
+    newPage.marginLeft      = this.marginLeft;
+    newPage.backgroundColor = this.backgroundColor;
+
+    return newPage;
 
 };
 
@@ -45,12 +64,11 @@ TPage.prototype.insert = function( position, paragraph ){
     for( var i = position; i < this.paragraphs.length; i++ ){
 
         this.paragraphs[ i ].id = i;
-
         this.paragraphs[ i ].updateWidth();
 
     }
 
-    console.warn('ToDo','Page Insert','reallocate Page');
+    this.reallocate();
 
     return this;
 
@@ -62,6 +80,14 @@ TPage.prototype.next = function(){
 
 TPage.prototype.prev = function(){
     return this.parent.pages[ this.id - 1 ];
+};
+
+TPage.prototype.reallocate = function(){
+
+    this.parent.reallocate();
+
+    return this;
+
 };
 
 TPage.prototype.remove = function( position ){
@@ -78,7 +104,7 @@ TPage.prototype.remove = function( position ){
 
     }
 
-    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
+    this.reallocate();
 
     return this;
 

@@ -138,7 +138,7 @@ Cursor.prototype.move = function( positions ){
 
 Cursor.prototype.setNode = function( node, position ){
 
-    console.warn('ToDo','setNode','Prevent blocked');
+    // To Do -> console.warn('ToDo','setNode','Prevent blocked');
 
 	var checked   = checkCursorPosition( node, position );
 	var oldPageId = ( this.page || {} ).id;

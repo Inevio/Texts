@@ -14,7 +14,7 @@ CanvasRulerTop.prototype.constructor = CanvasRulerTop;
 
 CanvasRulerTop.prototype.draw = function(){
 
-    console.warn('ToDo','CanvasRulerTop','draw','clean');
+    // To Do -> console.warn('ToDo','CanvasRulerTop','draw','clean');
 
     this.waiting = false;
 

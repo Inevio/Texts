@@ -14,7 +14,7 @@ CanvasRulerLeft.prototype.constructor = CanvasRulerLeft;
 
 CanvasRulerLeft.prototype.draw = function(){
 
-    console.warn('ToDo','CanvasRulerLeft','draw','clean');
+    // To Do -> console.warn('ToDo','CanvasRulerLeft','draw','clean');
 
     // To Do -> Seguramente el alto no corresponde
     // To Do -> Renderizar solo la parte que deba mostrarse

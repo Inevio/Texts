@@ -15,7 +15,7 @@ CanvasDocument.prototype.constructor = CanvasDocument;
 
 CanvasDocument.prototype.draw = function(){
 
-	console.warn('ToDo','CanvasDocument','draw','clean');
+	// To Do -> console.warn('ToDo','CanvasDocument','draw','clean');
 
 	this.waiting = false;
 

@@ -215,8 +215,6 @@ canvasCursor.canvas
 // Controlador del scropll
 .on( 'mousewheel', function( e, delta, x, y ){
 
-    console.log( 'mousewheel', y );
-
     var documentHeight = currentDocument.height();
 
     if( documentHeight <= ( canvasPages.canvas[ 0 ].height /*/ pixelRatio*/ ) ){
@@ -238,8 +236,6 @@ canvasCursor.canvas
     if( originalScrollTop === newScroll ){
         return;
     }
-
-    console.log('newScroll',newScroll)
 
     /*
     updateScroll( newScroll );
