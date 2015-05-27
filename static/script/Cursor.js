@@ -291,12 +291,15 @@ Cursor.prototype.updatePositionY = function(){
 Cursor.prototype.updateScroll = function(){
 
 	// Comprobamos si hay que hacer scroll
+	// To Do -> Introducir esta optimización. Hay que tener en cuenta que si la app es más grande que la páginam se tenía 2 y se borra la segunda, al pasar a la primera debe posicionarse bien
+	/*
 	if(
 		scrollTop <= this.positionY &&
 		scrollTop + canvasCursor.canvas[ 0 ].height >= this.positionY + this.line.height
 	){
 		return this;
 	}
+	*/
 
 	if( scrollTop > this.positionY ){
 		canvasCursor.canvas.trigger( 'mousewheel', [ 0, 0, scrollTop - this.positionY + GAP ] );
