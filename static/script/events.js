@@ -216,10 +216,14 @@ canvasCursor.canvas
 .on( 'mousewheel', function( e, delta, x, y ){
 
     var documentHeight = currentDocument.height();
+    var maxScrollTop   = canvasPages.canvas[ 0 ].height * pixelRatio;
 
-    if( documentHeight <= ( canvasPages.canvas[ 0 ].height /*/ pixelRatio*/ ) ){
+    /*
+    // To Do -> Introducir esta optimización
+    if( documentHeight <= maxScrollTop ){
         return;
     }
+    */
 
     var originalScrollTop = scrollTop;
     var newScroll         = scrollTop;
@@ -229,17 +233,14 @@ canvasCursor.canvas
 
     if( newScroll < 0 ){
         newScroll = 0;
-    }else if( newScroll > documentHeight - canvasPages.canvas[ 0 ].height ){
-        newScroll = documentHeight - canvasPages.canvas[ 0 ].height;
+    }else if( newScroll > documentHeight - maxScrollTop ){
+        newScroll = documentHeight - maxScrollTop;
     }
 
     if( originalScrollTop === newScroll ){
         return;
     }
 
-    /*
-    updateScroll( newScroll );
-    */
     scrollTop = newScroll;
 
     canvasPages.requestDraw();
