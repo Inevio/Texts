@@ -1,7 +1,7 @@
 
 var CanvasCursor = function(){
 
-    console.warn('ToDo','CanvasCursor','draw','clean & range support');
+    // To Do -> console.warn('ToDo','CanvasCursor','draw','clean & range support');
 
     TCanvas.call( this );
 

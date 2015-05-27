@@ -246,7 +246,7 @@ TNode.prototype.setStyle = function( key, value ){
             update          = true;
 
         }else{
-            console.warn('unrecognised style', i, key[ i ] );
+            // To Do -> console.warn('unrecognised style', i, key[ i ] );
         }
 
     }

@@ -485,6 +485,7 @@ var handleEnter = function( dontSend ){
 var handleEnterNormal = function( dontSend ){
 
     cursor.paragraph.split( cursor.line.id, cursor.node.id, cursor.char );
+    cursor.page.reallocate();
     canvasPages.requestDraw();
     cursor.move( 1 );
 
@@ -567,8 +568,6 @@ var start = function(){
         });
 
         setViewTitle();
-
-        console.log( currentDocument );
 
     //}
 

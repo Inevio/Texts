@@ -1,7 +1,7 @@
 
 var TLine = function(){
 
-    console.warn('ToDo','TLine','Tabs support');
+    // To Do -> console.warn('ToDo','TLine','Tabs support');
 
     this.id;
     this.parent;
@@ -305,7 +305,7 @@ TLine.prototype.remove = function( position ){
         this.nodes[ i ].id--;
     }
 
-    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
+    this.reallocate();
 
     return this;
 

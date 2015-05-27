@@ -30,6 +30,11 @@ TParagraph.prototype.append = function( line ){
     line.parent = this;
 
     line.updateWidth();
+    this.updateHeight();
+
+    if( this.parent ){
+        this.parent.reallocate();
+    }
 
     return this;
 
@@ -166,14 +171,15 @@ TParagraph.prototype.insert = function( position, line ){
     for( var i = position; i < this.lines.length; i++ ){
 
         this.lines[ i ].id = i;
-
         this.lines[ i ].updateWidth();
 
     }
 
     this.updateHeight();
 
-    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
+    if( this.parent ){
+        this.parent.reallocate();
+    }
 
     return this;
 
@@ -261,6 +267,7 @@ TParagraph.prototype.reallocate = function(){
     // Determinamos en que líneas tienen que ir
     var line           = this.lines[ 0 ];
     var availableWidth = line.width;
+    var propagate      = false;
 
     for( var i = 0; i < words.length; i++ ){
 
@@ -272,7 +279,11 @@ TParagraph.prototype.reallocate = function(){
         }else{
 
             if( !this.lines[ line.id + 1 ] ){
+
                 this.append( new TLine() );
+
+                propagate = true;
+
             }
 
             line             = this.lines[ line.id + 1 ];
@@ -316,6 +327,12 @@ TParagraph.prototype.reallocate = function(){
 
         this.remove( i );
 
+        propagate = true;
+
+    }
+
+    if( propagate && this.parent ){
+        this.parent.reallocate();
     }
 
     cursor.updatePosition( true );
@@ -340,7 +357,11 @@ TParagraph.prototype.remove = function( position ){
 
     }
 
-    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
+    this.updateHeight();
+
+    if( this.parent ){
+        this.parent.reallocate();
+    }
 
     return this;
 
@@ -367,7 +388,7 @@ TParagraph.prototype.setStyle = function( key, value ){
         if( i === 'align' ){
 
             if( value === ALIGN_JUSTIFY ){
-                console.warn('ToDo','Paragraph setStyle Justify')
+                // To Do -> console.warn('ToDo','Paragraph setStyle Justify')
                 return this;
             }
 
@@ -541,7 +562,7 @@ TParagraph.prototype.setStyle = function( key, value ){
             }
 
         }else{
-            console.warn('unrecognised style', i, key[ i ] );
+            // To Do -> console.warn('unrecognised style', i, key[ i ] );
         }
 
     }
