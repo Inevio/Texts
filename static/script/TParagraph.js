@@ -103,6 +103,8 @@ TParagraph.prototype.getWords = function(){
 
             }
 
+        }else if( nodes[ i ].blocked ){
+            words = [ nodes[ i ].string ];
         }else{
             words = nodes[ i ].string.match(/( *[\S*]+ *| *[\t*]+ *| +)/g) || [''];
         }
@@ -445,6 +447,7 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             var newNode = this.lines[ 0 ].nodes[ 0 ].clone();
 
+            newNode.setBlocked( true );
             this.lines[ 0 ].insert( 0, newNode );
             newNode.slice( 0, 0 );
             this.setStyle( 'indentationLeftAdd', value );
@@ -481,7 +484,6 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             }
 
-            newNode.setBlocked( true );
             /*
             newNode.style.color          = '#000000';
             */
