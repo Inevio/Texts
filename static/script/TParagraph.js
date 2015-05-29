@@ -369,7 +369,7 @@ TParagraph.prototype.remove = function( position ){
 
 };
 
-TParagraph.prototype.setStyle = function( key, value ){
+TParagraph.prototype.setStyle = function( key, value, secondValue ){
 
     if( typeof key === 'string' ){
 
@@ -445,15 +445,13 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             value = 0.63 * CENTIMETER;
 
-            this.indentationSpecialType = INDENTATION_HANGING;
-            //this.indentationSpecialValue = value;
-
             var newNode = this.lines[ 0 ].nodes[ 0 ].clone();
 
             newNode.setBlocked( true );
             this.lines[ 0 ].insert( 0, newNode );
             newNode.slice( 0, 0 );
             this.setStyle( 'indentationLeftAdd', value );
+            this.setStyle( 'indentationSpecial', INDENTATION_HANGING, value );
 
             if( i === 'listNumber' ){
 
@@ -525,7 +523,18 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             this.reallocate();
 
-        }else if( i == 'spacing' ){
+        }else if( i === 'indentationSpecial' ){
+
+            this.indentationSpecialType  = value;
+            this.indentationSpecialValue = secondValue;
+
+            for( var j = 0; j < this.lines.length; j++ ){
+                this.lines[ j ].updateWidth();
+            }
+
+            this.reallocate();
+
+        }else if( i === 'spacing' ){
 
             if( value !== this.spacing ){
 
@@ -610,7 +619,7 @@ TParagraph.prototype.updateHeight = function(){
 
 TParagraph.prototype.updateWidth = function(){
 
-    this.width = this.parent.width - this.parent.marginLeft - this.parent.marginRight;
+    this.width = this.parent.width - this.parent.marginLeft - this.parent.marginRight - this.indentationLeft - this.indentationRight;
 
     // To Do -> Recursivo
 
