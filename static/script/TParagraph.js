@@ -445,6 +445,9 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             value = 0.63 * CENTIMETER;
 
+            this.indentationSpecialType = INDENTATION_HANGING;
+            //this.indentationSpecialValue = value;
+
             var newNode = this.lines[ 0 ].nodes[ 0 ].clone();
 
             newNode.setBlocked( true );
@@ -487,8 +490,6 @@ TParagraph.prototype.setStyle = function( key, value ){
             /*
             newNode.style.color          = '#000000';
             */
-            this.indentationSpecialType  = INDENTATION_HANGING;
-            this.indentationSpecialValue = value;
             /*
             this.lines[ 0 ].tabList      = getTabsInLine( this.lines[ 0 ] );
 
@@ -539,19 +540,7 @@ TParagraph.prototype.setStyle = function( key, value ){
                 this.lines[ i ].width -= value;
             }
 
-            if( value >= 0 ){
-
-                for( i = 0; i < this.lines.length; i++ ){
-                    this.lines[ i ].reallocate();
-                }
-
-            }else{
-
-                for( i = 0; i < this.lines.length; i++ ){
-                    this.lines[ i ].reallocateInverse();
-                }
-
-            }
+            this.reallocate();
 
         }else if( i == 'spacing' ){
 

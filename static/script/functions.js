@@ -348,6 +348,12 @@ var handleBackspaceNormal = function( dontSend ){
         node.remove( char - 1 );
         node.deleteIfEmpty();
 
+    }else if( !cursor.paragraphChar && cursor.paragraph.listMode ){
+
+        cursor.paragraph.setStyle('listNone');
+        updateToolsLineStatus();
+        return handleBackspaceNormal();
+
     }else if( cursor.line.id ){
 
         //var paragraph = cursor.paragraph;
@@ -365,6 +371,7 @@ var handleBackspaceNormal = function( dontSend ){
 
     }
 
+    updateToolsLineStatus();
     canvasPages.requestDraw();
 
 };
