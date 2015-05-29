@@ -457,31 +457,14 @@ TParagraph.prototype.setStyle = function( key, value ){
 
             if( i === 'listNumber' ){
 
-                /*
                 this.listMode = LIST_NUMBER;
 
-                var number = 1;
-
-                if( paragraphId > 0 ){
-
-                    if( page.paragraphs[ paragraphId - 1 ].listMode === LIST_NUMBER ){
-                        number = parseInt( page.paragraphs[ paragraphId - 1 ].lines[ 0 ].nodes[ 0 ].string, 10 ) + 1;
-                    }
-
-                }else if( pageId > 0 ){
-
-                    if( currentDocument.pages[ pageId - 1 ].paragraphs[ currentDocument.pages[ pageId - 1 ].paragraphs.length - 1 ].listMode === LIST_NUMBER ){
-                        number = parseInt( currentDocument.pages[ pageId - 1 ].paragraphs[ currentDocument.pages[ pageId - 1 ].paragraphs.length - 1 ].lines[ 0 ].nodes[ 0 ].string, 10 ) + 1;
-                    }
-
-                }
-
-                newNode.string = number + '.' + '\t';
-                */
+                newNode.insert( 0, '1.' + '\t' );
 
             }else{
 
-                this.listMode  = LIST_BULLET;
+                this.listMode = LIST_BULLET;
+
                 newNode.insert( 0, String.fromCharCode( 8226 ) + '\t' );
                 newNode.setStyle( 'font-family', 'Symbol' );
 
@@ -582,7 +565,31 @@ TParagraph.prototype.split = function( lineId, nodeId, char ){
     newLine.append( newNode );
 
     if( this.listMode ){
-        newLine.insert( 0, this.lines[ 0 ].nodes[ 0 ].clone() );
+
+        var newNode = this.lines[ 0 ].nodes[ 0 ].clone();
+
+        newLine.insert( 0, newNode );
+
+        if( this.listMode === LIST_NUMBER ){
+
+            var newNumber = parseInt( newNode.string, 10 ) + 1;
+
+            newNode.replace( newNumber + '.\t' );
+
+            var next = newParagraph.next();
+
+            while( next && next.lines[ 0 ].nodes[ 0 ].string === newNumber + '.\t' ){
+
+                newNumber = newNumber + 1;
+
+                next.lines[ 0 ].nodes[ 0 ].replace( newNumber + '.\t' );
+
+                next = next.next();
+
+            }
+
+        }
+
     }
 
     return this;

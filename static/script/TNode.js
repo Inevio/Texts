@@ -208,6 +208,16 @@ TNode.prototype.deleteIfEmpty = function(){
 
 };
 
+TNode.prototype.replace = function( text ){
+
+    this.string = text.toString();
+
+    this.updateWidth();
+
+    return this;
+
+};
+
 TNode.prototype.setBlocked = function( value ){
 
     this.blocked = value;
