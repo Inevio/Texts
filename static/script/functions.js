@@ -491,6 +491,15 @@ var handleEnter = function( dontSend ){
 
 var handleEnterNormal = function( dontSend ){
 
+    if(
+        cursor.paragraph.listMode &&
+        !cursor.line.id &&
+        !cursor.line.nodes[ 1 ].string.length
+    ){
+        cursor.paragraph.setStyle('listNone');
+        return updateToolsLineStatus();
+    }
+
     cursor.paragraph.split( cursor.line.id, cursor.node.id, cursor.char );
     cursor.page.reallocate();
     canvasPages.requestDraw();
