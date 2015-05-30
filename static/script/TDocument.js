@@ -20,6 +20,45 @@ TDocument.prototype.append = function( page ){
 
 };
 
+TDocument.prototype.getRaw = function(){
+
+    var paragraphList = [];
+
+    for( var i = 0; i < this.pages.length; i++ ){
+
+        for( var j = 0; j < this.pages[ i ].paragraphs.length; j++ ){
+            paragraphList.push( this.pages[ i ].paragraphs[ j ].getRaw() );
+        }
+
+    }
+
+    return {
+
+        info : {
+
+            description : INFO_DESCRIPTION,
+            generator   : INFO_GENERATOR,
+            version     : INFO_VERSION
+
+        },
+
+        defaultPage : {
+
+            height       : this.pages[ 0 ].height / CENTIMETER,
+            width        : this.pages[ 0 ].width / CENTIMETER,
+            marginTop    : this.pages[ 0 ].marginTop / CENTIMETER,
+            marginLeft   : this.pages[ 0 ].marginLeft / CENTIMETER,
+            marginBottom : this.pages[ 0 ].marginBottom / CENTIMETER,
+            marginRight  : this.pages[ 0 ].marginRight / CENTIMETER
+
+        },
+
+        paragraphList : paragraphList
+
+    };
+
+};
+
 TDocument.prototype.height = function(){
 
     var height = GAP;

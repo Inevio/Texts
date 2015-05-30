@@ -120,8 +120,8 @@ TPage.prototype.setBackgroundColor = function( color ){
 
 TPage.prototype.setDimensions = function( width, height ){
 
-    this.width  = parseInt( width, 10 ) || 0;
-    this.height = parseInt( height, 10 ) || 0;
+    this.width  = width || 0;
+    this.height = height || 0;
 
     return this;
 
@@ -129,10 +129,10 @@ TPage.prototype.setDimensions = function( width, height ){
 
 TPage.prototype.setMargins = function( top, right, bottom, left ){
 
-    this.marginTop    = parseInt( top, 10 ) || 0;
-    this.marginRight  = parseInt( right, 10 ) || 0;
-    this.marginBottom = parseInt( bottom, 10 ) || 0;
-    this.marginLeft   = parseInt( left, 10 ) || 0;
+    this.marginTop    = top || 0;
+    this.marginRight  = right || 0;
+    this.marginBottom = bottom || 0;
+    this.marginLeft   = left || 0;
 
     return this;
 
