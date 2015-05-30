@@ -69,14 +69,18 @@ TParagraph.prototype.getHash = function(){
 
 };
 
-TParagraph.prototype.getRaw = function(){
+TParagraph.prototype.getRaw = function( ignoreNodes ){
 
     var nodeList = [];
 
-    for( var i = 0; i < this.lines.length; i++ ){
+    if( !ignoreNodes ){
 
-        for( var j = 0; j < this.lines[ i ].nodes.length; j++ ){
-            nodeList.push( this.lines[ i ].nodes[ j ].getRaw() );
+        for( var i = 0; i < this.lines.length; i++ ){
+
+            for( var j = 0; j < this.lines[ i ].nodes.length; j++ ){
+                nodeList.push( this.lines[ i ].nodes[ j ].getRaw() );
+            }
+
         }
 
     }

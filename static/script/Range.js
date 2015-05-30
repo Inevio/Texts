@@ -219,6 +219,37 @@ Range.prototype.isValid = function(){
 
 };
 
+Range.prototype.getRaw = function(){
+
+	var list                 = [];
+	var currentParagraphHash = [ -1, -1 ];
+
+	this.mapNodes( function( node, start, stop ){
+
+		if( compareHashes( node.parent.parent.getHash(), currentParagraphHash ) !== 0 ){
+
+			list.unshift( node.parent.parent.getRaw( true ) );
+
+			currentParagraphHash = node.parent.parent.getHash();
+
+		}
+
+		var rawNode = node.getRaw();
+
+		rawNode.string = rawNode.string.slice( start, stop );
+
+		if( rawNode.string.length ){
+			list[ 0 ].nodeList.push( rawNode );
+		}
+
+	});
+
+	list = list.reverse();
+
+	return list;
+
+};
+
 Range.prototype.mapNodes = function( handler ){
 
 	var range     = this.getLimits();
