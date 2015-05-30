@@ -497,14 +497,28 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
                 return;
             }
 
-            value                        = this.indentationLeft * -1;
-            this.listMode                = LIST_NONE;
-            this.indentationSpecialType  = INDENTATION_NONE;
-            this.indentationSpecialValue = 0;
+            if( this.listMode === LIST_NUMBER ){
+
+                var number = parseInt( this.lines[ 0 ].nodes[ 0 ].string, 10 );
+                var next   = this.next();
+
+                while( next && next.lines[ 0 ].nodes[ 0 ].string === ( number + 1 ) + '.\t' ){
+
+                    next.lines[ 0 ].nodes[ 0 ].replace( number + '.\t' );
+
+                    number = number + 1;
+                    next   = next.next();
+
+                }
+
+            }
+
+            this.listMode = LIST_NONE;
 
             // Eliminamos el bullet
             this.lines[ 0 ].remove( 0 );
-            this.setStyle( 'indentationLeftAdd', value );
+            this.setStyle( 'indentationSpecial', INDENTATION_NONE, 0 );
+            this.setStyle( 'indentationLeftAdd', this.indentationLeft * -1 );
 
         }else if( i === 'indentationLeftAdd' ){
 
