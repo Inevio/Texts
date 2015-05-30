@@ -1,2 +1,0 @@
-
-var RawParagraph = function(){};

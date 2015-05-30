@@ -122,6 +122,18 @@ TNode.prototype.getPositionY = function(){
 
 };
 
+TNode.prototype.getRaw = function(){
+
+    return {
+
+        blocked : this.blocked,
+        string  : this.string,
+        style   : cloneObject( this.style )
+
+    };
+
+};
+
 TNode.prototype.insert = function( position, content ){
 
     this.string = this.string.slice( 0, position ) + content + this.string.slice( position );

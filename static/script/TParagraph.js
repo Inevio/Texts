@@ -69,6 +69,33 @@ TParagraph.prototype.getHash = function(){
 
 };
 
+TParagraph.prototype.getRaw = function(){
+
+    var nodeList = [];
+
+    for( var i = 0; i < this.lines.length; i++ ){
+
+        for( var j = 0; j < this.lines[ i ].nodes.length; j++ ){
+            nodeList.push( this.lines[ i ].nodes[ j ].getRaw() );
+        }
+
+    }
+
+    return {
+
+        align                   : this.align,
+        indentationLeft         : this.indentationLeft / CENTIMETER,
+        indentationRight        : this.indentationRight / CENTIMETER,
+        indentationSpecialType  : this.indentationSpecialType,
+        indentationSpecialValue : this.indentationSpecialValue / CENTIMETER,
+        listMode                : this.listMode,
+        nodeList                : nodeList,
+        spacing                 : this.spacing
+
+    };
+
+};
+
 TParagraph.prototype.getWords = function(){
 
     // To Do -> Revisar calidad del código

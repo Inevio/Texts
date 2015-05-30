@@ -1,2 +1,0 @@
-
-var RawNode = function(){};
