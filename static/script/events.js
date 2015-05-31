@@ -64,6 +64,7 @@ wz.system.on( 'paste', function( paste ){
         insertPlainText( content );
     }
 
+    canvasPages.requestDraw();
     input.focus();
 
 });

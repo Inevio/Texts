@@ -29,6 +29,24 @@ TLine.prototype.append = function( node ){
 
 };
 
+TLine.prototype.deleteEmptyNodes = function(){
+
+    var isList = this.parent.listMode;
+
+    for( var i = 0; i < this.nodes.length; i++ ){
+
+        if(
+            this.id ||
+            ( !this.id && isList && i > 1 ) ||
+            ( !this.id && !isList && i > 0 )
+        ){
+            this.nodes[ i ].deleteIfEmpty();
+        }
+
+    }
+
+};
+
 TLine.prototype.getIndentationLeft = function(){
 
     if( !this.id && this.parent.indentationSpecialType === INDENTATION_FIRSTLINE ){
@@ -224,7 +242,7 @@ TLine.prototype.getWords = function(){
 
 };
 
-TLine.prototype.insert = function( position, node ){
+TLine.prototype.insert = function( position, node, dontReallocate ){
 
     if( node.parent ){
         node.parent.remove( node.id );
@@ -237,10 +255,11 @@ TLine.prototype.insert = function( position, node ){
         this.nodes[ i ].id = i;
     }
 
-    this.reallocate();
-    this.updateHeight();
+    if( !dontReallocate ){
+        this.reallocate();
+    }
 
-    // To Do -> Hacer reallocate si es conveniente (a decision del programador)
+    this.updateHeight();
 
     return this;
 

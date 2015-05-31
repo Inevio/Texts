@@ -81,7 +81,8 @@ var clipboardCopy = function( e ){
 
     }
 
-    res['text/plain'] = res['text/plain'].join('\r\n');
+    res['text/plain']        = res['text/plain'].join('\r\n');
+    res['text/inevio-texts'] = JSON.stringify( res['text/inevio-texts'] );
 
     return res;
 
@@ -558,6 +559,57 @@ var insertPlainText = function( text ){
         // Si la línea no está vacía
         if( text[ i ].length ){
             handleCharNormal( text[ i ] );
+        }
+
+    }
+
+};
+
+var insertTextsText = function( text ){
+
+    var obj = JSON.parse( text );
+
+    if( selectionRange.isValid() ){
+        handleBackspaceSelection();
+    }
+
+    var newNode, tmp;
+
+    for( var i = 0; i < obj.length; i++ ){
+
+        if( i ){
+            handleEnter();
+        }
+
+        for( var j = 0; j < obj[ i ].nodeList.length; j++ ){
+
+            tmp = obj[ i ].nodeList[ j ];
+
+            if( !tmp.string.length ){
+                continue;
+            }
+
+            newNode = new TNode();
+
+            if( !cursor.char ){
+                cursor.line.insert( cursor.node.id, newNode, true );
+            }else if( cursor.char === cursor.node.string.length ){
+                cursor.line.insert( cursor.node.id + 1, newNode, true );
+            }else{
+
+                cursor.node.split( cursor.char );
+                cursor.line.insert( cursor.node.id + 1, newNode, true );
+
+            }
+
+            newNode.replace( tmp.string );
+
+            for( var k in tmp.style ){
+                newNode.setStyle( k, tmp.style[ k ] );
+            }
+
+            cursor.setNode( newNode, newNode.string.length );
+
         }
 
     }
