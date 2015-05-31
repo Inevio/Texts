@@ -88,6 +88,20 @@ var clipboardCopy = function( e ){
 
 };
 
+var clipboardCut = function( e ){
+
+    var res = clipboardCopy( e );
+
+    if( selectionRange.isValid() ){
+        handleBackspaceSelection();
+    }
+
+    canvasPages.requestDraw();
+
+    return res;
+
+};
+
 var getElementsByPosition = function( posX, posY ){
 
     var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, charList;
