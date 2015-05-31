@@ -34,6 +34,13 @@ wz.system.on( 'copy', function( copy ){
 
 });
 
+wz.system.on( 'cut', function( cut ){
+
+    cut( clipboardCut() );
+    input.focus();
+
+});
+
 wz.system.on( 'paste', function( paste ){
 
     var content = paste();
