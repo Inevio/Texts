@@ -14,6 +14,7 @@ var TParagraph = function(){
     this.indentationSpecialValue = 0;
     this.listMode                = LIST_NONE;
     this.spacing                 = 1;
+    this.splitting               = false;
     this.reallocating            = false;
     this.width                   = 0;
     //this.split                   = 0;
@@ -351,6 +352,10 @@ TParagraph.prototype.reallocate = function(){
     // Limpiamos líneas vacías
     for( var i = 0; i < this.lines.length; ){
 
+        if( !this.splitting ){
+            this.lines[ i ].deleteEmptyNodes();
+        }
+
         if( this.lines[ i ].nodes.length ){
 
             i++;
@@ -610,6 +615,8 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
 
 TParagraph.prototype.split = function( lineId, nodeId, char ){
 
+    this.splitting = true;
+
     var newParagraph = this.clone();
     var newLine      = new TLine();
     var newNode      = this.lines[ lineId ].nodes[ nodeId ].split( char ).parent.nodes[ nodeId + 1 ];
@@ -645,6 +652,8 @@ TParagraph.prototype.split = function( lineId, nodeId, char ){
         }
 
     }
+
+    this.splitting = false;
 
     return this;
 
