@@ -20,6 +20,52 @@ win
 
 .on( 'ui-view-restore ui-view-focus', function(){
     input.focus();
+})
+
+.key( 'ctrl+c, cmd+c', function(){
+    textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento copy
+});
+
+// Copy, cut and paste
+wz.system.on( 'copy', function( copy ){
+
+    copy( clipboardCopy() );
+    input.focus();
+
+});
+
+wz.system.on( 'paste', function( paste ){
+
+    var content = paste();
+    var type    = null;
+
+    for( var i = 0; i < PASTE_FORMATS.length; i++ ){
+
+        if( typeof content[ PASTE_FORMATS[ i ] ] !== 'undefined' ){
+
+            type    = PASTE_FORMATS[ i ];
+            content = content[ type ];
+
+            break;
+
+        }
+
+    }
+
+    if( !type ){
+        return;
+    }
+
+    if( type === 'text/inevio-texts' ){
+        insertTextsText( content );
+    //}else if( type === 'text/html' ){
+        //insertHtmlText( content );
+    }else if( type === 'text/plain' ){
+        insertPlainText( content );
+    }
+
+    input.focus();
+
 });
 
 // Selections
