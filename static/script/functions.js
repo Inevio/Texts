@@ -58,6 +58,35 @@ var compareHashes = function( first, second ){
 
 };
 
+var clipboardCopy = function( e ){
+
+    var raw = selectionRange.getRaw();
+    var res = {
+
+        'text/plain'        : [],
+        //'text/html'         : '',
+        'text/inevio-texts' : raw
+
+    };
+
+    for( var i = 0; i < raw.length; i++ ){
+
+        var text = '';
+
+        for( var j = 0; j < raw[ i ].nodeList.length; j++ ){
+            text += raw[ i ].nodeList[ j ].string;
+        }
+
+        res['text/plain'].push( text );
+
+    }
+
+    res['text/plain'] = res['text/plain'].join('\r\n');
+
+    return res;
+
+};
+
 var getElementsByPosition = function( posX, posY ){
 
     var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, charList;
@@ -504,6 +533,34 @@ var handleEnterNormal = function( dontSend ){
     cursor.page.reallocate();
     canvasPages.requestDraw();
     cursor.move( 1 );
+
+};
+
+var insertPlainText = function( text ){
+
+    if( selectionRange.isValid() ){
+        handleBackspaceSelection();
+    }
+
+    /*text = text.replace( /\t/g, ' ' ); // To Do -> Soportar tabuladores*/
+    text = text.replace( /\r\n/g, '\n' );
+    text = text.replace( /\r/g, '\n' );
+    text = text.split('\n');
+
+    // Si no hay ningún salto de línea
+    for( var i = 0; i < text.length; i++ ){
+
+        // Si no es la primera línea
+        if( i ){
+            handleEnter();
+        }
+
+        // Si la línea no está vacía
+        if( text[ i ].length ){
+            handleCharNormal( text[ i ] );
+        }
+
+    }
 
 };
 

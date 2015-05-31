@@ -92,4 +92,4 @@ var PARAGRAPH_SPLIT_NONE = 0;
 var PARAGRAPH_SPLIT_START = 1;
 var PARAGRAPH_SPLIT_MIDDLE = 2;
 var PARAGRAPH_SPLIT_END = 3;
-var PASTE_FORMATS = [ 'text/inevio-texts', 'text/html', 'text/plain' ];
+var PASTE_FORMATS = [ 'text/inevio-texts', /*'text/html',*/ 'text/plain' ];
