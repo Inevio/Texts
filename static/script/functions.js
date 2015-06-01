@@ -654,6 +654,52 @@ var normalizeColor = function( color ){
 
 };
 
+var openFile = function( structureId ){
+
+    // To Do -> Error
+
+    wz.fs( structureId, function( error, structure ){
+
+        if( structure.formats['inevio-texts'] ){
+
+            structure.formats['inevio-texts'].read( function( error, data ){
+
+                console.log( error, data, JSON.parse( data ) );
+
+                // Asociamos todos los datos del fichero con sus variables correspondientes
+                /*
+                currentOpenFile = structure;
+                setViewTitle( currentOpenFile.name );
+                */
+                start( JSON.parse( data ) );
+                /*
+                start();
+                */
+
+            });
+
+        }else if( structure.mime === 'application/inevio-texts' ){
+
+            console.warn('Deprecated');
+            structure.read( function( error, data ){
+
+                // Asociamos todos los datos del fichero con sus variables correspondientes
+                currentOpenFile = structure;
+
+                setViewTitle( currentOpenFile.name );
+                processFile( data );
+                start();
+
+            });
+
+        }else{
+            alert( 'FILE FORMAT NOT RECOGNIZED' );
+        }
+
+    });
+
+};
+
 var setViewTitle = function( name ){
 
     if( !name ){
