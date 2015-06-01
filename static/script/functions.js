@@ -664,51 +664,49 @@ var setViewTitle = function( name ){
 
 };
 
-var start = function(){
+var start = function( document ){
 
     input.focus();
 
     currentDocument = new TDocument();
 
-    //if( !currentOpenFile ){
+    var page      = new TPage();
+    var paragraph = new TParagraph();
+    var line      = new TLine();
+    var node      = new TNode();
 
-        var page      = new TPage();
-        var paragraph = new TParagraph();
-        var line      = new TLine();
-        var node      = new TNode();
+    page
+    .setDimensions(
 
-        page
-        .setDimensions(
+        document.defaultPage.width * TWIP_TO_PIXEL,
+        document.defaultPage.height * TWIP_TO_PIXEL
 
-            PAGEDIMENSIONS['A4'].width * CENTIMETER,
-            PAGEDIMENSIONS['A4'].height * CENTIMETER
+    )
+    .setMargins(
 
-        )
-        .setMargins(
+        document.defaultPage.marginTop * TWIP_TO_PIXEL,
+        document.defaultPage.marginRight * TWIP_TO_PIXEL,
+        document.defaultPage.marginBottom * TWIP_TO_PIXEL,
+        document.defaultPage.marginLeft * TWIP_TO_PIXEL
 
-            MARGIN['Normal'].top * CENTIMETER,
-            MARGIN['Normal'].right * CENTIMETER,
-            MARGIN['Normal'].bottom * CENTIMETER,
-            MARGIN['Normal'].left * CENTIMETER
+    );
 
-        );
+    currentDocument.append( page );
+    page.append( paragraph );
+    paragraph.append( line );
+    line.append( node );
 
-        currentDocument.append( page );
-        page.append( paragraph );
-        paragraph.append( line );
-        line.append( node );
+    node.setStyle({
 
-        node.setStyle({
+        'color'       : '#000000',
+        'font-family' : 'Cambria',
+        'font-size'   : 12
 
-            'color'       : '#000000',
-            'font-family' : 'Cambria',
-            'font-size'   : 12
+    });
 
-        });
-
-        setViewTitle();
-
-    //}
+    /*
+    setViewTitle();
+    */
 
     cursor.setNode( node, 0 );
 

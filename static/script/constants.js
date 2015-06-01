@@ -38,7 +38,7 @@ var INDENTATION_FIRSTLINE = 1;
 var INDENTATION_HANGING = 2;
 var INFO_DESCRIPTION = 'Inevio Texts File';
 var INFO_GENERATOR = 'Inevio Texts';
-var INFO_VERSION = 1;
+var INFO_VERSION = '1.1';
 var KEY_BACKSPACE = 8;
 var KEY_TAB = 9;
 var KEY_ENTER = 13;
@@ -53,12 +53,12 @@ var LIST_NUMBER = 2;
 var LINESPACING = [ '1.0', '1.15', '1.5', '2.0', '2.5', '3.0' ];
 var MARGIN = {
 
-    'Normal'              : { top : 2.54, left : 2.54, bottom : 2.54, right : 2.54 },
-    'Narrow'              : { top : 1.27, left : 1.27, bottom : 1.27, right : 1.27 },
-    'Moderate'            : { top : 2.54, left : 1.9,  bottom : 2.54, right : 1.9  },
-    'Wide'                : { top : 2.54, left : 5.08, bottom : 2.54, right : 5.08 },
-    'Mirrored'            : { top : 2.54, left : 3.17, bottom : 2.54, right : 2.54 },
-    'Office 2003 Default' : { top : 2.54, left : 3.17, bottom : 2.54, right : 3.17 }
+    'Normal'              : { top : 1440, left : 1440, bottom : 1440, right : 1440 },
+//    'Narrow'              : { top : 1.27, left : 1.27, bottom : 1.27, right : 1.27 },
+//    'Moderate'            : { top : 2.54, left : 1.9,  bottom : 2.54, right : 1.9  },
+//    'Wide'                : { top : 2.54, left : 5.08, bottom : 2.54, right : 5.08 },
+//    'Mirrored'            : { top : 2.54, left : 3.17, bottom : 2.54, right : 2.54 },
+//    'Office 2003 Default' : { top : 2.54, left : 3.17, bottom : 2.54, right : 3.17 }
 
 };
 var MOUSE_NORMAL = 0;
@@ -71,21 +71,20 @@ var MOUSE_STATUS = [
 ];
 var PAGEDIMENSIONS = {
 
-    'US Letter'          : { width : 21.59, height : 27.94 },
-    'US Legal'           : { width : 21.59, height : 35.56 },
-    //'A4'                 : { width : 21,    height : 29.7  },
-    'A4'                 : { width : 10,    height : 10 },
-    'A5'                 : { width : 14.81, height : 20.99 },
-    'JIS B5'             : { width : 18.2,  height : 25.71 },
-    'B5'                 : { width : 17.6,  height : 25.01 },
-    'Envelope #10'       : { width : 10.48, height : 24.13 },
-    'Envelope DL'        : { width : 11.01, height : 22.01 },
-    'Tabloid'            : { width : 27.94, height : 43.17 },
-    'A3'                 : { width : 29.7,  height : 42.01 },
-    'Tabloid Oversize'   : { width : 30.48, height : 45.71 },
-    'ROC 16K'            : { width : 19.68, height : 27.3  },
-    'Envelope Choukei 3' : { width : 11.99, height : 23.49 },
-    'Super B/A3'         : { width : 33.02, height : 48.25 }
+//    'US Letter'          : { width : 21.59, height : 27.94 },
+//    'US Legal'           : { width : 21.59, height : 35.56 },
+    'A4'                 : { width : 11907,    height : 16839  },
+//    'A5'                 : { width : 14.81, height : 20.99 },
+//    'JIS B5'             : { width : 18.2,  height : 25.71 },
+//    'B5'                 : { width : 17.6,  height : 25.01 },
+//    'Envelope #10'       : { width : 10.48, height : 24.13 },
+//    'Envelope DL'        : { width : 11.01, height : 22.01 },
+//    'Tabloid'            : { width : 27.94, height : 43.17 },
+//    'A3'                 : { width : 29.7,  height : 42.01 },
+//    'Tabloid Oversize'   : { width : 30.48, height : 45.71 },
+//    'ROC 16K'            : { width : 19.68, height : 27.3  },
+//    'Envelope Choukei 3' : { width : 11.99, height : 23.49 },
+//    'Super B/A3'         : { width : 33.02, height : 48.25 }
 
 };
 var PARAGRAPH_SPLIT_NONE = 0;
@@ -93,3 +92,4 @@ var PARAGRAPH_SPLIT_START = 1;
 var PARAGRAPH_SPLIT_MIDDLE = 2;
 var PARAGRAPH_SPLIT_END = 3;
 var PASTE_FORMATS = [ 'text/inevio-texts', /*'text/html',*/ 'text/plain' ];
+var TWIP_TO_PIXEL = 0.06666666666667;
