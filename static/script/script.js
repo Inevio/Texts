@@ -118,7 +118,51 @@ var marginsCode        = '';
 
 // Start
 if( !params ){
-    start();
+
+    start({
+
+        info : {},
+        defaultPage : {
+
+            height       : PAGEDIMENSIONS['A4'].height,
+            width        : PAGEDIMENSIONS['A4'].width,
+            marginTop    : MARGIN['Normal'].top,
+            marginLeft   : MARGIN['Normal'].left,
+            marginBottom : MARGIN['Normal'].bottom,
+            marginRight  : MARGIN['Normal'].right
+
+        },
+        paragraphList : [
+
+            {
+
+                align            : 0,
+                indentationLeft  : 0,
+                indentationRight : 0,
+                spacing          : 1,
+                nodeList         : [
+
+                    {
+
+                        string : "",
+                        style  : {
+
+                            'color'       : '#000000',
+                            'font-family' : 'Cambria',
+                            'font-size'   : 12
+
+                        }
+
+                    }
+
+                ]
+
+            }
+
+        ]
+
+    });
+
 }else{
 
     /*
