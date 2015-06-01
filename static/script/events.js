@@ -26,6 +26,17 @@ win
     textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento copy
 });
 
+// Open file
+win
+.on( 'ui-view-ready', function(){
+
+    // To Do -> Comprobar que params no va vacio
+    if( params && params.command === 'openFile' ){
+        openFile( params.data );
+    }
+
+})
+
 // Copy, cut and paste
 wz.system.on( 'copy', function( copy ){
 
@@ -463,6 +474,18 @@ input
 
     compositionCounter = 0;
     compositionEnded   = true;
+
+});
+
+// Save button
+saveButton
+.on( 'click', function(){
+
+    console.log( 'save',currentDocument.getRaw() );
+
+    wz.tool.textsDocumentToDocx( 'prueba.docx', 'root', currentDocument.getRaw(), function( error, result ){
+        console.log( arguments );
+    });
 
 });
 
