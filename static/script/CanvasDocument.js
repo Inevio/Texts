@@ -93,16 +93,7 @@ CanvasDocument.prototype.draw = function(){
                             for( var l = 0; l < tracks.length; l++ ){
 
                                 if( tracks[ l ][ 0 ] === ' ' || tracks[ l ][ 0 ] === '\t' ){
-
-                                    if(
-                                        paragraph.align === ALIGN_JUSTIFY &&
-                                        node.justifyCharList
-                                    ){
-                                        trackHeritage = node.justifyCharList[ trackChars + tracks[ l ].length - 1 ];
-                                    }else{
-                                        trackHeritage = node.chars[ trackChars + tracks[ l ].length - 1 ];
-                                    }
-
+                                    trackHeritage = node.visualChars[ trackChars + tracks[ l ].length - 1 ];
                                 }else if( tracks[ l ] ){
                                     this.ctx.fillText( tracks[ l ], startX + trackHeritage, startY );
                                 }
@@ -113,7 +104,7 @@ CanvasDocument.prototype.draw = function(){
 
                         }
 
-                        wHeritage += node.justifyWidth || node.width;
+                        wHeritage += node.visualWidth;
 
                         if( !node.style['text-decoration-underline'] ){
                             continue;
