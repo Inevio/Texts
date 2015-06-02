@@ -104,7 +104,7 @@ var clipboardCut = function( e ){
 
 var getElementsByPosition = function( posX, posY ){
 
-    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar, charList;
+    var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar;
 
     // Buscamos la posición vertical
     var height = -scrollTop;
@@ -204,15 +204,13 @@ var getElementsByPosition = function( posX, posY ){
 
         for( nodeId = 0; nodeId < line.nodes.length; nodeId++ ){
 
-            if( width <= posX && line.nodes[ nodeId ].width + width >= posX ){
+            if( width <= posX && line.nodes[ nodeId ].visualWidth + width >= posX ){
 
                 node = line.nodes[ nodeId ];
 
                 for( nodeChar = 0; nodeChar < node.string.length; ){
 
-                    charList = node.justifyCharList || node.chars;
-
-                    if( charList[ nodeChar ] - ( ( charList[ nodeChar ] - ( charList[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
+                    if( node.visualChars[ nodeChar ] - ( ( node.visualChars[ nodeChar ] - ( node.visualChars[ nodeChar - 1 ] || 0 ) ) / 2 ) + width >= posX ){
                         break;
                     }
 
@@ -225,7 +223,7 @@ var getElementsByPosition = function( posX, posY ){
 
             }
 
-            width    += line.nodes[ nodeId ].width;
+            width    += line.nodes[ nodeId ].visualWidth;
             lineChar += line.nodes[ nodeId ].string.length;
 
         }

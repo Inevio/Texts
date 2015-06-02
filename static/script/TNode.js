@@ -1,23 +1,21 @@
 
 var TNode = function(){
 
-    this.id     = undefined;
-    this.parent = undefined;
-    this.chars  = [];
-    this.uniqId = TNode.uniqId++;
-    //this.justifyCharList = [];
+    this.id          = undefined;
+    this.parent      = undefined;
+    this.chars       = [];
+    this.visualChars = [];
 
     // Properties
-    this.blocked   = false;
-    this.height    = 0;
-    this.string    = '';
-    this.style     = {};
-    this.width     = 0;
-    this.splitting = false;
+    this.blocked     = false;
+    this.height      = 0;
+    this.string      = '';
+    this.style       = {};
+    this.width       = 0;
+    this.visualWidth = 0;
+    this.splitting   = false;
 
 };
-
-TNode.uniqId = 0;
 
 TNode.prototype.clone = function(){
 
@@ -70,17 +68,11 @@ TNode.prototype.getPositionX = function( nodeChar ){
 
     // Posicion dentro de la linea
     for( i = 0; i < this.id; i++ ){
-        x += this.parent.nodes[ i ].justifyWidth || this.parent.nodes[ i ].width;
+        x += this.parent.nodes[ i ].visualWidth;
     }
 
     if( nodeChar > 0 ){
-
-        if( this.justifyCharList ){
-            x += this.justifyCharList[ nodeChar - 1 ];
-        }else{
-            x += this.chars[ nodeChar - 1 ];
-        }
-
+        x += this.visualChars[ nodeChar - 1 ];
     }
 
     return x;
@@ -353,6 +345,26 @@ TNode.prototype.updateHeight = function(){
     if( lineHeight !== this.parent.height ){
         this.parent.updateHeight();
     }
+
+    return this;
+
+};
+
+TNode.prototype.updateVisualWidth = function( increment ){
+
+    this.visualChars = [];
+
+    for( var i = 0; i < this.string.length; i++ ){
+
+        if( this.string[ i ] !== ' ' ){
+            this.visualChars.push( this.chars[ i ] );
+        }else{
+            this.visualChars.push( this.chars[ i ] + increment );
+        }
+
+    }
+
+    this.visualWidth = this.visualChars[ this.visualChars.length - 1 ] || 0;
 
     return this;
 

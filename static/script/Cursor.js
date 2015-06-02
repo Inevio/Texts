@@ -242,17 +242,11 @@ Cursor.prototype.updatePositionX = function(){
 
     // Posicion dentro de la linea
     for( var i = 0; i < this.node.id; i++ ){
-        this.positionX += this.line.nodes[ i ].justifyWidth || this.line.nodes[ i ].width;
+        this.positionX += this.line.nodes[ i ].visualWidth;
     }
 
     if( this.char > 0 ){
-
-        if( this.node.justifyCharList ){
-            this.positionX += this.node.justifyCharList[ this.char - 1 ];
-        }else{
-            this.positionX += this.node.chars[ this.char - 1 ];
-        }
-
+        this.positionX += this.node.visualChars[ this.char - 1 ];
     }
 
     return this;
@@ -361,10 +355,10 @@ Cursor.prototype.verticalMove = function( positions ){
 
         for( var j = 0; j < node.chars.length; j++ ){
 
-            if( heritage + node.chars[ j ] > this.verticalPosition ){
+            if( heritage + node.visualChars[ j ] > this.verticalPosition ){
                 nodeChar = j;
                 break;
-            }else if( j === node.chars.length - 1 || heritage + node.chars[ j ] === this.verticalPosition ){
+            }else if( j === node.visualChars.length - 1 || heritage + node.visualChars[ j ] === this.verticalPosition ){
                 nodeChar = j + 1;
                 break;
             }

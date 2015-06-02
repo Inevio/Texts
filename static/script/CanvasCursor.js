@@ -164,7 +164,7 @@ CanvasCursor.prototype.drawRange = function(){
 
             node.getPositionX( start ),
             node.getPositionY() - scrollTop,
-            node.chars[ end - 1 ] - ( node.chars[ start - 1 ] || 0 ),
+            node.visualChars[ end - 1 ] - ( node.visualChars[ start - 1 ] || 0 ),
             node.parent.height * node.parent.parent.spacing
 
         );

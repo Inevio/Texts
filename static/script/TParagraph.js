@@ -369,6 +369,10 @@ TParagraph.prototype.reallocate = function(){
 
     }
 
+    for( var i = 0; i < this.lines.length; i++ ){
+        this.lines[ i ].updateJustify();
+    }
+
     if( propagate && this.parent ){
         this.parent.reallocate();
     }
@@ -425,52 +429,10 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
 
         if( i === 'align' ){
 
-            if( value === ALIGN_JUSTIFY ){
-                // To Do -> console.warn('ToDo','Paragraph setStyle Justify')
-                return this;
-            }
+            this.align = value;
 
-            // Si aplicamos la misma alineacion a un parrafo se ignora el cambio
-            if( this.align !== value ){
-
-                // Si el párrafo estaba justificado, desjustificamos su contenido
-                /*
-                if( paragraph[ key ] === ALIGN_JUSTIFY ){
-
-                    var j, line, node;
-
-                    for( i = 0; i < paragraph.lines.length; i++ ){
-
-                        line = paragraph.lines[ i ];
-
-                        for( j = 0; j < line.nodes.length; j++ ){
-
-                            node = line.nodes[ j ];
-
-                            delete node.justifyCharList;
-                            delete node.justifyWidth;
-
-                        }
-
-                    }
-
-                }
-                */
-
-                this.align = value;
-                //update     = true;
-
-                // Si hemos justificado el párrafo, justificamos su contenido
-                /*
-                if( value === ALIGN_JUSTIFY ){
-
-                    for( i = 0; i < paragraph.lines.length; i++ ){
-                        measureLineJustify( paragraph, paragraph.lines[ i ], i );
-                    }
-
-                }
-                */
-
+            for( var i = 0; i < this.lines.length; i++ ){
+                this.lines[ i ].updateJustify();
             }
 
         }else if( i === 'listBullet' || i === 'listNumber' ){

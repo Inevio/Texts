@@ -370,11 +370,47 @@ TLine.prototype.updateHeight = function(){
 
 };
 
+TLine.prototype.updateJustify = function(){
+
+    var add = 0;
+
+    if(
+        this.parent.align === ALIGN_JUSTIFY &&
+        this.id !== this.parent.lines.length - 1
+    ){
+
+        var widthUsed = 0;
+        var words     = this.getWords();
+        var line      = '';
+
+        for( var i = 0; i < words.length; i++ ){
+
+            line += words[ i ].string;
+
+            if( i !== words.length - 1 ){
+                widthUsed += words[ i ].width;
+            }else{
+                widthUsed += words[ i ].widthTrim;
+            }
+
+        }
+
+        var spaces = trimRight( line ).split(' ').length - 1;
+        add = ( this.width - widthUsed ) / spaces;
+
+    }
+
+    for( var i = 0; i < this.nodes.length; i++ ){
+        this.nodes[ i ].updateVisualWidth( add );
+    }
+
+    return this;
+
+};
+
 TLine.prototype.updateWidth = function(){
 
     this.width = this.parent.width - this.getIndentationLeft() || 0;
-
-    // To Do -> Recursivo/Realocados
 
     return this;
 
