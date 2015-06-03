@@ -129,6 +129,7 @@ Cursor.prototype.move = function( positions ){
 	this.updatePositionY(); // To Do -> Hacer que se ejecute solo cuando haga falta
 	selectionRange.clear();
     canvasCursor.resetBlink();
+	styleController.temporal.clear();
 
 	if( this.page.id !== oldPageId ){
 		canvasRulerLeft.requestDraw();
@@ -165,6 +166,7 @@ Cursor.prototype.setNode = function( node, position ){
     this.updatePositionX();
     this.updatePositionY();
     canvasCursor.resetBlink();
+	styleController.temporal.clear();
 
 	if( this.page.id !== oldPageId ){
 		canvasRulerLeft.requestDraw();

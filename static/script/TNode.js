@@ -126,11 +126,37 @@ TNode.prototype.getRaw = function(){
 
 };
 
-TNode.prototype.insert = function( position, content ){
+TNode.prototype.insert = function( position, content, style ){
 
-    this.string = this.string.slice( 0, position ) + content + this.string.slice( position );
+    console.log( position, content, style );
 
-    this.updateWidth( position );
+    if(
+        !Object.keys( style ).length ||
+        !Object.keys( diffObject( this.style, style ) ).length
+    ){
+        this.string = this.string.slice( 0, position ) + content + this.string.slice( position );
+    }else{
+
+        style = diffObject( this.style, style );
+
+        var newNode = this.clone();
+        var newId   = this.id;
+
+        if( position !== 0 ){
+            newId++;
+        }
+
+        if( position > 0 && position < this.string.length ){
+            this.split( position );
+        }
+
+        this.parent.insert( newId, newNode, true );
+        newNode
+            .replace( content )
+            .setStyle( style );
+        console.log('end',this.parent.nodes.length, this.parent.nodes, style);
+
+    }
 
     return this;
 

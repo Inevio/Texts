@@ -12,17 +12,20 @@ TemporalStyle.prototype.clear = function(){
 };
 
 TemporalStyle.prototype.get = function( type ){
-	return this.attributes[ type ];
+
+	if( type ){
+		return this.attributes[ type ];
+	}else{
+		return this.attributes;
+	}
+
 };
 
 TemporalStyle.prototype.set = function( type, value ){
 
-	if( value ){
-		this.attributes[ type ] = value;
-	}else{
-		delete this.attributes[ type ];
-	}
 
+	this.attributes[ type ] = value;
+	
 	return this;
 
 };

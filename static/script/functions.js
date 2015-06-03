@@ -102,6 +102,22 @@ var clipboardCut = function( e ){
 
 };
 
+var diffObject = function( base, changes ){
+
+    var res = {};
+
+    for( var i in changes ){
+
+        if( changes[ i ] !== base[ i ] ){
+            res[ i ] = changes[ i ];
+        }
+
+    }
+
+    return res;
+
+};
+
 var getElementsByPosition = function( posX, posY ){
 
     var pageId, page, paragraphId, paragraph, lineId, line, lineChar, nodeId, node, nodeChar;
@@ -475,7 +491,7 @@ var handleChar = function( newChar, dontSend ){
 
 var handleCharNormal = function( newChar, dontSend ){
 
-    cursor.node.insert( cursor.char, newChar );
+    cursor.node.insert( cursor.char, newChar, styleController.temporal.get() );
     canvasPages.requestDraw();
     cursor.move( newChar.length );
 
