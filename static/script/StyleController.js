@@ -35,41 +35,13 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 
 		});
 
-		canvasPages.requestDraw();
-		canvasCursor.requestDraw();
-
     // Principio de un párrafo vacío
-    }else if( currentLineId === 0 && currentLine.totalChars() === 0 ){
+	}else if(
+		cursor.line.id === 0 &&
+		cursor.line.totalChars() === 0
+	){
 
-        // Calculamos las posiciones de inicio
-        /*
-		paragraphIdStart     = currentParagraphId;
-        charInParagraphStart = currentLineCharId;
-
-        for( i = 0; i < currentPageId; i++ ){
-            paragraphIdStart += currentDocument.pages[ i ].paragraphs.length;
-        }
-
-        for( i = 0; i < currentLineId; i++ ){
-            charInParagraphStart += currentParagraph.lines[ i ].totalChars();
-        }
-
-        // Aplicamos el estilo
-        setNodeStyle( currentParagraph, currentLine, currentNode, type, value );
-
-        // Enviamos
-        if( realtime ){
-
-            realtime.send({
-
-                cmd  : CMD_NODE_STYLE,
-                data : [ paragraphIdStart, charInParagraphStart, type, value ],
-                pos  : [ positionAbsoluteX, positionAbsoluteY, currentLine.height, currentNode.height ]
-
-            });
-
-        }
-		*/
+		cursor.node.setStyle( type, value );
 
     // Falso mononodo, acumulado de estilos
     }else{
@@ -81,14 +53,11 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 	selectionRange.update();
 	canvasPages.requestDraw();
 	canvasCursor.resetBlink();
+	updateToolsLineStatus();
 
 	return this;
 
 };
-
-/*
-StyleController.prototype.setNodeStyleToNode = function(){};
-*/
 
 StyleController.prototype.setParagraphStyle = function( type, value ){
 
