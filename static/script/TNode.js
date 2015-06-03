@@ -134,7 +134,11 @@ TNode.prototype.insert = function( position, content, style ){
         !Object.keys( style ).length ||
         !Object.keys( diffObject( this.style, style ) ).length
     ){
+
         this.string = this.string.slice( 0, position ) + content + this.string.slice( position );
+
+        this.updateWidth( position );
+
     }else{
 
         style = diffObject( this.style, style );
