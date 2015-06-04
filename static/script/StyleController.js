@@ -82,11 +82,20 @@ StyleController.prototype.setParagraphStyle = function( type, value ){
 StyleController.prototype.toggleNodeStyle = function( type, value ){
 
 	if(
-        ( selectionRange.isValid() && selectionRange.startNode.style[ type ] ) ||
         cursor.node.style[ type ] ||
         this.temporal.get( type )
     ){
         this.setNodeStyle( type, null );
+	}else if( selectionRange.isValid() ){
+
+		var range = selectionRange.getLimits();
+
+		if( range.startNode.style[ type ] ){
+			this.setNodeStyle( type, null );
+		}else{
+			this.setNodeStyle( type, value );
+		}
+
     }else{
         this.setNodeStyle( type, value );
     }
