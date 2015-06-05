@@ -730,10 +730,8 @@ var start = function( document ){
 
     currentDocument = new TDocument();
 
-    var page      = new TPage();
-    var paragraph = new TParagraph();
-    var line      = new TLine();
-    var node      = new TNode();
+    var page = new TPage();
+    var paragraph, line, node;
 
     page
     .setDimensions(
@@ -752,17 +750,26 @@ var start = function( document ){
     );
 
     currentDocument.append( page );
-    page.append( paragraph );
-    paragraph.append( line );
-    line.append( node );
 
-    node.setStyle({
+    for( var i = 0; i < document.paragraphList.length; i++ ){
 
-        'color'       : '#000000',
-        'font-family' : 'Cambria',
-        'font-size'   : 12
+        paragraph = new TParagraph();
+        line      = new TLine();
 
-    });
+        page.append( paragraph );
+        paragraph.append( line );
+
+        for( var j = 0; j < document.paragraphList[ i ].nodeList.length; j++ ){
+
+            node = new TNode();
+
+            line.append( node );
+            node.replace( document.paragraphList[ i ].nodeList[ j ].string );
+            node.setStyle( document.paragraphList[ i ].nodeList[ j ].style );
+
+        }
+
+    }
 
     /*
     setViewTitle();
