@@ -967,6 +967,7 @@
     top: 50px;
     z-index: 2;
     background-color: white;
+    border-radius: 3px;
 }
 
 .separator{
