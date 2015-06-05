@@ -1052,3 +1052,19 @@
 .button-latest div{
   padding-top: 6px;
 }
+
+.users-number{
+  display: none;
+  float: right;
+  width: 110px;
+  }
+
+  .users-number div{
+    font-size: 13px;
+    font-family: Lato;
+    padding-top: 15px;
+  }
+
+.users-number.active{
+  display: block;
+}
