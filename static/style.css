@@ -823,8 +823,8 @@
 }
 
 .ruler-arrow-up{
-    width: 0; 
-    height: 0; 
+    width: 0;
+    height: 0;
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-bottom: 6px solid #7ebe30;
@@ -834,8 +834,8 @@
 }
 
 .ruler-arrow-down{
-    width: 0; 
-    height: 0; 
+    width: 0;
+    height: 0;
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-top: 6px solid #7ebe30;
@@ -955,4 +955,100 @@
     padding-right: 15px;
     width: auto;
     margin: 0 10px;
+}
+
+.collaborative{
+    /*height: 300px;*/
+    border:1px solid #ccd3d5;
+    width: 215px;
+    float: right;
+    position: absolute;
+    right: 10px;
+    top: 50px;
+    z-index: 2;
+    background-color: white;
+    border-radius: 3px;
+}
+
+.separator{
+    border-top:1px solid #ccd3d5;
+    border-bottom:1px solid #ccd3d5;
+    background-color: #f6f8f8;
+    height: 30px;
+}
+
+.viewing, .editing, .saved{
+  display: none;
+}
+
+.viewing .separator{
+  border-top: none;
+}
+
+.viewing.active, .editing.active, .saved.active{
+  display: block;
+}
+
+.collaborative div{
+  font-size: 13px;
+  font-family: Lato;
+}
+
+.separator div{
+  text-align: center;
+  padding-top: 10px;
+}
+
+.user{
+  height: 35px;
+  padding: 10px 0 5px 0;
+}
+
+.user .profile-pic{
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  float: left;
+  background-image: url(https://download.inevio.com/avatar/6980/small);
+  background-size: contain;
+}
+
+.user .warning-pic{
+  background: url('@static/alert_red.png');
+  width: 16px;
+  height: 16px;
+  float:right;
+  display: none;
+  margin: 9px 10px 0;
+  background-repeat: no-repeat;
+}
+
+.user .warning-pic.active{
+  display: block;
+}
+
+.user div{
+  float: left;
+  padding: 8px 0 0 8px;
+}
+
+.latest{
+  background-color: #f6f8f8;
+  height: 33px;
+  padding-top: 7px;
+  border-top: 1px solid #ccd3d5;
+}
+
+.button-latest{
+  border: 1px solid #ccd3d5;
+  background-color: #f9f8f7;
+  width: 130px;
+  border-radius: 3px;
+  text-align: center;
+  height: 25px;
+  margin: 0px auto 0px auto;
+}
+
+.button-latest div{
+  padding-top: 6px;
 }
