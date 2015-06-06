@@ -970,22 +970,22 @@
     border-radius: 3px;
 }
 
-.separator{
+.collaborative .separator{
     border-top:1px solid #ccd3d5;
     border-bottom:1px solid #ccd3d5;
     background-color: #f6f8f8;
     height: 30px;
 }
 
-.viewing, .editing, .saved{
+.collaborative .viewing, .collaborative .editing, .collaborative .saved{
   display: none;
 }
 
-.viewing .separator{
+.collaborative .viewing .separator{
   border-top: none;
 }
 
-.viewing.active, .editing.active, .saved.active{
+.collaborative .viewing.active, .collaborative .editing.active, .collaborative .saved.active{
   display: block;
 }
 
@@ -994,52 +994,50 @@
   font-family: Lato;
 }
 
-.separator div{
+.collaborative .separator div{
   text-align: center;
   padding-top: 10px;
 }
 
-.user{
+.collaborative .user{
   height: 35px;
   padding: 10px 0 5px 0;
 }
 
-.user .profile-pic{
+.collaborative .user .profile-pic{
   width: 30px;
   height: 30px;
   margin-left: 10px;
   float: left;
-  background-image: url(https://download.inevio.com/avatar/6980/small);
-  background-size: contain;
 }
 
-.user .warning-pic{
+.collaborative .user .warning-pic{
   background: url('@static/alert_red.png');
   width: 16px;
   height: 16px;
   float:right;
   display: none;
   margin: 9px 10px 0;
-  background-repeat: no-repeat;
+  background-size: 16px 15px;
 }
 
-.user .warning-pic.active{
+.collaborative .user .warning-pic.active{
   display: block;
 }
 
-.user div{
+.collaborative .user .name{
   float: left;
   padding: 8px 0 0 8px;
 }
 
-.latest{
+.collaborative .latest{
   background-color: #f6f8f8;
   height: 33px;
   padding-top: 7px;
   border-top: 1px solid #ccd3d5;
 }
 
-.button-latest{
+.collaborative .button-latest{
   border: 1px solid #ccd3d5;
   background-color: #f9f8f7;
   width: 130px;
@@ -1049,7 +1047,7 @@
   margin: 0px auto 0px auto;
 }
 
-.button-latest div{
+.collaborative .button-latest div{
   padding-top: 6px;
 }
 
