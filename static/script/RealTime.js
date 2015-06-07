@@ -1,5 +1,5 @@
 
-var RealTime = function( fsnode ){
+var RealTime = function(){
 
     this.controller = undefined;
     this.status     = USER_VIEWING;

@@ -1,10 +1,10 @@
 
 // DOM variables
 var win                 = $(this);
-var newButton           = $('.option-new');
+//var newButton           = $('.option-new');
 var saveButton          = $('.option-save');
-var moreButton          = $('.option-more');
-var closeButton         = $('.wz-view-close');
+//var moreButton          = $('.option-more');
+//var closeButton         = $('.wz-view-close');
 var toolsMenu           = $('.toolbar-menu');
 var toolsLine           = $('.tools-line');
 var toolsListContainer  = $('.toolbar-list-container');
@@ -13,18 +13,14 @@ var toolsColorContainer = $('.toolbar-color-picker-container');
 var toolsColor          = $('.toolbar-color-picker');
 var toolsColorHover     = $('.toolbar-color-picker-hover');
 var toolsColorColor     = $('.tool-button-color .color');
-//var pages               = new CanvasDocument();
-//var selections          = new CanvasCursor();
-//var ruleLeft            = new CanvasRuleLeft();
-//var ruleTop             = new CanvasRuleTop();
-var marginTopDown       = $('.ruler-arrow-down');
-var marginTopUp         = $('.ruler-arrow-up');
-var marginTopBox        = $('.ruler-box');
+//var marginTopDown       = $('.ruler-arrow-down');
+//var marginTopUp         = $('.ruler-arrow-up');
+//var marginTopBox        = $('.ruler-box');
 var input               = $('.input');
 var textarea            = $('.textarea');
 var testZone            = $('.test-zone');
 var viewTitle           = $('.document-title');
-var loading             = $('.loading');
+//var loading             = $('.loading');
 var scrollV             = $('.scroll-vertical');
 var scrollVItem         = $('.scroll-vertical-seeker');
 var collaborativeList   = $('.collaborative');
@@ -51,9 +47,9 @@ var realtime = new RealTime();
 
 // Waiting variables
 var waitingCheckLetter      = false;
-var waitingCheckLetterInput = false;
-var waitingRangeUpdate      = false;
-var waitingRuleLeftUpdate   = false;
+//var waitingCheckLetterInput = false;
+//var waitingRangeUpdate      = false;
+//var waitingRuleLeftUpdate   = false;
 
 // Composition Variables
 var compositionCounter = 0;
@@ -68,12 +64,8 @@ var blinkCurrent = false;
 var blinkGlobal  = false;
 
 // Selection variables
-var selectionRange       = new Range();
-var selectionEnabled     = false;
-var selectionStart       = null;
-var selectedEnabled      = true;
-var verticalKeysEnabled  = false;
-var verticalKeysPosition = 0;
+var selectionRange   = new Range();
+var selectionEnabled = false;
 
 // Scroll variables
 var scrollTop    = 0;
@@ -104,15 +96,15 @@ var currentMultipleHash   = null;
 var currentMouse          = MOUSE_NORMAL;
 var toolsListEnabled      = false;
 var toolsColorEnabled     = false;
-var lastStatus            = null;
+//var lastStatus            = null;
 var styleController       = new StyleController();
 
 // Preprocesed data
 var fontfamilyCode     = '';
 var fontsizeCode       = '';
 var linespacingCode    = '';
-var pageDimensionsCode = '';
-var marginsCode        = '';
+//var pageDimensionsCode = '';
+//var marginsCode        = '';
 
 //var fps = 0;
 

@@ -387,17 +387,17 @@ var handleArrowUp = function(){
     cursor.verticalMove( -1 );
 };
 
-var handleBackspace = function( dontSend ){
+var handleBackspace = function(){
 
     if( selectionRange.isValid() ){
-        handleBackspaceSelection( dontSend );
+        handleBackspaceSelection();
     }else{
-        handleBackspaceNormal( dontSend );
+        handleBackspaceNormal();
     }
 
 };
 
-var handleBackspaceNormal = function( dontSend ){
+var handleBackspaceNormal = function(){
 
     var node = cursor.node;
     var char = cursor.char;
@@ -436,7 +436,7 @@ var handleBackspaceNormal = function( dontSend ){
 
 };
 
-var handleBackspaceSelection = function( dontSend ){
+var handleBackspaceSelection = function(){
 
     var range              = selectionRange.getLimits();
     var startParagraphHash = range.startParagraph.getHash();
@@ -481,19 +481,19 @@ var handleBackspaceSelection = function( dontSend ){
 
 };
 
-var handleChar = function( newChar, dontSend ){
+var handleChar = function( newChar ){
 
     if( selectionRange.isValid() ){
-        handleCharSelection( newChar, dontSend );
+        handleCharSelection( newChar );
     }else{
-        handleCharNormal( newChar, dontSend );
+        handleCharNormal( newChar );
     }
 
     realtime.setStatus( USER_EDITING );
 
 };
 
-var handleCharNormal = function( newChar, dontSend ){
+var handleCharNormal = function( newChar ){
 
     cursor.node.insert( cursor.char, newChar, styleController.temporal.get() );
     canvasPages.requestDraw();
@@ -501,26 +501,26 @@ var handleCharNormal = function( newChar, dontSend ){
 
 };
 
-var handleCharSelection = function( newChar, dontSend ){
+var handleCharSelection = function( newChar ){
 
     handleBackspaceSelection();
     handleCharNormal( newChar );
 
 };
 
-var handleDel = function( dontSend ){
+var handleDel = function(){
 
     if( selectionRange.isValid() ){
-        handleBackspaceSelection( dontSend );
+        handleBackspaceSelection();
     }else{
-        handleDelNormal( dontSend );
+        handleDelNormal();
     }
 
     realtime.setStatus( USER_EDITING );
 
 };
 
-var handleDelNormal = function( dontSend ){
+var handleDelNormal = function(){
 
     var node = cursor.node;
     var char = cursor.char;
@@ -543,19 +543,19 @@ var handleDelNormal = function( dontSend ){
 
 };
 
-var handleEnter = function( dontSend ){
+var handleEnter = function(){
 
     if( selectionRange.isValid() ){
-        handleEnterSelection( dontSend );
+        handleEnterSelection();
     }else{
-        handleEnterNormal( dontSend );
+        handleEnterNormal();
     }
 
     realtime.setStatus( USER_EDITING );
 
 };
 
-var handleEnterNormal = function( dontSend ){
+var handleEnterNormal = function(){
 
     if(
         cursor.paragraph.listMode &&
@@ -573,7 +573,7 @@ var handleEnterNormal = function( dontSend ){
 
 };
 
-var handleEnterSelection = function( dontSend ){
+var handleEnterSelection = function(){
 
     handleBackspaceSelection();
     handleEnterNormal();
