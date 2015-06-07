@@ -82,6 +82,7 @@ wz.system.on( 'paste', function( paste ){
         insertPlainText( content );
     }
 
+    realtime.setStatus( USER_EDITING );
     canvasPages.requestDraw();
     input.focus();
 

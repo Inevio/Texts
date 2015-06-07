@@ -96,6 +96,8 @@ var clipboardCut = function( e ){
         handleBackspaceSelection();
     }
 
+    realtime.setStatus( USER_EDITING );
+
     canvasPages.requestDraw();
 
     return res;
@@ -487,6 +489,8 @@ var handleChar = function( newChar, dontSend ){
         handleCharNormal( newChar, dontSend );
     }
 
+    realtime.setStatus( USER_EDITING );
+
 };
 
 var handleCharNormal = function( newChar, dontSend ){
@@ -511,6 +515,8 @@ var handleDel = function( dontSend ){
     }else{
         handleDelNormal( dontSend );
     }
+
+    realtime.setStatus( USER_EDITING );
 
 };
 
@@ -544,6 +550,8 @@ var handleEnter = function( dontSend ){
     }else{
         handleEnterNormal( dontSend );
     }
+
+    realtime.setStatus( USER_EDITING );
 
 };
 
@@ -683,9 +691,9 @@ var openFile = function( structureId ){
 
         if( structure.formats['inevio-texts'] ){
 
-            structure.formats['inevio-texts'].read( function( error, data ){
+            realtime.setController( structure.realtime() );
 
-                console.log( error, data, JSON.parse( data ) );
+            structure.formats['inevio-texts'].read( function( error, data ){
 
                 // Asociamos todos los datos del fichero con sus variables correspondientes
                 /*
@@ -770,11 +778,13 @@ var start = function( document ){
 
             node = new TNode();
 
-            line.append( node );
+            line.insert( j, node, true );
             node.replace( document.paragraphList[ i ].nodeList[ j ].string );
             node.setStyle( document.paragraphList[ i ].nodeList[ j ].style );
 
         }
+
+        paragraph.reallocate();
 
     }
 

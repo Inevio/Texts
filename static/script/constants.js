@@ -93,3 +93,7 @@ var PARAGRAPH_SPLIT_MIDDLE = 2;
 var PARAGRAPH_SPLIT_END = 3;
 var PASTE_FORMATS = [ 'text/inevio-texts', /*'text/html',*/ 'text/plain' ];
 var TWIP_TO_PIXEL = 0.06666666666667;
+var USER_VIEWING = 0;
+var USER_EDITING = 1;
+var USER_SAVED = 2;
+var USER_STATUSES = [ 'viewing', 'editing', 'saved' ];

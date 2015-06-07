@@ -5,7 +5,7 @@ var StyleController = function(){
 
 StyleController.prototype.setNodeStyle = function( type, value ){
 
-    var i, charInParagraphStart, charInParagraphEnd, paragraphIdStart, paragraphIdEnd;
+	var temporal;
 
     // Selección normal
     if( selectionRange.isValid() ){
@@ -45,7 +45,11 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 
     // Falso mononodo, acumulado de estilos
     }else{
+
+		temporal = true;
+
         this.temporal.set( type, value );
+
     }
 
 	cursor.updatePositionX();
@@ -54,6 +58,11 @@ StyleController.prototype.setNodeStyle = function( type, value ){
 	canvasPages.requestDraw();
 	canvasCursor.resetBlink();
 	updateToolsLineStatus();
+
+
+	if( !temporal ){
+		realtime.setStatus( USER_EDITING );
+	}
 
 	return this;
 
@@ -76,6 +85,7 @@ StyleController.prototype.setParagraphStyle = function( type, value ){
 	cursor.updatePositionY();
 	canvasPages.requestDraw();
 	canvasCursor.resetBlink();
+	realtime.setStatus( USER_EDITING );
 
 };
 
