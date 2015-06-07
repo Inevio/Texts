@@ -970,8 +970,11 @@
     border-radius: 3px;
 }
 
+.collaborative .status.active + .active{
+    border-top: 1px solid #ccd3d5;
+}
+
 .collaborative .separator{
-    border-top:1px solid #ccd3d5;
     border-bottom:1px solid #ccd3d5;
     background-color: #f6f8f8;
     height: 30px;
@@ -1014,7 +1017,7 @@
 .collaborative .user .warning-pic{
   background: url('@static/alert_red.png');
   width: 16px;
-  height: 16px;
+  height: 15px;
   float:right;
   display: none;
   margin: 9px 10px 0;
@@ -1031,10 +1034,15 @@
 }
 
 .collaborative .latest{
+  border-top: 1px solid #ccd3d5;
   background-color: #f6f8f8;
   height: 33px;
   padding-top: 7px;
-  border-top: 1px solid #ccd3d5;
+  display: none;
+}
+
+.collaborative .active + .latest{
+    display: block;
 }
 
 .collaborative .button-latest{

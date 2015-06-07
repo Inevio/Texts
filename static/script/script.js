@@ -27,6 +27,8 @@ var viewTitle           = $('.document-title');
 var loading             = $('.loading');
 var scrollV             = $('.scroll-vertical');
 var scrollVItem         = $('.scroll-vertical-seeker');
+var collaborativeList   = $('.collaborative');
+var collaborativeProto  = collaborativeList.find('.wz-prototype');
 var cursor              = new Cursor();
 var canvasPages         = new CanvasDocument();
 var canvasCursor        = new CanvasCursor();
@@ -45,9 +47,7 @@ var pixelRatio          = wz.tool.devicePixelRatio() / backingStoreRatio;
 var activeHiRes         = wz.tool.devicePixelRatio() !== backingStoreRatio;
 
 // Realtime variables
-var realtime      = null;
-var usersPosition = {};
-var usersEditing  = {};
+var realtime = new RealTime();
 
 // Waiting variables
 var waitingCheckLetter      = false;
