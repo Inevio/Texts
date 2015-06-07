@@ -411,7 +411,6 @@ TNode.prototype.updateWidth = function( position ){
         // To Do -> Cálculo de la posición del tabulado teniendo en cuenta el offset de la línea
 
         var current    = 0;
-        var prev       = 0;
         var multiples  = 0;
         /*var heritage    = 0;*/
         var index      = 0;

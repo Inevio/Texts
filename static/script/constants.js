@@ -9,10 +9,13 @@ var BROWSER_FIREFOX = 0;
 var BROWSER_IE = 1;
 var BROWSER_WEBKIT = 2;
 var BROWSER_TYPE = /webkit/i.test( navigator.userAgent ) ? BROWSER_WEBKIT : ( /trident/i.test( navigator.userAgent ) ? BROWSER_IE : BROWSER_FIREFOX );
+/*
 var CLOSEOPTION_DONTSAVE = 0;
 var CLOSEOPTION_CANCEL = 1;
 var CLOSEOPTION_SAVE = 2;
+*/
 var CENTIMETER = 37.79527559055;
+/*
 var CHUNK_FILE_NODES = 40;
 var CMD_SYNC = 0;
 var CMD_DOCUMENT = 1;
@@ -28,8 +31,11 @@ var CMD_RANGE_NODE_STYLE = 10;
 var CMD_PARAGRAPH_STYLE = 11;
 var CMD_RANGE_PARAGRAPH_STYLE = 12;
 var DEBUG = false;
+*/
 var DEFAULT_PAGE_BACKGROUNDCOLOR = '#ffffff';
+/*
 var DIMENSION_TO_CM = 1440 / 2.54;
+*/
 var FONTFAMILY = [ 'Arial', 'Cambria', 'Comic Sans MS', 'Courier', 'Helvetica', 'Times New Roman', 'Trebuchet MS', 'Verdana' ];
 var FONTSIZE = [ 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 ];
 var GAP = 20;
@@ -87,10 +93,12 @@ var PAGEDIMENSIONS = {
 //    'Super B/A3'         : { width : 33.02, height : 48.25 }
 
 };
+/*
 var PARAGRAPH_SPLIT_NONE = 0;
 var PARAGRAPH_SPLIT_START = 1;
 var PARAGRAPH_SPLIT_MIDDLE = 2;
 var PARAGRAPH_SPLIT_END = 3;
+*/
 var PASTE_FORMATS = [ 'text/inevio-texts', /*'text/html',*/ 'text/plain' ];
 var TWIP_TO_PIXEL = 0.06666666666667;
 var USER_VIEWING = 0;

@@ -438,7 +438,7 @@ input
 
 })
 
-.on( 'keyup', function( e ){
+.on( 'keyup', function(){
 
     if( compositionEnded ){
         cleanComposition();
@@ -448,7 +448,7 @@ input
 
 })
 
-.on( 'compositionstart', function( e ){
+.on( 'compositionstart', function(){
 
     compositionCounter = 0;
     compositionEnded   = false;
