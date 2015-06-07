@@ -565,6 +565,13 @@ var handleEnterNormal = function( dontSend ){
 
 };
 
+var handleEnterSelection = function( dontSend ){
+
+    handleBackspaceSelection();
+    handleEnterNormal();
+
+};
+
 var insertPlainText = function( text ){
 
     if( selectionRange.isValid() ){

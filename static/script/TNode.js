@@ -128,8 +128,6 @@ TNode.prototype.getRaw = function(){
 
 TNode.prototype.insert = function( position, content, style ){
 
-    console.log( position, content, style );
-
     if(
         !Object.keys( style ).length ||
         !Object.keys( diffObject( this.style, style ) ).length
@@ -158,7 +156,6 @@ TNode.prototype.insert = function( position, content, style ){
         newNode
             .replace( content )
             .setStyle( style );
-        console.log('end',this.parent.nodes.length, this.parent.nodes, style);
 
     }
 
