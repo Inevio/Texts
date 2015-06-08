@@ -645,12 +645,8 @@ var insertTextsText = function( text ){
 
             }
 
+            newNode.setStyle( tmp.style );
             newNode.replace( tmp.string );
-
-            for( var k in tmp.style ){
-                newNode.setStyle( k, tmp.style[ k ] );
-            }
-
             cursor.setNode( newNode, newNode.string.length );
 
         }
@@ -778,9 +774,9 @@ var start = function( document ){
 
             node = new TNode();
 
+            node.setStyle( document.paragraphList[ i ].nodeList[ j ].style );
             line.insert( j, node, true );
             node.replace( document.paragraphList[ i ].nodeList[ j ].string );
-            node.setStyle( document.paragraphList[ i ].nodeList[ j ].style );
 
         }
 
@@ -791,17 +787,17 @@ var start = function( document ){
     /*
     setViewTitle();
     */
-
-    cursor.setNode( node, 0 );
-
+    
     /*
     updateScroll( 0 );
     */
+    cursor.setNode( currentDocument.pages[ 0 ].paragraphs[ 0 ].lines[ 0 ].nodes[ 0 ], 0 );
     canvasPages.requestDraw();
     canvasRulerLeft.requestDraw();
     canvasRulerTop.requestDraw();
     canvasCursor.requestDraw();
     updateToolsLineStatus();
+
     /*
     activeRealTime();
     saveStatus();
