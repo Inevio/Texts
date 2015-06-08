@@ -38,7 +38,13 @@ RealTime.prototype.addUser = function( user ){
 };
 
 RealTime.prototype.requestUsersStatus = function(){
-    this.controller.send( { cmd : 'getStatus' } );
+
+    if( this.controller ){
+        this.controller.send( { cmd : CMD_GET_STATUS } );
+    }
+
+    return this;
+
 };
 
 RealTime.prototype.setController = function( controller ){
@@ -48,6 +54,8 @@ RealTime.prototype.setController = function( controller ){
     var that = this;
 
     this.controller.connect( function(){
+
+        that.controller.send( { cmd : CMD_SET_STATUS, status : status } );
 
         controller.getUserList( true, function( error, list ){
 
@@ -69,9 +77,9 @@ RealTime.prototype.setController = function( controller ){
             return;
         }
 
-        if( message.cmd === 'getStatus' ){
-            that.controller.send( { cmd : 'setStatus', status : that.status } );
-        }else if( message.cmd === 'setStatus' ){
+        if( message.cmd === CMD_GET_STATUS ){
+            that.controller.send( { cmd : CMD_SET_STATUS, status : that.status } );
+        }else if( message.cmd === CMD_SET_STATUS ){
             that.setUserStatus( info.sender, message.status );
         }
 
@@ -104,7 +112,9 @@ RealTime.prototype.setStatus = function( status ){
 
     this.status = status;
 
-    this.controller.send( { cmd : 'setStatus', status : status } );
+    if( this.controller ){
+        this.controller.send( { cmd : CMD_SET_STATUS, status : status } );
+    }
 
     return this;
 

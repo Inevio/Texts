@@ -217,7 +217,7 @@ TNode.prototype.remove = function( position ){
 
 TNode.prototype.deleteIfEmpty = function(){
 
-    if( this.string.length ){
+    if( this.string.length || !this.parent ){
         return false;
     }
 
@@ -369,7 +369,7 @@ TNode.prototype.updateHeight = function(){
 
     this.height = lineHeight;
 
-    if( lineHeight !== this.parent.height ){
+    if( this.parent && lineHeight !== this.parent.height ){
         this.parent.updateHeight();
     }
 
