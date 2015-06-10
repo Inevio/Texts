@@ -219,6 +219,26 @@ Range.prototype.isValid = function(){
 
 };
 
+Range.prototype.getCommonStyles = function(){
+
+	var limits = this.getLimits();
+	var res    = {
+
+		nodes      : limits.startNode.style,
+		paragraphs : {
+
+            align    : limits.startParagraph.align,
+            spacing  : limits.startParagraph.spacing,
+            listMode : limits.startParagraph.listMode
+
+    	}
+
+	};
+
+	return res;
+
+};
+
 Range.prototype.getRaw = function(){
 
 	var list                 = [];
