@@ -21,11 +21,15 @@ TemporalStyle.prototype.get = function( type ){
 
 };
 
+TemporalStyle.prototype.length = function(){
+	return Object.keys( this.attributes ).length;
+};
+
 TemporalStyle.prototype.set = function( type, value ){
 
 
 	this.attributes[ type ] = value;
-	
+
 	return this;
 
 };

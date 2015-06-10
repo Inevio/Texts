@@ -136,8 +136,8 @@ var createDocument = function(){
 
         currentOpenFile = structure;
 
-        /*
         setViewTitle( currentOpenFile.name );
+        /*
         displaySaveSuccessFully();
         */
 
@@ -761,17 +761,14 @@ var openFile = function( structureId ){
             structure.formats['inevio-texts'].read( function( error, data ){
 
                 // Asociamos todos los datos del fichero con sus variables correspondientes
-                /*
                 currentOpenFile = structure;
-                setViewTitle( currentOpenFile.name );
-                */
+
                 start( JSON.parse( data ) );
-                /*
-                start();
-                */
+                setViewTitle( currentOpenFile.name );
 
             });
 
+        /*
         }else if( structure.mime === 'application/inevio-texts' ){
 
             console.warn('Deprecated');
@@ -780,11 +777,12 @@ var openFile = function( structureId ){
                 // Asociamos todos los datos del fichero con sus variables correspondientes
                 currentOpenFile = structure;
 
-                setViewTitle( currentOpenFile.name );
                 processFile( data );
                 start();
+                setViewTitle( currentOpenFile.name );
 
             });
+        */
 
         }else{
             alert( 'FILE FORMAT NOT RECOGNIZED' );
@@ -876,9 +874,7 @@ var start = function( document ){
 
     }
 
-    /*
     setViewTitle();
-    */
 
     /*
     updateScroll( 0 );
@@ -909,17 +905,15 @@ var trimRight = function( string ){
 
 var updateToolsLineStatus = function(){
 
-    var /*styles,*/ nodeStyles, paragraphStyles;
+    var styles, nodeStyles, paragraphStyles;
 
-    /*
     if( selectionRange.isValid() ){
 
-        styles          = getCommonStyles( currentRangeStart, currentRangeEnd );
-        nodeStyles      = styles.node;
-        paragraphStyles = styles.paragraph;
+        styles          = selectionRange.getCommonStyles();
+        nodeStyles      = styles.nodes;
+        paragraphStyles = styles.paragraphs;
 
     }else{
-    */
 
         nodeStyles      = cursor.node.style;
         paragraphStyles = {
@@ -930,20 +924,18 @@ var updateToolsLineStatus = function(){
 
         };
 
-    /*
     }
-    */
 
     // Estilos de nodos
-    if( styleController.temporal && styleController.temporal.get('font-family') ){
-        $( '.tool-fontfamily', toolsLine ).text( styleController.temporal.get('font-family') );
+    if( styleController.temporal.length() && styleController.temporal.get('font-family') ){
+        toolsLine.find('.tool-fontfamily').text( styleController.temporal.get('font-family') );
     }else if( nodeStyles['font-family'] ){
-        $( '.tool-fontfamily', toolsLine ).text( nodeStyles['font-family'] );
+        toolsLine.find('.tool-fontfamily').text( nodeStyles['font-family'] );
     }else{
-        $( '.tool-fontfamily', toolsLine ).text('');
+        toolsLine.find('.tool-fontfamily').text('');
     }
 
-    if( styleController.temporal && styleController.temporal.get('font-size') ){
+    if( styleController.temporal.length() && styleController.temporal.get('font-size') ){
         $( '.tool-fontsize', toolsLine ).text( styleController.temporal.get('font-size') );
     }else if( nodeStyles['font-size'] ){
         $( '.tool-fontsize', toolsLine ).text( nodeStyles['font-size'] );
@@ -951,7 +943,7 @@ var updateToolsLineStatus = function(){
         $( '.tool-fontsize', toolsLine ).text('');
     }
 
-    if( styleController.temporal ){
+    if( styleController.temporal.length() ){
 
         if( styleController.temporal.get( 'font-weight', true ) ){
             $( '.tool-button-bold', toolsLine ).addClass('active');
@@ -969,7 +961,7 @@ var updateToolsLineStatus = function(){
 
     }
 
-    if( styleController.temporal ){
+    if( styleController.temporal.length() ){
 
         if( styleController.temporal.get( 'font-style', true ) ){
             $( '.tool-button-italic', toolsLine ).addClass('active');
@@ -987,7 +979,7 @@ var updateToolsLineStatus = function(){
 
     }
 
-    if( styleController.temporal ){
+    if( styleController.temporal.length() ){
 
         if( styleController.temporal.get( 'text-decoration-underline', true ) ){
             $( '.tool-button-underline', toolsLine ).addClass('active');
