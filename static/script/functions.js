@@ -104,6 +104,75 @@ var clipboardCut = function( e ){
 
 };
 
+var createDocument = function(){
+
+    var file = currentDocument.getRaw();
+    var name;
+
+    if( currentOpenFile ){
+        name = currentOpenFile.name.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
+    }else{
+        name = lang.newDocument;
+    }
+
+    var counter  = 0;
+    var callback = function( error, structure ){
+
+        if( error && error !== 'FILE NAME EXISTS ALREADY' ){
+            return alert( error );
+        }
+
+        if( error && error === 'FILE NAME EXISTS ALREADY' ){
+
+            counter += 1;
+
+            createFile( name + ' (' + counter + ')' + '.docx', file, callback );
+
+            return;
+
+        }
+
+        console.log('call');
+
+        currentOpenFile = structure;
+
+        /*
+        setViewTitle( currentOpenFile.name );
+        displaySaveSuccessFully();
+        */
+
+    };
+
+    createFile( name + '.docx', file, callback );
+
+};
+
+var createFile = function( name, data, callback ){
+
+    wz.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, name, replace ){
+
+        if( error ){
+            return callback( error );
+        }
+
+        wz.fs.create({
+
+            name    : name,
+            destiny : destiny,
+            data    : JSON.stringify( currentDocument.getRaw() ),
+            convert : {
+
+                from : 'application/inevio-texts',
+                to   : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+            }
+
+        }, callback );
+
+    });
+
+};
+
 var diffObject = function( base, changes ){
 
     var res = {};
@@ -725,6 +794,29 @@ var openFile = function( structureId ){
 
 };
 
+var saveDocument = function(){
+
+    currentOpenFile.write(
+
+        JSON.stringify( currentDocument.getRaw() ),
+        {
+
+            from : 'application/inevio-texts',
+            to   : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+        },
+        function( error ){
+
+            if( error ){
+                return alert( error );
+            }
+
+        }
+
+    );
+
+};
+
 var setViewTitle = function( name ){
 
     if( !name ){
@@ -787,7 +879,7 @@ var start = function( document ){
     /*
     setViewTitle();
     */
-    
+
     /*
     updateScroll( 0 );
     */

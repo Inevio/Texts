@@ -482,11 +482,11 @@ input
 saveButton
 .on( 'click', function(){
 
-    console.log( 'save',currentDocument.getRaw() );
-
-    wz.tool.textsDocumentToDocx( 'prueba.docx', 'root', currentDocument.getRaw(), function( error, result ){
-        console.log( arguments );
-    });
+    if( currentOpenFile ){
+        saveDocument();
+    }else{
+        createDocument();
+    }
 
 });
 
