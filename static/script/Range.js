@@ -224,7 +224,7 @@ Range.prototype.getCommonStyles = function(){
 	var limits = this.getLimits();
 	var res    = {
 
-		nodes      : limits.startNode.style,
+		nodes      : $.extend( {}, limits.startNode.style ),
 		paragraphs : {
 
             align    : limits.startParagraph.align,
@@ -234,6 +234,34 @@ Range.prototype.getCommonStyles = function(){
     	}
 
 	};
+
+	this.mapNodes( function( node ){
+
+		for( var i in res.nodes ){
+
+			if( res.nodes[ i ] !== node.style[ i ] ){
+				delete res.nodes[ i ];
+			}
+
+		}
+
+	});
+
+	this.mapParagraphs( function( paragraph ){
+
+		if( res.paragraphs.align !== paragraph.align ){
+            res.paragraphs.align = -1;
+        }
+
+        if( res.paragraphs.spacing !== paragraph.spacing ){
+            res.paragraphs.spacing = -1;
+        }
+
+        if( res.paragraphs.listMode !== paragraph.listMode ){
+            res.paragraphs.listMode = LIST_NONE;
+        }
+
+	});
 
 	return res;
 
