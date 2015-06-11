@@ -128,6 +128,8 @@ TNode.prototype.getRaw = function(){
 
 TNode.prototype.insert = function( position, content, style ){
 
+    style = style || {};
+    
     if(
         !Object.keys( style ).length ||
         !Object.keys( diffObject( this.style, style ) ).length
