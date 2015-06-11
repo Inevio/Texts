@@ -670,7 +670,11 @@ var insertPlainText = function( text ){
 
         // Si la línea no está vacía
         if( text[ i ].length ){
-            handleCharNormal( text[ i ] );
+
+            for( var j = 0; j < text[ i ].length; j += CHUNK_FILE_NODES ){
+                handleCharNormal( text[ i ].slice( j, j + CHUNK_FILE_NODES ) );
+            }
+
         }
 
     }
