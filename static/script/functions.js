@@ -703,6 +703,8 @@ var insertTextsText = function( text ){
 
             newNode = new TNode();
 
+            newNode.setStyle( tmp.style );
+
             if( !cursor.char ){
                 cursor.line.insert( cursor.node.id, newNode, true );
             }else if( cursor.char === cursor.node.string.length ){
@@ -714,7 +716,6 @@ var insertTextsText = function( text ){
 
             }
 
-            newNode.setStyle( tmp.style );
             newNode.replace( tmp.string );
             cursor.setNode( newNode, newNode.string.length );
 

@@ -303,7 +303,6 @@ Cursor.prototype.updateScroll = function(){
 		scrollTop + canvasPages.canvas.height() - this.line.height < this.positionY ||
 		this.positionY < scrollTop
 	){
-
 		canvasCursor.canvas.trigger( 'mousewheel', [ 0, 0, scrollTop + canvasCursor.canvas[ 0 ].height - this.positionY - this.line.height - GAP ] );
 	}
 
