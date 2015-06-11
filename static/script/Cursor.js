@@ -299,7 +299,11 @@ Cursor.prototype.updateScroll = function(){
 
 	if( scrollTop > this.positionY ){
 		canvasCursor.canvas.trigger( 'mousewheel', [ 0, 0, scrollTop - this.positionY + GAP ] );
-	}else{
+	}else if(
+		scrollTop + canvasPages.canvas.height() - this.line.height < this.positionY ||
+		this.positionY < scrollTop
+	){
+
 		canvasCursor.canvas.trigger( 'mousewheel', [ 0, 0, scrollTop + canvasCursor.canvas[ 0 ].height - this.positionY - this.line.height - GAP ] );
 	}
 
