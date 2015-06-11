@@ -91,21 +91,22 @@ StyleController.prototype.setParagraphStyle = function( type, value ){
 
 StyleController.prototype.toggleNodeStyle = function( type, value ){
 
-	if(
-        cursor.node.style[ type ] ||
-        this.temporal.get( type )
-    ){
-        this.setNodeStyle( type, null );
-	}else if( selectionRange.isValid() ){
+	if( selectionRange.isValid() ){
 
-		var range = selectionRange.getLimits();
+		var range = selectionRange.getCommonStyles();
 
-		if( range.startNode.style[ type ] ){
+
+		if( range.nodes[ type ] ){
 			this.setNodeStyle( type, null );
 		}else{
 			this.setNodeStyle( type, value );
 		}
 
+	}else if(
+        cursor.node.style[ type ] ||
+        this.temporal.get( type )
+    ){
+        this.setNodeStyle( type, null );
     }else{
         this.setNodeStyle( type, value );
     }
