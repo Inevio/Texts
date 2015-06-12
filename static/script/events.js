@@ -26,6 +26,12 @@ win
     textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento copy
 });
 
+// Drag window
+win.parent()
+.on( 'wz-dragend', function(){
+    input.focus();
+});
+
 // Open file
 win
 .on( 'ui-view-ready', function(){
