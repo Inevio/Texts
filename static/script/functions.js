@@ -473,7 +473,7 @@ var handleBackspaceNormal = function(){
 
     if( cursor.paragraphChar ){
 
-        cursor.move( -1 );
+        cursor.move( -1, true );
         node.remove( char - 1 );
         node.deleteIfEmpty();
 
@@ -488,14 +488,14 @@ var handleBackspaceNormal = function(){
         //var paragraph = cursor.paragraph;
         var node = cursor.node.prev();
 
-        cursor.move( -1 );
+        cursor.move( -1, true );
         node.remove( node.string.length - 1 );
 
     }else if( cursor.page.id || cursor.paragraph.id ){
 
         var paragraph = cursor.paragraph;
 
-        cursor.move( -1 );
+        cursor.move( -1, true );
         paragraph.prev().merge( paragraph );
 
     }
@@ -638,7 +638,7 @@ var handleEnterNormal = function(){
     cursor.paragraph.split( cursor.line.id, cursor.node.id, cursor.char );
     cursor.page.reallocate();
     canvasPages.requestDraw();
-    cursor.move( 1 );
+    cursor.move( 1, true );
 
 };
 

@@ -43,20 +43,25 @@ Cursor.prototype.move = function( positions, keyMode ){
 
 			}
 
-			if( next.string.length >= this.char ){
+
+			if( keyMode ){
 
 				if(
-					keyMode && (
-
-						this.line.id !== next.parent.id ||
-						this.paragraph.id !== next.parent.parent.id ||
-						this.page.id !== next.parent.parent.parent.id
-
-					)
-
+					this.line.id !== next.parent.id ||
+					this.paragraph.id !== next.parent.parent.id ||
+					this.page.id !== next.parent.parent.parent.id
 				){
 					this.char = this.char - 1;
 				}
+
+				if( next.string.length >= this.char ){
+
+					this.setNode( next, this.char );
+					break;
+
+				}
+
+			}else if( next.string.length >= this.char ){
 
 				this.setNode( next, this.char );
 				break;
@@ -92,20 +97,24 @@ Cursor.prototype.move = function( positions, keyMode ){
 
 			}
 
-			if( available >= needMove ){
+			if( keyMode ){
 
 				if(
-					keyMode && (
-
-						this.line.id !== prev.parent.id ||
-						this.paragraph.id !== prev.parent.parent.id ||
-						this.page.id !== prev.parent.parent.parent.id
-
-					)
-
+					this.line.id !== prev.parent.id ||
+					this.paragraph.id !== prev.parent.parent.id ||
+					this.page.id !== prev.parent.parent.parent.id
 				){
 					needMove = needMove - 1;
 				}
+
+				if( available >= needMove ){
+
+					this.setNode( prev, available - needMove );
+					break;
+
+				}
+
+			}else if( available >= needMove ){
 
 				this.setNode( prev, available - needMove );
 				break;

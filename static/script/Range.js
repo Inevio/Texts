@@ -148,7 +148,7 @@ Range.prototype.getLimits = function(){
 
 Range.prototype.isValid = function(){
 
-	if( !this.endNode ){
+	if( !this.startNode || !this.endNode ){
 		return false;
 	}
 
