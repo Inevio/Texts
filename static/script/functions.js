@@ -437,7 +437,7 @@ var handleArrowLeft = function(){
     if( selectionRange.isValid() ){
         selectionRange.collapseLeft();
     }else{
-        cursor.move( -1 );
+        cursor.move( -1, true );
     }
 
 };
@@ -447,7 +447,7 @@ var handleArrowRight = function(){
     if( selectionRange.isValid() ){
         selectionRange.collapseRight();
     }else{
-        cursor.move( 1 );
+        cursor.move( 1, true );
     }
 
 };

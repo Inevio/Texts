@@ -17,7 +17,7 @@ var Cursor = function(){
 
 };
 
-Cursor.prototype.move = function( positions ){
+Cursor.prototype.move = function( positions, keyMode ){
 
 	positions = parseInt( positions, 10 ) || 0;
 
@@ -28,111 +28,106 @@ Cursor.prototype.move = function( positions ){
 		this.verticalEnabled = false;
 	}
 
-	//var nodeInfo = getNodeByGlobalId( this.paragraph, this.paragraphChar );
-
-	this.node = this.node; //nodeInfo.node;
-	this.char = this.char + positions; //nodeInfo.char + positions;
-
 	// Movimiento a la derecha
 	if( positions > 0 ){
 
-		if( this.char > this.node.string.length ){
+		this.char = this.char + positions;
+		var next  = this.node;
 
-			var next = this.node.next();
+		while( true ){
 
-			while( true ){
+			if( next.blocked ){
 
-				if( !next ){
+				next = next.next();
+				continue;
 
-					this.char = this.node.string.length;
-					break;
+			}
 
-				}
-
-				if( next.blocked ){
-
-					next = next.next();
-					continue;
-
-				}
+			if( next.string.length >= this.char ){
 
 				if(
-	                this.line.id !== next.parent.id ||
-	                this.paragraph.id !== next.parent.parent.id ||
-	                this.page.id !== next.parent.parent.parent.id
-	            ){
+					keyMode && (
 
-	                this.node = next;
-	                this.char = 0;
+						this.line.id !== next.parent.id ||
+						this.paragraph.id !== next.parent.parent.id ||
+						this.page.id !== next.parent.parent.parent.id
 
-	            }else{
+					)
 
-	                this.node = next;
-	                this.char = 1;
+				){
+					this.char = this.char - 1;
+				}
 
-	            }
-
+				this.setNode( next, this.char );
 				break;
 
 			}
 
-	    }
+			this.char -= next.string.length;
 
-	// Movimiento a la izquierda
-	}else{
+			if( next.next() ){
+				next = next.next();
+			}else{
 
-		if(
-			this.char < 0 ||
-			(
-				this.char === 0 &&
-				this.node.id !== 0 &&
-				!this.node.prev().blocked
-			)
-		){
-
-			var prev = this.node.prev();
-
-			while( true ){
-
-				if( !prev ){
-
-					this.char = 0;
-					break;
-
-				}
-
-				if( prev.blocked ){
-
-					prev = prev.prev();
-					continue;
-
-				}
-
-				this.node = prev;
-	            this.char = this.node.string.length;
+				this.setNode( next, next.string.length );
 				break;
 
 			}
 
 		}
 
-	}
+	// Movimiento a la izquierda
+	}else{
 
-	var oldPageId = ( this.page || {} ).id;
+		var prev      = this.node;
+		var available = this.char;
+		var needMove  = Math.abs( positions );
 
-	this.line          = this.node.parent;
-	this.paragraph     = this.line.parent;
-	this.page          = this.paragraph.parent;
-	this.paragraphChar = getGlobalParagraphCharId( this.node, this.char );
+		while( true ){
 
-    this.updatePositionX();
-	this.updatePositionY(); // To Do -> Hacer que se ejecute solo cuando haga falta
-	selectionRange.clear();
-    canvasCursor.resetBlink();
-	styleController.temporal.clear();
+			if( prev.blocked ){
 
-	if( this.page.id !== oldPageId ){
-		canvasRulerLeft.requestDraw();
+				prev = prev.prev();
+				continue;
+
+			}
+
+			if( available >= needMove ){
+
+				if(
+					keyMode && (
+
+						this.line.id !== prev.parent.id ||
+						this.paragraph.id !== prev.parent.parent.id ||
+						this.page.id !== prev.parent.parent.parent.id
+
+					)
+
+				){
+					needMove = needMove - 1;
+				}
+
+				this.setNode( prev, available - needMove );
+				break;
+
+			}
+
+			needMove = needMove - available;
+
+			if( prev.prev() ){
+
+				prev      = prev.prev();
+				available = prev.string.length;
+
+			}else{
+
+				this.setNode( prev, 0 );
+				break;
+
+			}
+
+		}
+
 	}
 
 };
