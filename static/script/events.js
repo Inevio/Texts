@@ -496,6 +496,12 @@ saveButton
 
 });
 
+// Users listusersNumber
+usersNumber
+.on( 'click', function(){
+    collaborativeList.css( 'display', 'block' );
+});
+
 // Toggle buttons
 toolsLine
 .on( 'click', '.tool-button', function(){
