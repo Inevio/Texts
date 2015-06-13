@@ -33,6 +33,11 @@ RealTime.prototype.addUser = function( user ){
 
     }
 
+    usersNumber
+        .addClass('active')
+        .find('span')
+        .text( ( this.users.length > 1 ? lang.userConnected : lang.userConnected ).replace( '%d', this.users.length ) );
+
     return this;
 
 };

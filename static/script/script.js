@@ -5,6 +5,7 @@ var win                 = $(this);
 var saveButton          = $('.option-save');
 //var moreButton          = $('.option-more');
 //var closeButton         = $('.wz-view-close');
+var usersNumber         = $('.users-number');
 var toolsMenu           = $('.toolbar-menu');
 var toolsLine           = $('.tools-line');
 var toolsListContainer  = $('.toolbar-list-container');

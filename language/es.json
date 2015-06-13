@@ -14,6 +14,9 @@
 	"accept" : "Accept",
 
 	"unsupportedCopy" : "Tu navegador no soporta esta función",
-	"unsupportedCopyDescription" : "Por favor, usa Ctrl+C para copiar"
-	
+	"unsupportedCopyDescription" : "Por favor, usa Ctrl+C para copiar",
+
+	"userConnected" : "%d persona conectada",
+	"usersConnected" : "%d personas conectadas"
+
 }

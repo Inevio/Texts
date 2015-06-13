@@ -16,6 +16,9 @@
 
 .wz-view-menu-group.right{
     padding: 10px 20px 6px;
+    border-right: none;
+    border-left: 1px solid rgba(205, 205, 205, 0.85);
+    box-shadow: -1px 0 0 rgba(245, 245, 245, 0.9);
 }
 
 .option-new{
@@ -29,7 +32,7 @@
     height: 17px;
     width: 16px;
     background: url('@static/sprite.png') -269px 0;
-    background-size: 298px 18px;
+    background-size: 301px 18px;
     display: block;
 }
 
@@ -44,7 +47,7 @@
     height: 11px;
     width: 11px;
     background: url('@static/sprite.png') -245px 0;
-    background-size: 298px 18px;
+    background-size: 301px 18px;
     display: block;
 }
 
@@ -59,7 +62,7 @@
     height: 3px;
     width: 13px;
     background: url('@static/sprite.png') -285px 0;
-    background-size: 298px 18px;
+    background-size: 301px 18px;
     display: block;
 }
 
@@ -184,7 +187,7 @@
 
 .tool-button i, .tool-list-button i{
     background: url('@static/sprite.png') 0 0;
-    background-size: 298px 18px;
+    background-size: 301px 18px;
     display: inline-block;
 }
 
@@ -346,9 +349,9 @@
     top: 1px;
     left: 8px;
     width: 10px;
-    height: 10px;
+    height: 6px;
     background: url('@static/sprite.png') -234px 0;
-    background-size: 298px 18px;
+    background-size: 301px 18px;
 }
 
 .toolbar-list{
@@ -418,7 +421,7 @@
     height: 16px;
     width: 13px;
     background: url('@static/sprite.png') -256px 0;
-    background-size: 298px 18px;
+    background-size: 301px 18px;
     vertical-align: sub;
 }
 
@@ -437,9 +440,9 @@
     top: 1px;
     left: 8px;
     width: 10px;
-    height: 10px;
+    height: 6px;
     background: url('@static/sprite.png') -234px 0;
-    background-size: 298px 18px;
+    background-size: 301px 18px;
 }
 
 .toolbar-color-picker-hover{
@@ -1001,6 +1004,19 @@ border-color: #000;
     z-index: 2;
     background-color: white;
     border-radius: 3px;
+    display: none;
+
+    .arrow{
+        position: absolute;
+        display: block;
+        z-index: 1;
+        top: -6px;
+        left: 104px;
+        width: 10px;
+        height: 10px;
+        background: url('@static/sprite.png') -234px -6px;
+        background-size: 301px 18px;
+    }
 
     .status.active + .active{
         border-top: 1px solid #ccd3d5;
@@ -1047,13 +1063,13 @@ border-color: #000;
     }
 
     .user .warning-pic{
-        background: url('@static/alert_red.png');
+        background: url('@static/sprite.png') -285px -3px;
+        background-size: 301px 18px;
         width: 16px;
         height: 15px;
         float:right;
         display: none;
         margin: 9px 10px 0;
-        background-size: 16px 15px;
     }
 
     .user .warning-pic.active{
@@ -1096,13 +1112,33 @@ border-color: #000;
 .users-number{
     display: none;
     float: right;
-    width: 110px;
+    border: 1px solid transparent;
+    margin: 7px 10px 5px 0;
+    border-radius: 2px;
+    padding: 5px 8px 5px;
 }
 
-.users-number div{
+.users-number:hover{
+    border: 1px solid #999;
+}
+
+.users-number span{
     font-size: 13px;
     font-family: Lato;
-    padding-top: 15px;
+    height: 13px;
+    color: #666;
+}
+
+.users-number .arrow{
+    background: none;
+    margin: 7px 0 0 6px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #919191;
+    height: 0;
+    vertical-align: 9px;
+    width: 0;
+    float: right;
 }
 
 .users-number.active{
