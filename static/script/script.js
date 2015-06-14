@@ -31,6 +31,7 @@ var canvasPages         = new CanvasDocument();
 var canvasCursor        = new CanvasCursor();
 var canvasRulerLeft     = new CanvasRulerLeft();
 var canvasRulerTop      = new CanvasRulerTop();
+var ui                  = new UI();
 //var ctx                 = canvasPages.getContext('2d');
 //var ctxSel              = canvasSelect.getContext('2d');
 //var ctxRuleLeft         = canvasRuleLeft.getContext('2d');
@@ -95,8 +96,6 @@ var currentRangeEndHash   = null;
 */
 var currentMultipleHash   = null;
 var currentMouse          = MOUSE_NORMAL;
-var toolsListEnabled      = false;
-var toolsColorEnabled     = false;
 //var lastStatus            = null;
 var styleController       = new StyleController();
 
