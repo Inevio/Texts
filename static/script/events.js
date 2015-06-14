@@ -3,18 +3,12 @@
 win
 .on( 'mousedown', function(){
 
-    if( !toolsListEnabled && !toolsColorEnabled ){
+    if( ui.dropdownActive === -1 ){
         return;
     }
 
-    toolsListEnabled  = false;
-    toolsColorEnabled = false;
-
+    ui.hideDropdowns();
     input.focus();
-    toolsListContainer.css( 'display', 'none' );
-    toolsColorContainer.css( 'display', 'none' );
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-moreoptions active-page-dimensions active-page-margins');
-    toolsColor.removeClass('active-color active-page-color');
 
 })
 
@@ -533,25 +527,20 @@ toolsList
 
 .on( 'click', 'li', function(){
 
-    toolsListEnabled = false;
-
-    input.focus();
-    toolsListContainer.css( 'display', 'none' );
-
     // Modo Tipografía
-    if( toolsList.hasClass('active-fontfamily') ){
+    if( ui.dropdownActive === DROPDOWN_FONTFAMILY ){
         styleController.setNodeStyle( 'font-family', $(this).text() );
 
     // Modo Tamaño de letra
-    }else if( toolsList.hasClass('active-fontsize') ){
+}else if( ui.dropdownActive === DROPDOWN_FONTSIZE ){
         styleController.setNodeStyle( 'font-size', parseInt( $(this).text(), 10 ) );
 
     // Modo Interlineado
-    }else if( toolsList.hasClass('active-linespacing') ){
+    }else if( ui.dropdownActive === DROPDOWN_LINESPACING ){
         styleController.setParagraphStyle( 'spacing', parseFloat( $(this).text() ) );
 
     // Modo más opciones
-    }else if( toolsList.hasClass('active-moreoptions') ){
+    }/*else if( toolsList.hasClass('active-moreoptions') ){
 
         var name = ( currentOpenFile ? currentOpenFile.name.replace( /.docx|.texts$/i, '' ) : lang.newDocument ) + '.pdf';
 
@@ -575,9 +564,10 @@ toolsList
 
         });
 
-    }
+    }*/
 
-    toolsList.removeClass('active-fontfamily active-fontsize active-linespacing active-moreoptions active-page-dimensions active-page-margins');
+    input.focus();
+    ui.hideDropdowns();
     updateToolsLineStatus();
 
 });
@@ -585,113 +575,25 @@ toolsList
 // Font-family
 toolsLine
 .on( 'click', '.tool-fontfamily', function(){
-
-    toolsListEnabled = true;
-
-    if( !fontfamilyCode ){
-
-        for( var i = 0; i < FONTFAMILY.length; i++ ){
-            fontfamilyCode += '<li data-value="' + FONTFAMILY[ i ] + '"><i></i><span>' + FONTFAMILY[ i ] + '</span></li>';
-        }
-
-    }
-
-    toolsList
-        .addClass('active-fontfamily')
-        .html( fontfamilyCode );
-
-    toolsListContainer
-        .css({
-
-            top     : $(this).position().top + $(this).outerHeight(),
-            left    : $(this).position().left,
-            display : 'block'
-
-        });
-
-    toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
-
+    ui.showDropdown( DROPDOWN_FONTFAMILY, this );
 });
 
 // Font-size
 toolsLine
 .on( 'click', '.tool-fontsize', function(){
-
-    toolsListEnabled = true;
-
-    if( !fontsizeCode ){
-
-        for( var i = 0; i < FONTSIZE.length; i++ ){
-            fontsizeCode += '<li data-value="' + FONTSIZE[ i ] + '"><i></i><span>' + FONTSIZE[ i ] + '</span></li>';
-        }
-
-    }
-
-    toolsList
-        .addClass('active-fontsize')
-        .html( fontsizeCode );
-
-    toolsListContainer
-        .css({
-
-            top     : $(this).position().top + $(this).outerHeight(),
-            left    : $(this).position().left,
-            display : 'block'
-
-        });
-
-    toolsList.find('[data-value="' + $(this).text() + '"]').addClass('active');
-
+    ui.showDropdown( DROPDOWN_FONTSIZE, this );
 });
 
 // Spacing
 toolsLine
 .on( 'click', '.tool-button-line-spacing', function(){
-
-    toolsListEnabled = true;
-
-    if( !linespacingCode ){
-
-        for( var i = 0; i < LINESPACING.length; i++ ){
-            linespacingCode += '<li data-value="' + parseFloat( LINESPACING[ i ] ) + '"><i></i><span>' + LINESPACING[ i ] + '</span></li>';
-        }
-
-    }
-
-    toolsList
-        .addClass('active-linespacing')
-        .html( linespacingCode );
-
-    toolsListContainer
-        .css({
-
-            top     : $(this).position().top + $(this).outerHeight(),
-            left    : $(this).position().left,
-            display : 'block'
-
-        });
-
-    toolsList.find('[data-value="' + $(this).attr('data-value') + '"]').addClass('active');
-
+    ui.showDropdown( DROPDOWN_LINESPACING, this );
 });
 
 // Color Panel
 toolsLine
 .on( 'click', '.tool-button-color', function(){
-
-    toolsColorEnabled = true;
-
-    toolsColorContainer
-        .css({
-
-            top     : $(this).position().top + $(this).outerHeight(),
-            left    : $(this).position().left,
-            display : 'block'
-
-        });
-
-    toolsColor.addClass('active-color');
-
+    ui.showDropdown( DROPDOWN_COLOR, this );
 })
 
 .on( 'click', '.tool-button-color .color', function( e ){
@@ -735,19 +637,14 @@ toolsColor
 
 toolsColorHover.on( 'click', function(){
 
-    toolsColorEnabled = false;
-
-    if( toolsColor.hasClass('active-color') ){
-
-        toolsColorContainer.css( 'display', 'none' );
-        toolsColor.removeClass('active-color');
+    if( ui.dropdownActive === DROPDOWN_COLOR  ){
 
         toolsColorColor
             .attr( 'data-tool-value', normalizeColor( toolsColorHover.css('background-color') ) )
             .css( 'background-color', normalizeColor( toolsColorHover.css('background-color') ) )
             .click();
 
-    }else if( toolsColor.hasClass('active-page-color') ){
+    }/*else if( toolsColor.hasClass('active-page-color') ){
 
         toolsColorContainer.css( 'display', 'none' );
         toolsColor.removeClass('active-page-color');
@@ -755,5 +652,8 @@ toolsColorHover.on( 'click', function(){
         setPagesStyle( 'pageBackgroundColor', normalizeColor( toolsColorHover.css('background-color') ) );
 
     }
+    */
+
+    ui.hideDropdowns();
 
 });
