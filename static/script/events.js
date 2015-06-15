@@ -3,10 +3,6 @@
 win
 .on( 'mousedown', function(){
 
-    if( ui.dropdownActive === -1 ){
-        return;
-    }
-
     ui.hideDropdowns();
     input.focus();
 
@@ -491,9 +487,8 @@ saveButton
 });
 
 // Users listusersNumber
-usersNumber
-.on( 'click', function(){
-    collaborativeList.css( 'display', 'block' );
+usersNumber.on( 'click', function(){
+    ui.showDropdown( DROPDOWN_COLLABORATIVE );
 });
 
 // Toggle buttons
@@ -574,26 +569,42 @@ toolsList
 
 // Font-family
 toolsLine
-.on( 'click', '.tool-fontfamily', function(){
-    ui.showDropdown( DROPDOWN_FONTFAMILY, this );
+.on( 'click', '.tool-fontfamily', function( e ){
+
+    if( ui.lastDropdownActive !== DROPDOWN_FONTFAMILY ){
+        ui.showDropdown( DROPDOWN_FONTFAMILY, this );
+    }
+
 });
 
 // Font-size
 toolsLine
 .on( 'click', '.tool-fontsize', function(){
-    ui.showDropdown( DROPDOWN_FONTSIZE, this );
+
+    if( ui.lastDropdownActive !== DROPDOWN_FONTSIZE ){
+        ui.showDropdown( DROPDOWN_FONTSIZE, this );
+    }
+
 });
 
 // Spacing
 toolsLine
 .on( 'click', '.tool-button-line-spacing', function(){
-    ui.showDropdown( DROPDOWN_LINESPACING, this );
+
+    if( ui.lastDropdownActive !== DROPDOWN_LINESPACING ){
+        ui.showDropdown( DROPDOWN_LINESPACING, this );
+    }
+
 });
 
 // Color Panel
 toolsLine
 .on( 'click', '.tool-button-color', function(){
-    ui.showDropdown( DROPDOWN_COLOR, this );
+
+    if( ui.lastDropdownActive !== DROPDOWN_COLOR ){
+        ui.showDropdown( DROPDOWN_COLOR, this );
+    }
+
 })
 
 .on( 'click', '.tool-button-color .color', function( e ){
