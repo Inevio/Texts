@@ -111,5 +111,6 @@ var DROPDOWN_FONTFAMILY = 0;
 var DROPDOWN_FONTSIZE = 1;
 var DROPDOWN_LINESPACING = 2;
 var DROPDOWN_COLOR = 3;
+var DROPDOWN_COLLABORATIVE = 4;
 var DROPDOWN = [ FONTFAMILY, FONTSIZE, LINESPACING ];
 var DROPDOWN_CLASS = [ 'active-fontfamily', 'active-fontsize', 'active-linespacing' ];

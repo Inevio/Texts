@@ -1,6 +1,7 @@
 
 var UI = function(){
 
+    this.lastDropdownActive = -1;
     this.dropdownActive = -1;
     this.cached = [];
 
@@ -8,12 +9,19 @@ var UI = function(){
 
 UI.prototype.hideDropdowns = function(){
 
+    this.lastDropdownActive = this.dropdownActive;
+
+    if( this.dropdownActive === -1 ){
+        return;
+    }
+
     this.dropdownActive = -1;
 
     toolsList.removeClass( DROPDOWN_CLASS.join(' ') );
     toolsColor.removeClass('active-color');
     toolsListContainer.hide();
     toolsColorContainer.hide();
+    collaborativeList.hide();
 
 };
 
@@ -64,6 +72,8 @@ UI.prototype.showDropdown = function( type, origin ){
 
             });
 
+    }else if( type === DROPDOWN_COLLABORATIVE ){
+        collaborativeList.css( 'display', 'block' );
     }
 
 };
