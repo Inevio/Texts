@@ -455,7 +455,18 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
 
                 this.listMode = LIST_NUMBER;
 
-                newNode.insert( 0, '1.' + '\t' );
+                var number = 1;
+                var prev   = this.prev();
+
+                if(
+                    prev &&
+                    prev.listMode === LIST_NUMBER &&
+                    prev.lines[ 0 ].nodes[ 0 ].blocked
+                ){
+                    number = parseInt( prev.lines[ 0 ].nodes[ 0 ].string, 10 ) + 1;
+                }
+
+                newNode.insert( 0, number + '.' + '\t' );
 
             }else{
 
@@ -500,7 +511,11 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
                 var number = parseInt( this.lines[ 0 ].nodes[ 0 ].string, 10 );
                 var next   = this.next();
 
-                while( next && next.lines[ 0 ].nodes[ 0 ].string === ( number + 1 ) + '.\t' ){
+                while(
+                    next &&
+                    next.lines[ 0 ].nodes[ 0 ].blocked &&
+                    next.lines[ 0 ].nodes[ 0 ].string === ( number + 1 ) + '.\t'
+                ){
 
                     next.lines[ 0 ].nodes[ 0 ].replace( number + '.\t' );
 
@@ -618,6 +633,18 @@ TParagraph.prototype.split = function( lineId, nodeId, char ){
     this.splitting = false;
 
     return this;
+
+};
+
+TParagraph.prototype.totalChars = function( includeBlocked ){
+
+    var total = 0;
+
+    for( var i = 0; i < this.lines.length; i++ ){
+        total += this.lines[ i ].totalChars( includeBlocked );
+    }
+
+    return total;
 
 };
 
