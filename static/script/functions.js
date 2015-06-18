@@ -671,8 +671,14 @@ var insertPlainText = function( text ){
         // Si la línea no está vacía
         if( text[ i ].length ){
 
-            for( var j = 0; j < text[ i ].length; j += CHUNK_FILE_NODES ){
-                handleCharNormal( text[ i ].slice( j, j + CHUNK_FILE_NODES ) );
+            var list = text[ i ].split(/(\s+)/g);
+
+            for( var k = 0; k < list.length; k++ ){
+
+                if( list[ k ].length ){
+                    handleCharNormal( list[ k ] );
+                }
+
             }
 
         }
@@ -867,11 +873,20 @@ var start = function( document ){
 
         for( var j = 0; j < document.paragraphList[ i ].nodeList.length; j++ ){
 
-            node = new TNode();
+            var list  = document.paragraphList[ i ].nodeList[ j ].string.split(/(\s+)/g);
+            var nodes = [];
 
-            node.setStyle( document.paragraphList[ i ].nodeList[ j ].style );
-            line.insert( j, node, true );
-            node.replace( document.paragraphList[ i ].nodeList[ j ].string );
+            for( var k = 0; k < list.length; k++ ){
+
+                node = new TNode();
+
+                node.setStyle( document.paragraphList[ i ].nodeList[ j ].style );
+                node.replace( list[ k ] );
+                nodes.push( node );
+
+            }
+
+            line.append( nodes );
 
         }
 
@@ -901,6 +916,14 @@ var start = function( document ){
     marginTopUp.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     marginTopBox.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     */
+
+    var node = cursor.node;
+    var nodes = 1;
+
+    while( node.next() ){
+        nodes++;
+        node = node.next();
+    }
 
 };
 
