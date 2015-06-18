@@ -75,7 +75,13 @@ StyleController.prototype.setParagraphStyle = function( type, value ){
 
 		selectionRange.mapParagraphs( function( paragraph ){
 
-			if( ( type === 'listBullet' || type === 'listNumber' ) && paragraph.totalChars() ){
+			if( type === 'listBullet' || type === 'listNumber' ){
+
+				if( paragraph.totalChars() ){
+					paragraph.setStyle( type, value );
+				}
+
+			}else{
 				paragraph.setStyle( type, value );
 			}
 

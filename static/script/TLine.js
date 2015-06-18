@@ -13,14 +13,22 @@ var TLine = function(){
 
 };
 
-TLine.prototype.append = function( node ){
+TLine.prototype.append = function( list ){
 
-    if( node.parent ){
-        node.parent.remove( node.id );
+    if( list.constructor !== Array ){
+        list = [ list ];
     }
 
-    node.id     = this.nodes.push( node ) - 1;
-    node.parent = this;
+    for( var i = 0; i < list.length; i++ ){
+
+        if( list[ i ].parent ){
+            list[ i ].parent.remove( list[ i ].id );
+        }
+
+        list[ i ].id     = this.nodes.push( list[ i ] ) - 1;
+        list[ i ].parent = this;
+
+    }
 
     this.updateHeight();
     this.reallocate();

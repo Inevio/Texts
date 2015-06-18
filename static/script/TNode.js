@@ -129,7 +129,7 @@ TNode.prototype.getRaw = function(){
 TNode.prototype.insert = function( position, content, style ){
 
     style = style || {};
-    
+
     if(
         !Object.keys( style ).length ||
         !Object.keys( diffObject( this.style, style ) ).length
@@ -327,8 +327,8 @@ TNode.prototype.split = function( start, stop ){
 
         var newNode = this.clone();
 
-        this.slice( 0, stop );
-        newNode.slice( stop );
+        this.slice( 0, start );
+        newNode.slice( start, stop );
         this.parent.insert( this.id + 1, newNode );
 
     }else if( stop === this.string.length ){
