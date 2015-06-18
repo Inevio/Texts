@@ -116,18 +116,8 @@ CanvasDocument.prototype.draw = function(){
                             underlineHeight = 1;
                         }
 
-                        startY = startY + underlineHeight;
-                        endX   = startX + node.width;
-                        endY   = startY;
-
-                        this.ctx.beginPath();
-
-                        this.ctx.strokeStyle = node.style.color;
-                        this.ctx.lineWidth   = underlineHeight;
-
-                        this.ctx.moveTo( parseInt( startX, 10 ), parseInt( startY, 10 ) + 0.5 );
-                        this.ctx.lineTo( parseInt( endX, 10 ), parseInt( endY, 10 ) + 0.5 );
-                        this.ctx.stroke();
+                        this.ctx.fillStyle = node.style.color;
+                        this.ctx.fillRect( Math.floor( startX ), startY + Math.round( underlineHeight ), Math.ceil( node.width ), Math.round( underlineHeight ) );
 
                     }
 

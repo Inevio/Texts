@@ -917,14 +917,6 @@ var start = function( document ){
     marginTopBox.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     */
 
-    var node = cursor.node;
-    var nodes = 1;
-
-    while( node.next() ){
-        nodes++;
-        node = node.next();
-    }
-
 };
 
 var trimRight = function( string ){
