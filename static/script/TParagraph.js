@@ -597,14 +597,23 @@ TParagraph.prototype.split = function( lineId, nodeId, char ){
     var newParagraph = this.clone();
     var newLine      = new TLine();
     var newNode      = this.lines[ lineId ].nodes[ nodeId ].split( char ).parent.nodes[ nodeId + 1 ];
+    var list         = [];
+
+    while( newNode && compareHashes( this.getHash(), newNode.parent.parent.getHash() ) === 0 ){
+
+        list.push( newNode );
+
+        newNode = newNode.next();
+
+    }
 
     this.parent.insert( this.id + 1, newParagraph );
     newParagraph.append( newLine );
-    newLine.append( newNode );
+    newLine.append( list );
 
     if( this.listMode ){
 
-        var newNode = this.lines[ 0 ].nodes[ 0 ].clone();
+        newNode = this.lines[ 0 ].nodes[ 0 ].clone();
 
         newLine.insert( 0, newNode );
 
