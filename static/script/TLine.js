@@ -318,7 +318,11 @@ TLine.prototype.prev = function(){
 };
 
 TLine.prototype.reallocate = function(){
-    this.parent.reallocate();
+
+    if( this.parent ){
+        this.parent.reallocate();
+    }
+    
 };
 
 TLine.prototype.remove = function( position ){
