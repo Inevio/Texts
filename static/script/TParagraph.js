@@ -596,7 +596,7 @@ TParagraph.prototype.split = function( lineId, nodeId, char ){
 
     var newParagraph = this.clone();
     var newLine      = new TLine();
-    var newNode      = this.lines[ lineId ].nodes[ nodeId ].split( char ).parent.nodes[ nodeId + 1 ];
+    var newNode      = this.lines[ lineId ].nodes[ nodeId ].split( char, char ).parent.nodes[ nodeId + 1 ];
     var list         = [];
 
     while( newNode && compareHashes( this.getHash(), newNode.parent.parent.getHash() ) === 0 ){

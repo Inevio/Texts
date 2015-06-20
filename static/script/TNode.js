@@ -317,18 +317,22 @@ TNode.prototype.slice = function( start, stop ){
 
 TNode.prototype.split = function( start, stop ){
 
-    this.splitting = true;
-
     if( typeof stop === 'undefined' ){
         stop = this.string.length;
     }
+
+    if( start === 0 && stop === this.string.length ){
+        return this;
+    }
+
+    this.splitting = true;
 
     if( start === 0 ){
 
         var newNode = this.clone();
 
-        this.slice( 0, start );
-        newNode.slice( start, stop );
+        this.slice( 0, stop );
+        newNode.slice( stop );
         this.parent.insert( this.id + 1, newNode );
 
     }else if( stop === this.string.length ){
