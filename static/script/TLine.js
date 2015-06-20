@@ -227,7 +227,7 @@ TLine.prototype.getWords = function(){
             currentWord.string    = words[ j ];
             currentWord.width     = ( nodes[ i ].chars[ offset + words[ j ].length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
             currentWord.widthTrim = ( nodes[ i ].chars[ offset + trimRight( words[ j ] ).length - 1 ] || 0 ) - ( nodes[ i ].chars[ offset - 1 ] || 0 );
-            currentWord.nodes     = [ i ];
+            currentWord.nodes     = [ nodes[ i ] ];
 
             currentWord.offset.push( [ offset, offset + /*currentWord.string.length*/ words[ j ].length - 1 ] );
 
@@ -322,7 +322,7 @@ TLine.prototype.reallocate = function(){
     if( this.parent ){
         this.parent.reallocate();
     }
-    
+
 };
 
 TLine.prototype.remove = function( position ){

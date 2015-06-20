@@ -159,8 +159,8 @@ canvasCursor.canvas
 
         var word = words[ wordId ];
 
-        selectionRange.setStart( elements.line.nodes[ word.nodes[ 0 ] ], word.offset[ 0 ][ 0 ] );
-        selectionRange.setEnd( elements.line.nodes[ word.nodes[ word.nodes.length - 1 ] ], word.offset[ word.offset.length - 1 ][ 1 ] + 1 );
+        selectionRange.setStart( word.nodes[ 0 ], word.offset[ 0 ][ 0 ] );
+        selectionRange.setEnd( word.nodes[ word.nodes.length - 1 ], word.offset[ word.offset.length - 1 ][ 1 ] + 1 );
         canvasCursor.resetBlink();
 
     // Click que coincide con los clicks previos y corresponde a seleccionar el párrafo

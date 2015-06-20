@@ -22,14 +22,14 @@ Range.prototype.clear = function(){
 	this.startLine              = undefined;
 	this.startNode              = undefined;
 	this.startChar              = undefined;
-	this.startGlobalParagraphId = undefined;
+	//this.startGlobalParagraphId = undefined;
 	this.startGlobalCharId      = undefined;
 	this.endPage                = undefined;
 	this.endParagraph           = undefined;
 	this.endLine                = undefined;
 	this.endNode                = undefined;
 	this.endChar                = undefined;
-	this.endGlobalParagraphId   = undefined;
+	//this.endGlobalParagraphId   = undefined;
 	this.endGlobalCharId        = undefined;
 
 	return this;
@@ -66,11 +66,12 @@ Range.prototype.getLimits = function(){
 
 		return {
 
-			startPage      : this.startPage,
-			startParagraph : this.startParagraph,
-			startLine      : this.startLine,
-			startNode      : this.startNode,
-			startChar      : this.startChar
+			startPage         : this.startPage,
+			startParagraph    : this.startParagraph,
+			startLine         : this.startLine,
+			startNode         : this.startNode,
+			startChar         : this.startChar,
+			startGlobalCharId : this.startGlobalCharId
 
 		};
 
@@ -89,16 +90,18 @@ Range.prototype.getLimits = function(){
 
 		limits = {
 
-			startPage      : this.endPage,
-			startParagraph : this.endParagraph,
-			startLine      : this.endLine,
-			startNode      : this.endNode,
-			startChar      : this.endChar,
-			endPage        : this.startPage,
-			endParagraph   : this.startParagraph,
-			endLine        : this.startLine,
-			endNode        : this.startNode,
-			endChar        : this.startChar
+			startPage         : this.endPage,
+			startParagraph    : this.endParagraph,
+			startLine         : this.endLine,
+			startNode         : this.endNode,
+			startChar         : this.endChar,
+			startGlobalCharId : this.endGlobalCharId,
+			endPage           : this.startPage,
+			endParagraph      : this.startParagraph,
+			endLine           : this.startLine,
+			endNode           : this.startNode,
+			endChar           : this.startChar,
+			endGlobalCharId   : this.startGlobalCharId
 
 		};
 
@@ -106,16 +109,18 @@ Range.prototype.getLimits = function(){
 
 		limits = {
 
-			startPage      : this.startPage,
-			startParagraph : this.startParagraph,
-			startLine      : this.startLine,
-			startNode      : this.startNode,
-			startChar      : this.startChar,
-			endPage        : this.endPage,
-			endParagraph   : this.endParagraph,
-			endLine        : this.endLine,
-			endNode        : this.endNode,
-			endChar        : this.endChar
+			startPage         : this.startPage,
+			startParagraph    : this.startParagraph,
+			startLine         : this.startLine,
+			startNode         : this.startNode,
+			startChar         : this.startChar,
+			startGlobalCharId : this.startGlobalCharId,
+			endPage           : this.endPage,
+			endParagraph      : this.endParagraph,
+			endLine           : this.endLine,
+			endNode           : this.endNode,
+			endChar           : this.endChar,
+			endGlobalCharId   : this.endGlobalCharId
 
 		};
 
@@ -420,7 +425,7 @@ Range.prototype.setStart = function( node, position ){
 	this.startParagraph         = this.startLine.parent;
 	this.startPage              = this.startParagraph.parent;
 	this.startChar              = parseInt( position, 10 ) || 0;
-	this.startGlobalParagraphId = getGlobalParagraphId( this.startParagraph );
+	//this.startGlobalParagraphId = getGlobalParagraphId( this.startParagraph );
 	this.startGlobalCharId      = getGlobalParagraphCharId( this.startNode, this.startChar );
 
 	return this;
@@ -434,7 +439,7 @@ Range.prototype.setEnd = function( node, position ){
 	this.endParagraph 		  = this.endLine.parent;
 	this.endPage      		  = this.endParagraph.parent;
 	this.endChar      		  = parseInt( position, 10 ) || 0;
-	this.endGlobalParagraphId = getGlobalParagraphId( this.endParagraph );
+	//this.endGlobalParagraphId = getGlobalParagraphId( this.endParagraph );
 	this.endGlobalCharId      = getGlobalParagraphCharId( this.endNode, this.endChar );
 
 	return this;
@@ -443,15 +448,15 @@ Range.prototype.setEnd = function( node, position ){
 
 Range.prototype.update = function(){
 
-
 	var start, end;
+	var limits = this.getLimits();
 
-	if( this.startParagraph ){
-		start = getNodeByGlobalId( this.startParagraph, this.startGlobalCharId );
+	if( limits.startNode ){
+		start = getNodeByGlobalId( limits.startParagraph, limits.startGlobalCharId );
 	}
 
-	if( this.endParagraph ){
-		end = getNodeByGlobalId( this.endParagraph, this.endGlobalCharId );
+	if( limits.endNode ){
+		end = getNodeByGlobalId( limits.endParagraph, limits.endGlobalCharId );
 	}
 
 	if( start ){
