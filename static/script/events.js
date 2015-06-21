@@ -266,15 +266,7 @@ canvasCursor.canvas
 
 })
 
-.on( 'mouseup', function(){
-
-    selectionEnabled = false;
-
-    updateToolsLineStatus();
-
-})
-
-// Controlador del scropll
+// Controlador del scroll
 .on( 'mousewheel', function( e, delta, x, y ){
 
     var documentHeight = currentDocument.height();
@@ -309,6 +301,15 @@ canvasCursor.canvas
     canvasCursor.resetBlink();
     canvasRulerLeft.requestDraw();
     scrollVItem.css( 'y', parseInt( ( scrollV.height() - scrollVItem.outerHeight() ) * ( scrollTop / maxScrollTop ), 10 ) );
+
+});
+
+// Controlador de mouseup
+win.parent().on( 'wz-mouseup', function(){
+
+    selectionEnabled = false;
+
+    updateToolsLineStatus();
 
 });
 
