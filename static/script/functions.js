@@ -871,7 +871,7 @@ var start = function( document ){
         page.append( paragraph );
         paragraph.append( line );
 
-        for( var j = 0; j < document.paragraphList[ i ].nodeList.length; j++ ){
+        for( var j = ( document.paragraphList[ i ].listMode ? 1 : 0 ); j < document.paragraphList[ i ].nodeList.length; j++ ){
 
             var list  = document.paragraphList[ i ].nodeList[ j ].string.split(/(\s+)/g);
             var nodes = [];
@@ -887,6 +887,16 @@ var start = function( document ){
             }
 
             line.append( nodes );
+
+        }
+
+        if( document.paragraphList[ i ].listMode ){
+
+            if( document.paragraphList[ i ].listMode === LIST_BULLET ){
+                paragraph.setStyle('listBullet');
+            }else if( document.paragraphList[ i ].listMode === LIST_NUMBER ){
+                paragraph.setStyle('listNumber');
+            }
 
         }
 
