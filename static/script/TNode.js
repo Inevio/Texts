@@ -420,7 +420,7 @@ TNode.prototype.updateWidth = function( position ){
         var multiples  = 0;
         /*var heritage    = 0;*/
         var index      = 0;
-        var identation = this.parent.getOffsetIndentationLeft();
+        var identation = this.parent ? this.parent.getOffsetIndentationLeft() : 0;
 
         for( var i = position; i < this.string.length; i++ ){
 

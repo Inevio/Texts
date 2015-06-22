@@ -183,7 +183,7 @@ TLine.prototype.getWords = function(){
             ( nodes[ i ].string[ 0 ] === ' ' || nodes[ i ].string[ 0 ] === '\t' )
         ){
 
-            tmp   = nodes[ i ].string.split(/( +)/g);
+            tmp   = nodes[ i ].string.split(/(\s+)/g);
             words = [ tmp[ 1 ] ];
 
             // Sino no solo hay espacio
