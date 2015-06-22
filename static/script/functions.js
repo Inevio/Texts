@@ -132,8 +132,6 @@ var createDocument = function(){
 
         }
 
-        console.log('call');
-
         currentOpenFile = structure;
 
         setViewTitle( currentOpenFile.name );

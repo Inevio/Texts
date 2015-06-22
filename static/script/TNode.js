@@ -321,10 +321,6 @@ TNode.prototype.split = function( start, stop ){
         stop = this.string.length;
     }
 
-    if( start === 0 && stop === this.string.length ){
-        return this;
-    }
-
     this.splitting = true;
 
     if( start === 0 ){
