@@ -610,24 +610,8 @@ var handleDel = function(){
 
 var handleDelNormal = function(){
 
-    var node = cursor.node;
-    var char = cursor.char;
-
-    if( char === node.string.length ){
-
-        node = node.next();
-        char = 0;
-
-    }
-
-    if( !node ){
-        return;
-    }
-
-    node.remove( char );
-    node.deleteIfEmpty();
-    cursor.updatePosition();
-    canvasPages.requestDraw();
+    cursor.move( 1, true );
+    handleBackspaceNormal();
 
 };
 
