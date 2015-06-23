@@ -97,9 +97,7 @@ canvasCursor.canvas
     */
     selectionEnabled    = true;
 
-    /*
     cleanComposition();
-    */
     e.preventDefault();
 
     var offset       = canvasCursor.canvas.offset();

@@ -26,6 +26,17 @@ var checkCursorPosition = function( node, position ){
 
 };
 
+var cleanComposition = function( isEnd ){
+
+    if( !isEnd && compositionCounter ){
+        input.blur().focus();
+    }
+
+    compositionEnded = false;
+    input[ 0 ].value = '';
+
+};
+
 var cloneObject = function( obj ){
 
     var target = {};
@@ -427,10 +438,15 @@ var getParagraphByGlobalId = function( paragraphId ){
 };
 
 var handleArrowDown = function(){
+
+    cleanComposition();
     cursor.verticalMove( 1 );
+
 };
 
 var handleArrowLeft = function(){
+
+    cleanComposition();
 
     if( selectionRange.isValid() ){
         selectionRange.collapseLeft();
@@ -442,6 +458,8 @@ var handleArrowLeft = function(){
 
 var handleArrowRight = function(){
 
+    cleanComposition();
+
     if( selectionRange.isValid() ){
         selectionRange.collapseRight();
     }else{
@@ -451,7 +469,10 @@ var handleArrowRight = function(){
 };
 
 var handleArrowUp = function(){
+
+    cleanComposition();
     cursor.verticalMove( -1 );
+
 };
 
 var handleBackspace = function(){
