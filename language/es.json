@@ -3,10 +3,12 @@
 
 	"newDocument" : "Nuevo documento",
     "fileSaved" : "ha sido guardado",
-    "saveQuestion" : "¿Deseas guardar los cambios realizados a %s?",
+    "saveQuestion" : "¿Desea guardar los cambios realizados al documento \"%s\"?",
+	"saveDescription" : "Los cambios se perderán si no los guarda.",
     "dontSave" : "No guardar",
 	"cancel" : "Cancelar",
 	"save" : "Guardar",
+	"saving" : "Guardando...",
 
     "copy" : "Copiar",
 	"cut" : "Cortar",

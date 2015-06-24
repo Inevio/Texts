@@ -987,10 +987,15 @@ border-color: #000;
 }
 
 .wz-dialog .wz-ui-button{
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
     width: auto;
-    margin: 0 10px;
+    margin: 0 4px;
+}
+
+.wz-dialog .saving header{
+    text-align: center;
+    margin-bottom: 8px;
 }
 
 .collaborative{

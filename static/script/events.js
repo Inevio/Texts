@@ -667,3 +667,46 @@ toolsColorHover.on( 'click', function(){
     ui.hideDropdowns();
 
 });
+
+closeButton.on( 'click', function(e){
+
+    e.stopPropagation();
+
+    var dialog = wz.dialog();
+
+    dialog
+        .setTitle( lang.saveQuestion.replace( '%s', currentOpenFile ? currentOpenFile.name : lang.newDocument ) )
+        .setText( lang.saveDescription )
+        .setButton( 0, lang.dontSave, 'red' )
+        .setButton( 1, lang.cancel, 'black' )
+        .setButton( 2, lang.save );
+
+    /*dialog = */dialog.render( function( button ){
+
+        if( button === CLOSEOPTION_DONTSAVE ){
+            wz.app.removeView( win );
+        }else if( button === CLOSEOPTION_CANCEL ){
+            input.focus();
+        }else if( button === CLOSEOPTION_SAVE ){
+
+            var callback = function( error ){
+
+                if( error ){
+                    input.focus();
+                }else{
+                    wz.app.removeView( win );
+                }
+
+            };
+
+            if( currentOpenFile && currentOpenFile.mime === 'application/inevio-texts' ){
+                saveDocument( callback );
+            }else{
+                createDocument( callback );
+            }
+
+        }
+
+    });
+
+});

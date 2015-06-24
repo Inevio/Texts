@@ -115,9 +115,8 @@ var clipboardCut = function( e ){
 
 };
 
-var createDocument = function(){
+var createDocument = function( cb ){
 
-    var file = currentDocument.getRaw();
     var name;
 
     if( currentOpenFile ){
@@ -126,59 +125,84 @@ var createDocument = function(){
         name = lang.newDocument;
     }
 
-    var counter  = 0;
-    var callback = function( error, structure ){
 
-        if( error && error !== 'FILE NAME EXISTS ALREADY' ){
-            return alert( error );
-        }
+    wz.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, userName, replace ){
 
-        if( error && error === 'FILE NAME EXISTS ALREADY' ){
-
-            counter += 1;
-
-            createFile( name + ' (' + counter + ')' + '.docx', file, callback );
-
-            return;
-
-        }
-
-        currentOpenFile = structure;
-
-        setViewTitle( currentOpenFile.name );
-        /*
-        displaySaveSuccessFully();
-        */
-
-    };
-
-    createFile( name + '.docx', file, callback );
-
-};
-
-var createFile = function( name, data, callback ){
-
-    wz.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, name, replace ){
+        name = userName.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
 
         if( error ){
             return callback( error );
         }
 
-        wz.fs.create({
+        cb = wz.tool.secureCallback( cb );
 
-            name    : name,
-            destiny : destiny,
-            data    : JSON.stringify( currentDocument.getRaw() ),
-            convert : {
+        var dialog = wz.dialog();
 
-                from : 'application/inevio-texts',
-                to   : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        dialog
+            .setTitle( lang.saving )
+            .setButton( 0, 'button' );
+
+        dialog = dialog.render();
+
+        dialog
+            .addClass('saving')
+            .find('button')
+                .remove();
+
+        var file     = JSON.stringify( currentDocument.getRaw() );
+        var counter  = 0;
+        var callback = function( error, structure ){
+
+
+            if( error && error !== 'FILE NAME EXISTS ALREADY' ){
+
+                dialog.parent().remove();
+                alert( error );
+                return cb( error );
 
             }
 
-        }, callback );
+            if( error && error === 'FILE NAME EXISTS ALREADY' ){
+
+
+                counter += 1;
+
+                return createFile( name + ' (' + counter + ')' + '.docx', destiny, file, callback );
+
+            }
+
+            currentOpenFile = structure;
+
+            dialog.parent().remove();
+            setViewTitle( currentOpenFile.name );
+            /*
+            displaySaveSuccessFully();
+            */
+            cb();
+
+        };
+
+        createFile( name + '.docx', destiny, file, callback );
 
     });
+
+};
+
+var createFile = function( name, destiny, data, callback ){
+
+    wz.fs.create({
+
+        name    : name,
+        destiny : destiny,
+        data    : data,
+        convert : {
+
+            from : 'application/inevio-texts',
+            to   : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+        }
+
+    }, callback );
 
 };
 
@@ -806,7 +830,22 @@ var openFile = function( structureId ){
 
 };
 
-var saveDocument = function(){
+var saveDocument = function( callback ){
+
+    callback = wz.tool.secureCallback( callback );
+
+    var dialog = wz.dialog();
+
+    dialog
+        .setTitle( lang.saving )
+        .setButton( 0, 'button' );
+
+    dialog = dialog.render();
+
+    dialog
+        .addClass('saving')
+        .find('button')
+            .remove();
 
     currentOpenFile.write(
 
@@ -819,9 +858,13 @@ var saveDocument = function(){
         },
         function( error ){
 
+            dialog.parent().remove();
+
             if( error ){
-                return alert( error );
+                alert( error );
             }
+
+            callback( error );
 
         }
 
