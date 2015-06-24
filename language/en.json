@@ -3,10 +3,12 @@
 
 	"newDocument" : "New document",
 	"fileSaved" : "has been saved",
-	"saveQuestion" : "Do you want to save the changes you made to %s?",
+	"saveQuestion" : "Do you want to save the changes you made to the document \"%s\"?",
+	"saveDescription" : "Your changes will be lost if you don’t save them.",
 	"dontSave" : "Don't save",
 	"cancel" : "Cancel",
 	"save" : "Save",
+	"saving" : "Saving...",
 
 	"copy" : "Copy",
 	"cut" : "Cut",

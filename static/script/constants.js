@@ -9,11 +9,9 @@ var BROWSER_FIREFOX = 0;
 var BROWSER_IE = 1;
 var BROWSER_WEBKIT = 2;
 var BROWSER_TYPE = /webkit/i.test( navigator.userAgent ) ? BROWSER_WEBKIT : ( /trident/i.test( navigator.userAgent ) ? BROWSER_IE : BROWSER_FIREFOX );
-/*
 var CLOSEOPTION_DONTSAVE = 0;
 var CLOSEOPTION_CANCEL = 1;
 var CLOSEOPTION_SAVE = 2;
-*/
 var CENTIMETER = 37.79527559055;
 var CMD_GET_STATUS = 0;
 var CMD_SET_STATUS = 1;
