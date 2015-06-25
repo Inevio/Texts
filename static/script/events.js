@@ -12,6 +12,15 @@ win
     input.focus();
 })
 
+.key( 'ctrl+a, cmd+a', function(){
+
+    var lastNode = currentDocument.pages.slice( -1 )[ 0 ].paragraphs.slice( -1 )[ 0 ].lines.slice( -1 )[ 0 ].nodes.slice( -1 )[ 0 ];
+
+    selectionRange.setStart( currentDocument.pages[ 0 ].paragraphs[ 0 ].lines[ 0 ].nodes[ 0 ], 0 );
+    selectionRange.setEnd( lastNode, lastNode.string.length );
+
+})
+
 .key( 'ctrl+c, cmd+c', function(){
     textarea.val(' ').select(); // Tiene que existir algo para que se invoque un evento copy
 });
