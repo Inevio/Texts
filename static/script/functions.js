@@ -720,6 +720,8 @@ var insertPlainText = function( text ){
 
 var insertTextsText = function( text ){
 
+    console.warn('insertTextsText','ToDo','Lists');
+
     var obj = JSON.parse( text );
 
     if( selectionRange.isValid() ){
@@ -738,7 +740,10 @@ var insertTextsText = function( text ){
 
             tmp = obj[ i ].nodeList[ j ];
 
-            if( !tmp.string.length ){
+            if(
+                !tmp.string.length ||
+                tmp.blocked
+            ){
                 continue;
             }
 
