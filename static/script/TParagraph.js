@@ -437,19 +437,22 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
 
         }else if( i === 'listBullet' || i === 'listNumber' ){
 
-            if( this.listMode ){
-                return;
-            }
-
             value = 0.63 * CENTIMETER;
 
-            var newNode = this.lines[ 0 ].nodes[ 0 ].clone();
+            var prevMode = this.listMode;
+            var newNode  = prevMode ? this.lines[ 0 ].nodes[ 0 ] : this.lines[ 0 ].nodes[ 0 ].clone();
 
             newNode.setBlocked( true );
             this.lines[ 0 ].insert( 0, newNode );
-            newNode.slice( 0, 0 );
-            this.setStyle( 'indentationLeftAdd', value );
-            this.setStyle( 'indentationSpecial', INDENTATION_HANGING, value );
+
+            if( !prevMode ){
+
+                this.setStyle( 'indentationLeftAdd', value );
+                this.setStyle( 'indentationSpecial', INDENTATION_HANGING, value );
+
+            }else{
+                this.setStyle( 'indentationSpecial', INDENTATION_HANGING, this.indentationSpecialValue );
+            }
 
             if( i === 'listNumber' ){
 
@@ -466,13 +469,14 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
                     number = parseInt( prev.lines[ 0 ].nodes[ 0 ].string, 10 ) + 1;
                 }
 
-                newNode.insert( 0, number + '.' + '\t' );
+                newNode.replace( number + '.' + '\t' );
+                newNode.setStyle( 'font-family', newNode.next().style['font-family'] );
 
             }else{
 
                 this.listMode = LIST_BULLET;
 
-                newNode.insert( 0, String.fromCharCode( 8226 ) + '\t' );
+                newNode.replace( String.fromCharCode( 8226 ) + '\t' );
                 newNode.setStyle( 'font-family', 'Symbol' );
 
             }
