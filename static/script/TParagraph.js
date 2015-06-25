@@ -533,23 +533,24 @@ TParagraph.prototype.setStyle = function( key, value, secondValue ){
             this.setStyle( 'indentationSpecial', INDENTATION_NONE, 0 );
             this.setStyle( 'indentationLeftAdd', this.indentationLeft * -1 );
 
-        }else if( i === 'indentationLeftAdd' ){
+        }else if( i === 'indentationLeft' ){
 
-            if( this.indentationLeft + value < 0 ){
-                value = -this.indentationLeft;
-            }else if( this.width - value <= 0 ){
+            if( value < 0 || ( this.parent.width - this.parent.marginLeft - this.parent.marginRight - this.indentationRight ) - value < 0 ){
                 return;
             }
 
-            this.indentationLeft += value;
-            this.width           -= value;
+            this.indentationLeft = value;
 
-            for( i = 0; i < this.lines.length; i++ ){
-                this.lines[ i ].width -= value;
+            this.updateWidth();
+
+            for( var j = 0; j < this.lines.length; j++ ){
+                this.lines[ j ].updateWidth();
             }
 
             this.reallocate();
 
+        }else if( i === 'indentationLeftAdd' ){
+            this.setStyle( 'indentationLeft', this.indentationLeft + value );
         }else if( i === 'indentationSpecial' ){
 
             this.indentationSpecialType  = value;
