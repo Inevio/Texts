@@ -589,6 +589,10 @@ var handleBackspaceSelection = function(){
 
     });
 
+    if( !range.endParagraph.totalChars() ){
+        range.endParagraph.parent.remove( range.endParagraph.id );
+    }
+
     selectionRange.collapseLeft();
 
 };
