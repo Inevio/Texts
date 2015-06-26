@@ -125,7 +125,6 @@ var createDocument = function( cb ){
         name = lang.newDocument;
     }
 
-
     wz.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, userName, replace ){
 
         name = userName.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
@@ -172,6 +171,7 @@ var createDocument = function( cb ){
             }
 
             currentOpenFile = structure;
+            lastSavedStatus = JSON.stringify( currentDocument.getRaw() );
 
             dialog.parent().remove();
             setViewTitle( currentOpenFile.name );
@@ -867,6 +867,8 @@ var saveDocument = function( callback ){
         },
         function( error ){
 
+            lastSavedStatus = JSON.stringify( currentDocument.getRaw() );
+
             dialog.parent().remove();
 
             if( error ){
@@ -981,6 +983,8 @@ var start = function( document ){
     marginTopUp.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     marginTopBox.css( 'x', parseInt( currentPage.marginLeft, 10 ) );
     */
+
+    lastSavedStatus = JSON.stringify( currentDocument.getRaw() );
 
 };
 
