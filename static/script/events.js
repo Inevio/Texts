@@ -336,7 +336,7 @@ input
 
     }else if( e.keyCode === KEY_ARROW_LEFT ){
 
-        handleArrowLeft();
+        handleArrowLeft( e.shiftKey );
 
         keydownHandled = true;
 
@@ -348,7 +348,7 @@ input
 
     }else if( e.keyCode === KEY_ARROW_RIGHT ){
 
-        handleArrowRight();
+        handleArrowRight( e.shiftKey );
 
         keydownHandled = true;
 
