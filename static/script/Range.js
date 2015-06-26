@@ -442,6 +442,8 @@ Range.prototype.setEnd = function( node, position ){
 	//this.endGlobalParagraphId = getGlobalParagraphId( this.endParagraph );
 	this.endGlobalCharId      = getGlobalParagraphCharId( this.endNode, this.endChar );
 
+	canvasCursor.requestDraw();
+
 	return this;
 
 };

@@ -17,7 +17,7 @@ var Cursor = function(){
 
 };
 
-Cursor.prototype.move = function( positions, keyMode ){
+Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 
 	positions = parseInt( positions, 10 ) || 0;
 
@@ -31,8 +31,37 @@ Cursor.prototype.move = function( positions, keyMode ){
 	// Movimiento a la derecha
 	if( positions > 0 ){
 
-		this.char = this.char + positions;
-		var next  = this.node;
+		var next, char, line, paragraph, page;
+
+		if( shiftKey ){
+
+			if( selectionRange.endNode ){
+
+				char      = selectionRange.endChar + positions;
+				next      = selectionRange.endNode;
+				line      = selectionRange.endLine;
+				paragraph = selectionRange.endParagraph;
+				page      = selectionRange.endPage;
+
+			}else{
+
+				char      = selectionRange.startChar + positions;
+				next      = selectionRange.startNode;
+				line      = selectionRange.startLine;
+				paragraph = selectionRange.startParagraph;
+				page      = selectionRange.startPage;
+
+			}
+
+		}else{
+
+			char      = this.char + positions;
+			next      = this.node;
+			line      = this.line;
+			paragraph = this.paragraph;
+			page      = this.page;
+
+		}
 
 		while( true ){
 
@@ -43,38 +72,52 @@ Cursor.prototype.move = function( positions, keyMode ){
 
 			}
 
-
 			if( keyMode ){
 
 				if(
-					this.line.id !== next.parent.id ||
-					this.paragraph.id !== next.parent.parent.id ||
-					this.page.id !== next.parent.parent.parent.id
+					line.id !== next.parent.id ||
+					paragraph.id !== next.parent.parent.id ||
+					page.id !== next.parent.parent.parent.id
 				){
-					this.char = this.char - 1;
+					char = char - 1;
 				}
 
-				if( next.string.length >= this.char ){
+				if( next.string.length >= char ){
 
-					this.setNode( next, this.char );
+					if( shiftKey ){
+						selectionRange.setEnd( next, char );
+					}else{
+						this.setNode( next, char );
+					}
+
 					break;
 
 				}
 
-			}else if( next.string.length >= this.char ){
+			}else if( next.string.length >= char ){
 
-				this.setNode( next, this.char );
+				if( shiftKey ){
+					selectionRange.setEnd( next, char );
+				}else{
+					this.setNode( next, char );
+				}
+
 				break;
 
 			}
 
-			this.char -= next.string.length;
+			char -= next.string.length;
 
 			if( next.next() ){
 				next = next.next();
 			}else{
 
-				this.setNode( next, next.string.length );
+				if( shiftKey ){
+					selectionRange.setEnd( next, next.string.length );
+				}else{
+					this.setNode( next, next.string.length );
+				}
+
 				break;
 
 			}
@@ -84,9 +127,39 @@ Cursor.prototype.move = function( positions, keyMode ){
 	// Movimiento a la izquierda
 	}else{
 
-		var prev      = this.node;
-		var available = this.char;
-		var needMove  = Math.abs( positions );
+		var prev, available, line, paragraph, page;
+
+		if( shiftKey ){
+
+			if( selectionRange.endNode ){
+
+				available = selectionRange.endChar;
+				prev      = selectionRange.endNode;
+				line      = selectionRange.endLine;
+				paragraph = selectionRange.endParagraph;
+				page      = selectionRange.endPage;
+
+			}else{
+
+				available = selectionRange.startChar;
+				prev      = selectionRange.startNode;
+				line      = selectionRange.startLine;
+				paragraph = selectionRange.startParagraph;
+				page      = selectionRange.startPage;
+
+			}
+
+		}else{
+
+			available = this.char;
+			prev      = this.node;
+			line      = this.line;
+			paragraph = this.paragraph;
+			page      = this.page;
+
+		}
+
+		var needMove = Math.abs( positions );
 
 		while( true ){
 
@@ -100,23 +173,33 @@ Cursor.prototype.move = function( positions, keyMode ){
 			if( keyMode ){
 
 				if(
-					this.line.id !== prev.parent.id ||
-					this.paragraph.id !== prev.parent.parent.id ||
-					this.page.id !== prev.parent.parent.parent.id
+					line.id !== prev.parent.id ||
+					paragraph.id !== prev.parent.parent.id ||
+					page.id !== prev.parent.parent.parent.id
 				){
 					needMove = needMove - 1;
 				}
 
 				if( available >= needMove ){
 
-					this.setNode( prev, available - needMove );
+					if( shiftKey ){
+						selectionRange.setEnd( prev, available - needMove );
+					}else{
+						this.setNode( prev, available - needMove );
+					}
+
 					break;
 
 				}
 
 			}else if( available >= needMove ){
 
-				this.setNode( prev, available - needMove );
+				if( shiftKey ){
+					selectionRange.setEnd( prev, available - needMove );
+				}else{
+					this.setNode( prev, available - needMove );
+				}
+
 				break;
 
 			}
@@ -130,7 +213,12 @@ Cursor.prototype.move = function( positions, keyMode ){
 
 			}else{
 
-				this.setNode( prev, 0 );
+				if( shiftKey ){
+					selectionRange.setEnd( prev, 0 );
+				}else{
+					this.setNode( prev, 0 );
+				}
+
 				break;
 
 			}
@@ -164,7 +252,10 @@ Cursor.prototype.setNode = function( node, position ){
 	if( this.updating ){
 		selectionRange.update();
 	}else{
+
 		selectionRange.clear();
+		selectionRange.setStart( node, position );
+
 	}
 
     this.updatePositionX();

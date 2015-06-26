@@ -468,26 +468,26 @@ var handleArrowDown = function(){
 
 };
 
-var handleArrowLeft = function(){
+var handleArrowLeft = function( shiftKey ){
 
     cleanComposition();
 
-    if( selectionRange.isValid() ){
+    if( !shiftKey && selectionRange.isValid() ){
         selectionRange.collapseLeft();
     }else{
-        cursor.move( -1, true );
+        cursor.move( -1, true, shiftKey );
     }
 
 };
 
-var handleArrowRight = function(){
+var handleArrowRight = function( shiftKey ){
 
     cleanComposition();
 
-    if( selectionRange.isValid() ){
+    if( !shiftKey && selectionRange.isValid() ){
         selectionRange.collapseRight();
     }else{
-        cursor.move( 1, true );
+        cursor.move( 1, true, shiftKey );
     }
 
 };
