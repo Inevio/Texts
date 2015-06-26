@@ -679,6 +679,10 @@ toolsColorHover.on( 'click', function(){
 
 closeButton.on( 'click', function(e){
 
+    if( lastSavedStatus === JSON.stringify( currentDocument.getRaw() ) ){
+        return;
+    }
+
     e.stopPropagation();
 
     var dialog = wz.dialog();

@@ -76,6 +76,7 @@ var maxScrollTop = 0;
 // Current variables
 var currentDocument       = null;
 var currentOpenFile       = null;
+var lastSavedStatus       = '';
 /*
 var currentPage           = null;
 var currentPageId         = null;
