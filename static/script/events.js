@@ -9,7 +9,14 @@ win
 })
 
 .on( 'ui-view-restore ui-view-focus', function(){
+
     input.focus();
+    canvasCursor.enableBlink( true );
+
+})
+
+.on( 'ui-view-blur', function(){
+    canvasCursor.enableBlink( false );
 })
 
 .key( 'ctrl+a, cmd+a', function(){
