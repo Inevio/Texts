@@ -284,7 +284,7 @@ canvasCursor.canvas
 .on( 'mousewheel', function( e, delta, x, y ){
 
     var documentHeight = currentDocument.height();
-    var maxScrollTop   = canvasPages.canvas[ 0 ].height * pixelRatio;
+    var maxScrollTop   = canvasPages.canvas[ 0 ].height / pixelRatio;
 
     /*
     // To Do -> Introducir esta optimización
@@ -314,7 +314,7 @@ canvasCursor.canvas
     canvasPages.requestDraw();
     canvasCursor.resetBlink();
     canvasRulerLeft.requestDraw();
-    scrollVItem.css( 'y', parseInt( ( scrollV.height() - scrollVItem.outerHeight() ) * ( scrollTop / maxScrollTop ), 10 ) );
+    scrollVItem.css( 'y', parseInt( ( scrollV.height() - scrollVItem.outerHeight() ) * ( scrollTop / ( documentHeight - maxScrollTop ) ), 10 ) );
 
 });
 
@@ -728,5 +728,21 @@ closeButton.on( 'click', function(e){
         }
 
     });
+
+});
+
+scrollV
+.on( 'wz-dragmove', function( e, x, y ){
+
+    e.stopPropagation();
+
+    var documentHeight = currentDocument.height();
+    var maxScrollTop   = canvasPages.canvas[ 0 ].height / pixelRatio;
+
+    scrollTop = ( documentHeight - maxScrollTop ) * y;
+
+    canvasPages.requestDraw();
+    canvasCursor.resetBlink();
+    canvasRulerLeft.requestDraw();
 
 });
