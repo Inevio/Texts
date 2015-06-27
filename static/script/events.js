@@ -489,6 +489,11 @@ input
 
 });
 
+// Create button
+newButton.on( 'click', function(){
+    wz.app.createView();
+});
+
 // Save button
 saveButton
 .on( 'click', function(){

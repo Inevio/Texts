@@ -1132,4 +1132,4 @@ var updateToolsLineStatus = function(){
 
 };
 
-$(this).data( 'getOpenedId', function(){ return currentOpenFile.id; })
+$(this).data( 'getOpenedId', function(){ return currentOpenFile ? currentOpenFile.id : null; })
