@@ -27,7 +27,6 @@ TemporalStyle.prototype.length = function(){
 
 TemporalStyle.prototype.set = function( type, value ){
 
-
 	this.attributes[ type ] = value;
 
 	return this;
