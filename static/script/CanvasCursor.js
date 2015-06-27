@@ -10,6 +10,7 @@ var CanvasCursor = function(){
     this.blinkTime    = Date.now();
     this.blinkStatus  = 0;
     this.blinkCurrent = false;
+    this.enabled      = false;
 
 };
 
@@ -30,6 +31,13 @@ CanvasCursor.prototype.draw = function(){
 CanvasCursor.prototype.drawCursor = function(){
 
     this.waiting = false;
+
+    if( !this.enabled ){
+
+        this.updateSize();
+        return this;
+
+    }
 
     /*
     if( selectedEnabled ){
@@ -150,7 +158,7 @@ CanvasCursor.prototype.drawRange = function(){
     this.updateSize();
 
     this.ctx.globalAlpha = 0.3;
-    this.ctx.fillStyle   = '#7EBE30';
+    this.ctx.fillStyle   = this.enabled ? '#7ebe30' : '#868c8e';
 
     // To Do -> Puede optimizarse evitando recalcular las posiciones continuamente
     selectionRange.mapNodes( ( function( node, start, end ){
@@ -175,6 +183,14 @@ CanvasCursor.prototype.drawRange = function(){
     this.ctx.globalAlpha = 1;
 
     return this;
+
+};
+
+CanvasCursor.prototype.enableBlink = function( value ){
+    
+    this.enabled = value;
+
+    this.requestDraw();
 
 };
 
