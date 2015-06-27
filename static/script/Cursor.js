@@ -85,7 +85,10 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 				if( next.string.length >= char ){
 
 					if( shiftKey ){
+
 						selectionRange.setEnd( next, char );
+						updateToolsLineStatus();
+
 					}else{
 						this.setNode( next, char );
 					}
@@ -97,7 +100,10 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 			}else if( next.string.length >= char ){
 
 				if( shiftKey ){
+
 					selectionRange.setEnd( next, char );
+					updateToolsLineStatus();
+
 				}else{
 					this.setNode( next, char );
 				}
@@ -113,7 +119,10 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 			}else{
 
 				if( shiftKey ){
+
 					selectionRange.setEnd( next, next.string.length );
+					updateToolsLineStatus();
+
 				}else{
 					this.setNode( next, next.string.length );
 				}
@@ -183,7 +192,10 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 				if( available >= needMove ){
 
 					if( shiftKey ){
+
 						selectionRange.setEnd( prev, available - needMove );
+						updateToolsLineStatus();
+
 					}else{
 						this.setNode( prev, available - needMove );
 					}
@@ -195,7 +207,10 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 			}else if( available >= needMove ){
 
 				if( shiftKey ){
+
 					selectionRange.setEnd( prev, available - needMove );
+					updateToolsLineStatus();
+
 				}else{
 					this.setNode( prev, available - needMove );
 				}
@@ -214,7 +229,10 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 			}else{
 
 				if( shiftKey ){
+
 					selectionRange.setEnd( prev, 0 );
+					updateToolsLineStatus();
+
 				}else{
 					this.setNode( prev, 0 );
 				}
@@ -231,6 +249,7 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 
 Cursor.prototype.setNode = function( node, position ){
 
+	console.log( 'setNode' );
     // To Do -> console.warn('ToDo','setNode','Prevent blocked');
 
 	var checked   = checkCursorPosition( node, position );
@@ -260,8 +279,10 @@ Cursor.prototype.setNode = function( node, position ){
 
     this.updatePositionX();
     this.updatePositionY();
+	updateToolsLineStatus();
     canvasCursor.resetBlink();
 	styleController.temporal.clear();
+
 
 	if( this.page.id !== oldPageId ){
 		canvasRulerLeft.requestDraw();

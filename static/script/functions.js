@@ -1016,7 +1016,7 @@ var updateToolsLineStatus = function(){
     }
 
     // Estilos de nodos
-    if( styleController.temporal.length() && styleController.temporal.get('font-family') ){
+    if( styleController.temporal.get('font-family') ){
         toolsLine.find('.tool-fontfamily').text( styleController.temporal.get('font-family') );
     }else if( nodeStyles['font-family'] ){
         toolsLine.find('.tool-fontfamily').text( nodeStyles['font-family'] );
@@ -1024,7 +1024,7 @@ var updateToolsLineStatus = function(){
         toolsLine.find('.tool-fontfamily').text('');
     }
 
-    if( styleController.temporal.length() && styleController.temporal.get('font-size') ){
+    if( styleController.temporal.get('font-size') ){
         $( '.tool-fontsize', toolsLine ).text( styleController.temporal.get('font-size') );
     }else if( nodeStyles['font-size'] ){
         $( '.tool-fontsize', toolsLine ).text( nodeStyles['font-size'] );
@@ -1032,9 +1032,10 @@ var updateToolsLineStatus = function(){
         $( '.tool-fontsize', toolsLine ).text('');
     }
 
-    if( styleController.temporal.length() ){
+    if( typeof styleController.temporal.get('font-weight') !== 'undefined' ){
 
-        if( styleController.temporal.get( 'font-weight', true ) ){
+        if( styleController.temporal.get('font-weight') ){
+
             $( '.tool-button-bold', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-bold', toolsLine ).removeClass('active');
@@ -1050,9 +1051,9 @@ var updateToolsLineStatus = function(){
 
     }
 
-    if( styleController.temporal.length() ){
+    if( typeof styleController.temporal.get('font-style') !== 'undefined' ){
 
-        if( styleController.temporal.get( 'font-style', true ) ){
+        if( styleController.temporal.get( 'font-style' ) ){
             $( '.tool-button-italic', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-italic', toolsLine ).removeClass('active');
@@ -1068,9 +1069,9 @@ var updateToolsLineStatus = function(){
 
     }
 
-    if( styleController.temporal.length() ){
+    if( typeof styleController.temporal.get('text-decoration-underline') !== 'undefined' ){
 
-        if( styleController.temporal.get( 'text-decoration-underline', true ) ){
+        if( styleController.temporal.get( 'text-decoration-underline' ) ){
             $( '.tool-button-underline', toolsLine ).addClass('active');
         }else{
             $( '.tool-button-underline', toolsLine ).removeClass('active');
