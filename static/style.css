@@ -1,6 +1,6 @@
 
 .wz-view{
-    background: #fff;
+    background: #f6f8f8;
 }
 
 .wz-ui-header{
@@ -85,7 +85,7 @@
     height: 30px;
     width: 100%;
     float: left;
-    border-bottom: 1px solid #cacaca;
+    border-bottom: 1px solid #ccd3d5;
 
     ul{
         padding: 4px 0 0 7px;
@@ -101,9 +101,9 @@
     }
 
     li.active{
-        background-color: #f6f8f8;
+        background-color: #fff;
         box-shadow: inset 0 1px rgba(255,255,255,.5);
-        border: solid 1px #cacaca;
+        border: solid 1px #ccd3d5;
     }
 
 }
@@ -113,8 +113,8 @@
     padding: 5px 7px;
     width: 846px;
     float: left;
-    background: #f6f8f8;
-    border-bottom: 1px solid #cacaca;
+    background: #fff;
+    border-bottom: 1px solid #ccd3d5;
 }
 
 .tools-group{
@@ -142,10 +142,10 @@
     height: 24px;
     border-radius: 3px;
     background-color: #fff;
-    box-shadow: inset 0 1px rgba(0,0,0,.05);
-    border: solid 1px #cacaca;
+    box-shadow: inset 0px 1px 0px 0px rgba(204, 211, 213, 0.25);
+    border: solid 1px rgb(204, 211, 213);
     font-size: 12px;
-    color: #424242;
+    color: rgb(111, 117, 120);
     margin-right: 10px;
     line-height: 24px;
     padding: 0 6px;
@@ -156,10 +156,10 @@
     height: 24px;
     border-radius: 3px;
     background-color: #fff;
-    box-shadow: inset 0 1px rgba(0,0,0,.05);
-    border: solid 1px #cacaca;
+    box-shadow: inset 0px 1px 0px 0px rgba(204, 211, 213, 0.25);
+    border: solid 1px rgb(204, 211, 213);
     font-size: 12px;
-    color: #424242;
+    color: rgb(111, 117, 120);
     line-height: 24px;
     padding: 0 6px;
 }
@@ -190,7 +190,7 @@
     background-image: -o-linear-gradient( 90deg, rgb(243,243,243) 0%, rgb(228,228,228) 100%);
     background-image: linear-gradient( 0, rgb(243,243,243) 0%, rgb(228,228,228) 100%);
     border-color: #c2cacd;
-    box-shadow: inset 0px 2px 0px 0px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0px 1px 0px 0px rgba(0, 0, 0, 0.05);
 }
 
 .tool-button.active{
@@ -867,7 +867,7 @@ border-color: #000;
     height: 15px;
     float: left;
     padding: 8px 0 11px 34px;
-    background: #ebebeb;
+    background: #f3f5f5;
     position: relative;
 }
 
@@ -912,7 +912,7 @@ border-color: #000;
     height: 458px;
     float: left;
     padding: 0 11px 0 8px;
-    background: #ebebeb;
+    background: #f3f5f5;
 }
 
 .editor{
@@ -928,7 +928,7 @@ border-color: #000;
     position: absolute;
     top: 0;
     left: 0;
-    background: #ebebeb;
+    background: #f3f5f5;
 }
 
 .selections{
@@ -972,7 +972,7 @@ border-color: #000;
     margin: auto;
     width: 300px;
     height: 14px;
-    border: 1px solid #cacaca;
+    border: 1px solid #ccd3d5;
     border-radius: 3px;
     background: #fff;
     padding: 15px;
@@ -986,8 +986,8 @@ border-color: #000;
     background: #fff;
     padding: 1px;
     width: 12px;
-    border-top: 1px solid #cacaca;
-    border-left: 1px solid #cacaca;
+    border-top: 1px solid #ccd3d5;
+    border-left: 1px solid #ccd3d5;
     height: 455px;
     float: left;
 }
