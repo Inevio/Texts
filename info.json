@@ -31,7 +31,7 @@
             "view" : {
 
                 "main" : {
-                    
+
                     "template" : "main.html",
 
                     "maxizable" : false,
@@ -55,7 +55,7 @@
 
                     "css"    : ["style.css"],
                     "script" : ["script/script.dist.js"],
-                    "start"  : []
+                    "start"  : ["script/start.js"]
 
                 }
 
@@ -80,7 +80,7 @@
 
             "modify" : true,
             "read"   : true
-            
+
         }
 
     }
