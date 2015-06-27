@@ -46,7 +46,7 @@ CanvasDocument.prototype.draw = function(){
         this.ctx.fillStyle = page.backgroundColor;
         this.ctx.fill();
         this.ctx.lineWidth = 1;
-        this.ctx.strokeStyle = '#cacaca';
+        this.ctx.strokeStyle = '#ccd3d5';
         this.ctx.stroke();
 
         // Draw the paragraphs

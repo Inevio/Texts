@@ -43,19 +43,19 @@ CanvasRulerLeft.prototype.draw = function(){
     this.ctx.fillStyle = '#ffffff';
     this.ctx.fill();
     this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = '#cacaca';
+    this.ctx.strokeStyle = '#ccd3d5';
     this.ctx.stroke();
 
     // Dibujamos el fondo del margen izquierdo
     this.ctx.beginPath();
     this.ctx.rect( 1, 1 + top, 13, cursor.page.marginTop );
-    this.ctx.fillStyle = '#e4e4e4';
+    this.ctx.fillStyle = '#e9eaea';
     this.ctx.fill();
 
     // Dibujamos el fondo del margen derecho
     this.ctx.beginPath();
     this.ctx.rect( 1, top + cursor.page.height - cursor.page.marginBottom, 13, cursor.page.marginBottom );
-    this.ctx.fillStyle = '#e4e4e4';
+    this.ctx.fillStyle = '#e9eaea';
     this.ctx.fill();
 
     // Calculamos la posición de inicio
@@ -93,7 +93,7 @@ CanvasRulerLeft.prototype.draw = function(){
         // Si es múltiplo de 0.5, le toca linea grande
         }else if( pos % 0.5 === 0 ){ // To Do -> Quizás haya algún problema con la precisión de las divisiones de JS. Estar pendientes
 
-            this.ctx.fillStyle = '#cacaca';
+            this.ctx.fillStyle = '#ccd3d5';
 
             this.ctx.beginPath();
             this.ctx.rect( 4, parseInt( height + top, 10 ), 7, 1 );
@@ -102,7 +102,7 @@ CanvasRulerLeft.prototype.draw = function(){
         // Es un múltiplo de 0.25, le toca linea pequeña
         }else{
 
-            this.ctx.fillStyle = '#cacaca';
+            this.ctx.fillStyle = '#ccd3d5';
 
             this.ctx.beginPath();
             this.ctx.rect( 6, parseInt( height + top, 10 ), 3, 1 );
@@ -119,7 +119,7 @@ CanvasRulerLeft.prototype.draw = function(){
     this.ctx.beginPath();
     this.ctx.rect( 0.5, 0.5 + top, 14, cursor.page.height );
     this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = '#cacaca';
+    this.ctx.strokeStyle = '#ccd3d5';
     this.ctx.stroke();
 
 };
