@@ -61,7 +61,7 @@ TDocument.prototype.getRaw = function(){
 
 TDocument.prototype.height = function(){
 
-    var height = GAP;
+    var height = 0;
 
     for( var i = 0; i < this.pages.length; i++ ){
         height += this.pages[ i ].height + GAP;
