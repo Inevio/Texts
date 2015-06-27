@@ -1,7 +1,7 @@
 
 // DOM variables
 var win                 = $(this);
-//var newButton           = $('.option-new');
+var newButton           = $('.option-new');
 var saveButton          = $('.option-save');
 //var moreButton          = $('.option-more');
 var closeButton         = $('.wz-view-close');

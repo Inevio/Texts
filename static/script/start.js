@@ -1,6 +1,6 @@
 
 if( !params || params.command !== 'openFile' ){
-    start();
+    return start();
 }
 
 var views = wz.app.getViews().not( this );
