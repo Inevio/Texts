@@ -381,9 +381,51 @@ TNode.prototype.updateHeight = function(){
 
 TNode.prototype.updateVisualWidth = function( increment ){
 
+    if(
+        this.parent &&
+        this.parent.parent &&
+        this.parent.parent.align !== ALIGN_JUSTIFY
+    ){
+
+        this.visualChars = new Array( this.chars.length );
+
+        for( var i = 0; i < this.chars.length; i++ ){
+            this.visualChars[ i ] = this.chars[ i ];
+        }
+
+        this.visualWidth = this.visualChars[ this.visualChars.length - 1 ] || 0;
+
+        return this;
+
+    }
+
+    var limit = this.string.length;
+
+    if( this.parent ){
+
+        if( this.id === this.parent.nodes.length - 1 ){
+            limit = this.string.trimRight().length;
+        }else{
+
+            var string = '';
+
+            for( var i = this.id; i < this.parent.nodes.length; i++ ){
+                string += this.parent.nodes[ i ].string;
+            }
+
+            string = string.trimRight();
+
+            if( this.string.length > string.length ){
+                limit = string.length;
+            }
+
+        }
+
+    }
+
     this.visualChars = [];
 
-    for( var i = 0; i < this.string.length; i++ ){
+    for( var i = 0; i < limit; i++ ){
 
         if( this.string[ i ] !== ' ' ){
             this.visualChars.push( this.chars[ i ] );
@@ -391,6 +433,10 @@ TNode.prototype.updateVisualWidth = function( increment ){
             this.visualChars.push( this.chars[ i ] + increment );
         }
 
+    }
+
+    for( var i = limit; i < this.string.length; i++ ){
+        this.visualChars.push( this.chars[ i ] );
     }
 
     this.visualWidth = this.visualChars[ this.visualChars.length - 1 ] || 0;
