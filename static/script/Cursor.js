@@ -248,8 +248,7 @@ Cursor.prototype.move = function( positions, keyMode, shiftKey ){
 };
 
 Cursor.prototype.setNode = function( node, position ){
-
-	console.log( 'setNode' );
+	
     // To Do -> console.warn('ToDo','setNode','Prevent blocked');
 
 	var checked   = checkCursorPosition( node, position );
