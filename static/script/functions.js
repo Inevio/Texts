@@ -550,50 +550,54 @@ var handleBackspaceNormal = function(){
 
 var handleBackspaceSelection = function(){
 
-    var range              = selectionRange.getLimits();
-    var startParagraphHash = range.startParagraph.getHash();
+    // To Do -> Optimizar esta función para que borre de párrafos enteros
+
+    var nodes      = [];
+    var paragraphs = [];
+
+    selectionRange.mapNodes( function( node, start, stop ){
+        nodes.push( { node : node, start : start, stop : stop } );
+    });
 
     selectionRange.mapParagraphs( function( paragraph ){
-
-        if(
-            compareHashes( paragraph.getHash(), startParagraphHash ) === 0 ||
-            compareHashes( paragraph.getHash(), range.endParagraph.getHash() ) === 0
-        ){
-            return;
-        }
-
-        paragraph.parent.remove( paragraph.id );
-
+        paragraphs.push( paragraph );
     });
-
-    selectionRange.update();
-    selectionRange.mapNodes( function( node, start, stop ){
-
-        if(
-            start === 0 &&
-            stop === node.string.length
-        ){
-            node.slice( 0, 0 ).deleteIfEmpty();
-        }else if( start === 0 ){
-            node.slice( stop );
-        }else if( stop === node.string.length ){
-            node.slice( 0, start );
-        }else{
-
-            var newNode = node.clone().slice( stop );
-
-            node.slice( 0, start );
-            node.parent.insert( node.id + 1, newNode );
-
-        }
-
-    });
-
-    if( !range.endParagraph.totalChars() ){
-        range.endParagraph.parent.remove( range.endParagraph.id );
-    }
 
     selectionRange.collapseLeft();
+
+    for( var i = 0; i < nodes.length; i++ ){
+
+        if( nodes[ i ].node.blocked ){
+            continue;
+        }
+
+        if(
+            nodes[ i ].start === 0 &&
+            nodes[ i ].stop === nodes[ i ].node.string.length
+        ){
+            nodes[ i ].node.replace('').deleteIfEmpty();
+        }else if( nodes[ i ].start === 0 ){
+            nodes[ i ].node.slice( nodes[ i ].stop );
+        }else if( nodes[ i ].stop === nodes[ i ].node.string.length ){
+            nodes[ i ].node.slice( 0, nodes[ i ].start );
+        }else{
+
+            var newNode = nodes[ i ].node.clone().slice( nodes[ i ].stop );
+
+            nodes[ i ].node.slice( 0, nodes[ i ].start );
+            nodes[ i ].node.parent.insert( nodes[ i ].node.id + 1, newNode );
+
+        }
+
+    }
+
+    for( var i = 1; i < paragraphs.length; i++ ){
+
+        if( !paragraphs[ i ].totalChars() ){
+            paragraphs[ i ].parent.remove( paragraphs[ i ].id );
+        }
+
+    }
 
 };
 
@@ -946,6 +950,9 @@ var start = function( document ){
             line.append( nodes );
 
         }
+
+        // To Do -> Indentantion
+        paragraph.setStyle( 'align', document.paragraphList[ i ].align || ALIGN_LEFT );
 
         if( document.paragraphList[ i ].listMode ){
 
