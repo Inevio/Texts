@@ -127,13 +127,13 @@ var createDocument = function( cb ){
 
     wz.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, userName, replace ){
 
-        name = userName.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
+        cb = wz.tool.secureCallback( cb );
 
         if( error ){
-            return callback( error );
+            return cb( error );
         }
 
-        cb = wz.tool.secureCallback( cb );
+        name = userName.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
 
         var dialog = wz.dialog();
 
