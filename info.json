@@ -34,8 +34,8 @@
 
                     "template" : "main.html",
 
-                    "maxizable" : false,
-                    "resizable" : false,
+                    "maxizable" : true,
+                    "resizable" : true,
 
                     "width"  : {
 
