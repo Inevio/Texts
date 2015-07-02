@@ -75,6 +75,12 @@ CanvasCursor.prototype.drawCursor = function(){
 
         this.updateSize();
 
+        var offset = parseInt( ( ( this.canvas[ 0 ].width / pixelRatio ) - cursor.page.width ) / 2, 10 );
+
+        if( offset < 0 ){
+            offset = 0;
+        }
+
         // Los cursores remotos deben dibujarse antes para estar por devahi del actual
         /*
         for( var i in usersPosition ){
@@ -122,6 +128,8 @@ CanvasCursor.prototype.drawCursor = function(){
 
         if( ( blinkGlobal && !( this.blinkCurrent && !newCurrent ) ) || ( !this.blinkCurrent && newCurrent ) ){
 
+            console.log( offset, cursor.positionX );
+
             blinkGlobal = true;
 
             this.blinkCurrent  = newCurrent;
@@ -129,7 +137,7 @@ CanvasCursor.prototype.drawCursor = function(){
 
             this.ctx.fillRect(
 
-                parseInt( cursor.positionX, 10 ),
+                parseInt( offset + cursor.positionX, 10 ),
                 parseInt( cursor.positionY - scrollTop + cursor.line.height - cursor.node.height, 10 ),
                 1,
                 cursor.node.height
@@ -160,6 +168,13 @@ CanvasCursor.prototype.drawRange = function(){
     this.ctx.globalAlpha = 0.3;
     this.ctx.fillStyle   = this.enabled ? '#7ebe30' : '#868c8e';
 
+    // To Do -> El día de mañana, si puede haber páginas de distintos tamaños esto habrá que cambiarlo
+    var offset = parseInt( ( ( this.canvas[ 0 ].width / pixelRatio ) - cursor.page.width ) / 2, 10 );
+
+    if( offset < 0 ){
+        offset = 0;
+    }
+
     // To Do -> Puede optimizarse evitando recalcular las posiciones continuamente
     selectionRange.mapNodes( ( function( node, start, end ){
 
@@ -170,7 +185,7 @@ CanvasCursor.prototype.drawRange = function(){
         this.ctx.beginPath();
         this.ctx.rect(
 
-            node.getPositionX( start ),
+            offset + node.getPositionX( start ),
             node.getPositionY() - scrollTop,
             node.visualChars[ end - 1 ] - ( node.visualChars[ start - 1 ] || 0 ),
             node.parent.height * node.parent.parent.spacing
@@ -187,7 +202,7 @@ CanvasCursor.prototype.drawRange = function(){
 };
 
 CanvasCursor.prototype.enableBlink = function( value ){
-    
+
     this.enabled = value;
 
     this.requestDraw();
