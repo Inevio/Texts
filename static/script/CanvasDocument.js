@@ -26,6 +26,7 @@ CanvasDocument.prototype.draw = function(){
     var pageHeight = 0.5;
     var wHeritage  = 0;
     var hHeritage  = 0;
+    var offset     = 0;
     var startX, startY, endX, endY, underlineHeight, tracks, trackHeritage, trackChars;
 
     this.updateSize();
@@ -37,12 +38,18 @@ CanvasDocument.prototype.draw = function(){
     // To Do -> Renderizar solo la parte que deba mostrarse
     for( var m = 0; m < currentDocument.pages.length; m++ ){
 
+        offset = parseInt( ( ( this.canvas[ 0 ].width / 2 ) - currentDocument.pages[ m ].width ) / 2, 10 );
+
+        if( offset < 0 ){
+            offset = 0;
+        }
+
         // Draw the page
         page      = currentDocument.pages[ m ];
         hHeritage = 0;
 
         this.ctx.beginPath();
-        this.ctx.rect( 0.5, pageHeight, page.width, page.height );
+        this.ctx.rect( offset + 0.5, pageHeight, page.width, page.height );
         this.ctx.fillStyle = page.backgroundColor;
         this.ctx.fill();
         this.ctx.lineWidth = 1;
@@ -63,7 +70,7 @@ CanvasDocument.prototype.draw = function(){
 
                 if( line.totalChars( true ) ){
 
-                    wHeritage = line.getOffset();
+                    wHeritage = offset + line.getOffset();
 
                     // Draw the nodes
                     for( var k = 0; k < line.nodes.length; k++ ){

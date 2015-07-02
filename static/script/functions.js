@@ -127,13 +127,13 @@ var createDocument = function( cb ){
 
     wz.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, userName, replace ){
 
-        name = userName.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
+        cb = wz.tool.secureCallback( cb );
 
         if( error ){
-            return callback( error );
+            return cb( error );
         }
 
-        cb = wz.tool.secureCallback( cb );
+        name = userName.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
 
         var dialog = wz.dialog();
 
@@ -932,10 +932,11 @@ var start = function( document ){
         page.append( paragraph );
         paragraph.append( line );
 
+        var nodes = [];
+
         for( var j = ( document.paragraphList[ i ].listMode ? 1 : 0 ); j < document.paragraphList[ i ].nodeList.length; j++ ){
 
-            var list  = document.paragraphList[ i ].nodeList[ j ].string.split(/(\s+)/g);
-            var nodes = [];
+            var list = document.paragraphList[ i ].nodeList[ j ].string.split(/(\s+)/g);
 
             for( var k = 0; k < list.length; k++ ){
 
@@ -947,9 +948,9 @@ var start = function( document ){
 
             }
 
-            line.append( nodes );
-
         }
+
+        line.append( nodes );
 
         // To Do -> Indentantion
         paragraph.setStyle( 'align', document.paragraphList[ i ].align || ALIGN_LEFT );
