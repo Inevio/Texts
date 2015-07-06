@@ -20,27 +20,21 @@ CanvasRulerTop.prototype.draw = function(){
 
     this.updateSize();
 
-    var offset = parseInt( ( ( canvasPages.canvas[ 0 ].width / pixelRatio ) - cursor.page.width ) / 2, 10 );
-
-    if( offset < 0 ){
-        offset = 0;
-    }
-
     // Dibujamos el fondo
     this.ctx.beginPath();
-    this.ctx.rect( offset, 0, cursor.page.width, 15 );
+    this.ctx.rect( 0, 0, cursor.page.width, 15 );
     this.ctx.fillStyle = '#ffffff';
     this.ctx.fill();
 
     // Dibujamos el fondo del margen izquierdo
     this.ctx.beginPath();
-    this.ctx.rect( offset + 1, 1, cursor.page.marginLeft, 13 );
+    this.ctx.rect( 1, 1, cursor.page.marginLeft, 13 );
     this.ctx.fillStyle = '#e9eaea';
     this.ctx.fill();
 
     // Dibujamos el fondo del margen derecho
     this.ctx.beginPath();
-    this.ctx.rect( offset + cursor.page.width - cursor.page.marginRight, 1, cursor.page.marginRight, 13 );
+    this.ctx.rect( cursor.page.width - cursor.page.marginRight, 1, cursor.page.marginRight, 13 );
     this.ctx.fillStyle = '#e9eaea';
     this.ctx.fill();
 
@@ -74,7 +68,7 @@ CanvasRulerTop.prototype.draw = function(){
 
             this.ctx.fillStyle = '#6e6e6e';
 
-            this.ctx.fillText( Math.abs( pos ).toString(), offset + width, 8 );
+            this.ctx.fillText( Math.abs( pos ).toString(), width, 8 );
 
         // Si es múltiplo de 0.5, le toca linea grande
         }else if( pos % 0.5 === 0 ){ // To Do -> Quizás haya algún problema con la precisión de las divisiones de JS. Estar pendientes
@@ -82,7 +76,7 @@ CanvasRulerTop.prototype.draw = function(){
             this.ctx.fillStyle = '#ccd3d5';
 
             this.ctx.beginPath();
-            this.ctx.rect( offset + parseInt( width, 10 ), 4, 1, 7 );
+            this.ctx.rect( parseInt( width, 10 ), 4, 1, 7 );
             this.ctx.fill();
 
         // Es un múltiplo de 0.25, le toca linea pequeña
@@ -91,7 +85,7 @@ CanvasRulerTop.prototype.draw = function(){
             this.ctx.fillStyle = '#ccd3d5';
 
             this.ctx.beginPath();
-            this.ctx.rect( offset + parseInt( width, 10 ), 6, 1, 3 );
+            this.ctx.rect( parseInt( width, 10 ), 6, 1, 3 );
             this.ctx.fill();
 
         }
@@ -103,7 +97,7 @@ CanvasRulerTop.prototype.draw = function(){
 
     // Dibujamos el borde¡e
     this.ctx.beginPath();
-    this.ctx.rect( offset + 0.5, 0.5, cursor.page.width, 14 );
+    this.ctx.rect( 0.5, 0.5, cursor.page.width, 14 );
     this.ctx.lineWidth = 1;
     this.ctx.strokeStyle = '#ccd3d5';
     this.ctx.stroke();

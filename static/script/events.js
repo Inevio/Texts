@@ -15,17 +15,6 @@ win
 
 })
 
-.on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(e){
-
-    console.log( e );
-
-    canvasPages.requestDraw();
-    canvasCursor.requestDraw();
-    canvasRulerTop.requestDraw();
-    canvasRulerLeft.requestDraw();
-
-})
-
 .on( 'ui-view-blur', function(){
     canvasCursor.enableBlink( false );
 })
