@@ -61,21 +61,21 @@ win
 })
 
 // Copy, cut and paste
-wz.system.on( 'copy', function( copy ){
+api.system.on( 'copy', function( copy ){
 
     copy( clipboardCopy() );
     input.focus();
 
 });
 
-wz.system.on( 'cut', function( cut ){
+api.system.on( 'cut', function( cut ){
 
     cut( clipboardCut() );
     input.focus();
 
 });
 
-wz.system.on( 'paste', function( paste ){
+api.system.on( 'paste', function( paste ){
 
     var content = paste();
     var type    = null;
@@ -502,7 +502,7 @@ input
 
 // Create button
 newButton.on( 'click', function(){
-    wz.app.createView();
+    api.app.createView();
 });
 
 // Save button
@@ -570,19 +570,19 @@ toolsList
 
         var name = ( currentOpenFile ? currentOpenFile.name.replace( /.docx|.texts$/i, '' ) : lang.newDocument ) + '.pdf';
 
-        wz.banner()
+        api.banner()
                 .setTitle( 'Texts - Exporting PDF...' )
                 .setText( name + ' is being exported' )
                 .setIcon( 'https://static.inevio.com/app/7/saved.png' )
                 .render();
 
-        wz.tool.textsDocumentToPdf( name, 'root', generateDocument(), function( error ){
+        api.tool.textsDocumentToPdf( name, 'root', generateDocument(), function( error ){
 
             if( error ){
                 return alert( error );
             }
 
-            wz.banner()
+            api.banner()
                 .setTitle( 'Texts - ' + name )
                 .setText( name + ' ' + lang.fileSaved )
                 .setIcon( 'https://static.inevio.com/app/7/saved.png' )
@@ -708,7 +708,7 @@ closeButton.on( 'click', function(e){
 
     e.stopPropagation();
 
-    var dialog = wz.dialog();
+    var dialog = api.dialog();
 
     dialog
         .setTitle( lang.saveQuestion.replace( '%s', currentOpenFile ? currentOpenFile.name : lang.newDocument ) )
@@ -720,7 +720,7 @@ closeButton.on( 'click', function(e){
     /*dialog = */dialog.render( function( button ){
 
         if( button === CLOSEOPTION_DONTSAVE ){
-            wz.app.removeView( win );
+            api.app.removeView( win );
         }else if( button === CLOSEOPTION_CANCEL ){
             input.focus();
         }else if( button === CLOSEOPTION_SAVE ){
@@ -730,7 +730,7 @@ closeButton.on( 'click', function(e){
                 if( error ){
                     input.focus();
                 }else{
-                    wz.app.removeView( win );
+                    api.app.removeView( win );
                 }
 
             };

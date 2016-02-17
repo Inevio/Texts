@@ -9,7 +9,7 @@ var RealTime = function(){
 
 RealTime.prototype.addUser = function( user ){
 
-    if( user.id === wz.system.user().id ){
+    if( user.id === api.system.user().id ){
         return this;
     }
 
@@ -96,7 +96,7 @@ RealTime.prototype.setController = function( controller ){
             return;
         }
 
-        wz.user( info.sender, function( error, user ){
+        api.user( info.sender, function( error, user ){
 
             // To Do -> Error
             that.addUser( user );

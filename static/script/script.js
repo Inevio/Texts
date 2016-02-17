@@ -41,8 +41,8 @@ var backingStoreRatio   = canvasPages.ctx.webkitBackingStorePixelRatio ||
                           canvasPages.ctx.msBackingStorePixelRatio ||
                           canvasPages.ctx.oBackingStorePixelRatio ||
                           canvasPages.ctx.backingStorePixelRatio || 1;
-var pixelRatio          = wz.tool.devicePixelRatio() / backingStoreRatio;
-var activeHiRes         = wz.tool.devicePixelRatio() !== backingStoreRatio;
+var pixelRatio          = api.tool.devicePixelRatio() / backingStoreRatio;
+var activeHiRes         = api.tool.devicePixelRatio() !== backingStoreRatio;
 
 // Realtime variables
 var realtime = new RealTime();
