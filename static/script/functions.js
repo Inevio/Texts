@@ -125,9 +125,9 @@ var createDocument = function( cb ){
         name = lang.newDocument;
     }
 
-    wz.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, userName, replace ){
+    api.fs.saveFile( 'root', { name : name, extension : 'docx' }, function( error, destiny, userName, replace ){
 
-        cb = wz.tool.secureCallback( cb );
+        cb = api.tool.secureCallback( cb );
 
         if( error ){
             return cb( error );
@@ -135,7 +135,7 @@ var createDocument = function( cb ){
 
         name = userName.replace( /(\.docx|\.doc|\.odt|\.rtf)$/i, '' );
 
-        var dialog = wz.dialog();
+        var dialog = api.dialog();
 
         dialog
             .setTitle( lang.saving )
@@ -190,7 +190,7 @@ var createDocument = function( cb ){
 
 var createFile = function( name, destiny, data, callback ){
 
-    wz.fs.create({
+    api.fs.create({
 
         name    : name,
         destiny : destiny,
@@ -803,7 +803,7 @@ var openFile = function( structureId ){
 
     // To Do -> Error
 
-    wz.fs( structureId, function( error, structure ){
+    api.fs( structureId, function( error, structure ){
 
         if( structure.formats['inevio-texts'] ){
 
@@ -845,9 +845,9 @@ var openFile = function( structureId ){
 
 var saveDocument = function( callback ){
 
-    callback = wz.tool.secureCallback( callback );
+    callback = api.tool.secureCallback( callback );
 
-    var dialog = wz.dialog();
+    var dialog = api.dialog();
 
     dialog
         .setTitle( lang.saving )

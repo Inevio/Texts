@@ -3,14 +3,14 @@ if( !params || params.command !== 'openFile' ){
     return start();
 }
 
-var views = wz.app.getViews().not( this );
+var views = api.app.getViews().not( this );
 var found = false;
 
 views.each( function(){
 
     if( $(this).data('getOpenedId')() === params.data ){
 
-        wz.app.viewToFront( this );
+        api.app.viewToFront( this );
 
         found = true;
 
@@ -21,7 +21,7 @@ views.each( function(){
 });
 
 if( found ){
-    wz.app.removeView( this );
+    api.app.removeView( this );
 }else{
     start();
 }
